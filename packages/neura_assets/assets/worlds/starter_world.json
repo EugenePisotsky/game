@@ -1,0 +1,628 @@
+{
+  "schemaVersion": 5,
+  "id": "starter_meadow",
+  "name": "Starter Meadow",
+  "width": 20,
+  "height": 20,
+  "originX": -10,
+  "originY": -10,
+  "spawn": {
+    "x": 0.0,
+    "y": 0.0
+  },
+  "groundRows": [
+    "gggggggggggggggggggg",
+    "ggggegeggggggggggggg",
+    "ggggegeggggggggggggg",
+    "ggggegeggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg",
+    "gggggggggggggggggggg"
+  ],
+  "elevations": [],
+  "roads": [],
+  "tileLayers": [
+    {
+      "x": -8,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g15",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -7,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -6,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -5,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g22",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -4,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -3,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -2,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -1,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 0,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 1,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 2,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 3,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 4,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 5,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 6,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 7,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 8,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": 9,
+      "y": -10,
+      "layers": [
+        {
+          "assetId": "ground.g18",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -6,
+      "y": -9,
+      "layers": [
+        {
+          "assetId": "ground.a5",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": -5,
+      "y": -9,
+      "layers": [
+        {
+          "assetId": "ground.h7",
+          "rotation": "east"
+        }
+      ]
+    },
+    {
+      "x": -4,
+      "y": -9,
+      "layers": [
+        {
+          "assetId": "ground.a3",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": -6,
+      "y": -8,
+      "layers": [
+        {
+          "assetId": "ground.a4",
+          "rotation": "west"
+        }
+      ]
+    },
+    {
+      "x": -5,
+      "y": -8,
+      "layers": [
+        {
+          "assetId": "ground.h5",
+          "rotation": "east"
+        }
+      ]
+    },
+    {
+      "x": -4,
+      "y": -8,
+      "layers": [
+        {
+          "assetId": "ground.a4",
+          "rotation": "west"
+        }
+      ]
+    },
+    {
+      "x": -6,
+      "y": -7,
+      "layers": [
+        {
+          "assetId": "ground.a4",
+          "rotation": "south"
+        }
+      ]
+    },
+    {
+      "x": -5,
+      "y": -7,
+      "layers": [
+        {
+          "assetId": "ground.h1",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": -4,
+      "y": -7,
+      "layers": [
+        {
+          "assetId": "ground.a4",
+          "rotation": "west"
+        }
+      ]
+    },
+    {
+      "x": -5,
+      "y": -6,
+      "layers": [
+        {
+          "assetId": "ground.h6",
+          "rotation": "west"
+        }
+      ]
+    },
+    {
+      "x": -5,
+      "y": -5,
+      "layers": [
+        {
+          "assetId": "ground.h8",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": -5,
+      "y": -4,
+      "layers": [
+        {
+          "assetId": "ground.h7",
+          "rotation": "east"
+        }
+      ]
+    },
+    {
+      "x": -5,
+      "y": -3,
+      "layers": [
+        {
+          "assetId": "ground.h6",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": -9,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e11",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": -8,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e6",
+          "rotation": "west"
+        }
+      ]
+    },
+    {
+      "x": -7,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e8",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": -6,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e9",
+          "rotation": "east"
+        }
+      ]
+    },
+    {
+      "x": -3,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e6",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": -2,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e5",
+          "rotation": "east"
+        }
+      ]
+    },
+    {
+      "x": -1,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e8",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": 0,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e2",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": 1,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e10",
+          "rotation": "north"
+        }
+      ]
+    },
+    {
+      "x": 2,
+      "y": -2,
+      "layers": [
+        {
+          "assetId": "ground.e12",
+          "rotation": "east"
+        }
+      ]
+    },
+    {
+      "x": -2,
+      "y": 4,
+      "layers": [
+        {
+          "assetId": "ground.g6",
+          "rotation": "west"
+        }
+      ]
+    },
+    {
+      "x": 0,
+      "y": 6,
+      "layers": [
+        {
+          "assetId": "ground.g7",
+          "rotation": "north"
+        }
+      ]
+    }
+  ],
+  "decorations": [
+    {
+      "x": -8,
+      "y": -9,
+      "type": "clayPots",
+      "rotation": "north"
+    },
+    {
+      "x": -7,
+      "y": -9,
+      "type": "ruralTreeA6",
+      "rotation": "north"
+    },
+    {
+      "x": -2,
+      "y": -9,
+      "type": "ruralTreeA2",
+      "rotation": "north"
+    },
+    {
+      "x": -10,
+      "y": -8,
+      "type": "ruralTreeA7",
+      "rotation": "north"
+    },
+    {
+      "x": -8,
+      "y": -8,
+      "type": "ruralTreeA3",
+      "rotation": "north"
+    },
+    {
+      "x": -9,
+      "y": -7,
+      "type": "ruralTreeA2",
+      "rotation": "north"
+    },
+    {
+      "x": -3,
+      "y": -7,
+      "type": "ruralTreeA4",
+      "rotation": "north"
+    },
+    {
+      "x": -7,
+      "y": -6,
+      "type": "ruralTreeA6",
+      "rotation": "north"
+    },
+    {
+      "x": 0,
+      "y": -6,
+      "type": "ruralTreeA2",
+      "rotation": "north"
+    },
+    {
+      "x": -9,
+      "y": -5,
+      "type": "ruralTreeA3",
+      "rotation": "east"
+    },
+    {
+      "x": -10,
+      "y": -1,
+      "type": "ruralTreeA6",
+      "rotation": "north"
+    },
+    {
+      "x": -8,
+      "y": 0,
+      "type": "ruralTreeA1",
+      "rotation": "north"
+    },
+    {
+      "x": -6,
+      "y": 1,
+      "type": "ruralTreeA3",
+      "rotation": "north"
+    },
+    {
+      "x": -6,
+      "y": 2,
+      "type": "ruralTreeA4",
+      "rotation": "north"
+    },
+    {
+      "x": -4,
+      "y": 2,
+      "type": "ruralTreeA6",
+      "rotation": "north"
+    },
+    {
+      "x": -9,
+      "y": 3,
+      "type": "ruralTreeA6",
+      "rotation": "north"
+    },
+    {
+      "x": -7,
+      "y": 3,
+      "type": "ruralTreeA1",
+      "rotation": "north"
+    },
+    {
+      "x": -5,
+      "y": 4,
+      "type": "ruralTreeA3",
+      "rotation": "north"
+    },
+    {
+      "x": -3,
+      "y": 4,
+      "type": "ruralTreeA3",
+      "rotation": "north"
+    },
+    {
+      "x": -1,
+      "y": 4,
+      "type": "ruralTreeA4",
+      "rotation": "north"
+    },
+    {
+      "x": -9,
+      "y": 5,
+      "type": "ruralTreeA3",
+      "rotation": "north"
+    },
+    {
+      "x": -6,
+      "y": 5,
+      "type": "ruralTreeA6",
+      "rotation": "north"
+    },
+    {
+      "x": -7,
+      "y": 6,
+      "type": "ruralTreeA3",
+      "rotation": "north"
+    },
+    {
+      "x": -8,
+      "y": 7,
+      "type": "ruralTreeA1",
+      "rotation": "north"
+    },
+    {
+      "x": -3,
+      "y": 7,
+      "type": "ruralTreeA4",
+      "rotation": "north"
+    },
+    {
+      "x": -7,
+      "y": 8,
+      "type": "ruralTreeA6",
+      "rotation": "north"
+    }
+  ],
+  "actors": []
+}

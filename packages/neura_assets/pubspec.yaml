@@ -1,0 +1,23 @@
+name: neura_assets
+description: Curated runtime assets shared by Neura applications.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.14.0-10.0.dev
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  assets:
+    - assets/images/animals/sheep/
+    - assets/images/environment/
+    - assets/images/ground/
+    - assets/images/ground/catalog/
+    - assets/images/player/
+    - assets/catalogs/
+    - assets/worlds/

@@ -1,0 +1,1625 @@
+{
+ "schemaVersion": 1,
+ "collections": [
+  {
+   "id": "ground.a",
+   "name": "Temperate Earth & Meadow",
+   "description": "Earth bases, grass transitions, plants, flowers, and sand banks."
+  },
+  {
+   "id": "ground.b",
+   "name": "Rocky Earth",
+   "description": "Opaque rocky-earth bases and directional stone transitions."
+  },
+  {
+   "id": "ground.c",
+   "name": "Earth & Mud",
+   "description": "Dark earth, embankments, disturbed soil, and muddy bases."
+  },
+  {
+   "id": "ground.d",
+   "name": "Stone Foundations",
+   "description": "Raised paving slabs and structural stone cliff pieces."
+  },
+  {
+   "id": "ground.e",
+   "name": "Cobblestone & Pebbles",
+   "description": "Flat cobblestone surfaces, transitions, and pebble overlays."
+  },
+  {
+   "id": "ground.f",
+   "name": "Wood Floors & Hatches",
+   "description": "Flat plank floors plus raised platforms and cellar hatches."
+  },
+  {
+   "id": "ground.g",
+   "name": "Cliffs & Elevation",
+   "description": "Earth ramps, rocky cliff transitions, walls, corners, and caves."
+  },
+  {
+   "id": "ground.h",
+   "name": "Stone Pavers",
+   "description": "Full, broken, scattered, and transitional stone paving."
+  },
+  {
+   "id": "ground.i",
+   "name": "Dirt Tracks",
+   "description": "Raised dirt-track topology and worn-ground variants."
+  },
+  {
+   "id": "ground.j",
+   "name": "Dry Grass",
+   "description": "Full straw surfaces, transitions, bands, clumps, and sparse tufts."
+  }
+ ],
+ "items": [
+  {
+   "id": "ground.a1",
+   "name": "Dirt Foundation",
+   "collection": "ground.a",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a1_e.png",
+    "n": "ground/catalog/ground_a1_n.png",
+    "s": "ground/catalog/ground_a1_s.png",
+    "w": "ground/catalog/ground_a1_w.png"
+   }
+  },
+  {
+   "id": "ground.a2",
+   "name": "Bright Grass — Full",
+   "collection": "ground.a",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a2_e.png",
+    "n": "ground/catalog/ground_a2_n.png",
+    "s": "ground/catalog/ground_a2_s.png",
+    "w": "ground/catalog/ground_a2_w.png"
+   }
+  },
+  {
+   "id": "ground.a3",
+   "name": "Bright Grass — Irregular Fill",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a3_e.png",
+    "n": "ground/catalog/ground_a3_n.png",
+    "s": "ground/catalog/ground_a3_s.png",
+    "w": "ground/catalog/ground_a3_w.png"
+   }
+  },
+  {
+   "id": "ground.a4",
+   "name": "Bright Grass — Edge",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a4_e.png",
+    "n": "ground/catalog/ground_a4_n.png",
+    "s": "ground/catalog/ground_a4_s.png",
+    "w": "ground/catalog/ground_a4_w.png"
+   }
+  },
+  {
+   "id": "ground.a5",
+   "name": "Bright Grass — Worn Ring",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a5_e.png",
+    "n": "ground/catalog/ground_a5_n.png",
+    "s": "ground/catalog/ground_a5_s.png",
+    "w": "ground/catalog/ground_a5_w.png"
+   }
+  },
+  {
+   "id": "ground.a6",
+   "name": "Bright Grass — Patch",
+   "collection": "ground.a",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a6_e.png",
+    "n": "ground/catalog/ground_a6_n.png",
+    "s": "ground/catalog/ground_a6_s.png",
+    "w": "ground/catalog/ground_a6_w.png"
+   }
+  },
+  {
+   "id": "ground.a7",
+   "name": "Leafy Ground Patch",
+   "collection": "ground.a",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a7_e.png",
+    "n": "ground/catalog/ground_a7_n.png",
+    "s": "ground/catalog/ground_a7_s.png",
+    "w": "ground/catalog/ground_a7_w.png"
+   }
+  },
+  {
+   "id": "ground.a8",
+   "name": "Leafy Ground Edge",
+   "collection": "ground.a",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a8_e.png",
+    "n": "ground/catalog/ground_a8_n.png",
+    "s": "ground/catalog/ground_a8_s.png",
+    "w": "ground/catalog/ground_a8_w.png"
+   }
+  },
+  {
+   "id": "ground.a9",
+   "name": "Sparse Ground Flecks",
+   "collection": "ground.a",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a9_e.png",
+    "n": "ground/catalog/ground_a9_n.png",
+    "s": "ground/catalog/ground_a9_s.png",
+    "w": "ground/catalog/ground_a9_w.png"
+   }
+  },
+  {
+   "id": "ground.a10",
+   "name": "Dense Groundcover",
+   "collection": "ground.a",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a10_e.png",
+    "n": "ground/catalog/ground_a10_n.png",
+    "s": "ground/catalog/ground_a10_s.png",
+    "w": "ground/catalog/ground_a10_w.png"
+   }
+  },
+  {
+   "id": "ground.a11",
+   "name": "Groundcover Edge",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a11_e.png",
+    "n": "ground/catalog/ground_a11_n.png",
+    "s": "ground/catalog/ground_a11_s.png",
+    "w": "ground/catalog/ground_a11_w.png"
+   }
+  },
+  {
+   "id": "ground.a12",
+   "name": "Groundcover Corner",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a12_e.png",
+    "n": "ground/catalog/ground_a12_n.png",
+    "s": "ground/catalog/ground_a12_s.png",
+    "w": "ground/catalog/ground_a12_w.png"
+   }
+  },
+  {
+   "id": "ground.a14",
+   "name": "Sandy Bank — Edge",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a14_e.png",
+    "n": "ground/catalog/ground_a14_n.png",
+    "s": "ground/catalog/ground_a14_s.png",
+    "w": "ground/catalog/ground_a14_w.png"
+   }
+  },
+  {
+   "id": "ground.a15",
+   "name": "Sandy Bank — Concave",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a15_e.png",
+    "n": "ground/catalog/ground_a15_n.png",
+    "s": "ground/catalog/ground_a15_s.png",
+    "w": "ground/catalog/ground_a15_w.png"
+   }
+  },
+  {
+   "id": "ground.a16",
+   "name": "Sand Mound",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a16_e.png",
+    "n": "ground/catalog/ground_a16_n.png",
+    "s": "ground/catalog/ground_a16_s.png",
+    "w": "ground/catalog/ground_a16_w.png"
+   }
+  },
+  {
+   "id": "ground.a17",
+   "name": "Sandy Bank — Corner",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a17_e.png",
+    "n": "ground/catalog/ground_a17_n.png",
+    "s": "ground/catalog/ground_a17_s.png",
+    "w": "ground/catalog/ground_a17_w.png"
+   }
+  },
+  {
+   "id": "ground.a18",
+   "name": "Dark Grass — Full",
+   "collection": "ground.a",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a18_e.png",
+    "n": "ground/catalog/ground_a18_n.png",
+    "s": "ground/catalog/ground_a18_s.png",
+    "w": "ground/catalog/ground_a18_w.png"
+   }
+  },
+  {
+   "id": "ground.a19",
+   "name": "Dark Grass — Edge",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a19_e.png",
+    "n": "ground/catalog/ground_a19_n.png",
+    "s": "ground/catalog/ground_a19_s.png",
+    "w": "ground/catalog/ground_a19_w.png"
+   }
+  },
+  {
+   "id": "ground.a20",
+   "name": "Dark Grass — Corner",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a20_e.png",
+    "n": "ground/catalog/ground_a20_n.png",
+    "s": "ground/catalog/ground_a20_s.png",
+    "w": "ground/catalog/ground_a20_w.png"
+   }
+  },
+  {
+   "id": "ground.a21",
+   "name": "Dark Grass — Remnant",
+   "collection": "ground.a",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a21_e.png",
+    "n": "ground/catalog/ground_a21_n.png",
+    "s": "ground/catalog/ground_a21_s.png",
+    "w": "ground/catalog/ground_a21_w.png"
+   }
+  },
+  {
+   "id": "ground.a22",
+   "name": "White Flowers — Dense",
+   "collection": "ground.a",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a22_e.png",
+    "n": "ground/catalog/ground_a22_n.png",
+    "s": "ground/catalog/ground_a22_s.png",
+    "w": "ground/catalog/ground_a22_w.png"
+   }
+  },
+  {
+   "id": "ground.a23",
+   "name": "White Flowers — Edge",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a23_e.png",
+    "n": "ground/catalog/ground_a23_n.png",
+    "s": "ground/catalog/ground_a23_s.png",
+    "w": "ground/catalog/ground_a23_w.png"
+   }
+  },
+  {
+   "id": "ground.a24",
+   "name": "White Flowers — Corner",
+   "collection": "ground.a",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_a24_e.png",
+    "n": "ground/catalog/ground_a24_n.png",
+    "s": "ground/catalog/ground_a24_s.png",
+    "w": "ground/catalog/ground_a24_w.png"
+   }
+  },
+  {
+   "id": "ground.b1",
+   "name": "Rocky Earth — Full Gravel",
+   "collection": "ground.b",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_b1_e.png",
+    "n": "ground/catalog/ground_b1_n.png",
+    "s": "ground/catalog/ground_b1_s.png",
+    "w": "ground/catalog/ground_b1_w.png"
+   }
+  },
+  {
+   "id": "ground.b2",
+   "name": "Rocky Earth — Gravel Edge",
+   "collection": "ground.b",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_b2_e.png",
+    "n": "ground/catalog/ground_b2_n.png",
+    "s": "ground/catalog/ground_b2_s.png",
+    "w": "ground/catalog/ground_b2_w.png"
+   }
+  },
+  {
+   "id": "ground.b3",
+   "name": "Rocky Earth — Sparse Corner",
+   "collection": "ground.b",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_b3_e.png",
+    "n": "ground/catalog/ground_b3_n.png",
+    "s": "ground/catalog/ground_b3_s.png",
+    "w": "ground/catalog/ground_b3_w.png"
+   }
+  },
+  {
+   "id": "ground.b4",
+   "name": "Rocky Earth — Center Patch",
+   "collection": "ground.b",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_b4_e.png",
+    "n": "ground/catalog/ground_b4_n.png",
+    "s": "ground/catalog/ground_b4_s.png",
+    "w": "ground/catalog/ground_b4_w.png"
+   }
+  },
+  {
+   "id": "ground.b5",
+   "name": "Rocky Earth — Gravel Border",
+   "collection": "ground.b",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_b5_e.png",
+    "n": "ground/catalog/ground_b5_n.png",
+    "s": "ground/catalog/ground_b5_s.png",
+    "w": "ground/catalog/ground_b5_w.png"
+   }
+  },
+  {
+   "id": "ground.b6",
+   "name": "Rocky Earth — Sparse Gravel",
+   "collection": "ground.b",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_b6_e.png",
+    "n": "ground/catalog/ground_b6_n.png",
+    "s": "ground/catalog/ground_b6_s.png",
+    "w": "ground/catalog/ground_b6_w.png"
+   }
+  },
+  {
+   "id": "ground.c1",
+   "name": "Packed Dirt — Shaded Edge",
+   "collection": "ground.c",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_c1_e.png",
+    "n": "ground/catalog/ground_c1_n.png",
+    "s": "ground/catalog/ground_c1_s.png",
+    "w": "ground/catalog/ground_c1_w.png"
+   }
+  },
+  {
+   "id": "ground.c2",
+   "name": "Packed Dirt — Split",
+   "collection": "ground.c",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_c2_e.png",
+    "n": "ground/catalog/ground_c2_n.png",
+    "s": "ground/catalog/ground_c2_s.png",
+    "w": "ground/catalog/ground_c2_w.png"
+   }
+  },
+  {
+   "id": "ground.c3",
+   "name": "Packed Dirt — Plain",
+   "collection": "ground.c",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_c3_e.png",
+    "n": "ground/catalog/ground_c3_n.png",
+    "s": "ground/catalog/ground_c3_s.png",
+    "w": "ground/catalog/ground_c3_w.png"
+   }
+  },
+  {
+   "id": "ground.c4",
+   "name": "Packed Dirt — Pitted",
+   "collection": "ground.c",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_c4_e.png",
+    "n": "ground/catalog/ground_c4_n.png",
+    "s": "ground/catalog/ground_c4_s.png",
+    "w": "ground/catalog/ground_c4_w.png"
+   }
+  },
+  {
+   "id": "ground.c5",
+   "name": "Packed Dirt — Scuffed",
+   "collection": "ground.c",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_c5_e.png",
+    "n": "ground/catalog/ground_c5_n.png",
+    "s": "ground/catalog/ground_c5_s.png",
+    "w": "ground/catalog/ground_c5_w.png"
+   }
+  },
+  {
+   "id": "ground.c6",
+   "name": "Packed Dirt — Scuffed Edge",
+   "collection": "ground.c",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_c6_e.png",
+    "n": "ground/catalog/ground_c6_n.png",
+    "s": "ground/catalog/ground_c6_s.png",
+    "w": "ground/catalog/ground_c6_w.png"
+   }
+  },
+  {
+   "id": "ground.d1",
+   "name": "Pale Stone Floor",
+   "collection": "ground.d",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_d1_e.png",
+    "n": "ground/catalog/ground_d1_n.png",
+    "s": "ground/catalog/ground_d1_s.png",
+    "w": "ground/catalog/ground_d1_w.png"
+   }
+  },
+  {
+   "id": "ground.d2",
+   "name": "Raised Stone Platform — Notched",
+   "collection": "ground.d",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_d2_e.png",
+    "n": "ground/catalog/ground_d2_n.png",
+    "s": "ground/catalog/ground_d2_s.png",
+    "w": "ground/catalog/ground_d2_w.png"
+   }
+  },
+  {
+   "id": "ground.d3",
+   "name": "Raised Stone Platform — Corner",
+   "collection": "ground.d",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_d3_e.png",
+    "n": "ground/catalog/ground_d3_n.png",
+    "s": "ground/catalog/ground_d3_s.png",
+    "w": "ground/catalog/ground_d3_w.png"
+   }
+  },
+  {
+   "id": "ground.d4",
+   "name": "Raised Stone Wall Face",
+   "collection": "ground.d",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_d4_e.png",
+    "n": "ground/catalog/ground_d4_n.png",
+    "s": "ground/catalog/ground_d4_s.png",
+    "w": "ground/catalog/ground_d4_w.png"
+   }
+  },
+  {
+   "id": "ground.e1",
+   "name": "Cobblestone Patch",
+   "collection": "ground.e",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e1_e.png",
+    "n": "ground/catalog/ground_e1_n.png",
+    "s": "ground/catalog/ground_e1_s.png",
+    "w": "ground/catalog/ground_e1_w.png"
+   }
+  },
+  {
+   "id": "ground.e2",
+   "name": "Cobblestone Small Corner",
+   "collection": "ground.e",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e2_e.png",
+    "n": "ground/catalog/ground_e2_n.png",
+    "s": "ground/catalog/ground_e2_s.png",
+    "w": "ground/catalog/ground_e2_w.png"
+   }
+  },
+  {
+   "id": "ground.e3",
+   "name": "Cobblestone Edge",
+   "collection": "ground.e",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e3_e.png",
+    "n": "ground/catalog/ground_e3_n.png",
+    "s": "ground/catalog/ground_e3_s.png",
+    "w": "ground/catalog/ground_e3_w.png"
+   }
+  },
+  {
+   "id": "ground.e4",
+   "name": "Cobblestone Half Patch",
+   "collection": "ground.e",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e4_e.png",
+    "n": "ground/catalog/ground_e4_n.png",
+    "s": "ground/catalog/ground_e4_s.png",
+    "w": "ground/catalog/ground_e4_w.png"
+   }
+  },
+  {
+   "id": "ground.e5",
+   "name": "Cobblestone Broken Patch",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e5_e.png",
+    "n": "ground/catalog/ground_e5_n.png",
+    "s": "ground/catalog/ground_e5_s.png",
+    "w": "ground/catalog/ground_e5_w.png"
+   }
+  },
+  {
+   "id": "ground.e6",
+   "name": "Cobblestone Corner Trail",
+   "collection": "ground.e",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e6_e.png",
+    "n": "ground/catalog/ground_e6_n.png",
+    "s": "ground/catalog/ground_e6_s.png",
+    "w": "ground/catalog/ground_e6_w.png"
+   }
+  },
+  {
+   "id": "ground.e7",
+   "name": "Cobblestone Cluster",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e7_e.png",
+    "n": "ground/catalog/ground_e7_n.png",
+    "s": "ground/catalog/ground_e7_s.png",
+    "w": "ground/catalog/ground_e7_w.png"
+   }
+  },
+  {
+   "id": "ground.e8",
+   "name": "Cobblestone Perimeter",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e8_e.png",
+    "n": "ground/catalog/ground_e8_n.png",
+    "s": "ground/catalog/ground_e8_s.png",
+    "w": "ground/catalog/ground_e8_w.png"
+   }
+  },
+  {
+   "id": "ground.e9",
+   "name": "Cobblestone Corner Arc",
+   "collection": "ground.e",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e9_e.png",
+    "n": "ground/catalog/ground_e9_n.png",
+    "s": "ground/catalog/ground_e9_s.png",
+    "w": "ground/catalog/ground_e9_w.png"
+   }
+  },
+  {
+   "id": "ground.e10",
+   "name": "Dense Pebble Scatter",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e10_e.png",
+    "n": "ground/catalog/ground_e10_n.png",
+    "s": "ground/catalog/ground_e10_s.png",
+    "w": "ground/catalog/ground_e10_w.png"
+   }
+  },
+  {
+   "id": "ground.e11",
+   "name": "Medium Pebble Scatter",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e11_e.png",
+    "n": "ground/catalog/ground_e11_n.png",
+    "s": "ground/catalog/ground_e11_s.png",
+    "w": "ground/catalog/ground_e11_w.png"
+   }
+  },
+  {
+   "id": "ground.e12",
+   "name": "Light Pebble Scatter",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e12_e.png",
+    "n": "ground/catalog/ground_e12_n.png",
+    "s": "ground/catalog/ground_e12_s.png",
+    "w": "ground/catalog/ground_e12_w.png"
+   }
+  },
+  {
+   "id": "ground.e13",
+   "name": "Compact Pebble Scatter",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e13_e.png",
+    "n": "ground/catalog/ground_e13_n.png",
+    "s": "ground/catalog/ground_e13_s.png",
+    "w": "ground/catalog/ground_e13_w.png"
+   }
+  },
+  {
+   "id": "ground.e14",
+   "name": "Sparse Large Stones",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e14_e.png",
+    "n": "ground/catalog/ground_e14_n.png",
+    "s": "ground/catalog/ground_e14_s.png",
+    "w": "ground/catalog/ground_e14_w.png"
+   }
+  },
+  {
+   "id": "ground.e15",
+   "name": "Mixed Pebble Scatter",
+   "collection": "ground.e",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_e15_e.png",
+    "n": "ground/catalog/ground_e15_n.png",
+    "s": "ground/catalog/ground_e15_s.png",
+    "w": "ground/catalog/ground_e15_w.png"
+   }
+  },
+  {
+   "id": "ground.f1",
+   "name": "Wooden Floor",
+   "collection": "ground.f",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_f1_e.png",
+    "n": "ground/catalog/ground_f1_n.png",
+    "s": "ground/catalog/ground_f1_s.png",
+    "w": "ground/catalog/ground_f1_w.png"
+   }
+  },
+  {
+   "id": "ground.f2",
+   "name": "Small Wooden Floor",
+   "collection": "ground.f",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_f2_e.png",
+    "n": "ground/catalog/ground_f2_n.png",
+    "s": "ground/catalog/ground_f2_s.png",
+    "w": "ground/catalog/ground_f2_w.png"
+   }
+  },
+  {
+   "id": "ground.f3",
+   "name": "Raised Wooden Platform",
+   "collection": "ground.f",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_f3_e.png",
+    "n": "ground/catalog/ground_f3_n.png",
+    "s": "ground/catalog/ground_f3_s.png",
+    "w": "ground/catalog/ground_f3_w.png"
+   }
+  },
+  {
+   "id": "ground.f4",
+   "name": "Supported Wooden Platform",
+   "collection": "ground.f",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_f4_e.png",
+    "n": "ground/catalog/ground_f4_n.png",
+    "s": "ground/catalog/ground_f4_s.png",
+    "w": "ground/catalog/ground_f4_w.png"
+   }
+  },
+  {
+   "id": "ground.f5",
+   "name": "Large Cellar Hatch",
+   "collection": "ground.f",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_f5_e.png",
+    "n": "ground/catalog/ground_f5_n.png",
+    "s": "ground/catalog/ground_f5_s.png",
+    "w": "ground/catalog/ground_f5_w.png"
+   }
+  },
+  {
+   "id": "ground.f6",
+   "name": "Open Ladder Hatch",
+   "collection": "ground.f",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_f6_e.png",
+    "n": "ground/catalog/ground_f6_n.png",
+    "s": "ground/catalog/ground_f6_s.png",
+    "w": "ground/catalog/ground_f6_w.png"
+   }
+  },
+  {
+   "id": "ground.g1",
+   "name": "Earth Cliff Edge A",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g1_e.png",
+    "n": "ground/catalog/ground_g1_n.png",
+    "s": "ground/catalog/ground_g1_s.png",
+    "w": "ground/catalog/ground_g1_w.png"
+   }
+  },
+  {
+   "id": "ground.g2",
+   "name": "Earth Cliff Ramp A",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g2_e.png",
+    "n": "ground/catalog/ground_g2_n.png",
+    "s": "ground/catalog/ground_g2_s.png",
+    "w": "ground/catalog/ground_g2_w.png"
+   }
+  },
+  {
+   "id": "ground.g3",
+   "name": "Earth Cliff Corner",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g3_e.png",
+    "n": "ground/catalog/ground_g3_n.png",
+    "s": "ground/catalog/ground_g3_s.png",
+    "w": "ground/catalog/ground_g3_w.png"
+   }
+  },
+  {
+   "id": "ground.g4",
+   "name": "Earth Cliff Edge B",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g4_e.png",
+    "n": "ground/catalog/ground_g4_n.png",
+    "s": "ground/catalog/ground_g4_s.png",
+    "w": "ground/catalog/ground_g4_w.png"
+   }
+  },
+  {
+   "id": "ground.g5",
+   "name": "Earth Cliff Ramp B",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g5_e.png",
+    "n": "ground/catalog/ground_g5_n.png",
+    "s": "ground/catalog/ground_g5_s.png",
+    "w": "ground/catalog/ground_g5_w.png"
+   }
+  },
+  {
+   "id": "ground.g6",
+   "name": "Cliff Grass Edge",
+   "collection": "ground.g",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g6_e.png",
+    "n": "ground/catalog/ground_g6_n.png",
+    "s": "ground/catalog/ground_g6_s.png",
+    "w": "ground/catalog/ground_g6_w.png"
+   }
+  },
+  {
+   "id": "ground.g7",
+   "name": "Cliff Grass Corner",
+   "collection": "ground.g",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g7_e.png",
+    "n": "ground/catalog/ground_g7_n.png",
+    "s": "ground/catalog/ground_g7_s.png",
+    "w": "ground/catalog/ground_g7_w.png"
+   }
+  },
+  {
+   "id": "ground.g8",
+   "name": "Rocky Earth Cliff Edge",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g8_e.png",
+    "n": "ground/catalog/ground_g8_n.png",
+    "s": "ground/catalog/ground_g8_s.png",
+    "w": "ground/catalog/ground_g8_w.png"
+   }
+  },
+  {
+   "id": "ground.g9",
+   "name": "Rocky Outer Cliff Corner",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g9_e.png",
+    "n": "ground/catalog/ground_g9_n.png",
+    "s": "ground/catalog/ground_g9_s.png",
+    "w": "ground/catalog/ground_g9_w.png"
+   }
+  },
+  {
+   "id": "ground.g10",
+   "name": "Rocky Inner Cliff Corner",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g10_e.png",
+    "n": "ground/catalog/ground_g10_n.png",
+    "s": "ground/catalog/ground_g10_s.png",
+    "w": "ground/catalog/ground_g10_w.png"
+   }
+  },
+  {
+   "id": "ground.g11",
+   "name": "Rocky Sloped Cliff Edge",
+   "collection": "ground.g",
+   "role": "transition",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g11_e.png",
+    "n": "ground/catalog/ground_g11_n.png",
+    "s": "ground/catalog/ground_g11_s.png",
+    "w": "ground/catalog/ground_g11_w.png"
+   }
+  },
+  {
+   "id": "ground.g12",
+   "name": "Narrow Stone Cliff A",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g12_e.png",
+    "n": "ground/catalog/ground_g12_n.png",
+    "s": "ground/catalog/ground_g12_s.png",
+    "w": "ground/catalog/ground_g12_w.png"
+   }
+  },
+  {
+   "id": "ground.g13",
+   "name": "Stone Cliff Inner Corner",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g13_e.png",
+    "n": "ground/catalog/ground_g13_n.png",
+    "s": "ground/catalog/ground_g13_s.png",
+    "w": "ground/catalog/ground_g13_w.png"
+   }
+  },
+  {
+   "id": "ground.g14",
+   "name": "Stone Cliff Wall",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g14_e.png",
+    "n": "ground/catalog/ground_g14_n.png",
+    "s": "ground/catalog/ground_g14_s.png",
+    "w": "ground/catalog/ground_g14_w.png"
+   }
+  },
+  {
+   "id": "ground.g15",
+   "name": "Stone Cliff Pillar",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g15_e.png",
+    "n": "ground/catalog/ground_g15_n.png",
+    "s": "ground/catalog/ground_g15_s.png",
+    "w": "ground/catalog/ground_g15_w.png"
+   }
+  },
+  {
+   "id": "ground.g16",
+   "name": "Jagged Earth Cliff Wall",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g16_e.png",
+    "n": "ground/catalog/ground_g16_n.png",
+    "s": "ground/catalog/ground_g16_s.png",
+    "w": "ground/catalog/ground_g16_w.png"
+   }
+  },
+  {
+   "id": "ground.g17",
+   "name": "Smooth Earth Cliff Wall",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g17_e.png",
+    "n": "ground/catalog/ground_g17_n.png",
+    "s": "ground/catalog/ground_g17_s.png",
+    "w": "ground/catalog/ground_g17_w.png"
+   }
+  },
+  {
+   "id": "ground.g18",
+   "name": "Narrow Stone Cliff B",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g18_e.png",
+    "n": "ground/catalog/ground_g18_n.png",
+    "s": "ground/catalog/ground_g18_s.png",
+    "w": "ground/catalog/ground_g18_w.png"
+   }
+  },
+  {
+   "id": "ground.g19",
+   "name": "Narrow Stone Cliff C",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g19_e.png",
+    "n": "ground/catalog/ground_g19_n.png",
+    "s": "ground/catalog/ground_g19_s.png",
+    "w": "ground/catalog/ground_g19_w.png"
+   }
+  },
+  {
+   "id": "ground.g20",
+   "name": "Grounded Stone Cliff Wall",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g20_e.png",
+    "n": "ground/catalog/ground_g20_n.png",
+    "s": "ground/catalog/ground_g20_s.png",
+    "w": "ground/catalog/ground_g20_w.png"
+   }
+  },
+  {
+   "id": "ground.g21",
+   "name": "Grounded Stone Cliff Corner",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g21_e.png",
+    "n": "ground/catalog/ground_g21_n.png",
+    "s": "ground/catalog/ground_g21_s.png",
+    "w": "ground/catalog/ground_g21_w.png"
+   }
+  },
+  {
+   "id": "ground.g22",
+   "name": "Stone Cliff Cave Entrance",
+   "collection": "ground.g",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_g22_e.png",
+    "n": "ground/catalog/ground_g22_n.png",
+    "s": "ground/catalog/ground_g22_s.png",
+    "w": "ground/catalog/ground_g22_w.png"
+   }
+  },
+  {
+   "id": "ground.h1",
+   "name": "Stone Pavers — Full A",
+   "collection": "ground.h",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h1_e.png",
+    "n": "ground/catalog/ground_h1_n.png",
+    "s": "ground/catalog/ground_h1_s.png",
+    "w": "ground/catalog/ground_h1_w.png"
+   }
+  },
+  {
+   "id": "ground.h2",
+   "name": "Stone Pavers — Edge Wedge",
+   "collection": "ground.h",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h2_e.png",
+    "n": "ground/catalog/ground_h2_n.png",
+    "s": "ground/catalog/ground_h2_s.png",
+    "w": "ground/catalog/ground_h2_w.png"
+   }
+  },
+  {
+   "id": "ground.h3",
+   "name": "Stone Pavers — Broken Edge",
+   "collection": "ground.h",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h3_e.png",
+    "n": "ground/catalog/ground_h3_n.png",
+    "s": "ground/catalog/ground_h3_s.png",
+    "w": "ground/catalog/ground_h3_w.png"
+   }
+  },
+  {
+   "id": "ground.h4",
+   "name": "Stone Pavers — Full B",
+   "collection": "ground.h",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h4_e.png",
+    "n": "ground/catalog/ground_h4_n.png",
+    "s": "ground/catalog/ground_h4_s.png",
+    "w": "ground/catalog/ground_h4_w.png"
+   }
+  },
+  {
+   "id": "ground.h5",
+   "name": "Stone Pavers — Broken Band Large",
+   "collection": "ground.h",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h5_e.png",
+    "n": "ground/catalog/ground_h5_n.png",
+    "s": "ground/catalog/ground_h5_s.png",
+    "w": "ground/catalog/ground_h5_w.png"
+   }
+  },
+  {
+   "id": "ground.h6",
+   "name": "Stone Pavers — Broken Band Small",
+   "collection": "ground.h",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h6_e.png",
+    "n": "ground/catalog/ground_h6_n.png",
+    "s": "ground/catalog/ground_h6_s.png",
+    "w": "ground/catalog/ground_h6_w.png"
+   }
+  },
+  {
+   "id": "ground.h7",
+   "name": "Stone Pavers — Scattered Large",
+   "collection": "ground.h",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h7_e.png",
+    "n": "ground/catalog/ground_h7_n.png",
+    "s": "ground/catalog/ground_h7_s.png",
+    "w": "ground/catalog/ground_h7_w.png"
+   }
+  },
+  {
+   "id": "ground.h8",
+   "name": "Stone Pavers — Scattered Center",
+   "collection": "ground.h",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h8_e.png",
+    "n": "ground/catalog/ground_h8_n.png",
+    "s": "ground/catalog/ground_h8_s.png",
+    "w": "ground/catalog/ground_h8_w.png"
+   }
+  },
+  {
+   "id": "ground.h9",
+   "name": "Stone Pavers — Damaged Full A",
+   "collection": "ground.h",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h9_e.png",
+    "n": "ground/catalog/ground_h9_n.png",
+    "s": "ground/catalog/ground_h9_s.png",
+    "w": "ground/catalog/ground_h9_w.png"
+   }
+  },
+  {
+   "id": "ground.h10",
+   "name": "Stone Pavers — Damaged Full B",
+   "collection": "ground.h",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h10_e.png",
+    "n": "ground/catalog/ground_h10_n.png",
+    "s": "ground/catalog/ground_h10_s.png",
+    "w": "ground/catalog/ground_h10_w.png"
+   }
+  },
+  {
+   "id": "ground.h11",
+   "name": "Stone Pavers — Damaged Full C",
+   "collection": "ground.h",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_h11_e.png",
+    "n": "ground/catalog/ground_h11_n.png",
+    "s": "ground/catalog/ground_h11_s.png",
+    "w": "ground/catalog/ground_h11_w.png"
+   }
+  },
+  {
+   "id": "ground.i1",
+   "name": "Dirt Track — Straight",
+   "collection": "ground.i",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i1_e.png",
+    "n": "ground/catalog/ground_i1_n.png",
+    "s": "ground/catalog/ground_i1_s.png",
+    "w": "ground/catalog/ground_i1_w.png"
+   }
+  },
+  {
+   "id": "ground.i2",
+   "name": "Dirt Track — Corner",
+   "collection": "ground.i",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i2_e.png",
+    "n": "ground/catalog/ground_i2_n.png",
+    "s": "ground/catalog/ground_i2_s.png",
+    "w": "ground/catalog/ground_i2_w.png"
+   }
+  },
+  {
+   "id": "ground.i3",
+   "name": "Dirt Track — End",
+   "collection": "ground.i",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i3_e.png",
+    "n": "ground/catalog/ground_i3_n.png",
+    "s": "ground/catalog/ground_i3_s.png",
+    "w": "ground/catalog/ground_i3_w.png"
+   }
+  },
+  {
+   "id": "ground.i4",
+   "name": "Dirt Track — Broad Worn",
+   "collection": "ground.i",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i4_e.png",
+    "n": "ground/catalog/ground_i4_n.png",
+    "s": "ground/catalog/ground_i4_s.png",
+    "w": "ground/catalog/ground_i4_w.png"
+   }
+  },
+  {
+   "id": "ground.i5",
+   "name": "Dirt Track — Rutted",
+   "collection": "ground.i",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i5_e.png",
+    "n": "ground/catalog/ground_i5_n.png",
+    "s": "ground/catalog/ground_i5_s.png",
+    "w": "ground/catalog/ground_i5_w.png"
+   }
+  },
+  {
+   "id": "ground.i6",
+   "name": "Dirt Track — Isolated Patch",
+   "collection": "ground.i",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i6_e.png",
+    "n": "ground/catalog/ground_i6_n.png",
+    "s": "ground/catalog/ground_i6_s.png",
+    "w": "ground/catalog/ground_i6_w.png"
+   }
+  },
+  {
+   "id": "ground.i7",
+   "name": "Dirt Track — Wide Irregular",
+   "collection": "ground.i",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i7_e.png",
+    "n": "ground/catalog/ground_i7_n.png",
+    "s": "ground/catalog/ground_i7_s.png",
+    "w": "ground/catalog/ground_i7_w.png"
+   }
+  },
+  {
+   "id": "ground.i8",
+   "name": "Dirt Track — T Junction",
+   "collection": "ground.i",
+   "role": "structural",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i8_e.png",
+    "n": "ground/catalog/ground_i8_n.png",
+    "s": "ground/catalog/ground_i8_s.png",
+    "w": "ground/catalog/ground_i8_w.png"
+   }
+  },
+  {
+   "id": "ground.i9",
+   "name": "Plain Dirt Block",
+   "collection": "ground.i",
+   "role": "base",
+   "stackable": false,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_i9_e.png",
+    "n": "ground/catalog/ground_i9_n.png",
+    "s": "ground/catalog/ground_i9_s.png",
+    "w": "ground/catalog/ground_i9_w.png"
+   }
+  },
+  {
+   "id": "ground.j1",
+   "name": "Dry Grass — Full",
+   "collection": "ground.j",
+   "role": "surface",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j1_e.png",
+    "n": "ground/catalog/ground_j1_n.png",
+    "s": "ground/catalog/ground_j1_s.png",
+    "w": "ground/catalog/ground_j1_w.png"
+   }
+  },
+  {
+   "id": "ground.j2",
+   "name": "Dry Grass — Edge",
+   "collection": "ground.j",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j2_e.png",
+    "n": "ground/catalog/ground_j2_n.png",
+    "s": "ground/catalog/ground_j2_s.png",
+    "w": "ground/catalog/ground_j2_w.png"
+   }
+  },
+  {
+   "id": "ground.j3",
+   "name": "Dry Grass — Corner",
+   "collection": "ground.j",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j3_e.png",
+    "n": "ground/catalog/ground_j3_n.png",
+    "s": "ground/catalog/ground_j3_s.png",
+    "w": "ground/catalog/ground_j3_w.png"
+   }
+  },
+  {
+   "id": "ground.j4",
+   "name": "Dry Grass — Perimeter",
+   "collection": "ground.j",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j4_e.png",
+    "n": "ground/catalog/ground_j4_n.png",
+    "s": "ground/catalog/ground_j4_s.png",
+    "w": "ground/catalog/ground_j4_w.png"
+   }
+  },
+  {
+   "id": "ground.j5",
+   "name": "Dry Grass — Dense Patch",
+   "collection": "ground.j",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j5_e.png",
+    "n": "ground/catalog/ground_j5_n.png",
+    "s": "ground/catalog/ground_j5_s.png",
+    "w": "ground/catalog/ground_j5_w.png"
+   }
+  },
+  {
+   "id": "ground.j6",
+   "name": "Dry Grass — Clumps",
+   "collection": "ground.j",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j6_e.png",
+    "n": "ground/catalog/ground_j6_n.png",
+    "s": "ground/catalog/ground_j6_s.png",
+    "w": "ground/catalog/ground_j6_w.png"
+   }
+  },
+  {
+   "id": "ground.j7",
+   "name": "Dry Grass — Rows",
+   "collection": "ground.j",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j7_e.png",
+    "n": "ground/catalog/ground_j7_n.png",
+    "s": "ground/catalog/ground_j7_s.png",
+    "w": "ground/catalog/ground_j7_w.png"
+   }
+  },
+  {
+   "id": "ground.j8",
+   "name": "Dry Grass — Sparse",
+   "collection": "ground.j",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j8_e.png",
+    "n": "ground/catalog/ground_j8_n.png",
+    "s": "ground/catalog/ground_j8_s.png",
+    "w": "ground/catalog/ground_j8_w.png"
+   }
+  },
+  {
+   "id": "ground.j9",
+   "name": "Dry Grass — Split Bands",
+   "collection": "ground.j",
+   "role": "transition",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j9_e.png",
+    "n": "ground/catalog/ground_j9_n.png",
+    "s": "ground/catalog/ground_j9_s.png",
+    "w": "ground/catalog/ground_j9_w.png"
+   }
+  },
+  {
+   "id": "ground.j10",
+   "name": "Dry Grass — Tuft Pair",
+   "collection": "ground.j",
+   "role": "overlay",
+   "stackable": true,
+   "description": "",
+   "assets": {
+    "e": "ground/catalog/ground_j10_e.png",
+    "n": "ground/catalog/ground_j10_n.png",
+    "s": "ground/catalog/ground_j10_s.png",
+    "w": "ground/catalog/ground_j10_w.png"
+   }
+  }
+ ]
+}

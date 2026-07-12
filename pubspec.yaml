@@ -1,0 +1,12 @@
+name: neura_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.14.0-10.0.dev
+
+workspace:
+  - apps/game
+  - apps/editor
+  - packages/neura_world
+  - packages/neura_rendering
+  - packages/neura_assets

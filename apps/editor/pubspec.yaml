@@ -1,0 +1,29 @@
+name: neura_editor
+description: Environment editor for Neura.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.14.0-10.0.dev
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: ^1.37.0
+  cupertino_icons: ^1.0.8
+  neura_assets:
+    path: ../../packages/neura_assets
+  neura_rendering:
+    path: ../../packages/neura_rendering
+  neura_world:
+    path: ../../packages/neura_world
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
