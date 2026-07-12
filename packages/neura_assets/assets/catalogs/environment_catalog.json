@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "materials": [
     {
       "id": "ow3.ground.001",
@@ -472,6 +472,10 @@
       "name": "Small bush",
       "category": "Shrubs",
       "renderScale": 1.7,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "tags": [
         "bush",
@@ -506,6 +510,10 @@
       "name": "Bush 002",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/002.png",
       "views": {
@@ -536,6 +544,10 @@
       "name": "Bush 003",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/003.png",
       "views": {
@@ -566,6 +578,10 @@
       "name": "Bush 004",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/004.png",
       "views": {
@@ -596,6 +612,10 @@
       "name": "Bush 005",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/005.png",
       "views": {
@@ -626,6 +646,10 @@
       "name": "Bush 006",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/006.png",
       "views": {
@@ -656,6 +680,10 @@
       "name": "Bush 007",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/007.png",
       "views": {
@@ -686,6 +714,10 @@
       "name": "Bush 008",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/008.png",
       "views": {
@@ -716,6 +748,10 @@
       "name": "Bush 009",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/009.png",
       "views": {
@@ -746,6 +782,10 @@
       "name": "Bush 010",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/010.png",
       "views": {
@@ -776,6 +816,10 @@
       "name": "Bush 011",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/011.png",
       "views": {
@@ -806,6 +850,10 @@
       "name": "Bush 012",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/012.png",
       "views": {
@@ -836,6 +884,10 @@
       "name": "Bush 013",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/013.png",
       "views": {
@@ -866,6 +918,10 @@
       "name": "Bush 014",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/014.png",
       "views": {
@@ -896,6 +952,10 @@
       "name": "Bush 015",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/015.png",
       "views": {
@@ -926,6 +986,10 @@
       "name": "Bush 016",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/016.png",
       "views": {
@@ -956,6 +1020,10 @@
       "name": "Bush 017",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/017.png",
       "views": {
@@ -986,6 +1054,10 @@
       "name": "Bush 018",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/018.png",
       "views": {
@@ -1016,6 +1088,10 @@
       "name": "Bush 019",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/019.png",
       "views": {
@@ -1046,6 +1122,10 @@
       "name": "Bush 020",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/020.png",
       "views": {
@@ -1076,6 +1156,10 @@
       "name": "Bush 021",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/021.png",
       "views": {
@@ -1106,6 +1190,10 @@
       "name": "Bush 022",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/022.png",
       "views": {
@@ -1136,6 +1224,10 @@
       "name": "Bush 023",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/023.png",
       "views": {
@@ -1166,6 +1258,10 @@
       "name": "Bush 024",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/024.png",
       "views": {
@@ -1196,6 +1292,10 @@
       "name": "Bush 025",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/025.png",
       "views": {
@@ -1226,6 +1326,10 @@
       "name": "Bush 026",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/026.png",
       "views": {
@@ -1256,6 +1360,10 @@
       "name": "Bush 027",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/027.png",
       "views": {
@@ -1286,6 +1394,10 @@
       "name": "Bush 028",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/028.png",
       "views": {
@@ -1316,6 +1428,10 @@
       "name": "Bush 029",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/029.png",
       "views": {
@@ -1346,6 +1462,10 @@
       "name": "Bush 030",
       "category": "Shrubs",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/bush/030.png",
       "views": {
@@ -1376,6 +1496,10 @@
       "name": "Flowering grass",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "tags": [
         "grass",
@@ -1410,6 +1534,10 @@
       "name": "Grass 002",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/002.png",
       "views": {
@@ -1440,6 +1568,10 @@
       "name": "Grass 003",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/003.png",
       "views": {
@@ -1470,6 +1602,10 @@
       "name": "Grass 004",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/004.png",
       "views": {
@@ -1500,6 +1636,10 @@
       "name": "Grass 005",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/005.png",
       "views": {
@@ -1530,6 +1670,10 @@
       "name": "Grass 006",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/006.png",
       "views": {
@@ -1560,6 +1704,10 @@
       "name": "Grass 007",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/007.png",
       "views": {
@@ -1590,6 +1738,10 @@
       "name": "Grass 008",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/008.png",
       "views": {
@@ -1620,6 +1772,10 @@
       "name": "Grass 009",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/009.png",
       "views": {
@@ -1650,6 +1806,10 @@
       "name": "Grass 010",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/010.png",
       "views": {
@@ -1680,6 +1840,10 @@
       "name": "Grass 011",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/011.png",
       "views": {
@@ -1710,6 +1874,10 @@
       "name": "Grass 012",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/012.png",
       "views": {
@@ -1740,6 +1908,10 @@
       "name": "Grass 013",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/013.png",
       "views": {
@@ -1770,6 +1942,10 @@
       "name": "Grass 014",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/014.png",
       "views": {
@@ -1800,6 +1976,10 @@
       "name": "Grass 015",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/015.png",
       "views": {
@@ -1830,6 +2010,10 @@
       "name": "Grass 016",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/016.png",
       "views": {
@@ -1860,6 +2044,10 @@
       "name": "Grass 017",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/017.png",
       "views": {
@@ -1890,6 +2078,10 @@
       "name": "Grass 018",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/018.png",
       "views": {
@@ -1920,6 +2112,10 @@
       "name": "Grass 019",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/019.png",
       "views": {
@@ -1950,6 +2146,10 @@
       "name": "Grass 020",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/020.png",
       "views": {
@@ -1980,6 +2180,10 @@
       "name": "Grass 021",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/021.png",
       "views": {
@@ -2010,6 +2214,10 @@
       "name": "Grass 022",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/022.png",
       "views": {
@@ -2040,6 +2248,10 @@
       "name": "Grass 023",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/023.png",
       "views": {
@@ -2070,6 +2282,10 @@
       "name": "Grass 024",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/024.png",
       "views": {
@@ -2100,6 +2316,10 @@
       "name": "Grass 025",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/025.png",
       "views": {
@@ -2130,6 +2350,10 @@
       "name": "Grass 026",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/026.png",
       "views": {
@@ -2160,6 +2384,10 @@
       "name": "Grass 027",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/027.png",
       "views": {
@@ -2190,6 +2418,10 @@
       "name": "Grass 028",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/028.png",
       "views": {
@@ -2220,6 +2452,10 @@
       "name": "Grass 029",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/029.png",
       "views": {
@@ -2250,6 +2486,10 @@
       "name": "Grass 030",
       "category": "Ground cover",
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "collisionProfile": "none",
       "thumbnail": "environment_generated/thumbnails/grass/030.png",
       "views": {
@@ -2280,6 +2520,37 @@
       "name": "Small rock",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "tags": [
         "rock",
@@ -2314,6 +2585,37 @@
       "name": "Rock 002",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/002.png",
       "views": {
@@ -2344,6 +2646,37 @@
       "name": "Rock 003",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/003.png",
       "views": {
@@ -2374,6 +2707,37 @@
       "name": "Rock 004",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/004.png",
       "views": {
@@ -2404,6 +2768,37 @@
       "name": "Rock 005",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/005.png",
       "views": {
@@ -2434,6 +2829,37 @@
       "name": "Rock 006",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/006.png",
       "views": {
@@ -2464,6 +2890,37 @@
       "name": "Rock 007",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/007.png",
       "views": {
@@ -2494,6 +2951,37 @@
       "name": "Rock 008",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/008.png",
       "views": {
@@ -2524,6 +3012,37 @@
       "name": "Rock 009",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/009.png",
       "views": {
@@ -2554,6 +3073,37 @@
       "name": "Rock 010",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/010.png",
       "views": {
@@ -2584,6 +3134,37 @@
       "name": "Rock 011",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/011.png",
       "views": {
@@ -2614,6 +3195,37 @@
       "name": "Rock 012",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/012.png",
       "views": {
@@ -2644,6 +3256,37 @@
       "name": "Rock 013",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/013.png",
       "views": {
@@ -2674,6 +3317,37 @@
       "name": "Rock 014",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/014.png",
       "views": {
@@ -2704,6 +3378,37 @@
       "name": "Rock 015",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/015.png",
       "views": {
@@ -2734,6 +3439,37 @@
       "name": "Rock 016",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/016.png",
       "views": {
@@ -2764,6 +3500,37 @@
       "name": "Rock 017",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/017.png",
       "views": {
@@ -2794,6 +3561,37 @@
       "name": "Rock 018",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/018.png",
       "views": {
@@ -2824,6 +3622,37 @@
       "name": "Rock 019",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/019.png",
       "views": {
@@ -2854,6 +3683,37 @@
       "name": "Rock 020",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/020.png",
       "views": {
@@ -2884,6 +3744,37 @@
       "name": "Rock 021",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/021.png",
       "views": {
@@ -2914,6 +3805,37 @@
       "name": "Rock 022",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/022.png",
       "views": {
@@ -2944,6 +3866,37 @@
       "name": "Rock 023",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/023.png",
       "views": {
@@ -2974,6 +3927,37 @@
       "name": "Rock 024",
       "category": "Rocks",
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "smallRock",
       "thumbnail": "environment_generated/thumbnails/rock/024.png",
       "views": {
@@ -3004,6 +3988,37 @@
       "name": "Blossoming tree",
       "category": "Trees",
       "renderScale": 0.85,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "tags": [
         "tree",
@@ -3058,6 +4073,37 @@
       "name": "Tree 002",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/002.png",
       "views": {
@@ -3108,6 +4154,37 @@
       "name": "Tree 003",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/003.png",
       "views": {
@@ -3158,6 +4235,37 @@
       "name": "Tree 004",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/004.png",
       "views": {
@@ -3208,6 +4316,37 @@
       "name": "Tree 005",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/005.png",
       "views": {
@@ -3258,6 +4397,37 @@
       "name": "Tree 006",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/006.png",
       "views": {
@@ -3308,6 +4478,37 @@
       "name": "Tree 007",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/007.png",
       "views": {
@@ -3358,6 +4559,37 @@
       "name": "Tree 008",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/008.png",
       "views": {
@@ -3408,6 +4640,37 @@
       "name": "Tree 009",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/009.png",
       "views": {
@@ -3458,6 +4721,37 @@
       "name": "Tree 010",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/010.png",
       "views": {
@@ -3508,6 +4802,37 @@
       "name": "Tree 011",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/011.png",
       "views": {
@@ -3558,6 +4883,37 @@
       "name": "Tree 012",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/012.png",
       "views": {
@@ -3608,6 +4964,37 @@
       "name": "Tree 013",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/013.png",
       "views": {
@@ -3658,6 +5045,37 @@
       "name": "Tree 014",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/014.png",
       "views": {
@@ -3708,6 +5126,37 @@
       "name": "Tree 015",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/015.png",
       "views": {
@@ -3758,6 +5207,37 @@
       "name": "Tree 016",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/016.png",
       "views": {
@@ -3808,6 +5288,37 @@
       "name": "Tree 017",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/017.png",
       "views": {
@@ -3858,6 +5369,37 @@
       "name": "Tree 018",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/018.png",
       "views": {
@@ -3908,6 +5450,37 @@
       "name": "Tree 019",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/019.png",
       "views": {
@@ -3958,6 +5531,37 @@
       "name": "Tree 020",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/020.png",
       "views": {
@@ -4008,6 +5612,37 @@
       "name": "Tree 021",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/021.png",
       "views": {
@@ -4058,6 +5693,37 @@
       "name": "Tree 022",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/022.png",
       "views": {
@@ -4108,6 +5774,37 @@
       "name": "Tree 023",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/023.png",
       "views": {
@@ -4158,6 +5855,37 @@
       "name": "Tree 024",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/024.png",
       "views": {
@@ -4208,6 +5936,37 @@
       "name": "Tree 025",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/025.png",
       "views": {
@@ -4258,6 +6017,37 @@
       "name": "Tree 026",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/026.png",
       "views": {
@@ -4308,6 +6098,37 @@
       "name": "Tree 027",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/027.png",
       "views": {
@@ -4358,6 +6179,37 @@
       "name": "Tree 028",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/028.png",
       "views": {
@@ -4408,6 +6260,37 @@
       "name": "Tree 029",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/029.png",
       "views": {
@@ -4458,6 +6341,37 @@
       "name": "Large round tree",
       "category": "Trees",
       "renderScale": 0.65,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "tags": [
         "tree",
@@ -4513,6 +6427,37 @@
       "name": "Tree 031",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/031.png",
       "views": {
@@ -4563,6 +6508,37 @@
       "name": "Tree 032",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/032.png",
       "views": {
@@ -4613,6 +6589,37 @@
       "name": "Tree 033",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/033.png",
       "views": {
@@ -4663,6 +6670,37 @@
       "name": "Tree 034",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/034.png",
       "views": {
@@ -4713,6 +6751,37 @@
       "name": "Tree 035",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/035.png",
       "views": {
@@ -4763,6 +6832,37 @@
       "name": "Tree 036",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/036.png",
       "views": {
@@ -4813,6 +6913,37 @@
       "name": "Tree 037",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/037.png",
       "views": {
@@ -4863,6 +6994,37 @@
       "name": "Tree 038",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/038.png",
       "views": {
@@ -4913,6 +7075,37 @@
       "name": "Tree 039",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/039.png",
       "views": {
@@ -4963,6 +7156,37 @@
       "name": "Tree 040",
       "category": "Trees",
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "treeTrunk",
       "thumbnail": "environment_generated/thumbnails/tree/040.png",
       "views": {
@@ -5013,6 +7237,39 @@
       "name": "Wooden fence",
       "category": "Structures",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "end": {
+              "x": 0.8,
+              "y": 0.0
+            },
+            "radius": 0.11,
+            "start": {
+              "x": -0.8,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
+        "footprint": {
+          "end": {
+            "x": 0.8,
+            "y": 0.0
+          },
+          "radius": 0.14,
+          "start": {
+            "x": -0.8,
+            "y": 0.0
+          },
+          "type": "capsule"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "fence",
       "tags": [
         "fence",
@@ -5046,6 +7303,65 @@
       "name": "Short dock",
       "category": "Structures",
       "renderScale": 0.8,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "end": {
+              "x": 1.0,
+              "y": -0.45
+            },
+            "radius": 0.08,
+            "start": {
+              "x": -1.0,
+              "y": -0.45
+            },
+            "type": "capsule"
+          },
+          {
+            "end": {
+              "x": 1.0,
+              "y": 0.45
+            },
+            "radius": 0.08,
+            "start": {
+              "x": -1.0,
+              "y": 0.45
+            },
+            "type": "capsule"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotationDegrees": 0.0,
+          "size": {
+            "x": 2.2,
+            "y": 1.0
+          },
+          "type": "rectangle"
+        },
+        "reviewed": false,
+        "walkable": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "rotationDegrees": 0.0,
+            "size": {
+              "x": 2.1,
+              "y": 0.75
+            },
+            "type": "rectangle"
+          }
+        ]
+      },
       "collisionProfile": "bridge",
       "tags": [
         "dock",
@@ -5080,6 +7396,39 @@
       "name": "Wide cottage",
       "category": "Buildings",
       "renderScale": 0.8,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.3
+            },
+            "rotationDegrees": 0.0,
+            "size": {
+              "x": 2.2,
+              "y": 1.4
+            },
+            "type": "rectangle"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": -0.3
+          },
+          "rotationDegrees": 0.0,
+          "size": {
+            "x": 2.4,
+            "y": 1.6
+          },
+          "type": "rectangle"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "building",
       "tags": [
         "building",
@@ -5133,6 +7482,39 @@
       "name": "Village manor",
       "category": "Buildings",
       "renderScale": 0.8,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.3
+            },
+            "rotationDegrees": 0.0,
+            "size": {
+              "x": 2.2,
+              "y": 1.4
+            },
+            "type": "rectangle"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": -0.3
+          },
+          "rotationDegrees": 0.0,
+          "size": {
+            "x": 2.4,
+            "y": 1.6
+          },
+          "type": "rectangle"
+        },
+        "reviewed": false
+      },
       "collisionProfile": "building",
       "tags": [
         "building",

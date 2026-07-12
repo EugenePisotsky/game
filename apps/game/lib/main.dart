@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
@@ -44,6 +46,15 @@ class _GameScreenState extends State<GameScreen> {
           ),
           SafeArea(
             child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: _StreamingHud(game: game),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Align(
               alignment: Alignment.topRight,
               child: Padding(
                 padding: const EdgeInsets.all(18),
@@ -60,7 +71,72 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
           ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: FilledButton.tonalIcon(
+                  onPressed: () {
+                    setState(game.toggleChunkDebug);
+                  },
+                  icon: const Icon(Icons.grid_4x4),
+                  label: const Text('Chunks'),
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _StreamingHud extends StatefulWidget {
+  const _StreamingHud({required this.game});
+
+  final NeuraGame game;
+
+  @override
+  State<_StreamingHud> createState() => _StreamingHudState();
+}
+
+class _StreamingHudState extends State<_StreamingHud> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.game.isLoaded) return const SizedBox.shrink();
+    final chunk = widget.game.currentChunk;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xCC17211C),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(
+          'chunk ${chunk?.x ?? '-'},${chunk?.y ?? '-'}  '
+          'loaded ${widget.game.loadedChunkCount}  '
+          'assets ${widget.game.loadedEnvironmentAssetCount}  '
+          'loading ${widget.game.preloadingChunkCount}  '
+          'pending ${widget.game.pendingUnloadChunkCount}',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ),
     );
   }
@@ -95,7 +171,7 @@ class _Instructions extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Tap anywhere to walk · collision is not enabled yet',
+                  'Tap anywhere to walk · paths avoid authored obstacles',
                   style: TextStyle(color: Color(0xFFB8CBBF)),
                 ),
               ],

@@ -11,6 +11,8 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  neura_world:
+    path: ../neura_world
 
 dev_dependencies:
   flutter_test:
@@ -29,3 +31,4 @@ flutter:
     - assets/images/player/
     - assets/catalogs/
     - assets/worlds/
+    - assets/worlds/chunks/

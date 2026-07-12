@@ -12,6 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   flame: ^1.37.0
+  neura_assets:
+    path: ../neura_assets
   neura_world:
     path: ../neura_world
 

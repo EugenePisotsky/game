@@ -8,13 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_world/neura_world.dart';
 
+import 'editor_chunk_session.dart';
 import 'editor_controller.dart';
 import 'editor_game.dart';
 
-const _starterAsset =
-    'packages/neura_assets/assets/worlds/environment_starter.json';
 const _catalogAsset =
     'packages/neura_assets/assets/catalogs/environment_catalog.json';
+const _geometryOverridesAsset =
+    'packages/neura_assets/assets/catalogs/environment_geometry_overrides.json';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,30 +54,61 @@ class EditorBootstrap extends StatefulWidget {
 }
 
 class _EditorBootstrapState extends State<EditorBootstrap> {
-  late final Future<List<String>> _sources = Future.wait([
-    rootBundle.loadString(_starterAsset),
-    rootBundle.loadString(_catalogAsset),
-  ]);
+  late final Future<_EditorBootstrapData> _data = _load();
+
+  Future<_EditorBootstrapData> _load() async {
+    final sources = await Future.wait([
+      rootBundle.loadString(_catalogAsset),
+      rootBundle.loadString(_geometryOverridesAsset),
+    ]);
+    final catalog = EnvironmentCatalog.fromJsonString(sources[0])
+      ..applyGeometryOverridesFromJsonString(sources[1]);
+    final manifest = await loadEnvironmentWorldManifest(rootBundle);
+    final session = EditorChunkSession(
+      manifest: manifest,
+      catalog: catalog,
+      bundle: rootBundle,
+    );
+    final document = await session.initialize();
+    return _EditorBootstrapData(
+      source: document.toJsonString(),
+      catalog: catalog,
+      chunkSession: session,
+    );
+  }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<List<String>>(
-    future: _sources,
+  Widget build(BuildContext context) => FutureBuilder<_EditorBootstrapData>(
+    future: _data,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return Scaffold(
           body: Center(child: Text('Could not load editor: ${snapshot.error}')),
         );
       }
-      final sources = snapshot.data;
-      if (sources == null) {
+      final data = snapshot.data;
+      if (data == null) {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
       return EditorScreen(
-        starterSource: sources[0],
-        catalog: EnvironmentCatalog.fromJsonString(sources[1]),
+        starterSource: data.source,
+        catalog: data.catalog,
+        chunkSession: data.chunkSession,
       );
     },
   );
+}
+
+class _EditorBootstrapData {
+  const _EditorBootstrapData({
+    required this.source,
+    required this.catalog,
+    required this.chunkSession,
+  });
+
+  final String source;
+  final EnvironmentCatalog catalog;
+  final EditorChunkSession chunkSession;
 }
 
 class EditorScreen extends StatefulWidget {
@@ -84,12 +116,16 @@ class EditorScreen extends StatefulWidget {
     required this.starterSource,
     required this.catalog,
     this.renderGame = true,
+    this.controllerOverride,
+    this.chunkSession,
     super.key,
   });
 
   final String starterSource;
   final EnvironmentCatalog catalog;
   final bool renderGame;
+  final EditorController? controllerOverride;
+  final EditorChunkSession? chunkSession;
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
@@ -99,19 +135,36 @@ class _EditorScreenState extends State<EditorScreen> {
   late final EnvironmentDocument _starter = EnvironmentDocument.fromJsonString(
     widget.starterSource,
   );
-  late final EditorController controller = EditorController(
-    EnvironmentDocument.fromJsonString(widget.starterSource),
-    catalog: widget.catalog,
+  late final EditorController controller =
+      widget.controllerOverride ??
+      EditorController(
+        EnvironmentDocument.fromJsonString(widget.starterSource),
+        catalog: widget.catalog,
+      );
+  late final EditorGame game = EditorGame(
+    controller,
+    loadedChunks: widget.chunkSession == null
+        ? null
+        : () => widget.chunkSession!.loadedCoordinates,
+    initialWorldCenter: widget.chunkSession?.manifest.playerSpawn.toWorld(
+      widget.chunkSession!.manifest.chunkSize,
+    ),
+    chunkSize: widget.chunkSession?.manifest.chunkSize ?? 32,
   );
-  late final EditorGame game = EditorGame(controller);
   bool _gesturing = false;
+  bool _marqueeSelecting = false;
+  bool _movingSelection = false;
+  Offset? _gestureScreenStart;
+  WorldPoint? _lastGestureWorld;
   Duration? _lastPanEventTime;
   Timer? _scrollPanEndTimer;
+  Timer? _chunkStreamTimer;
 
   @override
   void dispose() {
     _scrollPanEndTimer?.cancel();
-    controller.dispose();
+    _chunkStreamTimer?.cancel();
+    if (widget.controllerOverride == null) controller.dispose();
     super.dispose();
   }
 
@@ -126,6 +179,12 @@ class _EditorScreenState extends State<EditorScreen> {
           controller.undo,
       const SingleActivator(LogicalKeyboardKey.keyY, control: true):
           controller.redo,
+      const SingleActivator(LogicalKeyboardKey.escape):
+          controller.clearSelection,
+      const SingleActivator(LogicalKeyboardKey.delete):
+          controller.deleteSelected,
+      const SingleActivator(LogicalKeyboardKey.backspace):
+          controller.deleteSelected,
     },
     child: Focus(
       autofocus: true,
@@ -134,10 +193,11 @@ class _EditorScreenState extends State<EditorScreen> {
           children: [
             _Toolbar(
               controller: controller,
-              onZoomIn: () => game.zoomBy(1.2),
-              onZoomOut: () => game.zoomBy(1 / 1.2),
+              onZoomIn: () => _zoomBy(1.2),
+              onZoomOut: () => _zoomBy(1 / 1.2),
               onExport: _showExport,
               onImport: _showImport,
+              onSaveChunks: widget.chunkSession == null ? null : _saveChunks,
               onReset: () => controller.replaceDocument(
                 EnvironmentDocument.fromJson(_starter.toJson()),
               ),
@@ -160,29 +220,61 @@ class _EditorScreenState extends State<EditorScreen> {
   );
 
   Widget _canvas() => MouseRegion(
-    onExit: (_) => controller.hover(null),
+    onExit: (_) {
+      controller
+        ..hover(null)
+        ..hoverObjects(const []);
+    },
     child: Listener(
       behavior: HitTestBehavior.opaque,
       onPointerHover: (event) => _hoverAt(event.localPosition),
       onPointerDown: (event) {
         if (event.buttons & kPrimaryButton == 0) return;
         _gesturing = true;
+        _gestureScreenStart = event.localPosition;
+        _lastGestureWorld = _worldAt(event.localPosition);
         controller.beginGesture();
-        _applyAt(event.localPosition);
+        if (controller.isObjectSelectionMode) {
+          final candidates = game.hitTestObjectIds(
+            Vector2(event.localPosition.dx, event.localPosition.dy),
+          );
+          controller.selectCandidates(
+            candidates,
+            additive: HardwareKeyboard.instance.isShiftPressed,
+          );
+          _movingSelection = candidates.isNotEmpty;
+          _marqueeSelecting = candidates.isEmpty;
+          if (_marqueeSelecting) {
+            game.setSelectionMarquee(
+              Rect.fromPoints(event.localPosition, event.localPosition),
+            );
+          }
+        } else {
+          _applyAt(event.localPosition);
+        }
       },
       onPointerMove: (event) {
         _hoverAt(event.localPosition);
         if (!_gesturing) return;
+        if (controller.isObjectSelectionMode && _marqueeSelecting) {
+          game.setSelectionMarquee(
+            Rect.fromPoints(_gestureScreenStart!, event.localPosition),
+          );
+          return;
+        }
         final point = _worldAt(event.localPosition);
         if (point == null) return;
-        if (controller.mode == EnvironmentEditorMode.select &&
-            controller.selectedObject != null) {
-          controller.moveSelectedDuringGesture(point);
+        if (controller.isObjectSelectionMode && _movingSelection) {
+          final previous = _lastGestureWorld;
+          if (previous != null) {
+            controller.moveSelectionDuringGesture(previous, point);
+          }
+          _lastGestureWorld = point;
         } else {
           controller.applyAt(point);
         }
       },
-      onPointerUp: (_) => _endGesture(),
+      onPointerUp: (event) => _endGesture(event.localPosition),
       onPointerCancel: (_) => _endGesture(),
       onPointerSignal: (event) {
         if (event is! PointerScrollEvent) return;
@@ -192,20 +284,26 @@ class _EditorScreenState extends State<EditorScreen> {
           elapsedSeconds: _panElapsed(event.timeStamp),
         );
         _scrollPanEndTimer?.cancel();
-        _scrollPanEndTimer = Timer(
-          const Duration(milliseconds: 55),
-          game.endPan,
-        );
+        _scrollPanEndTimer = Timer(const Duration(milliseconds: 55), () {
+          game.endPan();
+          _scheduleChunkStreaming();
+        });
       },
       onPointerPanZoomStart: (event) {
         _lastPanEventTime = event.timeStamp;
         game.beginPan();
       },
-      onPointerPanZoomUpdate: (event) => game.panByScreenDelta(
-        Vector2(event.panDelta.dx, event.panDelta.dy),
-        elapsedSeconds: _panElapsed(event.timeStamp),
-      ),
-      onPointerPanZoomEnd: (_) => game.endPan(),
+      onPointerPanZoomUpdate: (event) {
+        game.panByScreenDelta(
+          Vector2(event.panDelta.dx, event.panDelta.dy),
+          elapsedSeconds: _panElapsed(event.timeStamp),
+        );
+        _scheduleChunkStreaming();
+      },
+      onPointerPanZoomEnd: (_) {
+        game.endPan();
+        _scheduleChunkStreaming();
+      },
       child: Stack(
         children: [
           Positioned.fill(
@@ -228,10 +326,14 @@ class _EditorScreenState extends State<EditorScreen> {
               },
             ),
           ),
-          const Positioned(
+          Positioned(
             right: 14,
             bottom: 14,
-            child: _StatusChip(text: 'Drag to paint  •  Two-finger pan'),
+            child: _StatusChip(
+              text: widget.chunkSession == null
+                  ? 'Drag to paint  •  Two-finger pan'
+                  : '${widget.chunkSession!.loadedCoordinates.length} chunks loaded  •  ${widget.chunkSession!.dirtyCoordinates.length} dirty',
+            ),
           ),
         ],
       ),
@@ -241,22 +343,84 @@ class _EditorScreenState extends State<EditorScreen> {
   WorldPoint? _worldAt(Offset position) =>
       game.worldAtScreen(Vector2(position.dx, position.dy));
 
-  void _hoverAt(Offset position) => controller.hover(_worldAt(position));
+  void _hoverAt(Offset position) {
+    controller.hover(_worldAt(position));
+    if (controller.isObjectSelectionMode) {
+      controller.hoverObjects(
+        game.hitTestObjectIds(Vector2(position.dx, position.dy)),
+      );
+    } else {
+      controller.hoverObjects(const []);
+    }
+  }
 
   void _applyAt(Offset position) {
     final point = _worldAt(position);
     if (point != null) controller.applyAt(point);
   }
 
-  void _endGesture() {
+  void _endGesture([Offset? position]) {
     if (!_gesturing) return;
+    if (_marqueeSelecting && position != null) {
+      final rect = Rect.fromPoints(_gestureScreenStart!, position);
+      final keyboard = HardwareKeyboard.instance;
+      controller.selectObjectIds(
+        game.objectIdsInMarquee(
+          rect,
+          requireContainment: keyboard.isAltPressed,
+        ),
+        additive: keyboard.isShiftPressed,
+        toggle: keyboard.isMetaPressed || keyboard.isControlPressed,
+      );
+    }
     _gesturing = false;
+    _marqueeSelecting = false;
+    _movingSelection = false;
+    _gestureScreenStart = null;
+    _lastGestureWorld = null;
+    game.setSelectionMarquee(null);
     controller.endGesture();
   }
 
   void _beginPan() {
     _lastPanEventTime ??= Duration.zero;
     game.beginPan();
+  }
+
+  void _zoomBy(double factor) {
+    game.zoomBy(factor);
+    _scheduleChunkStreaming();
+  }
+
+  void _scheduleChunkStreaming() {
+    final session = widget.chunkSession;
+    if (session == null || !game.isLoaded) return;
+    _chunkStreamTimer?.cancel();
+    _chunkStreamTimer = Timer(const Duration(milliseconds: 80), () async {
+      final bounds = game.visibleWorldBounds();
+      final streamed = await session.streamForBounds(
+        controller.document,
+        minX: bounds.minX,
+        minY: bounds.minY,
+        maxX: bounds.maxX,
+        maxY: bounds.maxY,
+      );
+      if (streamed != null && mounted) {
+        controller.replaceDocumentFromStreaming(streamed);
+        setState(() {});
+      }
+    });
+  }
+
+  Future<void> _saveChunks() async {
+    final session = widget.chunkSession;
+    if (session == null) return;
+    await session.saveDirty(controller.document);
+    if (!mounted) return;
+    setState(() {});
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Dirty chunks saved independently.')),
+    );
   }
 
   double _panElapsed(Duration now) {
@@ -337,6 +501,7 @@ class _Toolbar extends StatelessWidget {
     required this.onExport,
     required this.onImport,
     required this.onReset,
+    this.onSaveChunks,
   });
 
   final EditorController controller;
@@ -345,6 +510,7 @@ class _Toolbar extends StatelessWidget {
   final VoidCallback onExport;
   final VoidCallback onImport;
   final VoidCallback onReset;
+  final VoidCallback? onSaveChunks;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -388,6 +554,8 @@ class _Toolbar extends StatelessWidget {
         ),
         TextButton(onPressed: onImport, child: const Text('Import')),
         TextButton(onPressed: onExport, child: const Text('Export')),
+        if (onSaveChunks != null)
+          TextButton(onPressed: onSaveChunks, child: const Text('Save chunks')),
         TextButton(onPressed: onReset, child: const Text('Reset')),
       ],
     ),
@@ -550,6 +718,17 @@ class _PaletteState extends State<_Palette> {
                     ),
                     Expanded(
                       child: _PaletteButton(
+                        label: 'Collision',
+                        icon: Icons.border_outer,
+                        selected:
+                            controller.mode == EnvironmentEditorMode.collision,
+                        onTap: () => controller.selectMode(
+                          EnvironmentEditorMode.collision,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _PaletteButton(
                         label: 'Erase',
                         icon: Icons.auto_fix_off,
                         selected:
@@ -691,15 +870,32 @@ class _PaletteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: ListTile(
-      dense: true,
-      selected: selected,
-      selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-      leading: Icon(icon, size: 20),
-      title: Text(label),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      onTap: onTap,
+    padding: const EdgeInsets.symmetric(horizontal: 2),
+    child: Material(
+      color: selected
+          ? Theme.of(context).colorScheme.primaryContainer
+          : Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: SizedBox(
+          height: 52,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 19),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            ],
+          ),
+        ),
+      ),
     ),
   );
 }
@@ -738,19 +934,139 @@ class _Inspector extends StatelessWidget {
             ),
             Text('${controller.document.objects.length} placed objects'),
             const Divider(height: 32),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'LAYERS',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Add child layer',
+                  onPressed: controller.addLayer,
+                  icon: const Icon(Icons.create_new_folder_outlined),
+                ),
+              ],
+            ),
+            for (final layer in controller.document.editorLayers)
+              _EditorLayerRow(
+                controller: controller,
+                layer: layer,
+                depth: _layerDepth(controller.document, layer),
+              ),
+            const Divider(height: 32),
             if (object == null) ...[
               const Text('No object selected'),
               const SizedBox(height: 8),
-              const Text('Choose “Select and move”, then drag an object.'),
+              const Text('Choose Select, click an object, or drag a marquee.'),
             ] else ...[
               Text(
-                asset?.name ?? object.assetId,
+                controller.selectedObjects.length == 1
+                    ? asset?.name ?? object.assetId
+                    : '${controller.selectedObjects.length} objects selected',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text('x ${object.x.toStringAsFixed(2)}'),
               Text('y ${object.y.toStringAsFixed(2)}'),
               Text('view ${object.direction.name}'),
+              Text('render band ${asset?.renderBand.name ?? 'unknown'}'),
+              if (controller.mode == EnvironmentEditorMode.collision) ...[
+                const SizedBox(height: 10),
+                _GeometryEditor(controller: controller),
+              ],
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                initialValue: object.editorLayerId,
+                decoration: const InputDecoration(
+                  labelText: 'Move selection to layer',
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                ),
+                items: [
+                  for (final layer in controller.document.editorLayers)
+                    DropdownMenuItem(value: layer.id, child: Text(layer.name)),
+                ],
+                onChanged: (id) {
+                  if (id != null) controller.moveSelectionToLayer(id);
+                },
+              ),
+              if (controller.selectedObjects.length > 1) ...[
+                const SizedBox(height: 12),
+                for (final layer in controller.document.editorLayers)
+                  if (controller.selectedObjects.any(
+                    (selected) => selected.editorLayerId == layer.id,
+                  )) ...[
+                    Text(
+                      layer.name,
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    for (final selected in controller.selectedObjects.where(
+                      (selected) => selected.editorLayerId == layer.id,
+                    ))
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 2),
+                        child: Text(
+                          controller.catalog
+                                  .objectById(selected.assetId)
+                                  ?.name ??
+                              selected.assetId,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
+              ],
+              const SizedBox(height: 12),
+              _NumberStepper(
+                label: 'Vertical offset',
+                value: object.verticalOffset,
+                step: 0.25,
+                onDecrease: () =>
+                    controller.adjustSelectedVerticalOffset(-0.25),
+                onIncrease: () => controller.adjustSelectedVerticalOffset(0.25),
+              ),
+              const SizedBox(height: 8),
+              _NumberStepper(
+                label: 'Sort bias',
+                value: object.sortBias,
+                step: 0.1,
+                warning: object.sortBias != 0,
+                onDecrease: () => controller.adjustSelectedSortBias(-0.1),
+                onIncrease: () => controller.adjustSelectedSortBias(0.1),
+              ),
+              if (object.sortBias != 0) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Manual ordering correction',
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+              if (controller.overlapCandidateIds.length > 1) ...[
+                const SizedBox(height: 10),
+                Text(
+                  '${controller.overlapCandidateIds.length} overlapping objects',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                for (final id in controller.overlapCandidateIds)
+                  TextButton(
+                    onPressed: () => controller.selectCandidates([id]),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        controller.catalog
+                                .objectById(
+                                  controller.document.objects
+                                      .firstWhere((object) => object.id == id)
+                                      .assetId,
+                                )
+                                ?.name ??
+                            id,
+                      ),
+                    ),
+                  ),
+              ],
               const SizedBox(height: 12),
               FilledButton.tonalIcon(
                 onPressed: controller.rotateSelected,
@@ -768,6 +1084,547 @@ class _Inspector extends StatelessWidget {
         );
       },
     ),
+  );
+
+  static int _layerDepth(EnvironmentDocument document, EditorLayer layer) {
+    var depth = 0;
+    var parentId = layer.parentId;
+    final visited = <String>{layer.id};
+    while (parentId != null && visited.add(parentId)) {
+      depth++;
+      parentId = document.editorLayerById(parentId)?.parentId;
+    }
+    return depth;
+  }
+}
+
+class _EditorLayerRow extends StatelessWidget {
+  const _EditorLayerRow({
+    required this.controller,
+    required this.layer,
+    required this.depth,
+  });
+
+  final EditorController controller;
+  final EditorLayer layer;
+  final int depth;
+
+  @override
+  Widget build(BuildContext context) {
+    final active = controller.document.activeLayerId == layer.id;
+    return Material(
+      color: active
+          ? Theme.of(context).colorScheme.primaryContainer
+                .withValues(alpha: 0.4)
+          : Colors.transparent,
+      borderRadius: BorderRadius.circular(6),
+      child: InkWell(
+        onTap: () => controller.setActiveLayer(layer.id),
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: EdgeInsets.only(left: 4 + depth * 14, top: 2, bottom: 2),
+          child: Row(
+            children: [
+              Icon(depth == 0 ? Icons.public : Icons.folder_outlined, size: 16),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  layer.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: layer.visible ? 'Hide layer' : 'Show layer',
+                onPressed: () => controller.toggleLayerVisibility(layer.id),
+                iconSize: 17,
+                icon: Icon(
+                  layer.visible
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                tooltip: layer.locked ? 'Unlock layer' : 'Lock layer',
+                onPressed: () => controller.toggleLayerLocked(layer.id),
+                iconSize: 17,
+                icon: Icon(
+                  layer.locked ? Icons.lock_outline : Icons.lock_open_outlined,
+                ),
+              ),
+              PopupMenuButton<String>(
+                tooltip: 'Layer actions',
+                iconSize: 17,
+                onSelected: (action) {
+                  if (action == 'rename') {
+                    _rename(context);
+                  } else if (action == 'delete' &&
+                      !controller.deleteLayer(layer.id)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Move contents and child layers before deleting this layer.',
+                        ),
+                      ),
+                    );
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 'rename', child: Text('Rename')),
+                  if (layer.id != EnvironmentDocument.rootLayerId)
+                    const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _rename(BuildContext context) async {
+    final field = TextEditingController(text: layer.name);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rename layer'),
+        content: TextField(controller: field, autofocus: true),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, field.text),
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
+    field.dispose();
+    if (name != null) controller.renameLayer(layer.id, name);
+  }
+}
+
+class _GeometryEditor extends StatelessWidget {
+  const _GeometryEditor({required this.controller});
+
+  final EditorController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final object = controller.selectedObject!;
+    final asset = controller.catalog.objectById(object.assetId)!;
+    final geometry = controller.catalog.geometryForAsset(asset);
+    final shapes = switch (controller.geometryRole) {
+      GeometryRole.footprint => [
+        if (geometry.footprint != null) geometry.footprint!,
+      ],
+      GeometryRole.blocking => geometry.blocking,
+      GeometryRole.walkable => geometry.walkable,
+    };
+    final shape = controller.selectedGeometryShape;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('ASSET GEOMETRY', style: Theme.of(context).textTheme.labelMedium),
+        Text('profile ${asset.collisionProfile ?? 'none'}'),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<GeometryRole>(
+          isExpanded: true,
+          initialValue: controller.geometryRole,
+          decoration: const InputDecoration(
+            labelText: 'Geometry role',
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+          items: const [
+            DropdownMenuItem(
+              value: GeometryRole.footprint,
+              child: Text('Footprint'),
+            ),
+            DropdownMenuItem(
+              value: GeometryRole.blocking,
+              child: Text('Blocking'),
+            ),
+            DropdownMenuItem(
+              value: GeometryRole.walkable,
+              child: Text('Walkable'),
+            ),
+          ],
+          onChanged: (role) {
+            if (role != null) controller.selectGeometryRole(role);
+          },
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            if (controller.geometryRole != GeometryRole.footprint &&
+                shapes.isNotEmpty)
+              Expanded(
+                child: DropdownButtonFormField<int>(
+                  isExpanded: true,
+                  initialValue: controller.geometryShapeIndex.clamp(
+                    0,
+                    shapes.length - 1,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Shape',
+                    isDense: true,
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    for (var index = 0; index < shapes.length; index++)
+                      DropdownMenuItem(
+                        value: index,
+                        child: Text(
+                          '${index + 1}: ${_shapeName(shapes[index])}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (index) {
+                    if (index != null) {
+                      controller.selectGeometryShapeIndex(index);
+                    }
+                  },
+                ),
+              ),
+            if (controller.geometryRole != GeometryRole.footprint &&
+                shapes.isNotEmpty)
+              const SizedBox(width: 6),
+            PopupMenuButton<GeometryShapeType>(
+              tooltip: 'Add geometry shape',
+              onSelected: controller.addGeometryShape,
+              itemBuilder: (context) => [
+                for (final type in GeometryShapeType.values)
+                  PopupMenuItem(value: type, child: Text(type.name)),
+              ],
+              icon: const Icon(Icons.add_box_outlined),
+            ),
+            if (shape != null)
+              IconButton(
+                tooltip: 'Delete shape',
+                onPressed: controller.deleteSelectedGeometryShape,
+                icon: const Icon(Icons.delete_outline),
+              ),
+          ],
+        ),
+        if (shape == null)
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text('No shape for this role. Add one to begin.'),
+          )
+        else ...[
+          const SizedBox(height: 6),
+          ..._shapeControls(shape),
+        ],
+        const SizedBox(height: 8),
+        if (!geometry.reviewed)
+          Text(
+            'Unreviewed geometry',
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: Theme.of(context).colorScheme.error),
+          ),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            FilledButton.tonal(
+              onPressed: controller.markSelectedGeometryReviewed,
+              child: const Text('Mark reviewed'),
+            ),
+            OutlinedButton(
+              onPressed:
+                  controller.catalog.geometryOverrides.containsKey(asset.id)
+                  ? controller.resetSelectedGeometryOverride
+                  : null,
+              child: const Text('Reset'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                await controller.saveGeometryOverrides();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Geometry catalog saved.')),
+                );
+              },
+              child: const Text('Save catalog'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _shapeControls(EnvironmentGeometryShape shape) {
+    if (shape is EnvironmentCircle) {
+      return [
+        _control('Center X', shape.center.x, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentCircle(
+              center: EnvironmentGeometryPoint(value, shape.center.y),
+              radius: shape.radius,
+            ),
+          );
+        }),
+        _control('Center Y', shape.center.y, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentCircle(
+              center: EnvironmentGeometryPoint(shape.center.x, value),
+              radius: shape.radius,
+            ),
+          );
+        }),
+        _control('Radius', shape.radius, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentCircle(
+              center: shape.center,
+              radius: value.clamp(0.02, 20),
+            ),
+          );
+        }),
+      ];
+    }
+    if (shape is EnvironmentEllipse) {
+      return [
+        _control('Center X', shape.center.x, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentEllipse(
+              center: EnvironmentGeometryPoint(value, shape.center.y),
+              radius: shape.radius,
+            ),
+          );
+        }),
+        _control('Center Y', shape.center.y, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentEllipse(
+              center: EnvironmentGeometryPoint(shape.center.x, value),
+              radius: shape.radius,
+            ),
+          );
+        }),
+        _control('Radius X', shape.radius.x, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentEllipse(
+              center: shape.center,
+              radius: EnvironmentGeometryPoint(
+                value.clamp(0.02, 20),
+                shape.radius.y,
+              ),
+            ),
+          );
+        }),
+        _control('Radius Y', shape.radius.y, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentEllipse(
+              center: shape.center,
+              radius: EnvironmentGeometryPoint(
+                shape.radius.x,
+                value.clamp(0.02, 20),
+              ),
+            ),
+          );
+        }),
+      ];
+    }
+    if (shape is EnvironmentRectangle) {
+      return [
+        _control('Center X', shape.center.x, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentRectangle(
+              center: EnvironmentGeometryPoint(value, shape.center.y),
+              size: shape.size,
+              rotationDegrees: shape.rotationDegrees,
+            ),
+          );
+        }),
+        _control('Center Y', shape.center.y, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentRectangle(
+              center: EnvironmentGeometryPoint(shape.center.x, value),
+              size: shape.size,
+              rotationDegrees: shape.rotationDegrees,
+            ),
+          );
+        }),
+        _control('Width', shape.size.x, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentRectangle(
+              center: shape.center,
+              size: EnvironmentGeometryPoint(
+                value.clamp(0.02, 40),
+                shape.size.y,
+              ),
+              rotationDegrees: shape.rotationDegrees,
+            ),
+          );
+        }),
+        _control('Height', shape.size.y, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentRectangle(
+              center: shape.center,
+              size: EnvironmentGeometryPoint(
+                shape.size.x,
+                value.clamp(0.02, 40),
+              ),
+              rotationDegrees: shape.rotationDegrees,
+            ),
+          );
+        }),
+        _control('Rotation', shape.rotationDegrees, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentRectangle(
+              center: shape.center,
+              size: shape.size,
+              rotationDegrees: value,
+            ),
+          );
+        }, step: 5),
+      ];
+    }
+    if (shape is EnvironmentCapsule) {
+      return [
+        _control('Start X', shape.start.x, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentCapsule(
+              start: EnvironmentGeometryPoint(value, shape.start.y),
+              end: shape.end,
+              radius: shape.radius,
+            ),
+          );
+        }),
+        _control('Start Y', shape.start.y, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentCapsule(
+              start: EnvironmentGeometryPoint(shape.start.x, value),
+              end: shape.end,
+              radius: shape.radius,
+            ),
+          );
+        }),
+        _control('End X', shape.end.x, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentCapsule(
+              start: shape.start,
+              end: EnvironmentGeometryPoint(value, shape.end.y),
+              radius: shape.radius,
+            ),
+          );
+        }),
+        _control('End Y', shape.end.y, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentCapsule(
+              start: shape.start,
+              end: EnvironmentGeometryPoint(shape.end.x, value),
+              radius: shape.radius,
+            ),
+          );
+        }),
+        _control('Radius', shape.radius, (value) {
+          controller.replaceSelectedGeometryShape(
+            EnvironmentCapsule(
+              start: shape.start,
+              end: shape.end,
+              radius: value.clamp(0.02, 20),
+            ),
+          );
+        }),
+      ];
+    }
+    final polygon = shape as EnvironmentPolygon;
+    return [
+      for (var index = 0; index < polygon.points.length; index++) ...[
+        Text('Vertex ${index + 1}'),
+        _control('X', polygon.points[index].x, (value) {
+          final points = [...polygon.points];
+          points[index] = EnvironmentGeometryPoint(value, points[index].y);
+          controller.replaceSelectedGeometryShape(
+            EnvironmentPolygon(points: points),
+          );
+        }),
+        _control('Y', polygon.points[index].y, (value) {
+          final points = [...polygon.points];
+          points[index] = EnvironmentGeometryPoint(points[index].x, value);
+          controller.replaceSelectedGeometryShape(
+            EnvironmentPolygon(points: points),
+          );
+        }),
+      ],
+    ];
+  }
+
+  Widget _control(
+    String label,
+    double value,
+    ValueChanged<double> onChanged, {
+    double step = 0.05,
+  }) => _NumberStepper(
+    label: label,
+    value: value,
+    step: step,
+    onDecrease: () => onChanged(value - step),
+    onIncrease: () => onChanged(value + step),
+  );
+
+  static String _shapeName(EnvironmentGeometryShape shape) => switch (shape) {
+    EnvironmentCircle() => 'Circle',
+    EnvironmentEllipse() => 'Ellipse',
+    EnvironmentRectangle() => 'Rectangle',
+    EnvironmentCapsule() => 'Capsule',
+    EnvironmentPolygon() => 'Polygon',
+  };
+}
+
+class _NumberStepper extends StatelessWidget {
+  const _NumberStepper({
+    required this.label,
+    required this.value,
+    required this.step,
+    required this.onDecrease,
+    required this.onIncrease,
+    this.warning = false,
+  });
+
+  final String label;
+  final double value;
+  final double step;
+  final VoidCallback onDecrease;
+  final VoidCallback onIncrease;
+  final bool warning;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              value.toStringAsFixed(step < 0.2 ? 2 : 2),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: warning ? Theme.of(context).colorScheme.error : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+      IconButton(
+        tooltip: 'Decrease by $step',
+        onPressed: onDecrease,
+        icon: const Icon(Icons.remove),
+      ),
+      IconButton(
+        tooltip: 'Increase by $step',
+        onPressed: onIncrease,
+        icon: const Icon(Icons.add),
+      ),
+    ],
   );
 }
 

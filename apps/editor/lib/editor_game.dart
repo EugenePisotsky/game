@@ -7,16 +7,25 @@ import 'package:flame/components.dart' show Anchor;
 import 'package:flame/game.dart';
 import 'package:flame/sprite.dart';
 import 'package:neura_assets/neura_assets.dart';
+import 'package:neura_rendering/neura_rendering.dart';
 import 'package:neura_world/neura_world.dart';
 
 import 'editor_controller.dart';
 
 class EditorGame extends FlameGame {
-  EditorGame(this.controller) {
+  EditorGame(
+    this.controller, {
+    this.loadedChunks,
+    WorldPoint? initialWorldCenter,
+    this.chunkSize = 32,
+  }) : _viewCenterWorld = initialWorldCenter {
     images = Images(prefix: neuraAssetPrefix);
   }
 
   final EditorController controller;
+  final Set<EnvironmentChunkCoordinate> Function()? loadedChunks;
+  final double chunkSize;
+  final WorldPoint? _viewCenterWorld;
   final IsometricProjection projection = const IsometricProjection();
   final Vector2 _panOffset = Vector2.zero();
   final Vector2 _panVelocity = Vector2.zero();
@@ -24,8 +33,13 @@ class EditorGame extends FlameGame {
   final Set<String> _loadingImages = {};
   final Map<String, ui.Paint> _repeatingPaints = {};
   final Map<String, ui.Paint> _decalPaints = {};
+  final Map<EnvironmentChunkCoordinate, ui.Picture> _terrainPictures = {};
+  final Map<EnvironmentChunkCoordinate, int> _terrainPictureSignatures = {};
   bool _isPanning = false;
+  ui.Rect? _marqueeScreenRect;
   double zoom = 0.42;
+
+  static const double elevationPixelsPerWorldUnit = 64;
 
   final ui.Paint _mapOutlinePaint = ui.Paint()
     ..color = const ui.Color(0x669BB7A4)
@@ -37,6 +51,34 @@ class EditorGame extends FlameGame {
     ..strokeWidth = 2;
   final ui.Paint _selectionPaint = ui.Paint()
     ..color = const ui.Color(0xFFE9C46A)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 3;
+  final ui.Paint _hoverPaint = ui.Paint()
+    ..color = const ui.Color(0xFF78C6A3)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
+  final ui.Paint _marqueePaint = ui.Paint()
+    ..color = const ui.Color(0xAA78C6A3)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 1.5;
+  final ui.Paint _footprintPaint = ui.Paint()
+    ..color = const ui.Color(0xDD4EA8DE)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
+  final ui.Paint _blockingPaint = ui.Paint()
+    ..color = const ui.Color(0xDDE76F51)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2.5;
+  final ui.Paint _walkablePaint = ui.Paint()
+    ..color = const ui.Color(0xDD6FCF97)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
+  final ui.Paint _clearancePaint = ui.Paint()
+    ..color = const ui.Color(0xFFE9C46A)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
+  final ui.Paint _blockedClearancePaint = ui.Paint()
+    ..color = const ui.Color(0xFFFF4D4D)
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 3;
 
@@ -158,11 +200,66 @@ class EditorGame extends FlameGame {
 
   WorldPoint? worldAtScreen(Vector2 screen) {
     if (!isLoaded) return null;
-    final projected =
-        (screen - size / 2 - _panOffset) / zoom + _mapCenterScreen;
+    final projected = _projectedAtScreen(screen);
     final world = projection.screenToWorld(projected);
     final point = WorldPoint(world.x, world.y);
     return controller.document.contains(point.x, point.y) ? point : null;
+  }
+
+  List<String> hitTestObjectIds(Vector2 screen) {
+    if (!isLoaded) return const [];
+    final point = _projectedAtScreen(screen).toOffset();
+    final candidates = <PlacedEnvironmentObject>[];
+    for (final object in controller.document.objects) {
+      if (!controller.isLayerVisible(object.editorLayerId) ||
+          controller.isLayerLocked(object.editorLayerId)) {
+        continue;
+      }
+      final bounds = _objectProjectedBounds(object);
+      if (bounds != null && bounds.contains(point)) candidates.add(object);
+    }
+    candidates.sort(_compareVisualOrder);
+    return [for (final object in candidates.reversed) object.id];
+  }
+
+  List<String> objectIdsInMarquee(
+    ui.Rect screenRect, {
+    bool requireContainment = false,
+  }) {
+    final result = <PlacedEnvironmentObject>[];
+    for (final object in controller.document.objects) {
+      if (!controller.isLayerVisible(object.editorLayerId) ||
+          controller.isLayerLocked(object.editorLayerId)) {
+        continue;
+      }
+      final projected = _objectProjectedBounds(object);
+      if (projected == null) continue;
+      final bounds = _screenBoundsForProjected(projected);
+      final included = requireContainment
+          ? screenRect.contains(bounds.topLeft) &&
+                screenRect.contains(bounds.bottomRight)
+          : screenRect.overlaps(bounds);
+      if (included) result.add(object);
+    }
+    result.sort(_compareVisualOrder);
+    return [for (final object in result) object.id];
+  }
+
+  void setSelectionMarquee(ui.Rect? rect) => _marqueeScreenRect = rect;
+
+  EnvironmentObjectBounds visibleWorldBounds() {
+    final corners = [
+      Vector2.zero(),
+      Vector2(size.x, 0),
+      Vector2(size.x, size.y),
+      Vector2(0, size.y),
+    ].map(_projectedAtScreen).map(projection.screenToWorld).toList();
+    return EnvironmentObjectBounds(
+      minX: corners.map((point) => point.x).reduce(math.min),
+      minY: corners.map((point) => point.y).reduce(math.min),
+      maxX: corners.map((point) => point.x).reduce(math.max),
+      maxY: corners.map((point) => point.y).reduce(math.max),
+    );
   }
 
   void beginPan() {
@@ -206,13 +303,27 @@ class EditorGame extends FlameGame {
       ..translate(-_mapCenterScreen.x, -_mapCenterScreen.y);
 
     _renderBaseGround(canvas);
-    for (final stroke in controller.document.terrainStrokes) {
-      _renderStroke(canvas, stroke);
+    if (loadedChunks == null) {
+      for (final stroke in controller.document.terrainStrokes) {
+        _renderStroke(canvas, stroke);
+      }
+    } else {
+      _renderCachedChunkTerrain(canvas);
     }
+    _renderObjectBand(canvas, EnvironmentRenderBand.groundCover);
+    _renderObjectBand(canvas, EnvironmentRenderBand.depthSorted);
+    _renderObjectBand(canvas, EnvironmentRenderBand.overhead);
+    _renderObjectBand(canvas, EnvironmentRenderBand.effects);
     _renderMapOutline(canvas);
-    _renderObjects(canvas);
+    _renderChunkBoundaries(canvas);
+    if (controller.mode == EnvironmentEditorMode.collision) {
+      _renderGeometry(canvas);
+    }
+    _renderSelection(canvas);
     _renderCursor(canvas);
     canvas.restore();
+    final marquee = _marqueeScreenRect;
+    if (marquee != null) canvas.drawRect(marquee, _marqueePaint);
   }
 
   void _renderBaseGround(ui.Canvas canvas) {
@@ -225,19 +336,42 @@ class EditorGame extends FlameGame {
     final texture = controller.catalog.materialById(document.baseMaterialId)!;
     final image = _loadedImages[texture.texturePath]!;
     final texelsPerWorldUnit = 64.0;
-    _drawTexturedWorldQuad(
-      canvas,
-      const WorldPoint(0, 0),
-      WorldPoint(document.width.toDouble(), document.height.toDouble()),
-      paint,
-      ui.Rect.fromLTWH(
-        0,
-        0,
-        document.width * texelsPerWorldUnit,
-        document.height * texelsPerWorldUnit,
-      ),
-      image,
-    );
+    final chunks = loadedChunks?.call();
+    if (chunks == null) {
+      _drawTexturedWorldQuad(
+        canvas,
+        const WorldPoint(0, 0),
+        WorldPoint(document.width.toDouble(), document.height.toDouble()),
+        paint,
+        ui.Rect.fromLTWH(
+          0,
+          0,
+          document.width * texelsPerWorldUnit,
+          document.height * texelsPerWorldUnit,
+        ),
+        image,
+      );
+      return;
+    }
+    for (final chunk in chunks) {
+      final minX = chunk.x * chunkSize;
+      final minY = chunk.y * chunkSize;
+      final maxX = math.min(document.width.toDouble(), minX + chunkSize);
+      final maxY = math.min(document.height.toDouble(), minY + chunkSize);
+      _drawTexturedWorldQuad(
+        canvas,
+        WorldPoint(minX, minY),
+        WorldPoint(maxX, maxY),
+        paint,
+        ui.Rect.fromLTWH(
+          minX * texelsPerWorldUnit,
+          minY * texelsPerWorldUnit,
+          (maxX - minX) * texelsPerWorldUnit,
+          (maxY - minY) * texelsPerWorldUnit,
+        ),
+        image,
+      );
+    }
   }
 
   void _renderStroke(ui.Canvas canvas, TerrainStroke stroke) {
@@ -274,6 +408,76 @@ class EditorGame extends FlameGame {
       }
       previous = point;
     }
+  }
+
+  void _renderCachedChunkTerrain(ui.Canvas canvas) {
+    final chunks = loadedChunks!.call();
+    final stale = _terrainPictures.keys
+        .where((coordinate) => !chunks.contains(coordinate))
+        .toList();
+    for (final coordinate in stale) {
+      _terrainPictures.remove(coordinate)?.dispose();
+      _terrainPictureSignatures.remove(coordinate);
+    }
+    for (final coordinate in chunks) {
+      final strokes = controller.document.terrainStrokes
+          .where((stroke) => _strokeAffectsChunk(stroke, coordinate))
+          .toList();
+      var ready = true;
+      for (final stroke in strokes) {
+        if (!_decalPaints.containsKey(stroke.materialId)) {
+          _loadMaterial(stroke.materialId);
+          ready = false;
+        }
+      }
+      if (!ready) continue;
+      final signature = Object.hashAll([
+        controller.document.baseMaterialId,
+        for (final stroke in strokes)
+          Object.hash(
+            stroke.materialId,
+            stroke.radius,
+            stroke.opacity,
+            Object.hashAll([
+              for (final point in stroke.points) Object.hash(point.x, point.y),
+            ]),
+          ),
+      ]);
+      if (_terrainPictureSignatures[coordinate] != signature) {
+        _terrainPictures.remove(coordinate)?.dispose();
+        final recorder = ui.PictureRecorder();
+        final pictureCanvas = ui.Canvas(recorder)
+          ..clipPath(_chunkPath(coordinate));
+        for (final stroke in strokes) {
+          _renderStroke(pictureCanvas, stroke);
+        }
+        _terrainPictures[coordinate] = recorder.endRecording();
+        _terrainPictureSignatures[coordinate] = signature;
+      }
+      final picture = _terrainPictures[coordinate];
+      if (picture != null) canvas.drawPicture(picture);
+    }
+  }
+
+  bool _strokeAffectsChunk(
+    TerrainStroke stroke,
+    EnvironmentChunkCoordinate coordinate,
+  ) {
+    if (stroke.points.isEmpty) return false;
+    final minX =
+        stroke.points.map((point) => point.x).reduce(math.min) - stroke.radius;
+    final minY =
+        stroke.points.map((point) => point.y).reduce(math.min) - stroke.radius;
+    final maxX =
+        stroke.points.map((point) => point.x).reduce(math.max) + stroke.radius;
+    final maxY =
+        stroke.points.map((point) => point.y).reduce(math.max) + stroke.radius;
+    return EnvironmentObjectBounds(
+      minX: minX,
+      minY: minY,
+      maxX: maxX,
+      maxY: maxY,
+    ).overlapsChunk(coordinate, chunkSize);
   }
 
   void _drawStamp(
@@ -328,12 +532,21 @@ class EditorGame extends FlameGame {
     canvas.drawVertices(vertices, ui.BlendMode.srcOver, paint);
   }
 
-  void _renderObjects(ui.Canvas canvas) {
-    final objects = [...controller.document.objects]
-      ..sort((a, b) {
-        final depth = (a.x + a.y).compareTo(b.x + b.y);
-        return depth != 0 ? depth : a.x.compareTo(b.x);
-      });
+  void _renderObjectBand(ui.Canvas canvas, EnvironmentRenderBand band) {
+    final objects =
+        controller.document.objects.where((object) {
+          return controller.isLayerVisible(object.editorLayerId) &&
+              controller.catalog.objectById(object.assetId)?.renderBand == band;
+        }).toList()..sort((a, b) {
+          final aAsset = controller.catalog.objectById(a.assetId)!;
+          final bAsset = controller.catalog.objectById(b.assetId)!;
+          final depth = aAsset
+              .depthAt(a.x, a.y, instanceSortBias: a.sortBias)
+              .compareTo(
+                bAsset.depthAt(b.x, b.y, instanceSortBias: b.sortBias),
+              );
+          return depth != 0 ? depth : a.x.compareTo(b.x);
+        });
     for (final object in objects) {
       final asset = controller.catalog.objectById(object.assetId);
       if (asset == null) continue;
@@ -345,7 +558,8 @@ class EditorGame extends FlameGame {
       }
       Sprite(image).render(
         canvas,
-        position: projection.worldToScreen(Vector2(object.x, object.y)),
+        position: projection.worldToScreen(Vector2(object.x, object.y))
+          ..y -= object.verticalOffset * elevationPixelsPerWorldUnit,
         size: Vector2(
           image.width * asset.renderScale,
           image.height * asset.renderScale,
@@ -353,15 +567,147 @@ class EditorGame extends FlameGame {
         anchor: Anchor(view.pivotX, view.pivotY),
       );
     }
-    final selected = controller.selectedObject;
-    if (selected != null) {
-      _drawWorldDiamond(
-        canvas,
-        WorldPoint(selected.x, selected.y),
-        0.55,
-        _selectionPaint,
+  }
+
+  void _renderSelection(ui.Canvas canvas) {
+    final hoveredId = controller.hoveredObjectId;
+    if (hoveredId != null &&
+        !controller.selectedObjectIds.contains(hoveredId)) {
+      final hovered = _objectById(hoveredId);
+      final bounds = hovered == null ? null : _objectProjectedBounds(hovered);
+      if (bounds != null) canvas.drawRect(bounds, _hoverPaint);
+    }
+    for (final selected in controller.selectedObjects) {
+      final bounds = _objectProjectedBounds(selected);
+      if (bounds != null) canvas.drawRect(bounds, _selectionPaint);
+    }
+  }
+
+  void _renderGeometry(ui.Canvas canvas) {
+    for (final object in controller.document.objects) {
+      if (!controller.isLayerVisible(object.editorLayerId)) continue;
+      final asset = controller.catalog.objectById(object.assetId);
+      if (asset == null) continue;
+      final geometry = controller.catalog.geometryForAsset(asset);
+      final footprint = geometry.footprint;
+      if (footprint != null) {
+        _drawGeometryShape(canvas, footprint, object, _footprintPaint);
+      }
+      for (final shape in geometry.blocking) {
+        _drawGeometryShape(canvas, shape, object, _blockingPaint);
+      }
+      for (final shape in geometry.walkable) {
+        _drawGeometryShape(canvas, shape, object, _walkablePaint);
+      }
+    }
+    final cursor = controller.hoveredPoint;
+    if (cursor != null) {
+      const actorRadius = 0.18;
+      final blocked = controller.document.objects.any((object) {
+        final asset = controller.catalog.objectById(object.assetId);
+        return asset != null &&
+            environmentObjectBlocksPoint(
+              asset,
+              object,
+              cursor,
+              actorRadius: actorRadius,
+              geometry: controller.catalog.geometryForAsset(asset),
+            );
+      });
+      final points = [
+        for (var index = 0; index < 24; index++)
+          WorldPoint(
+            cursor.x + math.cos(index * math.pi / 12) * actorRadius,
+            cursor.y + math.sin(index * math.pi / 12) * actorRadius,
+          ),
+      ];
+      final first = projection.worldToScreen(
+        Vector2(points.first.x, points.first.y),
+      );
+      final path = ui.Path()..moveTo(first.x, first.y);
+      for (final point in points.skip(1)) {
+        final projected = projection.worldToScreen(Vector2(point.x, point.y));
+        path.lineTo(projected.x, projected.y);
+      }
+      canvas.drawPath(
+        path..close(),
+        blocked ? _blockedClearancePaint : _clearancePaint,
       );
     }
+  }
+
+  void _drawGeometryShape(
+    ui.Canvas canvas,
+    EnvironmentGeometryShape shape,
+    PlacedEnvironmentObject object,
+    ui.Paint paint,
+  ) {
+    final points = environmentShapeOutline(shape, object);
+    if (points.isEmpty) return;
+    final first = projection.worldToScreen(
+      Vector2(points.first.x, points.first.y),
+    );
+    final path = ui.Path()..moveTo(first.x, first.y);
+    for (final point in points.skip(1)) {
+      final projected = projection.worldToScreen(Vector2(point.x, point.y));
+      path.lineTo(projected.x, projected.y);
+    }
+    canvas.drawPath(path..close(), paint);
+  }
+
+  ui.Rect? _objectProjectedBounds(PlacedEnvironmentObject object) {
+    final asset = controller.catalog.objectById(object.assetId);
+    if (asset == null) return null;
+    final view = asset.viewFor(object.direction.name);
+    final image = _loadedImages[view.imagePath];
+    if (image == null) return null;
+    final width = image.width * asset.renderScale;
+    final height = image.height * asset.renderScale;
+    final anchor = projection.worldToScreen(Vector2(object.x, object.y))
+      ..y -= object.verticalOffset * elevationPixelsPerWorldUnit;
+    return ui.Rect.fromLTWH(
+      anchor.x - width * view.pivotX,
+      anchor.y - height * view.pivotY,
+      width,
+      height,
+    );
+  }
+
+  ui.Rect _screenBoundsForProjected(ui.Rect rect) {
+    final topLeft =
+        (Vector2(rect.left, rect.top) - _mapCenterScreen) * zoom +
+        size / 2 +
+        _panOffset;
+    return ui.Rect.fromLTWH(
+      topLeft.x,
+      topLeft.y,
+      rect.width * zoom,
+      rect.height * zoom,
+    );
+  }
+
+  Vector2 _projectedAtScreen(Vector2 screen) =>
+      (screen - size / 2 - _panOffset) / zoom + _mapCenterScreen;
+
+  int _compareVisualOrder(
+    PlacedEnvironmentObject a,
+    PlacedEnvironmentObject b,
+  ) {
+    final aAsset = controller.catalog.objectById(a.assetId)!;
+    final bAsset = controller.catalog.objectById(b.assetId)!;
+    final band = aAsset.renderBand.index.compareTo(bAsset.renderBand.index);
+    if (band != 0) return band;
+    final depth = aAsset
+        .depthAt(a.x, a.y, instanceSortBias: a.sortBias)
+        .compareTo(bAsset.depthAt(b.x, b.y, instanceSortBias: b.sortBias));
+    return depth != 0 ? depth : a.x.compareTo(b.x);
+  }
+
+  PlacedEnvironmentObject? _objectById(String id) {
+    for (final object in controller.document.objects) {
+      if (object.id == id) return object;
+    }
+    return null;
   }
 
   void _renderCursor(ui.Canvas canvas) {
@@ -409,7 +755,64 @@ class EditorGame extends FlameGame {
     canvas.drawPath(path..close(), _mapOutlinePaint);
   }
 
-  Vector2 get _mapCenterScreen => projection.worldToScreen(
-    Vector2(controller.document.width / 2, controller.document.height / 2),
-  );
+  ui.Path? _loadedChunkClip() {
+    final chunks = loadedChunks?.call();
+    if (chunks == null) return null;
+    final path = ui.Path();
+    for (final chunk in chunks) {
+      final minX = chunk.x * chunkSize;
+      final minY = chunk.y * chunkSize;
+      final points = [
+        projection.worldToScreen(Vector2(minX, minY)),
+        projection.worldToScreen(Vector2(minX + chunkSize, minY)),
+        projection.worldToScreen(Vector2(minX + chunkSize, minY + chunkSize)),
+        projection.worldToScreen(Vector2(minX, minY + chunkSize)),
+      ];
+      path.moveTo(points.first.x, points.first.y);
+      for (final point in points.skip(1)) {
+        path.lineTo(point.x, point.y);
+      }
+      path.close();
+    }
+    return path;
+  }
+
+  ui.Path _chunkPath(EnvironmentChunkCoordinate chunk) {
+    final minX = chunk.x * chunkSize;
+    final minY = chunk.y * chunkSize;
+    final points = [
+      projection.worldToScreen(Vector2(minX, minY)),
+      projection.worldToScreen(Vector2(minX + chunkSize, minY)),
+      projection.worldToScreen(Vector2(minX + chunkSize, minY + chunkSize)),
+      projection.worldToScreen(Vector2(minX, minY + chunkSize)),
+    ];
+    final path = ui.Path()..moveTo(points.first.x, points.first.y);
+    for (final point in points.skip(1)) {
+      path.lineTo(point.x, point.y);
+    }
+    return path..close();
+  }
+
+  void _renderChunkBoundaries(ui.Canvas canvas) {
+    final chunks = loadedChunks?.call();
+    if (chunks == null) return;
+    final paint = ui.Paint()
+      ..color = const ui.Color(0x4458D68D)
+      ..style = ui.PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    final clip = _loadedChunkClip();
+    if (clip != null) canvas.drawPath(clip, paint);
+  }
+
+  Vector2 get _mapCenterScreen {
+    final center = _viewCenterWorld;
+    return projection.worldToScreen(
+      center == null
+          ? Vector2(
+              controller.document.width / 2,
+              controller.document.height / 2,
+            )
+          : Vector2(center.x, center.y),
+    );
+  }
 }

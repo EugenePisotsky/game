@@ -546,6 +546,26 @@ Migration must preserve current object IDs and world positions.
 
 ## Implementation phases
 
+### Current implementation status (2026-07-12)
+
+- Phase 1 is implemented: catalog render bands, ground-cover separation,
+  sort anchors and bias, physical vertical offsets, schema migration, importer
+  validation, and editor controls are active in both editor and game.
+- Phase 2 is implemented for the first production pass: persistent nested
+  layers, visibility and locking, active-layer placement, full-sprite bounding
+  selection, topmost overlap cycling and candidate lists, Shift selection,
+  marquee selection, multi-object movement, grouped inspection, and layer
+  reassignment are available and undoable.
+- Phase 3 is in progress: the catalog now supports circle, ellipse, rectangle,
+  polygon, and capsule geometry; importer collision profiles emit separate
+  footprints, blocking shapes, and walkable surfaces; the editor has a
+  collision overlay mode; and the game uses an actor-radius-expanded A* grid.
+  Interactive asset-geometry authoring and reviewed override persistence are
+  the remaining Phase 3 work.
+- Phases 4 and 5 have not started. The existing older tile-world chunk classes
+  are not considered implementation of the new painted-environment chunk
+  format.
+
 ### Phase 0: developer diagnostics and test harness
 
 - Add `flame_test` to the game and editor development dependencies.

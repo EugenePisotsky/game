@@ -1,10 +1,237 @@
 import 'dart:convert';
 
+class EnvironmentGeometryPoint {
+  const EnvironmentGeometryPoint(this.x, this.y);
+
+  final double x;
+  final double y;
+
+  Map<String, Object> toJson() => {'x': x, 'y': y};
+
+  factory EnvironmentGeometryPoint.fromJson(Map<String, Object?> json) =>
+      EnvironmentGeometryPoint(
+        (json['x'] as num).toDouble(),
+        (json['y'] as num).toDouble(),
+      );
+}
+
+sealed class EnvironmentGeometryShape {
+  const EnvironmentGeometryShape();
+
+  Map<String, Object> toJson();
+
+  factory EnvironmentGeometryShape.fromJson(Map<String, Object?> json) {
+    EnvironmentGeometryPoint point(String key) =>
+        EnvironmentGeometryPoint.fromJson(json[key] as Map<String, Object?>);
+    switch (json['type'] as String) {
+      case 'circle':
+        return EnvironmentCircle(
+          center: point('center'),
+          radius: (json['radius'] as num).toDouble(),
+        );
+      case 'ellipse':
+        return EnvironmentEllipse(
+          center: point('center'),
+          radius: point('radius'),
+        );
+      case 'rectangle':
+        return EnvironmentRectangle(
+          center: point('center'),
+          size: point('size'),
+          rotationDegrees: (json['rotationDegrees'] as num? ?? 0).toDouble(),
+        );
+      case 'polygon':
+        return EnvironmentPolygon(
+          points: [
+            for (final value in json['points'] as List<Object?>)
+              EnvironmentGeometryPoint.fromJson(value as Map<String, Object?>),
+          ],
+        );
+      case 'capsule':
+        return EnvironmentCapsule(
+          start: point('start'),
+          end: point('end'),
+          radius: (json['radius'] as num).toDouble(),
+        );
+      default:
+        throw FormatException('Unknown geometry shape type ${json['type']}.');
+    }
+  }
+}
+
+class EnvironmentCircle extends EnvironmentGeometryShape {
+  const EnvironmentCircle({required this.center, required this.radius});
+
+  final EnvironmentGeometryPoint center;
+  final double radius;
+
+  @override
+  Map<String, Object> toJson() => {
+    'type': 'circle',
+    'center': center.toJson(),
+    'radius': radius,
+  };
+}
+
+class EnvironmentEllipse extends EnvironmentGeometryShape {
+  const EnvironmentEllipse({required this.center, required this.radius});
+
+  final EnvironmentGeometryPoint center;
+  final EnvironmentGeometryPoint radius;
+
+  @override
+  Map<String, Object> toJson() => {
+    'type': 'ellipse',
+    'center': center.toJson(),
+    'radius': radius.toJson(),
+  };
+}
+
+class EnvironmentRectangle extends EnvironmentGeometryShape {
+  const EnvironmentRectangle({
+    required this.center,
+    required this.size,
+    this.rotationDegrees = 0,
+  });
+
+  final EnvironmentGeometryPoint center;
+  final EnvironmentGeometryPoint size;
+  final double rotationDegrees;
+
+  @override
+  Map<String, Object> toJson() => {
+    'type': 'rectangle',
+    'center': center.toJson(),
+    'size': size.toJson(),
+    if (rotationDegrees != 0) 'rotationDegrees': rotationDegrees,
+  };
+}
+
+class EnvironmentPolygon extends EnvironmentGeometryShape {
+  const EnvironmentPolygon({required this.points});
+
+  final List<EnvironmentGeometryPoint> points;
+
+  @override
+  Map<String, Object> toJson() => {
+    'type': 'polygon',
+    'points': [for (final point in points) point.toJson()],
+  };
+}
+
+class EnvironmentCapsule extends EnvironmentGeometryShape {
+  const EnvironmentCapsule({
+    required this.start,
+    required this.end,
+    required this.radius,
+  });
+
+  final EnvironmentGeometryPoint start;
+  final EnvironmentGeometryPoint end;
+  final double radius;
+
+  @override
+  Map<String, Object> toJson() => {
+    'type': 'capsule',
+    'start': start.toJson(),
+    'end': end.toJson(),
+    'radius': radius,
+  };
+}
+
+class EnvironmentAssetGeometry {
+  const EnvironmentAssetGeometry({
+    this.footprint,
+    this.blocking = const [],
+    this.walkable = const [],
+    this.selection = const [],
+    this.reviewed = false,
+  });
+
+  static const empty = EnvironmentAssetGeometry();
+
+  final EnvironmentGeometryShape? footprint;
+  final List<EnvironmentGeometryShape> blocking;
+  final List<EnvironmentGeometryShape> walkable;
+  final List<EnvironmentGeometryShape> selection;
+  final bool reviewed;
+
+  Map<String, Object> toJson() => {
+    if (footprint != null) 'footprint': footprint!.toJson(),
+    'blocking': [for (final shape in blocking) shape.toJson()],
+    if (walkable.isNotEmpty)
+      'walkable': [for (final shape in walkable) shape.toJson()],
+    if (selection.isNotEmpty)
+      'selection': [for (final shape in selection) shape.toJson()],
+    'reviewed': reviewed,
+  };
+
+  EnvironmentAssetGeometry copyWith({
+    EnvironmentGeometryShape? footprint,
+    bool clearFootprint = false,
+    List<EnvironmentGeometryShape>? blocking,
+    List<EnvironmentGeometryShape>? walkable,
+    List<EnvironmentGeometryShape>? selection,
+    bool? reviewed,
+  }) => EnvironmentAssetGeometry(
+    footprint: clearFootprint ? null : footprint ?? this.footprint,
+    blocking: blocking ?? this.blocking,
+    walkable: walkable ?? this.walkable,
+    selection: selection ?? this.selection,
+    reviewed: reviewed ?? this.reviewed,
+  );
+
+  factory EnvironmentAssetGeometry.fromJson(Map<String, Object?> json) {
+    List<EnvironmentGeometryShape> shapes(String key) => [
+      for (final value in json[key] as List<Object?>? ?? const [])
+        EnvironmentGeometryShape.fromJson(value as Map<String, Object?>),
+    ];
+    return EnvironmentAssetGeometry(
+      footprint: json['footprint'] == null
+          ? null
+          : EnvironmentGeometryShape.fromJson(
+              json['footprint'] as Map<String, Object?>,
+            ),
+      blocking: shapes('blocking'),
+      walkable: shapes('walkable'),
+      selection: shapes('selection'),
+      reviewed: json['reviewed'] as bool? ?? false,
+    );
+  }
+}
+
+enum EnvironmentRenderBand {
+  terrain,
+  terrainDetail,
+  groundCover,
+  depthSorted,
+  overhead,
+  effects;
+
+  static EnvironmentRenderBand forCategory(String category) {
+    switch (category.toLowerCase()) {
+      case 'ground cover':
+      case 'grass':
+        return EnvironmentRenderBand.groundCover;
+      default:
+        return EnvironmentRenderBand.depthSorted;
+    }
+  }
+}
+
 class EnvironmentCatalog {
-  const EnvironmentCatalog({required this.materials, required this.objects});
+  EnvironmentCatalog({
+    required this.materials,
+    required this.objects,
+    Map<String, EnvironmentAssetGeometry>? geometryOverrides,
+  }) : _geometryOverrides = Map.of(geometryOverrides ?? const {});
 
   final List<EnvironmentMaterial> materials;
   final List<EnvironmentObjectAsset> objects;
+  final Map<String, EnvironmentAssetGeometry> _geometryOverrides;
+
+  Map<String, EnvironmentAssetGeometry> get geometryOverrides =>
+      Map.unmodifiable(_geometryOverrides);
 
   EnvironmentMaterial? materialById(String id) {
     for (final material in materials) {
@@ -18,6 +245,61 @@ class EnvironmentCatalog {
       if (object.id == id) return object;
     }
     return null;
+  }
+
+  EnvironmentAssetGeometry geometryForAsset(EnvironmentObjectAsset asset) =>
+      _geometryOverrides[asset.id] ?? asset.geometry;
+
+  EnvironmentAssetGeometry? geometryForObjectId(String id) {
+    final asset = objectById(id);
+    return asset == null ? null : geometryForAsset(asset);
+  }
+
+  void setGeometryOverride(String assetId, EnvironmentAssetGeometry geometry) {
+    if (objectById(assetId) == null) {
+      throw ArgumentError.value(
+        assetId,
+        'assetId',
+        'Unknown environment asset',
+      );
+    }
+    _geometryOverrides[assetId] = geometry;
+  }
+
+  void removeGeometryOverride(String assetId) =>
+      _geometryOverrides.remove(assetId);
+
+  void applyGeometryOverridesFromJsonString(String source) {
+    final json = jsonDecode(source) as Map<String, Object?>;
+    final objects = json['objects'] as Map<String, Object?>? ?? const {};
+    for (final entry in objects.entries) {
+      if (objectById(entry.key) == null) {
+        throw FormatException(
+          'Geometry override references unknown ${entry.key}.',
+        );
+      }
+      _geometryOverrides[entry.key] = EnvironmentAssetGeometry.fromJson(
+        entry.value as Map<String, Object?>,
+      );
+    }
+  }
+
+  void replaceGeometryOverridesFromJsonString(String source) {
+    _geometryOverrides.clear();
+    applyGeometryOverridesFromJsonString(source);
+  }
+
+  String geometryOverridesToJsonString({bool pretty = true}) {
+    final value = <String, Object>{
+      'schemaVersion': 1,
+      'objects': {
+        for (final entry in _geometryOverrides.entries)
+          entry.key: entry.value.toJson(),
+      },
+    };
+    return pretty
+        ? const JsonEncoder.withIndent('  ').convert(value)
+        : jsonEncode(value);
   }
 
   factory EnvironmentCatalog.fromJsonString(String source) {
@@ -76,6 +358,11 @@ class EnvironmentObjectAsset {
     required this.category,
     required this.renderScale,
     required this.views,
+    this.renderBand = EnvironmentRenderBand.depthSorted,
+    this.sortAnchorX = 0,
+    this.sortAnchorY = 0,
+    this.defaultSortBias = 0,
+    this.geometry = EnvironmentAssetGeometry.empty,
     this.tags = const [],
     this.thumbnailPath,
     this.collisionProfile,
@@ -85,6 +372,11 @@ class EnvironmentObjectAsset {
   final String name;
   final String category;
   final double renderScale;
+  final EnvironmentRenderBand renderBand;
+  final double sortAnchorX;
+  final double sortAnchorY;
+  final double defaultSortBias;
+  final EnvironmentAssetGeometry geometry;
   final Map<String, EnvironmentObjectView> views;
   final List<String> tags;
   final String? thumbnailPath;
@@ -93,12 +385,26 @@ class EnvironmentObjectAsset {
   EnvironmentObjectView viewFor(String direction) =>
       views[direction] ?? views['south'] ?? views.values.first;
 
+  double depthAt(double x, double y, {double instanceSortBias = 0}) =>
+      x + sortAnchorX + y + sortAnchorY + defaultSortBias + instanceSortBias;
+
   factory EnvironmentObjectAsset.fromJson(Map<String, Object?> json) =>
       EnvironmentObjectAsset(
         id: json['id'] as String,
         name: json['name'] as String,
         category: json['category'] as String,
         renderScale: (json['renderScale'] as num? ?? 1).toDouble(),
+        renderBand: json['renderBand'] == null
+            ? EnvironmentRenderBand.forCategory(json['category'] as String)
+            : EnvironmentRenderBand.values.byName(json['renderBand'] as String),
+        sortAnchorX: (json['sortAnchorX'] as num? ?? 0).toDouble(),
+        sortAnchorY: (json['sortAnchorY'] as num? ?? 0).toDouble(),
+        defaultSortBias: (json['defaultSortBias'] as num? ?? 0).toDouble(),
+        geometry: json['geometry'] == null
+            ? EnvironmentAssetGeometry.empty
+            : EnvironmentAssetGeometry.fromJson(
+                json['geometry'] as Map<String, Object?>,
+              ),
         tags: [
           for (final value in json['tags'] as List<Object?>? ?? const [])
             value as String,

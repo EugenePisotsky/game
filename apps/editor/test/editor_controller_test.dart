@@ -20,7 +20,7 @@ void main() {
       'southWest': EnvironmentObjectView(imagePath: 'tree_sw.png'),
     },
   );
-  const catalog = EnvironmentCatalog(materials: [earth], objects: [tree]);
+  final catalog = EnvironmentCatalog(materials: [earth], objects: [tree]);
 
   EnvironmentDocument world() => EnvironmentDocument(
     id: 'test',
@@ -93,5 +93,134 @@ void main() {
       ..endGesture();
 
     expect(controller.document.objects, hasLength(1));
+  });
+
+  test('vertical offset and exceptional sort bias are undoable', () {
+    final object = PlacedEnvironmentObject(
+      id: 'tree_1',
+      assetId: tree.id,
+      x: 2,
+      y: 2,
+    );
+    final controller =
+        EditorController(
+            EnvironmentDocument(
+              id: 'test',
+              name: 'Test',
+              width: 20,
+              height: 20,
+              baseMaterialId: earth.id,
+              objects: [object],
+            ),
+            catalog: catalog,
+          )
+          ..selectMode(EnvironmentEditorMode.select)
+          ..beginGesture()
+          ..applyAt(const WorldPoint(2, 2))
+          ..endGesture()
+          ..adjustSelectedVerticalOffset(0.25)
+          ..adjustSelectedSortBias(-0.1);
+
+    expect(controller.selectedObject?.verticalOffset, 0.25);
+    expect(controller.selectedObject?.sortBias, -0.1);
+    controller.undo();
+    expect(controller.selectedObject?.sortBias, 0);
+    controller.undo();
+    expect(controller.selectedObject?.verticalOffset, 0);
+  });
+
+  test(
+    'layers organize placement and hidden or locked content is not selectable',
+    () {
+      final controller = EditorController(world(), catalog: catalog)
+        ..addLayer()
+        ..renameLayer('layer_2', 'Trees')
+        ..selectObjectAsset(tree)
+        ..beginGesture()
+        ..applyAt(const WorldPoint(4, 4))
+        ..endGesture();
+
+      expect(controller.document.activeLayerId, 'layer_2');
+      expect(controller.selectedObject?.editorLayerId, 'layer_2');
+
+      controller
+        ..selectMode(EnvironmentEditorMode.select)
+        ..toggleLayerLocked('layer_2')
+        ..selectCandidates(['object_100']);
+      expect(controller.selectedObject, isNull);
+
+      controller
+        ..toggleLayerLocked('layer_2')
+        ..toggleLayerVisibility('layer_2')
+        ..selectCandidates(['object_100']);
+      expect(controller.selectedObject, isNull);
+    },
+  );
+
+  test('multi-selection movement preserves relative positions', () {
+    final controller =
+        EditorController(
+            EnvironmentDocument(
+              id: 'test',
+              name: 'Test',
+              width: 20,
+              height: 20,
+              baseMaterialId: earth.id,
+              objects: [
+                PlacedEnvironmentObject(id: 'a', assetId: tree.id, x: 2, y: 3),
+                PlacedEnvironmentObject(id: 'b', assetId: tree.id, x: 5, y: 7),
+              ],
+            ),
+            catalog: catalog,
+          )
+          ..selectObjectIds(['a', 'b'])
+          ..beginGesture()
+          ..moveSelectionDuringGesture(
+            const WorldPoint(2, 3),
+            const WorldPoint(4, 6),
+          )
+          ..endGesture();
+
+    expect(controller.document.objects[0].x, 4);
+    expect(controller.document.objects[0].y, 6);
+    expect(controller.document.objects[1].x, 7);
+    expect(controller.document.objects[1].y, 10);
+    controller.undo();
+    expect(controller.document.objects[0].x, 2);
+    expect(controller.document.objects[1].x, 5);
+  });
+
+  test('asset geometry edits participate in global undo and redo', () {
+    final controller =
+        EditorController(
+            EnvironmentDocument(
+              id: 'test',
+              name: 'Test',
+              width: 20,
+              height: 20,
+              baseMaterialId: earth.id,
+              objects: [
+                PlacedEnvironmentObject(
+                  id: 'tree_1',
+                  assetId: tree.id,
+                  x: 2,
+                  y: 2,
+                ),
+              ],
+            ),
+            catalog: catalog,
+          )
+          ..selectObjectIds(['tree_1'])
+          ..selectMode(EnvironmentEditorMode.collision)
+          ..addGeometryShape(GeometryShapeType.ellipse);
+
+    final edited = catalog.geometryForObjectId(tree.id)!;
+    expect(edited.blocking.single, isA<EnvironmentEllipse>());
+    expect(catalog.geometryOverrides, contains(tree.id));
+
+    controller.undo();
+    expect(catalog.geometryOverrides, isNot(contains(tree.id)));
+    controller.redo();
+    expect(catalog.geometryForObjectId(tree.id)?.blocking, hasLength(1));
   });
 }

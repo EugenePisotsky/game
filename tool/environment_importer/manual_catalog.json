@@ -7,6 +7,7 @@
       "name": "Wooden fence",
       "category": "Structures",
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
       "collisionProfile": "fence",
       "tags": ["fence", "wood"],
       "views": {
@@ -21,6 +22,7 @@
       "name": "Short dock",
       "category": "Structures",
       "renderScale": 0.8,
+      "renderBand": "depthSorted",
       "collisionProfile": "bridge",
       "tags": ["dock", "bridge", "wood"],
       "views": {
@@ -35,6 +37,7 @@
       "name": "Wide cottage",
       "category": "Buildings",
       "renderScale": 0.8,
+      "renderBand": "depthSorted",
       "collisionProfile": "building",
       "tags": ["building", "cottage"],
       "views": {
@@ -53,6 +56,7 @@
       "name": "Village manor",
       "category": "Buildings",
       "renderScale": 0.8,
+      "renderBand": "depthSorted",
       "collisionProfile": "building",
       "tags": ["building", "manor"],
       "views": {

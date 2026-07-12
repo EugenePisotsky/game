@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "id": "environment_starter",
   "name": "Environment Study",
   "width": 24,
@@ -345,7 +345,8 @@
       "assetId": "ow3.grass.021",
       "x": 4.321020603179932,
       "y": 15.77596664428711,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -353,7 +354,8 @@
       "assetId": "ow3.grass.021",
       "x": 7.422522068023682,
       "y": 16.31608772277832,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -361,7 +363,8 @@
       "assetId": "ow3.grass.021",
       "x": 9.551091194152832,
       "y": 16.58364486694336,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -369,7 +372,8 @@
       "assetId": "ow3.grass.021",
       "x": 13.2327880859375,
       "y": 15.832942962646484,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -377,7 +381,8 @@
       "assetId": "ow3.grass.021",
       "x": 12.818729400634766,
       "y": 17.19512367248535,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -385,7 +390,8 @@
       "assetId": "ow3.grass.021",
       "x": 3.676659345626831,
       "y": 9.54092025756836,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -393,7 +399,8 @@
       "assetId": "ow3.grass.021",
       "x": 6.455855369567871,
       "y": 9.907000541687012,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -401,7 +408,8 @@
       "assetId": "ow3.grass.021",
       "x": 8.852823257446289,
       "y": 9.105039596557617,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -409,7 +417,8 @@
       "assetId": "ow3.grass.021",
       "x": 11.015536308288574,
       "y": 9.512873649597168,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -417,7 +426,8 @@
       "assetId": "ow3.grass.021",
       "x": 13.710236549377441,
       "y": 8.602606773376465,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -425,7 +435,8 @@
       "assetId": "ow3.grass.021",
       "x": 15.673469543457031,
       "y": 14.814399719238281,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -433,7 +444,8 @@
       "assetId": "ow3.grass.021",
       "x": 15.384339332580566,
       "y": 16.174604415893555,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -441,7 +453,8 @@
       "assetId": "ow3.grass.021",
       "x": 18.566953659057617,
       "y": 15.173330307006836,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -449,7 +462,8 @@
       "assetId": "ow3.grass.021",
       "x": 21.360824584960938,
       "y": 14.66558837890625,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -457,7 +471,8 @@
       "assetId": "ow3.grass.021",
       "x": 17.768104553222656,
       "y": 7.635519027709961,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -465,7 +480,8 @@
       "assetId": "ow3.grass.021",
       "x": 15.678893089294434,
       "y": 7.955807685852051,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -473,7 +489,8 @@
       "assetId": "ow3.grass.021",
       "x": 20.71570587158203,
       "y": 7.027530670166016,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -481,7 +498,8 @@
       "assetId": "ow3.grass.022",
       "x": 2.3213648796081543,
       "y": 13.969558715820312,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -489,7 +507,8 @@
       "assetId": "ow3.grass.023",
       "x": 7.732416152954102,
       "y": 15.36357307434082,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -497,7 +516,8 @@
       "assetId": "ow3.rock.012",
       "x": 10.461404800415039,
       "y": 14.60063362121582,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -505,7 +525,8 @@
       "assetId": "ow3.rock.014",
       "x": 9.107675552368164,
       "y": 15.366683959960938,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -513,7 +534,8 @@
       "assetId": "ow3.tree.006",
       "x": 4.590603828430176,
       "y": 9.558566093444824,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -521,7 +543,8 @@
       "assetId": "ow3.tree.010",
       "x": 10.220829010009766,
       "y": 15.263370513916016,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -529,7 +552,8 @@
       "assetId": "ow3.tree.014",
       "x": 2.2803449630737305,
       "y": 14.73845386505127,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     },
     {
@@ -537,8 +561,20 @@
       "assetId": "ow3.tree.018",
       "x": 7.146981716156006,
       "y": 9.383108139038086,
-      "z": 0.0,
+      "verticalOffset": 0.0,
+      "editorLayerId": "layer_world",
       "direction": "south"
     }
-  ]
+  ],
+  "editorLayers": [
+    {
+      "id": "layer_world",
+      "name": "World",
+      "parentId": null,
+      "visible": true,
+      "locked": false,
+      "exported": true
+    }
+  ],
+  "activeLayerId": "layer_world"
 }

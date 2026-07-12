@@ -7,6 +7,14 @@
   "manifestPath": "packages/neura_assets/assets/catalogs/environment_discovered.json",
   "overridesPath": "tool/environment_importer/overrides.json",
   "manualCatalogPath": "tool/environment_importer/manual_catalog.json",
+  "geometryOverridesCatalogPath": "packages/neura_assets/assets/catalogs/environment_geometry_overrides.json",
+  "sourceWorldPath": "packages/neura_assets/assets/worlds/environment_starter.json",
+  "worldManifestPath": "packages/neura_assets/assets/worlds/environment_world.json",
+  "worldChunksRoot": "packages/neura_assets/assets/worlds/chunks",
+  "worldChunkSize": 32.0,
+  "worldWidth": 256.0,
+  "worldHeight": 256.0,
+  "playerSpawn": {"x": 12.0, "y": 20.5},
   "ground": {
     "tilePattern": "^Ground_tile_OtherWorldsCore_(\\d+)\\.png$",
     "decalPattern": "^Ground_Decal_OtherWorldsCore_(\\d+)\\.png$"
@@ -18,6 +26,10 @@
       "pattern": "^Tree(\\d+)_([1-8])\\.png$",
       "expectedViews": 8,
       "renderScale": 0.75,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "pivotX": 0.5,
       "pivotY": 0.96,
       "collisionProfile": "treeTrunk"
@@ -28,6 +40,10 @@
       "pattern": "^Bush(\\d+)_([1-4])\\.png$",
       "expectedViews": 4,
       "renderScale": 1.5,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "pivotX": 0.5,
       "pivotY": 1.0,
       "collisionProfile": "none"
@@ -38,6 +54,10 @@
       "pattern": "^Grass(\\d+)_0?([1-4])\\.png$",
       "expectedViews": 4,
       "renderScale": 1.0,
+      "renderBand": "groundCover",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "pivotX": 0.5,
       "pivotY": 1.0,
       "collisionProfile": "none"
@@ -49,6 +69,10 @@
       "directionlessPattern": "^Rock(\\d+)\\.png$",
       "expectedViews": 4,
       "renderScale": 0.9,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
       "pivotX": 0.5,
       "pivotY": 1.0,
       "collisionProfile": "smallRock"
