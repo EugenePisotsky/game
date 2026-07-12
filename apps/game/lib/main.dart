@@ -31,6 +31,7 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   late final NeuraGame game = NeuraGame();
+  bool female = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +41,24 @@ class _GameScreenState extends State<GameScreen> {
           Positioned.fill(child: GameWidget(game: game)),
           const SafeArea(
             child: Padding(padding: EdgeInsets.all(18), child: _Instructions()),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: FilledButton.tonalIcon(
+                  onPressed: () {
+                    setState(() => female = !female);
+                    game.setCharacter(
+                      female ? 'other_worlds.female_1' : 'other_worlds.male_1',
+                    );
+                  },
+                  icon: const Icon(Icons.swap_horiz),
+                  label: Text(female ? 'Female' : 'Male'),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -68,7 +87,7 @@ class _Instructions extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'NEURA',
+                  'ENVIRONMENT PROTOTYPE',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 2.4,
@@ -76,7 +95,7 @@ class _Instructions extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Tap anywhere to move',
+                  'Tap anywhere to walk · collision is not enabled yet',
                   style: TextStyle(color: Color(0xFFB8CBBF)),
                 ),
               ],

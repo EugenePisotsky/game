@@ -1,4 +1,6 @@
 export 'src/animal.dart';
+export 'src/environment/environment_document.dart';
+export 'src/environment/major_direction_movement.dart';
 export 'src/movement_direction.dart';
 export 'src/player.dart';
 export 'src/world/chunk_manager.dart';

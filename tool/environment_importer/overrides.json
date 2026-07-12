@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "materials": {
+    "ow3.ground.006": {
+      "id": "ow3.ground.moss",
+      "name": "Bright moss",
+      "defaultRadius": 1.4,
+      "texture": "environment_v2/materials/moss.png",
+      "decal": "environment_v2/materials/moss_decal.png",
+      "tags": ["moss", "bright"]
+    },
+    "ow3.ground.050": {
+      "id": "ow3.ground.earth",
+      "name": "Worn earth",
+      "defaultRadius": 1.8,
+      "texture": "environment_v2/materials/earth.png",
+      "decal": "environment_v2/materials/earth_decal.png",
+      "tags": ["earth", "road"]
+    },
+    "ow3.ground.051": {
+      "id": "ow3.ground.dense_grass",
+      "name": "Dense grass",
+      "defaultRadius": 1.6,
+      "texture": "environment_v2/materials/dense_grass.png",
+      "decal": "environment_v2/materials/dense_grass_decal.png",
+      "tags": ["grass", "dense"]
+    },
+    "ow3.ground.054": {
+      "id": "ow3.ground.meadow",
+      "name": "Sparse meadow",
+      "defaultRadius": 2.2,
+      "texture": "environment_v2/materials/meadow.png",
+      "decal": "environment_v2/materials/meadow_decal.png",
+      "tags": ["grass", "meadow"]
+    }
+  },
+  "objects": {
+    "ow3.tree.001": {
+      "id": "ow3.tree.blossom",
+      "name": "Blossoming tree",
+      "renderScale": 0.85,
+      "viewImages": {
+        "south": "environment_v2/objects/Tree1_1.png", "west": "environment_v2/objects/Tree1_2.png",
+        "east": "environment_v2/objects/Tree1_3.png", "north": "environment_v2/objects/Tree1_4.png",
+        "southWest": "environment_v2/objects/Tree1_5.png", "northWest": "environment_v2/objects/Tree1_6.png",
+        "southEast": "environment_v2/objects/Tree1_7.png", "northEast": "environment_v2/objects/Tree1_8.png"
+      },
+      "tags": ["tree", "blossom"]
+    },
+    "ow3.tree.030": {
+      "id": "ow3.tree.round_large",
+      "name": "Large round tree",
+      "renderScale": 0.65,
+      "viewImages": {
+        "south": "environment_v2/objects/Tree30_1.png", "west": "environment_v2/objects/Tree30_2.png",
+        "east": "environment_v2/objects/Tree30_3.png", "north": "environment_v2/objects/Tree30_4.png",
+        "southWest": "environment_v2/objects/Tree30_5.png", "northWest": "environment_v2/objects/Tree30_6.png",
+        "southEast": "environment_v2/objects/Tree30_7.png", "northEast": "environment_v2/objects/Tree30_8.png"
+      },
+      "tags": ["tree", "large", "round"]
+    },
+    "ow3.bush.001": {
+      "id": "ow3.bush.small",
+      "name": "Small bush",
+      "renderScale": 1.7,
+      "viewImages": {
+        "south": "environment_v2/objects/Bush1_1.png", "west": "environment_v2/objects/Bush1_2.png",
+        "east": "environment_v2/objects/Bush1_3.png", "north": "environment_v2/objects/Bush1_4.png"
+      },
+      "tags": ["bush", "small"]
+    },
+    "ow3.grass.001": {
+      "id": "ow3.grass.tuft",
+      "name": "Flowering grass",
+      "viewImages": {
+        "south": "environment_v2/objects/Grass1_1.png", "west": "environment_v2/objects/Grass1_2.png",
+        "east": "environment_v2/objects/Grass1_3.png", "north": "environment_v2/objects/Grass1_4.png"
+      },
+      "tags": ["grass", "flowers"]
+    },
+    "ow3.rock.001": {
+      "id": "ow3.rock.small",
+      "name": "Small rock",
+      "viewImages": {
+        "south": "environment_v2/objects/Rock1_01.png", "west": "environment_v2/objects/Rock1_02.png",
+        "east": "environment_v2/objects/Rock1_03.png", "north": "environment_v2/objects/Rock1_04.png"
+      },
+      "tags": ["rock", "small"]
+    }
+  }
+}

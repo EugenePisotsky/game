@@ -12,10 +12,18 @@ dependencies:
   flutter:
     sdk: flutter
 
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
 flutter:
   assets:
     - assets/images/animals/sheep/
+    - assets/images/characters/female/
+    - assets/images/characters/male/
     - assets/images/environment/
+    - assets/images/environment_v2/materials/
+    - assets/images/environment_v2/objects/
     - assets/images/ground/
     - assets/images/ground/catalog/
     - assets/images/player/

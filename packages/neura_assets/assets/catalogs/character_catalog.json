@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "frameWidth": 200,
+  "frameHeight": 200,
+  "directionRows": [
+    "south",
+    "west",
+    "east",
+    "north",
+    "southWest",
+    "northWest",
+    "southEast",
+    "northEast"
+  ],
+  "characters": [
+    {
+      "id": "other_worlds.male_1",
+      "name": "Male adventurer",
+      "idle": "characters/male/idle.png",
+      "idleFrames": 5,
+      "walk": "characters/male/walk.png",
+      "walkFrames": 8,
+      "renderScale": 1.0,
+      "pivotX": 0.5,
+      "pivotY": 0.75
+    },
+    {
+      "id": "other_worlds.female_1",
+      "name": "Female adventurer",
+      "idle": "characters/female/idle.png",
+      "idleFrames": 5,
+      "walk": "characters/female/walk.png",
+      "walkFrames": 8,
+      "renderScale": 1.0,
+      "pivotX": 0.5,
+      "pivotY": 0.75
+    }
+  ]
+}

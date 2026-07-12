@@ -1,11 +1,12 @@
-import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flame/cache.dart';
+import 'package:flame/components.dart' show Anchor;
 import 'package:flame/game.dart';
+import 'package:flame/sprite.dart';
 import 'package:neura_assets/neura_assets.dart';
-import 'package:neura_rendering/neura_rendering.dart';
 import 'package:neura_world/neura_world.dart';
 
 import 'editor_controller.dart';
@@ -17,143 +18,171 @@ class EditorGame extends FlameGame {
 
   final EditorController controller;
   final IsometricProjection projection = const IsometricProjection();
-  static const double zoom = 0.72;
   final Vector2 _panOffset = Vector2.zero();
   final Vector2 _panVelocity = Vector2.zero();
+  final Map<String, ui.Image> _loadedImages = {};
+  final Set<String> _loadingImages = {};
+  final Map<String, ui.Paint> _repeatingPaints = {};
+  final Map<String, ui.Paint> _decalPaints = {};
   bool _isPanning = false;
+  double zoom = 0.42;
 
-  late final GroundSprites _groundSprites;
-  late final RoadSprites _roadSprites;
-  late final TileLayerSprites _tileLayerSprites;
-  late final EnvironmentSprites _environmentSprites;
-  late final AnimalSprites _animalSprites;
-  final Map<String, Animal> _animals = {};
-  final Set<String> _loadingTileLayers = {};
-
-  final Paint _gridPaint = Paint()
-    ..color = const Color(0x35FFFFFF)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1;
-  final Paint _elevatedGridPaint = Paint()
-    ..color = const Color(0x8FCBE0D1)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.35;
-  final Paint _hoverPaint = Paint()
-    ..color = const Color(0x4CD7B96E)
-    ..style = PaintingStyle.fill;
-  final Paint _hoverOutlinePaint = Paint()
-    ..color = const Color(0xFFD7B96E)
-    ..style = PaintingStyle.stroke
+  final ui.Paint _mapOutlinePaint = ui.Paint()
+    ..color = const ui.Color(0x669BB7A4)
+    ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 2;
-  final Paint _shadowPaint = Paint()..color = const Color(0x52000000);
+  final ui.Paint _cursorPaint = ui.Paint()
+    ..color = const ui.Color(0x99E9C46A)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
+  final ui.Paint _selectionPaint = ui.Paint()
+    ..color = const ui.Color(0xFFE9C46A)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 3;
+
+  static final Float64List _identityMatrix = Float64List.fromList([
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+  ]);
 
   @override
-  Color backgroundColor() => const Color(0xFF121713);
+  ui.Color backgroundColor() => const ui.Color(0xFF111713);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    final additionalGround = await images.loadAll([
-      'ground/rocky_soil_n.png',
-      'ground/dark_earth_n.png',
-      'ground/cobblestone_n.png',
-      'ground/wood_planks_n.png',
-      'ground/stone_pavers_n.png',
-      'ground/dry_grass_n.png',
-    ]);
-    _groundSprites = GroundSprites(
-      foundationImages: await images.loadAll([
-        'ground/dirt_n.png',
-        'ground/dirt_e.png',
-        'ground/dirt_s.png',
-        'ground/dirt_w.png',
-      ]),
-      surfaceImages: await images.loadAll([
-        'ground/grass_n.png',
-        'ground/grass_e.png',
-        'ground/grass_s.png',
-        'ground/grass_w.png',
-      ]),
-      additionalImages: {
-        GroundType.rockySoil: additionalGround[0],
-        GroundType.darkEarth: additionalGround[1],
-        GroundType.cobblestone: additionalGround[2],
-        GroundType.woodPlanks: additionalGround[3],
-        GroundType.stonePavers: additionalGround[4],
-        GroundType.dryGrass: additionalGround[5],
-      },
-    );
-    _roadSprites = RoadSprites(images: await _loadRoadImages());
-    _tileLayerSprites = TileLayerSprites(images: {});
-    await _loadTileLayerAssets(_tileLayerIdsInDocument());
-    final environment = await images.loadAll([
-      for (final type in DecorationType.values)
-        for (final rotation in TileRotation.values)
-          environmentAssetPath(type, rotation),
-    ]);
-    var environmentIndex = 0;
-    _environmentSprites = EnvironmentSprites(
-      images: {
-        for (final type in DecorationType.values)
-          type: {
-            for (final rotation in TileRotation.values)
-              rotation: environment[environmentIndex++],
-          },
-      },
-    );
-    final sheep = await images.loadAll([
-      'animals/sheep/idle.png',
-      'animals/sheep/walk.png',
-    ]);
-    _animalSprites = AnimalSprites(idleSheet: sheep[0], walkSheet: sheep[1]);
-  }
-
-  CellCoordinate? cellAtScreen(Vector2 screen) {
-    if (!isLoaded) return null;
-    final worldScreen =
-        (screen - size / 2 - _panOffset) / zoom + _mapCenterScreen;
-    CellCoordinate? best;
-    var bestElevation = -1;
-    var bestDistance = double.infinity;
-    final document = controller.document;
-    for (var y = document.originY; y <= document.maxY; y++) {
-      for (var x = document.originX; x <= document.maxX; x++) {
-        final elevation = document.elevationAt(x, y);
-        final center = _screenFor(x.toDouble(), y.toDouble(), elevation);
-        final dx = (worldScreen.x - center.x).abs() / projection.halfWidth;
-        final dy = (worldScreen.y - center.y).abs() / projection.halfHeight;
-        final distance = dx + dy;
-        if (distance > 1) continue;
-        if (distance < bestDistance - 0.0001 ||
-            ((distance - bestDistance).abs() <= 0.0001 &&
-                elevation > bestElevation)) {
-          best = CellCoordinate(x, y);
-          bestElevation = elevation;
-          bestDistance = distance;
-        }
+    final materialIds = <String>{
+      controller.document.baseMaterialId,
+      controller.selectedMaterialId,
+      for (final stroke in controller.document.terrainStrokes)
+        stroke.materialId,
+    };
+    final paths = <String>{};
+    for (final id in materialIds) {
+      final material = controller.catalog.materialById(id);
+      if (material != null) {
+        paths
+          ..add(material.texturePath)
+          ..add(material.decalPath);
       }
     }
-    return best;
+    for (final object in controller.document.objects) {
+      final asset = controller.catalog.objectById(object.assetId);
+      if (asset != null) {
+        paths.add(asset.viewFor(object.direction.name).imagePath);
+      }
+    }
+    final pathList = paths.toList();
+    final loaded = await Future.wait([
+      for (final path in pathList) _loadUncachedImage(path),
+    ]);
+    for (var index = 0; index < pathList.length; index++) {
+      _loadedImages[pathList[index]] = loaded[index];
+    }
+    for (final id in materialIds) {
+      _createMaterialPaints(id);
+    }
+  }
+
+  Future<ui.Image?> _loadImage(String path) async {
+    final loaded = _loadedImages[path];
+    if (loaded != null) return loaded;
+    if (!_loadingImages.add(path)) return null;
+    try {
+      final image = await _loadUncachedImage(path);
+      _loadedImages[path] = image;
+      return image;
+    } finally {
+      _loadingImages.remove(path);
+    }
+  }
+
+  Future<ui.Image> _loadUncachedImage(String path) =>
+      path.startsWith('environment_generated/')
+      ? loadGeneratedEnvironmentImage(path)
+      : images.load(path);
+
+  Future<void> _loadMaterial(String id) async {
+    if (_repeatingPaints.containsKey(id) && _decalPaints.containsKey(id)) {
+      return;
+    }
+    final material = controller.catalog.materialById(id);
+    if (material == null) return;
+    final texture = await _loadImage(material.texturePath);
+    final decal = await _loadImage(material.decalPath);
+    if (texture == null || decal == null) return;
+    _createMaterialPaints(id);
+  }
+
+  void _createMaterialPaints(String id) {
+    final material = controller.catalog.materialById(id);
+    if (material == null) return;
+    final texture = _loadedImages[material.texturePath];
+    final decal = _loadedImages[material.decalPath];
+    if (texture == null || decal == null) return;
+    _repeatingPaints[id] = ui.Paint()
+      ..shader = ui.ImageShader(
+        texture,
+        ui.TileMode.repeated,
+        ui.TileMode.repeated,
+        _identityMatrix,
+      );
+    _decalPaints[id] = ui.Paint()
+      ..shader = ui.ImageShader(
+        decal,
+        ui.TileMode.clamp,
+        ui.TileMode.clamp,
+        _identityMatrix,
+      );
+  }
+
+  Future<void> _loadObjectView(PlacedEnvironmentObject object) async {
+    final asset = controller.catalog.objectById(object.assetId);
+    if (asset == null) return;
+    await _loadImage(asset.viewFor(object.direction.name).imagePath);
+  }
+
+  WorldPoint? worldAtScreen(Vector2 screen) {
+    if (!isLoaded) return null;
+    final projected =
+        (screen - size / 2 - _panOffset) / zoom + _mapCenterScreen;
+    final world = projection.screenToWorld(projected);
+    final point = WorldPoint(world.x, world.y);
+    return controller.document.contains(point.x, point.y) ? point : null;
   }
 
   void beginPan() {
-    if (_isPanning) return;
     _isPanning = true;
     _panVelocity.setZero();
   }
 
-  /// Moves the map in viewport pixels and records velocity for inertial motion.
   void panByScreenDelta(Vector2 delta, {required double elapsedSeconds}) {
     _panOffset.add(delta);
-    final sampleSeconds = elapsedSeconds.clamp(1 / 240, 1 / 15);
-    final instantaneousVelocity = delta / sampleSeconds;
+    final seconds = elapsedSeconds.clamp(1 / 240, 1 / 15);
+    final instantaneous = delta / seconds;
     _panVelocity
       ..scale(0.62)
-      ..add(instantaneousVelocity * 0.38);
+      ..add(instantaneous * 0.38);
   }
 
-  void endPan() {
-    _isPanning = false;
+  void endPan() => _isPanning = false;
+
+  void zoomBy(double factor) {
+    zoom = (zoom * factor).clamp(0.2, 1.4);
   }
 
   @override
@@ -164,296 +193,223 @@ class EditorGame extends FlameGame {
       _panVelocity.scale(math.exp(-6.5 * dt));
       if (_panVelocity.length < 8) _panVelocity.setZero();
     }
-    _loadMissingTileLayerAssets();
-    _syncAnimals();
-    for (final animal in _animals.values) {
-      animal.update(dt);
-      _animalSprites.update(dt, animal);
-    }
   }
 
   @override
-  void render(Canvas canvas) {
+  void render(ui.Canvas canvas) {
     super.render(canvas);
-    final document = controller.document;
+    if (!isLoaded) return;
     canvas
       ..save()
       ..translate(size.x / 2 + _panOffset.x, size.y / 2 + _panOffset.y)
       ..scale(zoom)
       ..translate(-_mapCenterScreen.x, -_mapCenterScreen.y);
 
-    final cells = <CellCoordinate>[
-      for (var y = document.originY; y <= document.maxY; y++)
-        for (var x = document.originX; x <= document.maxX; x++)
-          CellCoordinate(x, y),
-    ]..sort(_compareCells);
-
-    final maxElevation = document.elevations.values.fold<int>(0, math.max);
-    for (var level = 0; level <= maxElevation; level++) {
-      // Render each material as a complete pass. Drawing a whole cell stack at
-      // once lets a later cell's ground cover an earlier cell's road or grid.
-      for (final cell in cells) {
-        if (document.elevationAt(cell.x, cell.y) != level) continue;
-        final center = _screenFor(cell.x.toDouble(), cell.y.toDouble(), level);
-        _groundSprites.render(
-          canvas,
-          center,
-          cell.x,
-          cell.y,
-          document.groundAt(cell.x, cell.y),
-          clipToTile: level > 0,
-        );
-      }
-      final maxLayerCount = cells
-          .where((cell) => document.elevationAt(cell.x, cell.y) == level)
-          .map((cell) => document.tileLayersAt(cell.x, cell.y).length)
-          .fold<int>(0, math.max);
-      for (var layerIndex = 0; layerIndex < maxLayerCount; layerIndex++) {
-        for (final cell in cells) {
-          if (document.elevationAt(cell.x, cell.y) != level) continue;
-          final layers = document.tileLayersAt(cell.x, cell.y);
-          if (layerIndex >= layers.length) continue;
-          final layer = layers[layerIndex];
-          final center = _screenFor(
-            cell.x.toDouble(),
-            cell.y.toDouble(),
-            level,
-          );
-          final catalogItem = controller.groundCatalog.itemById(layer.assetId);
-          _tileLayerSprites.render(
-            canvas,
-            center,
-            layer,
-            clipToTile: level > 0 && catalogItem?.role == 'base' ? true : null,
-            cropBakedEdge: level > 0 && catalogItem?.role == 'base',
-          );
-        }
-      }
-      for (final cell in cells) {
-        if (document.elevationAt(cell.x, cell.y) != level) continue;
-        if (document.roadAt(cell.x, cell.y) != null) {
-          _roadSprites.render(
-            canvas,
-            _screenFor(cell.x.toDouble(), cell.y.toDouble(), level),
-            document.roadTileVariantAt(cell.x, cell.y),
-          );
-        }
-      }
-      if (level == 0) {
-        for (final cell in cells) {
-          if (document.elevationAt(cell.x, cell.y) == 0) {
-            _drawDiamond(canvas, cell, _gridPaint);
-          }
-        }
-      }
-      for (final cell in cells) {
-        for (final cliff in elevationCliffsAt(document, cell.x, cell.y)) {
-          if (cliff.level != level) continue;
-          _tileLayerSprites.render(
-            canvas,
-            _screenFor(cell.x.toDouble(), cell.y.toDouble(), level),
-            cliff.layer,
-          );
-        }
-      }
+    _renderBaseGround(canvas);
+    for (final stroke in controller.document.terrainStrokes) {
+      _renderStroke(canvas, stroke);
     }
-
-    final scene = <_SceneEntry>[];
-    for (final entry in document.decorations.entries) {
-      final cell = entry.key;
-      final elevation = document.elevationAt(cell.x, cell.y);
-      scene.add(
-        _SceneEntry(
-          depth: cell.x + cell.y - elevation * 2.0,
-          tieBreaker: cell.x.toDouble(),
-          draw: (canvas) => _environmentSprites.render(
-            canvas,
-            _screenFor(
-              cell.x.toDouble(),
-              cell.y.toDouble(),
-              document.elevationAt(cell.x, cell.y),
-            ),
-            entry.value,
-          ),
-        ),
-      );
-    }
-    for (final actor in document.actors) {
-      final animal = _animals[actor.id];
-      if (animal == null) continue;
-      final elevation = document.elevationAt(actor.x.round(), actor.y.round());
-      scene.add(
-        _SceneEntry(
-          depth: actor.x + actor.y - elevation * 2.0,
-          tieBreaker: actor.x,
-          draw: (canvas) {
-            final feet = _screenFor(
-              actor.x,
-              actor.y,
-              document.elevationAt(actor.x.round(), actor.y.round()),
-            );
-            canvas.drawOval(
-              Rect.fromCenter(
-                center: Offset(feet.x, feet.y + 3),
-                width: 32,
-                height: 12,
-              ),
-              _shadowPaint,
-            );
-            _animalSprites.render(canvas, feet, animal);
-          },
-        ),
-      );
-    }
-    scene.sort((a, b) {
-      final depth = a.depth.compareTo(b.depth);
-      return depth != 0 ? depth : a.tieBreaker.compareTo(b.tieBreaker);
-    });
-    for (final entry in scene) {
-      entry.draw(canvas);
-    }
-    for (final cell in cells) {
-      if (document.elevationAt(cell.x, cell.y) > 0) {
-        _drawDiamond(canvas, cell, _elevatedGridPaint);
-      }
-    }
-    final hovered = controller.hoveredCell;
-    if (hovered != null) {
-      _drawDiamond(canvas, hovered, _hoverPaint);
-      _drawDiamond(canvas, hovered, _hoverOutlinePaint);
-    }
+    _renderMapOutline(canvas);
+    _renderObjects(canvas);
+    _renderCursor(canvas);
     canvas.restore();
   }
 
-  Vector2 get _mapCenterScreen {
+  void _renderBaseGround(ui.Canvas canvas) {
     final document = controller.document;
-    return projection.worldToScreen(
-      Vector2(
-        (document.originX + document.maxX) / 2,
-        (document.originY + document.maxY) / 2,
+    final paint = _repeatingPaints[document.baseMaterialId];
+    if (paint == null) {
+      _loadMaterial(document.baseMaterialId);
+      return;
+    }
+    final texture = controller.catalog.materialById(document.baseMaterialId)!;
+    final image = _loadedImages[texture.texturePath]!;
+    final texelsPerWorldUnit = 64.0;
+    _drawTexturedWorldQuad(
+      canvas,
+      const WorldPoint(0, 0),
+      WorldPoint(document.width.toDouble(), document.height.toDouble()),
+      paint,
+      ui.Rect.fromLTWH(
+        0,
+        0,
+        document.width * texelsPerWorldUnit,
+        document.height * texelsPerWorldUnit,
       ),
+      image,
     );
   }
 
-  Vector2 _screenFor(double x, double y, [int elevation = 0]) =>
-      projection.worldToScreen(Vector2(x, y)) -
-      Vector2(0, elevation * elevationStepPixels);
-
-  void _drawDiamond(Canvas canvas, CellCoordinate cell, Paint paint) {
-    final center = _screenFor(
-      cell.x.toDouble(),
-      cell.y.toDouble(),
-      controller.document.elevationAt(cell.x, cell.y),
-    );
-    final path = Path()
-      ..moveTo(center.x, center.y - projection.halfHeight)
-      ..lineTo(center.x + projection.halfWidth, center.y)
-      ..lineTo(center.x, center.y + projection.halfHeight)
-      ..lineTo(center.x - projection.halfWidth, center.y)
-      ..close();
-    canvas.drawPath(path, paint);
+  void _renderStroke(ui.Canvas canvas, TerrainStroke stroke) {
+    if (stroke.points.isEmpty) return;
+    final material = controller.catalog.materialById(stroke.materialId);
+    final paint = _decalPaints[stroke.materialId];
+    if (material == null) return;
+    if (paint == null) {
+      _loadMaterial(stroke.materialId);
+      return;
+    }
+    final image = _loadedImages[material.decalPath]!;
+    paint.color = ui.Color.fromRGBO(255, 255, 255, stroke.opacity);
+    final spacing = math.max(0.15, stroke.radius * 0.22);
+    WorldPoint? previous;
+    for (final point in stroke.points) {
+      if (previous == null) {
+        _drawStamp(canvas, point, stroke.radius, paint, image);
+      } else {
+        final dx = point.x - previous.x;
+        final dy = point.y - previous.y;
+        final distance = math.sqrt(dx * dx + dy * dy);
+        final steps = math.max(1, (distance / spacing).ceil());
+        for (var step = 1; step <= steps; step++) {
+          final t = step / steps;
+          _drawStamp(
+            canvas,
+            WorldPoint(previous.x + dx * t, previous.y + dy * t),
+            stroke.radius,
+            paint,
+            image,
+          );
+        }
+      }
+      previous = point;
+    }
   }
 
-  void _syncAnimals() {
-    final actorIds = controller.document.actors
-        .map((actor) => actor.id)
-        .toSet();
-    _animals.removeWhere((id, _) => !actorIds.contains(id));
-    for (final actor in controller.document.actors) {
-      _animals.putIfAbsent(
-        actor.id,
-        () => Animal(
-          home: Vector2(actor.x, actor.y),
-          randomSeed: actor.id.hashCode,
-          behavior: const AnimalBehavior(
-            roamingRadius: 0,
-            walkingSpeed: 0,
-            minIdleTime: 10,
-            maxIdleTime: 10,
-          ),
+  void _drawStamp(
+    ui.Canvas canvas,
+    WorldPoint center,
+    double radius,
+    ui.Paint paint,
+    ui.Image image,
+  ) {
+    _drawTexturedWorldQuad(
+      canvas,
+      WorldPoint(center.x - radius, center.y - radius),
+      WorldPoint(center.x + radius, center.y + radius),
+      paint,
+      ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      image,
+    );
+  }
+
+  void _drawTexturedWorldQuad(
+    ui.Canvas canvas,
+    WorldPoint min,
+    WorldPoint max,
+    ui.Paint paint,
+    ui.Rect textureRect,
+    ui.Image image,
+  ) {
+    final corners = [
+      projection.worldToScreen(Vector2(min.x, min.y)),
+      projection.worldToScreen(Vector2(max.x, min.y)),
+      projection.worldToScreen(Vector2(max.x, max.y)),
+      projection.worldToScreen(Vector2(min.x, max.y)),
+    ];
+    final positions = Float32List.fromList([
+      for (final corner in corners) ...[corner.x, corner.y],
+    ]);
+    final textureCoordinates = Float32List.fromList([
+      textureRect.left,
+      textureRect.top,
+      textureRect.right,
+      textureRect.top,
+      textureRect.right,
+      textureRect.bottom,
+      textureRect.left,
+      textureRect.bottom,
+    ]);
+    final vertices = ui.Vertices.raw(
+      ui.VertexMode.triangleFan,
+      positions,
+      textureCoordinates: textureCoordinates,
+    );
+    canvas.drawVertices(vertices, ui.BlendMode.srcOver, paint);
+  }
+
+  void _renderObjects(ui.Canvas canvas) {
+    final objects = [...controller.document.objects]
+      ..sort((a, b) {
+        final depth = (a.x + a.y).compareTo(b.x + b.y);
+        return depth != 0 ? depth : a.x.compareTo(b.x);
+      });
+    for (final object in objects) {
+      final asset = controller.catalog.objectById(object.assetId);
+      if (asset == null) continue;
+      final view = asset.viewFor(object.direction.name);
+      final image = _loadedImages[view.imagePath];
+      if (image == null) {
+        _loadObjectView(object);
+        continue;
+      }
+      Sprite(image).render(
+        canvas,
+        position: projection.worldToScreen(Vector2(object.x, object.y)),
+        size: Vector2(
+          image.width * asset.renderScale,
+          image.height * asset.renderScale,
         ),
+        anchor: Anchor(view.pivotX, view.pivotY),
+      );
+    }
+    final selected = controller.selectedObject;
+    if (selected != null) {
+      _drawWorldDiamond(
+        canvas,
+        WorldPoint(selected.x, selected.y),
+        0.55,
+        _selectionPaint,
       );
     }
   }
 
-  static int _compareCells(CellCoordinate a, CellCoordinate b) {
-    final depth = (a.x + a.y).compareTo(b.x + b.y);
-    return depth != 0 ? depth : a.x.compareTo(b.x);
+  void _renderCursor(ui.Canvas canvas) {
+    final point = controller.hoveredPoint;
+    if (point == null) return;
+    final radius = controller.mode == EnvironmentEditorMode.paint
+        ? controller.brushRadius
+        : 0.5;
+    _drawWorldDiamond(canvas, point, radius, _cursorPaint);
   }
 
-  Future<Map<RoadTileVariant, Image>> _loadRoadImages() async {
-    final roadImages = await images.loadAll([
-      'ground/road_isolated.png',
-      'ground/road_end_negative_x.png',
-      'ground/road_end_positive_x.png',
-      'ground/road_end_negative_y.png',
-      'ground/road_end_positive_y.png',
-      'ground/road_straight_y.png',
-      'ground/road_straight_x.png',
-      'ground/road_corner_n.png',
-      'ground/road_corner_e.png',
-      'ground/road_corner_s.png',
-      'ground/road_corner_w.png',
-      'ground/road_junction.png',
-    ]);
-    return {
-      for (var i = 0; i < RoadTileVariant.values.length; i++)
-        RoadTileVariant.values[i]: roadImages[i],
-    };
-  }
-
-  Set<String> _tileLayerIdsInDocument() => {
-    for (final layers in controller.document.tileLayers.values)
-      for (final layer in layers) layer.assetId,
-    if (controller.document.elevations.isNotEmpty) ...earthElevationAssetIds,
-  };
-
-  void _loadMissingTileLayerAssets() {
-    final missing = _tileLayerIdsInDocument()
-        .where(
-          (assetId) =>
-              !_tileLayerSprites.contains(assetId) &&
-              !_loadingTileLayers.contains(assetId),
-        )
-        .toList();
-    if (missing.isNotEmpty) unawaited(_loadTileLayerAssets(missing));
-  }
-
-  Future<void> _loadTileLayerAssets(Iterable<String> assetIds) async {
-    for (final assetId in assetIds) {
-      if (_tileLayerSprites.contains(assetId) ||
-          !_loadingTileLayers.add(assetId)) {
-        continue;
-      }
-      final item = controller.groundCatalog.itemById(assetId);
-      if (item == null) {
-        _loadingTileLayers.remove(assetId);
-        continue;
-      }
-      try {
-        final loaded = await images.loadAll([
-          for (final rotation in TileRotation.values)
-            item.assetForKey(rotation.name[0]),
-        ]);
-        _tileLayerSprites.add(assetId, {
-          for (var index = 0; index < TileRotation.values.length; index++)
-            TileRotation.values[index]: loaded[index],
-        }, clipToTile: item.stackable);
-      } finally {
-        _loadingTileLayers.remove(assetId);
-      }
+  void _drawWorldDiamond(
+    ui.Canvas canvas,
+    WorldPoint center,
+    double radius,
+    ui.Paint paint,
+  ) {
+    final points = [
+      projection.worldToScreen(Vector2(center.x - radius, center.y - radius)),
+      projection.worldToScreen(Vector2(center.x + radius, center.y - radius)),
+      projection.worldToScreen(Vector2(center.x + radius, center.y + radius)),
+      projection.worldToScreen(Vector2(center.x - radius, center.y + radius)),
+    ];
+    final path = ui.Path()..moveTo(points.first.x, points.first.y);
+    for (final point in points.skip(1)) {
+      path.lineTo(point.x, point.y);
     }
+    canvas.drawPath(path..close(), paint);
   }
-}
 
-class _SceneEntry {
-  const _SceneEntry({
-    required this.depth,
-    required this.tieBreaker,
-    required this.draw,
-  });
+  void _renderMapOutline(ui.Canvas canvas) {
+    final document = controller.document;
+    final points = [
+      projection.worldToScreen(Vector2.zero()),
+      projection.worldToScreen(Vector2(document.width.toDouble(), 0)),
+      projection.worldToScreen(
+        Vector2(document.width.toDouble(), document.height.toDouble()),
+      ),
+      projection.worldToScreen(Vector2(0, document.height.toDouble())),
+    ];
+    final path = ui.Path()..moveTo(points.first.x, points.first.y);
+    for (final point in points.skip(1)) {
+      path.lineTo(point.x, point.y);
+    }
+    canvas.drawPath(path..close(), _mapOutlinePaint);
+  }
 
-  final double depth;
-  final double tieBreaker;
-  final void Function(Canvas canvas) draw;
+  Vector2 get _mapCenterScreen => projection.worldToScreen(
+    Vector2(controller.document.width / 2, controller.document.height / 2),
+  );
 }

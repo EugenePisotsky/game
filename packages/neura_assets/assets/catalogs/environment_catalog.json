@@ -1,0 +1,5185 @@
+{
+  "schemaVersion": 1,
+  "materials": [
+    {
+      "id": "ow3.ground.001",
+      "name": "Ground 001",
+      "texture": "environment_generated/materials/001_tile.png",
+      "decal": "environment_generated/materials/001_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/001.png"
+    },
+    {
+      "id": "ow3.ground.002",
+      "name": "Ground 002",
+      "texture": "environment_generated/materials/002_tile.png",
+      "decal": "environment_generated/materials/002_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/002.png"
+    },
+    {
+      "id": "ow3.ground.003",
+      "name": "Ground 003",
+      "texture": "environment_generated/materials/003_tile.png",
+      "decal": "environment_generated/materials/003_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/003.png"
+    },
+    {
+      "id": "ow3.ground.004",
+      "name": "Ground 004",
+      "texture": "environment_generated/materials/004_tile.png",
+      "decal": "environment_generated/materials/004_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/004.png"
+    },
+    {
+      "id": "ow3.ground.005",
+      "name": "Ground 005",
+      "texture": "environment_generated/materials/005_tile.png",
+      "decal": "environment_generated/materials/005_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/005.png"
+    },
+    {
+      "id": "ow3.ground.moss",
+      "name": "Bright moss",
+      "texture": "environment_v2/materials/moss.png",
+      "decal": "environment_v2/materials/moss_decal.png",
+      "defaultRadius": 1.4,
+      "tags": [
+        "moss",
+        "bright"
+      ],
+      "thumbnail": "environment_generated/thumbnails/ground/006.png"
+    },
+    {
+      "id": "ow3.ground.007",
+      "name": "Ground 007",
+      "texture": "environment_generated/materials/007_tile.png",
+      "decal": "environment_generated/materials/007_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/007.png"
+    },
+    {
+      "id": "ow3.ground.008",
+      "name": "Ground 008",
+      "texture": "environment_generated/materials/008_tile.png",
+      "decal": "environment_generated/materials/008_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/008.png"
+    },
+    {
+      "id": "ow3.ground.009",
+      "name": "Ground 009",
+      "texture": "environment_generated/materials/009_tile.png",
+      "decal": "environment_generated/materials/009_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/009.png"
+    },
+    {
+      "id": "ow3.ground.010",
+      "name": "Ground 010",
+      "texture": "environment_generated/materials/010_tile.png",
+      "decal": "environment_generated/materials/010_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/010.png"
+    },
+    {
+      "id": "ow3.ground.011",
+      "name": "Ground 011",
+      "texture": "environment_generated/materials/011_tile.png",
+      "decal": "environment_generated/materials/011_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/011.png"
+    },
+    {
+      "id": "ow3.ground.012",
+      "name": "Ground 012",
+      "texture": "environment_generated/materials/012_tile.png",
+      "decal": "environment_generated/materials/012_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/012.png"
+    },
+    {
+      "id": "ow3.ground.013",
+      "name": "Ground 013",
+      "texture": "environment_generated/materials/013_tile.png",
+      "decal": "environment_generated/materials/013_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/013.png"
+    },
+    {
+      "id": "ow3.ground.014",
+      "name": "Ground 014",
+      "texture": "environment_generated/materials/014_tile.png",
+      "decal": "environment_generated/materials/014_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/014.png"
+    },
+    {
+      "id": "ow3.ground.015",
+      "name": "Ground 015",
+      "texture": "environment_generated/materials/015_tile.png",
+      "decal": "environment_generated/materials/015_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/015.png"
+    },
+    {
+      "id": "ow3.ground.016",
+      "name": "Ground 016",
+      "texture": "environment_generated/materials/016_tile.png",
+      "decal": "environment_generated/materials/016_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/016.png"
+    },
+    {
+      "id": "ow3.ground.017",
+      "name": "Ground 017",
+      "texture": "environment_generated/materials/017_tile.png",
+      "decal": "environment_generated/materials/017_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/017.png"
+    },
+    {
+      "id": "ow3.ground.018",
+      "name": "Ground 018",
+      "texture": "environment_generated/materials/018_tile.png",
+      "decal": "environment_generated/materials/018_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/018.png"
+    },
+    {
+      "id": "ow3.ground.019",
+      "name": "Ground 019",
+      "texture": "environment_generated/materials/019_tile.png",
+      "decal": "environment_generated/materials/019_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/019.png"
+    },
+    {
+      "id": "ow3.ground.020",
+      "name": "Ground 020",
+      "texture": "environment_generated/materials/020_tile.png",
+      "decal": "environment_generated/materials/020_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/020.png"
+    },
+    {
+      "id": "ow3.ground.021",
+      "name": "Ground 021",
+      "texture": "environment_generated/materials/021_tile.png",
+      "decal": "environment_generated/materials/021_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/021.png"
+    },
+    {
+      "id": "ow3.ground.022",
+      "name": "Ground 022",
+      "texture": "environment_generated/materials/022_tile.png",
+      "decal": "environment_generated/materials/022_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/022.png"
+    },
+    {
+      "id": "ow3.ground.023",
+      "name": "Ground 023",
+      "texture": "environment_generated/materials/023_tile.png",
+      "decal": "environment_generated/materials/023_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/023.png"
+    },
+    {
+      "id": "ow3.ground.024",
+      "name": "Ground 024",
+      "texture": "environment_generated/materials/024_tile.png",
+      "decal": "environment_generated/materials/024_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/024.png"
+    },
+    {
+      "id": "ow3.ground.025",
+      "name": "Ground 025",
+      "texture": "environment_generated/materials/025_tile.png",
+      "decal": "environment_generated/materials/025_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/025.png"
+    },
+    {
+      "id": "ow3.ground.026",
+      "name": "Ground 026",
+      "texture": "environment_generated/materials/026_tile.png",
+      "decal": "environment_generated/materials/026_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/026.png"
+    },
+    {
+      "id": "ow3.ground.027",
+      "name": "Ground 027",
+      "texture": "environment_generated/materials/027_tile.png",
+      "decal": "environment_generated/materials/027_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/027.png"
+    },
+    {
+      "id": "ow3.ground.028",
+      "name": "Ground 028",
+      "texture": "environment_generated/materials/028_tile.png",
+      "decal": "environment_generated/materials/028_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/028.png"
+    },
+    {
+      "id": "ow3.ground.029",
+      "name": "Ground 029",
+      "texture": "environment_generated/materials/029_tile.png",
+      "decal": "environment_generated/materials/029_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/029.png"
+    },
+    {
+      "id": "ow3.ground.030",
+      "name": "Ground 030",
+      "texture": "environment_generated/materials/030_tile.png",
+      "decal": "environment_generated/materials/030_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/030.png"
+    },
+    {
+      "id": "ow3.ground.031",
+      "name": "Ground 031",
+      "texture": "environment_generated/materials/031_tile.png",
+      "decal": "environment_generated/materials/031_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/031.png"
+    },
+    {
+      "id": "ow3.ground.032",
+      "name": "Ground 032",
+      "texture": "environment_generated/materials/032_tile.png",
+      "decal": "environment_generated/materials/032_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/032.png"
+    },
+    {
+      "id": "ow3.ground.033",
+      "name": "Ground 033",
+      "texture": "environment_generated/materials/033_tile.png",
+      "decal": "environment_generated/materials/033_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/033.png"
+    },
+    {
+      "id": "ow3.ground.034",
+      "name": "Ground 034",
+      "texture": "environment_generated/materials/034_tile.png",
+      "decal": "environment_generated/materials/034_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/034.png"
+    },
+    {
+      "id": "ow3.ground.035",
+      "name": "Ground 035",
+      "texture": "environment_generated/materials/035_tile.png",
+      "decal": "environment_generated/materials/035_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/035.png"
+    },
+    {
+      "id": "ow3.ground.036",
+      "name": "Ground 036",
+      "texture": "environment_generated/materials/036_tile.png",
+      "decal": "environment_generated/materials/036_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/036.png"
+    },
+    {
+      "id": "ow3.ground.037",
+      "name": "Ground 037",
+      "texture": "environment_generated/materials/037_tile.png",
+      "decal": "environment_generated/materials/037_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/037.png"
+    },
+    {
+      "id": "ow3.ground.038",
+      "name": "Ground 038",
+      "texture": "environment_generated/materials/038_tile.png",
+      "decal": "environment_generated/materials/038_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/038.png"
+    },
+    {
+      "id": "ow3.ground.039",
+      "name": "Ground 039",
+      "texture": "environment_generated/materials/039_tile.png",
+      "decal": "environment_generated/materials/039_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/039.png"
+    },
+    {
+      "id": "ow3.ground.040",
+      "name": "Ground 040",
+      "texture": "environment_generated/materials/040_tile.png",
+      "decal": "environment_generated/materials/040_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/040.png"
+    },
+    {
+      "id": "ow3.ground.041",
+      "name": "Ground 041",
+      "texture": "environment_generated/materials/041_tile.png",
+      "decal": "environment_generated/materials/041_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/041.png"
+    },
+    {
+      "id": "ow3.ground.042",
+      "name": "Ground 042",
+      "texture": "environment_generated/materials/042_tile.png",
+      "decal": "environment_generated/materials/042_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/042.png"
+    },
+    {
+      "id": "ow3.ground.043",
+      "name": "Ground 043",
+      "texture": "environment_generated/materials/043_tile.png",
+      "decal": "environment_generated/materials/043_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/043.png"
+    },
+    {
+      "id": "ow3.ground.044",
+      "name": "Ground 044",
+      "texture": "environment_generated/materials/044_tile.png",
+      "decal": "environment_generated/materials/044_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/044.png"
+    },
+    {
+      "id": "ow3.ground.045",
+      "name": "Ground 045",
+      "texture": "environment_generated/materials/045_tile.png",
+      "decal": "environment_generated/materials/045_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/045.png"
+    },
+    {
+      "id": "ow3.ground.046",
+      "name": "Ground 046",
+      "texture": "environment_generated/materials/046_tile.png",
+      "decal": "environment_generated/materials/046_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/046.png"
+    },
+    {
+      "id": "ow3.ground.047",
+      "name": "Ground 047",
+      "texture": "environment_generated/materials/047_tile.png",
+      "decal": "environment_generated/materials/047_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/047.png"
+    },
+    {
+      "id": "ow3.ground.048",
+      "name": "Ground 048",
+      "texture": "environment_generated/materials/048_tile.png",
+      "decal": "environment_generated/materials/048_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/048.png"
+    },
+    {
+      "id": "ow3.ground.049",
+      "name": "Ground 049",
+      "texture": "environment_generated/materials/049_tile.png",
+      "decal": "environment_generated/materials/049_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/049.png"
+    },
+    {
+      "id": "ow3.ground.earth",
+      "name": "Worn earth",
+      "texture": "environment_v2/materials/earth.png",
+      "decal": "environment_v2/materials/earth_decal.png",
+      "defaultRadius": 1.8,
+      "tags": [
+        "earth",
+        "road"
+      ],
+      "thumbnail": "environment_generated/thumbnails/ground/050.png"
+    },
+    {
+      "id": "ow3.ground.dense_grass",
+      "name": "Dense grass",
+      "texture": "environment_v2/materials/dense_grass.png",
+      "decal": "environment_v2/materials/dense_grass_decal.png",
+      "defaultRadius": 1.6,
+      "tags": [
+        "grass",
+        "dense"
+      ],
+      "thumbnail": "environment_generated/thumbnails/ground/051.png"
+    },
+    {
+      "id": "ow3.ground.052",
+      "name": "Ground 052",
+      "texture": "environment_generated/materials/052_tile.png",
+      "decal": "environment_generated/materials/052_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/052.png"
+    },
+    {
+      "id": "ow3.ground.053",
+      "name": "Ground 053",
+      "texture": "environment_generated/materials/053_tile.png",
+      "decal": "environment_generated/materials/053_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/053.png"
+    },
+    {
+      "id": "ow3.ground.meadow",
+      "name": "Sparse meadow",
+      "texture": "environment_v2/materials/meadow.png",
+      "decal": "environment_v2/materials/meadow_decal.png",
+      "defaultRadius": 2.2,
+      "tags": [
+        "grass",
+        "meadow"
+      ],
+      "thumbnail": "environment_generated/thumbnails/ground/054.png"
+    },
+    {
+      "id": "ow3.ground.055",
+      "name": "Ground 055",
+      "texture": "environment_generated/materials/055_tile.png",
+      "decal": "environment_generated/materials/055_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/055.png"
+    },
+    {
+      "id": "ow3.ground.056",
+      "name": "Ground 056",
+      "texture": "environment_generated/materials/056_tile.png",
+      "decal": "environment_generated/materials/056_decal.png",
+      "defaultRadius": 1.8,
+      "thumbnail": "environment_generated/thumbnails/ground/056.png"
+    }
+  ],
+  "objects": [
+    {
+      "id": "ow3.bush.small",
+      "name": "Small bush",
+      "category": "Shrubs",
+      "renderScale": 1.7,
+      "collisionProfile": "none",
+      "tags": [
+        "bush",
+        "small"
+      ],
+      "thumbnail": "environment_generated/thumbnails/bush/001.png",
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Bush1_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_v2/objects/Bush1_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_v2/objects/Bush1_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_v2/objects/Bush1_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.002",
+      "name": "Bush 002",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/002.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/002_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/002_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/002_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/002_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.003",
+      "name": "Bush 003",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/003.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/003_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/003_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/003_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/003_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.004",
+      "name": "Bush 004",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/004.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/004_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/004_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/004_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/004_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.005",
+      "name": "Bush 005",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/005.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/005_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/005_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/005_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/005_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.006",
+      "name": "Bush 006",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/006.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/006_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/006_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/006_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/006_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.007",
+      "name": "Bush 007",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/007.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/007_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/007_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/007_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/007_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.008",
+      "name": "Bush 008",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/008.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/008_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/008_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/008_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/008_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.009",
+      "name": "Bush 009",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/009.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/009_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/009_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/009_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/009_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.010",
+      "name": "Bush 010",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/010.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/010_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/010_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/010_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/010_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.011",
+      "name": "Bush 011",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/011.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/011_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/011_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/011_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/011_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.012",
+      "name": "Bush 012",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/012.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/012_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/012_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/012_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/012_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.013",
+      "name": "Bush 013",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/013.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/013_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/013_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/013_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/013_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.014",
+      "name": "Bush 014",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/014.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/014_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/014_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/014_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/014_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.015",
+      "name": "Bush 015",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/015.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/015_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/015_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/015_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/015_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.016",
+      "name": "Bush 016",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/016.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/016_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/016_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/016_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/016_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.017",
+      "name": "Bush 017",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/017.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/017_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/017_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/017_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/017_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.018",
+      "name": "Bush 018",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/018.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/018_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/018_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/018_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/018_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.019",
+      "name": "Bush 019",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/019.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/019_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/019_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/019_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/019_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.020",
+      "name": "Bush 020",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/020.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/020_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/020_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/020_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/020_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.021",
+      "name": "Bush 021",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/021.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/021_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/021_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/021_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/021_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.022",
+      "name": "Bush 022",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/022.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/022_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/022_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/022_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/022_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.023",
+      "name": "Bush 023",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/023.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/023_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/023_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/023_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/023_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.024",
+      "name": "Bush 024",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/024.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/024_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/024_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/024_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/024_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.025",
+      "name": "Bush 025",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/025.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/025_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/025_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/025_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/025_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.026",
+      "name": "Bush 026",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/026.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/026_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/026_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/026_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/026_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.027",
+      "name": "Bush 027",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/027.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/027_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/027_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/027_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/027_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.028",
+      "name": "Bush 028",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/028.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/028_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/028_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/028_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/028_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.029",
+      "name": "Bush 029",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/029.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/029_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/029_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/029_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/029_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.bush.030",
+      "name": "Bush 030",
+      "category": "Shrubs",
+      "renderScale": 1.5,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/bush/030.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/bush/030_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/bush/030_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/bush/030_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/bush/030_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.tuft",
+      "name": "Flowering grass",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "tags": [
+        "grass",
+        "flowers"
+      ],
+      "thumbnail": "environment_generated/thumbnails/grass/001.png",
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Grass1_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_v2/objects/Grass1_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_v2/objects/Grass1_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_v2/objects/Grass1_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.002",
+      "name": "Grass 002",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/002.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/002_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/002_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/002_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/002_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.003",
+      "name": "Grass 003",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/003.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/003_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/003_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/003_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/003_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.004",
+      "name": "Grass 004",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/004.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/004_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/004_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/004_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/004_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.005",
+      "name": "Grass 005",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/005.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/005_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/005_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/005_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/005_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.006",
+      "name": "Grass 006",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/006.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/006_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/006_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/006_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/006_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.007",
+      "name": "Grass 007",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/007.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/007_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/007_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/007_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/007_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.008",
+      "name": "Grass 008",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/008.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/008_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/008_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/008_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/008_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.009",
+      "name": "Grass 009",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/009.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/009_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/009_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/009_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/009_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.010",
+      "name": "Grass 010",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/010.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/010_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/010_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/010_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/010_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.011",
+      "name": "Grass 011",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/011.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/011_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/011_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/011_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/011_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.012",
+      "name": "Grass 012",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/012.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/012_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/012_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/012_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/012_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.013",
+      "name": "Grass 013",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/013.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/013_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/013_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/013_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/013_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.014",
+      "name": "Grass 014",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/014.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/014_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/014_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/014_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/014_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.015",
+      "name": "Grass 015",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/015.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/015_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/015_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/015_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/015_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.016",
+      "name": "Grass 016",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/016.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/016_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/016_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/016_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/016_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.017",
+      "name": "Grass 017",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/017.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/017_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/017_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/017_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/017_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.018",
+      "name": "Grass 018",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/018.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/018_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/018_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/018_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/018_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.019",
+      "name": "Grass 019",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/019.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/019_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/019_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/019_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/019_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.020",
+      "name": "Grass 020",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/020.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/020_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/020_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/020_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/020_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.021",
+      "name": "Grass 021",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/021.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/021_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/021_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/021_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/021_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.022",
+      "name": "Grass 022",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/022.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/022_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/022_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/022_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/022_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.023",
+      "name": "Grass 023",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/023.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/023_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/023_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/023_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/023_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.024",
+      "name": "Grass 024",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/024.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/024_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/024_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/024_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/024_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.025",
+      "name": "Grass 025",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/025.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/025_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/025_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/025_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/025_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.026",
+      "name": "Grass 026",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/026.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/026_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/026_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/026_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/026_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.027",
+      "name": "Grass 027",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/027.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/027_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/027_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/027_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/027_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.028",
+      "name": "Grass 028",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/028.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/028_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/028_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/028_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/028_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.029",
+      "name": "Grass 029",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/029.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/029_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/029_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/029_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/029_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.grass.030",
+      "name": "Grass 030",
+      "category": "Ground cover",
+      "renderScale": 1.0,
+      "collisionProfile": "none",
+      "thumbnail": "environment_generated/thumbnails/grass/030.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/grass/030_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/grass/030_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/grass/030_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/grass/030_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.small",
+      "name": "Small rock",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "tags": [
+        "rock",
+        "small"
+      ],
+      "thumbnail": "environment_generated/thumbnails/rock/001.png",
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Rock1_03.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_v2/objects/Rock1_04.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_v2/objects/Rock1_01.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_v2/objects/Rock1_02.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.002",
+      "name": "Rock 002",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/002.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/002_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/002_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/002_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/002_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.003",
+      "name": "Rock 003",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/003.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/003_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/003_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/003_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/003_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.004",
+      "name": "Rock 004",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/004.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/004_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/004_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/004_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/004_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.005",
+      "name": "Rock 005",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/005.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/005_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/005_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/005_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/005_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.006",
+      "name": "Rock 006",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/006.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/006_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/006_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/006_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/006_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.007",
+      "name": "Rock 007",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/007.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/007_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/007_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/007_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/007_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.008",
+      "name": "Rock 008",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/008.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/008_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/008_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/008_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/008_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.009",
+      "name": "Rock 009",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/009.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/009_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/009_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/009_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/009_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.010",
+      "name": "Rock 010",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/010.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/010_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/010_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/010_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/010_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.011",
+      "name": "Rock 011",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/011.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/011_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/011_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/011_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/011_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.012",
+      "name": "Rock 012",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/012.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/012_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/012_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/012_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/012_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.013",
+      "name": "Rock 013",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/013.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/013_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/013_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/013_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/013_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.014",
+      "name": "Rock 014",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/014.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/014_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/014_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/014_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/014_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.015",
+      "name": "Rock 015",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/015.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/015_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/015_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/015_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/015_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.016",
+      "name": "Rock 016",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/016.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/016_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/016_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/016_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/016_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.017",
+      "name": "Rock 017",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/017.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/017_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/017_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/017_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/017_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.018",
+      "name": "Rock 018",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/018.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/018_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/018_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/018_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/018_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.019",
+      "name": "Rock 019",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/019.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/019_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/019_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/019_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/019_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.020",
+      "name": "Rock 020",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/020.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/020_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/020_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/020_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/020_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.021",
+      "name": "Rock 021",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/021.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/021_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/021_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/021_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/021_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.022",
+      "name": "Rock 022",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/022.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/022_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/022_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/022_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/022_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.023",
+      "name": "Rock 023",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/023.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/023_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/023_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/023_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/023_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.rock.024",
+      "name": "Rock 024",
+      "category": "Rocks",
+      "renderScale": 0.9,
+      "collisionProfile": "smallRock",
+      "thumbnail": "environment_generated/thumbnails/rock/024.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/rock/024_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_generated/objects/rock/024_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_generated/objects/rock/024_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_generated/objects/rock/024_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.blossom",
+      "name": "Blossoming tree",
+      "category": "Trees",
+      "renderScale": 0.85,
+      "collisionProfile": "treeTrunk",
+      "tags": [
+        "tree",
+        "blossom"
+      ],
+      "thumbnail": "environment_generated/thumbnails/tree/001.png",
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Tree1_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_v2/objects/Tree1_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_v2/objects/Tree1_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_v2/objects/Tree1_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_v2/objects/Tree1_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_v2/objects/Tree1_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_v2/objects/Tree1_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_v2/objects/Tree1_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.002",
+      "name": "Tree 002",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/002.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/002_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/002_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/002_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/002_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/002_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/002_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/002_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/002_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.003",
+      "name": "Tree 003",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/003.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/003_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/003_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/003_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/003_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/003_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/003_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/003_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/003_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.004",
+      "name": "Tree 004",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/004.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/004_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/004_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/004_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/004_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/004_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/004_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/004_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/004_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.005",
+      "name": "Tree 005",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/005.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/005_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/005_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/005_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/005_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/005_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/005_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/005_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/005_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.006",
+      "name": "Tree 006",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/006.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/006_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/006_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/006_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/006_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/006_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/006_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/006_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/006_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.007",
+      "name": "Tree 007",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/007.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/007_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/007_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/007_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/007_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/007_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/007_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/007_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/007_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.008",
+      "name": "Tree 008",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/008.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/008_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/008_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/008_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/008_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/008_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/008_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/008_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/008_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.009",
+      "name": "Tree 009",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/009.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/009_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/009_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/009_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/009_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/009_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/009_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/009_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/009_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.010",
+      "name": "Tree 010",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/010.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/010_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/010_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/010_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/010_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/010_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/010_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/010_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/010_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.011",
+      "name": "Tree 011",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/011.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/011_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/011_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/011_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/011_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/011_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/011_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/011_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/011_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.012",
+      "name": "Tree 012",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/012.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/012_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/012_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/012_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/012_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/012_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/012_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/012_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/012_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.013",
+      "name": "Tree 013",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/013.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/013_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/013_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/013_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/013_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/013_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/013_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/013_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/013_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.014",
+      "name": "Tree 014",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/014.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/014_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/014_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/014_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/014_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/014_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/014_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/014_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/014_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.015",
+      "name": "Tree 015",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/015.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/015_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/015_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/015_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/015_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/015_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/015_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/015_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/015_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.016",
+      "name": "Tree 016",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/016.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/016_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/016_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/016_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/016_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/016_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/016_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/016_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/016_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.017",
+      "name": "Tree 017",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/017.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/017_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/017_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/017_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/017_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/017_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/017_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/017_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/017_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.018",
+      "name": "Tree 018",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/018.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/018_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/018_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/018_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/018_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/018_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/018_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/018_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/018_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.019",
+      "name": "Tree 019",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/019.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/019_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/019_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/019_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/019_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/019_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/019_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/019_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/019_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.020",
+      "name": "Tree 020",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/020.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/020_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/020_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/020_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/020_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/020_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/020_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/020_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/020_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.021",
+      "name": "Tree 021",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/021.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/021_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/021_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/021_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/021_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/021_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/021_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/021_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/021_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.022",
+      "name": "Tree 022",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/022.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/022_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/022_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/022_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/022_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/022_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/022_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/022_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/022_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.023",
+      "name": "Tree 023",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/023.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/023_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/023_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/023_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/023_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/023_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/023_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/023_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/023_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.024",
+      "name": "Tree 024",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/024.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/024_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/024_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/024_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/024_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/024_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/024_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/024_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/024_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.025",
+      "name": "Tree 025",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/025.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/025_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/025_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/025_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/025_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/025_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/025_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/025_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/025_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.026",
+      "name": "Tree 026",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/026.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/026_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/026_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/026_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/026_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/026_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/026_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/026_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/026_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.027",
+      "name": "Tree 027",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/027.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/027_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/027_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/027_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/027_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/027_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/027_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/027_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/027_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.028",
+      "name": "Tree 028",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/028.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/028_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/028_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/028_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/028_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/028_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/028_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/028_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/028_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.029",
+      "name": "Tree 029",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/029.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/029_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/029_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/029_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/029_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/029_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/029_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/029_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/029_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.round_large",
+      "name": "Large round tree",
+      "category": "Trees",
+      "renderScale": 0.65,
+      "collisionProfile": "treeTrunk",
+      "tags": [
+        "tree",
+        "large",
+        "round"
+      ],
+      "thumbnail": "environment_generated/thumbnails/tree/030.png",
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Tree30_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_v2/objects/Tree30_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_v2/objects/Tree30_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_v2/objects/Tree30_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_v2/objects/Tree30_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_v2/objects/Tree30_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_v2/objects/Tree30_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_v2/objects/Tree30_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.031",
+      "name": "Tree 031",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/031.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/031_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/031_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/031_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/031_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/031_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/031_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/031_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/031_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.032",
+      "name": "Tree 032",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/032.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/032_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/032_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/032_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/032_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/032_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/032_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/032_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/032_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.033",
+      "name": "Tree 033",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/033.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/033_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/033_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/033_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/033_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/033_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/033_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/033_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/033_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.034",
+      "name": "Tree 034",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/034.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/034_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/034_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/034_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/034_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/034_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/034_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/034_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/034_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.035",
+      "name": "Tree 035",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/035.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/035_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/035_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/035_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/035_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/035_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/035_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/035_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/035_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.036",
+      "name": "Tree 036",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/036.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/036_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/036_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/036_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/036_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/036_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/036_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/036_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/036_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.037",
+      "name": "Tree 037",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/037.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/037_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/037_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/037_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/037_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/037_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/037_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/037_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/037_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.038",
+      "name": "Tree 038",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/038.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/038_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/038_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/038_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/038_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/038_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/038_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/038_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/038_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.039",
+      "name": "Tree 039",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/039.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/039_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/039_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/039_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/039_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/039_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/039_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/039_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/039_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.tree.040",
+      "name": "Tree 040",
+      "category": "Trees",
+      "renderScale": 0.75,
+      "collisionProfile": "treeTrunk",
+      "thumbnail": "environment_generated/thumbnails/tree/040.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/objects/tree/040_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "north": {
+          "image": "environment_generated/objects/tree/040_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northEast": {
+          "image": "environment_generated/objects/tree/040_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "northWest": {
+          "image": "environment_generated/objects/tree/040_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "south": {
+          "image": "environment_generated/objects/tree/040_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southEast": {
+          "image": "environment_generated/objects/tree/040_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "southWest": {
+          "image": "environment_generated/objects/tree/040_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "environment_generated/objects/tree/040_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "id": "ow3.fence.wood",
+      "name": "Wooden fence",
+      "category": "Structures",
+      "renderScale": 1.5,
+      "collisionProfile": "fence",
+      "tags": [
+        "fence",
+        "wood"
+      ],
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Fence3_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_v2/objects/Fence3_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_v2/objects/Fence3_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_v2/objects/Fence3_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow3.dock.short",
+      "name": "Short dock",
+      "category": "Structures",
+      "renderScale": 0.8,
+      "collisionProfile": "bridge",
+      "tags": [
+        "dock",
+        "bridge",
+        "wood"
+      ],
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Dock1_3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "environment_v2/objects/Dock1_4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "environment_v2/objects/Dock1_1.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "environment_v2/objects/Dock1_2.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "id": "ow1.building.cottage_wide",
+      "name": "Wide cottage",
+      "category": "Buildings",
+      "renderScale": 0.8,
+      "collisionProfile": "building",
+      "tags": [
+        "building",
+        "cottage"
+      ],
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Building10_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "north": {
+          "image": "environment_v2/objects/Building10_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "northEast": {
+          "image": "environment_v2/objects/Building10_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "northWest": {
+          "image": "environment_v2/objects/Building10_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "south": {
+          "image": "environment_v2/objects/Building10_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "southEast": {
+          "image": "environment_v2/objects/Building10_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "southWest": {
+          "image": "environment_v2/objects/Building10_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "west": {
+          "image": "environment_v2/objects/Building10_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        }
+      }
+    },
+    {
+      "id": "ow1.building.manor",
+      "name": "Village manor",
+      "category": "Buildings",
+      "renderScale": 0.8,
+      "collisionProfile": "building",
+      "tags": [
+        "building",
+        "manor"
+      ],
+      "views": {
+        "east": {
+          "image": "environment_v2/objects/Building29_3.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "north": {
+          "image": "environment_v2/objects/Building29_4.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "northEast": {
+          "image": "environment_v2/objects/Building29_8.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "northWest": {
+          "image": "environment_v2/objects/Building29_6.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "south": {
+          "image": "environment_v2/objects/Building29_1.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "southEast": {
+          "image": "environment_v2/objects/Building29_7.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "southWest": {
+          "image": "environment_v2/objects/Building29_5.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        },
+        "west": {
+          "image": "environment_v2/objects/Building29_2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        }
+      }
+    }
+  ]
+}

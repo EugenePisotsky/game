@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "materials": [],
+  "objects": [
+    {
+      "id": "ow3.fence.wood",
+      "name": "Wooden fence",
+      "category": "Structures",
+      "renderScale": 1.5,
+      "collisionProfile": "fence",
+      "tags": ["fence", "wood"],
+      "views": {
+        "south": {"image": "environment_v2/objects/Fence3_1.png"},
+        "west": {"image": "environment_v2/objects/Fence3_2.png"},
+        "east": {"image": "environment_v2/objects/Fence3_3.png"},
+        "north": {"image": "environment_v2/objects/Fence3_4.png"}
+      }
+    },
+    {
+      "id": "ow3.dock.short",
+      "name": "Short dock",
+      "category": "Structures",
+      "renderScale": 0.8,
+      "collisionProfile": "bridge",
+      "tags": ["dock", "bridge", "wood"],
+      "views": {
+        "south": {"image": "environment_v2/objects/Dock1_1.png"},
+        "west": {"image": "environment_v2/objects/Dock1_2.png"},
+        "east": {"image": "environment_v2/objects/Dock1_3.png"},
+        "north": {"image": "environment_v2/objects/Dock1_4.png"}
+      }
+    },
+    {
+      "id": "ow1.building.cottage_wide",
+      "name": "Wide cottage",
+      "category": "Buildings",
+      "renderScale": 0.8,
+      "collisionProfile": "building",
+      "tags": ["building", "cottage"],
+      "views": {
+        "south": {"image": "environment_v2/objects/Building10_1.png", "pivotX": 0.5, "pivotY": 0.97},
+        "west": {"image": "environment_v2/objects/Building10_2.png", "pivotX": 0.5, "pivotY": 0.97},
+        "east": {"image": "environment_v2/objects/Building10_3.png", "pivotX": 0.5, "pivotY": 0.97},
+        "north": {"image": "environment_v2/objects/Building10_4.png", "pivotX": 0.5, "pivotY": 0.97},
+        "southWest": {"image": "environment_v2/objects/Building10_5.png", "pivotX": 0.5, "pivotY": 0.97},
+        "northWest": {"image": "environment_v2/objects/Building10_6.png", "pivotX": 0.5, "pivotY": 0.97},
+        "southEast": {"image": "environment_v2/objects/Building10_7.png", "pivotX": 0.5, "pivotY": 0.97},
+        "northEast": {"image": "environment_v2/objects/Building10_8.png", "pivotX": 0.5, "pivotY": 0.97}
+      }
+    },
+    {
+      "id": "ow1.building.manor",
+      "name": "Village manor",
+      "category": "Buildings",
+      "renderScale": 0.8,
+      "collisionProfile": "building",
+      "tags": ["building", "manor"],
+      "views": {
+        "south": {"image": "environment_v2/objects/Building29_1.png", "pivotX": 0.5, "pivotY": 0.97},
+        "west": {"image": "environment_v2/objects/Building29_2.png", "pivotX": 0.5, "pivotY": 0.97},
+        "east": {"image": "environment_v2/objects/Building29_3.png", "pivotX": 0.5, "pivotY": 0.97},
+        "north": {"image": "environment_v2/objects/Building29_4.png", "pivotX": 0.5, "pivotY": 0.97},
+        "southWest": {"image": "environment_v2/objects/Building29_5.png", "pivotX": 0.5, "pivotY": 0.97},
+        "northWest": {"image": "environment_v2/objects/Building29_6.png", "pivotX": 0.5, "pivotY": 0.97},
+        "southEast": {"image": "environment_v2/objects/Building29_7.png", "pivotX": 0.5, "pivotY": 0.97},
+        "northEast": {"image": "environment_v2/objects/Building29_8.png", "pivotX": 0.5, "pivotY": 0.97}
+      }
+    }
+  ]
+}

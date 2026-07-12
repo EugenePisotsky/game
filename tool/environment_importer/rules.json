@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "packId": "ow3",
+  "sourceRoot": "content/Other Worlds Core Tiles 3",
+  "generatedImageRoot": "packages/neura_assets/assets/images/environment_generated",
+  "catalogPath": "packages/neura_assets/assets/catalogs/environment_catalog.json",
+  "manifestPath": "packages/neura_assets/assets/catalogs/environment_discovered.json",
+  "overridesPath": "tool/environment_importer/overrides.json",
+  "manualCatalogPath": "tool/environment_importer/manual_catalog.json",
+  "ground": {
+    "tilePattern": "^Ground_tile_OtherWorldsCore_(\\d+)\\.png$",
+    "decalPattern": "^Ground_Decal_OtherWorldsCore_(\\d+)\\.png$"
+  },
+  "objects": [
+    {
+      "kind": "tree",
+      "category": "Trees",
+      "pattern": "^Tree(\\d+)_([1-8])\\.png$",
+      "expectedViews": 8,
+      "renderScale": 0.75,
+      "pivotX": 0.5,
+      "pivotY": 0.96,
+      "collisionProfile": "treeTrunk"
+    },
+    {
+      "kind": "bush",
+      "category": "Shrubs",
+      "pattern": "^Bush(\\d+)_([1-4])\\.png$",
+      "expectedViews": 4,
+      "renderScale": 1.5,
+      "pivotX": 0.5,
+      "pivotY": 1.0,
+      "collisionProfile": "none"
+    },
+    {
+      "kind": "grass",
+      "category": "Ground cover",
+      "pattern": "^Grass(\\d+)_0?([1-4])\\.png$",
+      "expectedViews": 4,
+      "renderScale": 1.0,
+      "pivotX": 0.5,
+      "pivotY": 1.0,
+      "collisionProfile": "none"
+    },
+    {
+      "kind": "rock",
+      "category": "Rocks",
+      "pattern": "^Rock(\\d+)_0?([1-4])\\.png$",
+      "directionlessPattern": "^Rock(\\d+)\\.png$",
+      "expectedViews": 4,
+      "renderScale": 0.9,
+      "pivotX": 0.5,
+      "pivotY": 1.0,
+      "collisionProfile": "smallRock"
+    }
+  ]
+}
