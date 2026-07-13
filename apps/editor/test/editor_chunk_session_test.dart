@@ -83,6 +83,11 @@ void main() {
       );
       tree.x = 8;
 
+      session.capture(document);
+      expect(session.dirtyCoordinates, {
+        const EnvironmentChunkCoordinate(0, 0),
+      });
+
       document =
           await session.streamForBounds(
             document,

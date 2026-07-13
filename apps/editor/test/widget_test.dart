@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_editor/editor_controller.dart';
@@ -14,18 +11,8 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final source = await rootBundle.loadString(
-      'packages/neura_assets/assets/worlds/environment_starter.json',
-    );
-    final catalogData = await rootBundle.load(
-      'packages/neura_assets/assets/catalogs/environment_catalog.json',
-    );
-    final catalogSource = utf8.decode(
-      catalogData.buffer.asUint8List(
-        catalogData.offsetInBytes,
-        catalogData.lengthInBytes,
-      ),
-    );
+    final source = environmentStarterDocumentFile().readAsStringSync();
+    final catalogSource = environmentCatalogFile().readAsStringSync();
     final fullCatalog = EnvironmentCatalog.fromJsonString(catalogSource);
     final catalog = EnvironmentCatalog(
       materials: [
@@ -64,15 +51,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final catalogData = await rootBundle.load(
-      'packages/neura_assets/assets/catalogs/environment_catalog.json',
-    );
-    final catalogSource = utf8.decode(
-      catalogData.buffer.asUint8List(
-        catalogData.offsetInBytes,
-        catalogData.lengthInBytes,
-      ),
-    );
+    final catalogSource = environmentCatalogFile().readAsStringSync();
     final catalog = EnvironmentCatalog.fromJsonString(catalogSource);
     final document = EnvironmentDocument(
       id: 'geometry_test',

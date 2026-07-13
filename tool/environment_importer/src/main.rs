@@ -49,6 +49,10 @@ enum Command {
     BuildWorld,
     /// Verify the generated world manifest and chunks.
     CheckWorld,
+    /// Export the authored world and only its referenced images for release.
+    ExportWorld,
+    /// Verify the self-contained release world and its size budget.
+    CheckRelease,
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,6 +70,8 @@ struct Rules {
     source_world_path: PathBuf,
     world_manifest_path: PathBuf,
     world_chunks_root: PathBuf,
+    release_root: PathBuf,
+    release_max_bytes: u64,
     world_chunk_size: f64,
     world_width: f64,
     world_height: f64,
@@ -285,7 +291,10 @@ fn run() -> Result<()> {
         Command::Check => {
             let manifest = scan(&root, &rules)?;
             check(&root, &rules, &manifest)?;
+            check_world(&root, &rules)?;
+            check_release(&root, &rules)?;
             print_summary(&manifest, "verified");
+            println!("  chunked world and release bundle are current");
         }
         Command::BuildWorld => {
             build_world(&root, &rules)?;
@@ -294,6 +303,14 @@ fn run() -> Result<()> {
         Command::CheckWorld => {
             check_world(&root, &rules)?;
             println!("verified chunked environment world");
+        }
+        Command::ExportWorld => {
+            export_world(&root, &rules)?;
+            println!("exported self-contained release world");
+        }
+        Command::CheckRelease => {
+            check_release(&root, &rules)?;
+            println!("verified self-contained release world");
         }
     }
     Ok(())
@@ -779,6 +796,524 @@ fn check_world(root: &Path, rules: &Rules) -> Result<()> {
     let expected_names = expected_chunks.keys().cloned().collect::<BTreeSet<_>>();
     if actual_names != expected_names {
         return Err("world chunk directory contains missing or stale chunk files".into());
+    }
+    Ok(())
+}
+
+struct ReleasePackage {
+    files: BTreeMap<String, Vec<u8>>,
+}
+
+fn export_world(root: &Path, rules: &Rules) -> Result<()> {
+    let package = generate_release_package(root, rules)?;
+    let release_root = root.join(&rules.release_root);
+    fs::create_dir_all(&release_root)?;
+
+    let expected = package.files.keys().cloned().collect::<BTreeSet<_>>();
+    for path in files_recursively(&release_root)? {
+        let relative = relative_path(&release_root, &path)?;
+        if !expected.contains(&relative) {
+            fs::remove_file(path)?;
+        }
+    }
+    for (relative, bytes) in package.files {
+        let destination = release_root.join(relative);
+        if let Some(parent) = destination.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        if !destination.is_file() || fs::read(&destination)? != bytes {
+            fs::write(destination, bytes)?;
+        }
+    }
+    remove_empty_directories(&release_root)?;
+    Ok(())
+}
+
+fn check_release(root: &Path, rules: &Rules) -> Result<()> {
+    let package = generate_release_package(root, rules)?;
+    let release_root = root.join(&rules.release_root);
+    let actual = files_recursively(&release_root)?
+        .into_iter()
+        .map(|path| Ok((relative_path(&release_root, &path)?, fs::read(path)?)))
+        .collect::<Result<BTreeMap<_, _>>>()?;
+    let expected_names = package.files.keys().collect::<BTreeSet<_>>();
+    let actual_names = actual.keys().collect::<BTreeSet<_>>();
+    if actual_names != expected_names {
+        let missing = expected_names.difference(&actual_names).collect::<Vec<_>>();
+        let unexpected = actual_names.difference(&expected_names).collect::<Vec<_>>();
+        return Err(format!(
+            "release bundle file set is stale; missing {missing:?}, unexpected {unexpected:?}; run export-world"
+        )
+        .into());
+    }
+    for (relative, expected) in package.files {
+        if actual.get(&relative) != Some(&expected) {
+            return Err(format!("release file {relative} is stale; run export-world").into());
+        }
+    }
+    Ok(())
+}
+
+fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage> {
+    use serde_json::{Map, Value, json};
+
+    let mut manifest: Value = read_json(&root.join(&rules.world_manifest_path))?;
+    let catalog: Value = read_json(&root.join(&rules.catalog_path))?;
+    let geometry_overrides: Value = read_json(&root.join(&rules.geometry_overrides_catalog_path))?;
+    let world_id = manifest["id"]
+        .as_str()
+        .ok_or("world manifest has no id")?
+        .to_owned();
+    let chunk_size = manifest["chunkSize"]
+        .as_f64()
+        .ok_or("world manifest chunkSize must be numeric")?;
+    if chunk_size <= 0.0 {
+        return Err("world manifest chunkSize must be positive".into());
+    }
+
+    let layer_values = manifest["editorLayers"]
+        .as_array()
+        .ok_or("world manifest editorLayers must be an array")?;
+    let layer_by_id = layer_values
+        .iter()
+        .map(|layer| {
+            let id = layer["id"].as_str().ok_or("editor layer has no id")?;
+            Ok((id.to_owned(), layer.clone()))
+        })
+        .collect::<Result<BTreeMap<_, _>>>()?;
+    let mut exported_layers = BTreeSet::new();
+    for id in layer_by_id.keys() {
+        let mut cursor = Some(id.as_str());
+        let mut seen = BTreeSet::new();
+        let mut exported = true;
+        while let Some(current) = cursor {
+            if !seen.insert(current.to_owned()) {
+                return Err(format!("editor layer cycle includes {current}").into());
+            }
+            let layer = layer_by_id
+                .get(current)
+                .ok_or_else(|| format!("unknown editor layer {current}"))?;
+            if layer["exported"].as_bool() == Some(false) {
+                exported = false;
+                break;
+            }
+            cursor = layer["parentId"].as_str();
+        }
+        if exported {
+            exported_layers.insert(id.clone());
+        }
+    }
+    if exported_layers.is_empty() {
+        return Err("world has no exported editor layer".into());
+    }
+
+    let coordinates = manifest["chunks"]
+        .as_array()
+        .ok_or("world manifest chunks must be an array")?
+        .iter()
+        .map(|coordinate| {
+            Ok((
+                coordinate["x"]
+                    .as_i64()
+                    .ok_or("chunk x must be an integer")? as i32,
+                coordinate["y"]
+                    .as_i64()
+                    .ok_or("chunk y must be an integer")? as i32,
+            ))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let coordinate_set = coordinates.iter().copied().collect::<BTreeSet<_>>();
+    if coordinate_set.len() != coordinates.len() {
+        return Err("world manifest contains duplicate chunk coordinates".into());
+    }
+
+    let mut chunks = BTreeMap::<(i32, i32), Value>::new();
+    let mut included_object_ids = BTreeSet::new();
+    let mut required_objects = BTreeMap::<String, BTreeSet<String>>::new();
+    let mut required_materials = BTreeSet::from([manifest["baseMaterialId"]
+        .as_str()
+        .ok_or("world manifest has no baseMaterialId")?
+        .to_owned()]);
+    let mut object_bounds = Vec::<(String, (f64, f64, f64, f64))>::new();
+
+    for &(x, y) in &coordinates {
+        let path = root
+            .join(&rules.world_chunks_root)
+            .join(format!("{x}_{y}.json"));
+        let mut chunk: Value = read_json(&path)?;
+        if chunk["worldId"].as_str() != Some(world_id.as_str())
+            || chunk["coordinate"]["x"].as_i64() != Some(x as i64)
+            || chunk["coordinate"]["y"].as_i64() != Some(y as i64)
+        {
+            return Err(format!("chunk {x}_{y} identity disagrees with its manifest entry").into());
+        }
+        if chunk["baseMaterialId"].as_str() != manifest["baseMaterialId"].as_str() {
+            return Err(format!("chunk {x}_{y} base material disagrees with the world").into());
+        }
+        for stroke in chunk["terrainStrokes"].as_array().into_iter().flatten() {
+            required_materials.insert(
+                stroke["materialId"]
+                    .as_str()
+                    .ok_or_else(|| format!("chunk {x}_{y} terrain stroke has no materialId"))?
+                    .to_owned(),
+            );
+        }
+        let objects = chunk["objects"]
+            .as_array_mut()
+            .ok_or_else(|| format!("chunk {x}_{y} objects must be an array"))?;
+        for object in objects.iter() {
+            let object_id = object["id"]
+                .as_str()
+                .ok_or_else(|| format!("chunk {x}_{y} object has no id"))?;
+            let layer_id = object["editorLayerId"]
+                .as_str()
+                .ok_or_else(|| format!("object {object_id} has no editorLayerId"))?;
+            if !layer_by_id.contains_key(layer_id) {
+                return Err(
+                    format!("object {object_id} references unknown layer {layer_id}").into(),
+                );
+            }
+        }
+        objects.retain(|object| {
+            object["editorLayerId"]
+                .as_str()
+                .is_some_and(|id| exported_layers.contains(id))
+        });
+        for object in objects {
+            let object_id = object["id"]
+                .as_str()
+                .ok_or_else(|| format!("chunk {x}_{y} object has no id"))?;
+            if !included_object_ids.insert(object_id.to_owned()) {
+                return Err(format!("object {object_id} is owned by more than one chunk").into());
+            }
+            let asset_id = object["assetId"]
+                .as_str()
+                .ok_or_else(|| format!("object {object_id} has no assetId"))?;
+            let direction = object["direction"].as_str().unwrap_or("south");
+            required_objects
+                .entry(asset_id.to_owned())
+                .or_default()
+                .insert(direction.to_owned());
+            let bounds = &object["bounds"];
+            object_bounds.push((
+                object_id.to_owned(),
+                (
+                    bounds["min"]["x"]
+                        .as_f64()
+                        .ok_or_else(|| format!("object {object_id} bounds.min.x is invalid"))?,
+                    bounds["min"]["y"]
+                        .as_f64()
+                        .ok_or_else(|| format!("object {object_id} bounds.min.y is invalid"))?,
+                    bounds["max"]["x"]
+                        .as_f64()
+                        .ok_or_else(|| format!("object {object_id} bounds.max.x is invalid"))?,
+                    bounds["max"]["y"]
+                        .as_f64()
+                        .ok_or_else(|| format!("object {object_id} bounds.max.y is invalid"))?,
+                ),
+            ));
+        }
+        chunks.insert((x, y), chunk);
+    }
+
+    for (&coordinate, chunk) in &mut chunks {
+        let overlaps = chunk["overlapObjectIds"].as_array_mut().ok_or_else(|| {
+            format!(
+                "chunk {}_{} overlapObjectIds must be an array",
+                coordinate.0, coordinate.1
+            )
+        })?;
+        overlaps.retain(|id| {
+            id.as_str()
+                .is_some_and(|id| included_object_ids.contains(id))
+        });
+    }
+    for (object_id, bounds) in &object_bounds {
+        for &coordinate in &coordinates {
+            if bounds_overlap_chunk(*bounds, coordinate, chunk_size) {
+                let overlaps = chunks[&coordinate]["overlapObjectIds"]
+                    .as_array()
+                    .expect("validated overlap array");
+                if !overlaps.iter().any(|id| id.as_str() == Some(object_id)) {
+                    return Err(format!(
+                        "object {object_id} bounds overlap chunk {}_{}, but its overlap index is missing",
+                        coordinate.0, coordinate.1
+                    )
+                    .into());
+                }
+            }
+        }
+    }
+
+    let materials_by_id = catalog["materials"]
+        .as_array()
+        .ok_or("catalog materials must be an array")?
+        .iter()
+        .map(|material| {
+            let id = material["id"]
+                .as_str()
+                .ok_or("catalog material has no id")?;
+            Ok((id.to_owned(), material))
+        })
+        .collect::<Result<BTreeMap<_, _>>>()?;
+    let objects_by_id = catalog["objects"]
+        .as_array()
+        .ok_or("catalog objects must be an array")?
+        .iter()
+        .map(|object| {
+            let id = object["id"].as_str().ok_or("catalog object has no id")?;
+            Ok((id.to_owned(), object))
+        })
+        .collect::<Result<BTreeMap<_, _>>>()?;
+    let source_image_root = rules
+        .generated_image_root
+        .parent()
+        .ok_or("generated image root must have an asset image parent")?;
+    let mut images = BTreeMap::<String, (String, Vec<u8>)>::new();
+
+    let mut release_materials = Vec::new();
+    for id in &required_materials {
+        let source = materials_by_id
+            .get(id)
+            .ok_or_else(|| format!("world references unknown material {id}"))?;
+        let mut material = source
+            .as_object()
+            .cloned()
+            .ok_or("catalog material must be an object")?;
+        material.remove("thumbnail");
+        for key in ["texture", "decal"] {
+            let logical = material[key]
+                .as_str()
+                .ok_or_else(|| format!("material {id} has no {key} image"))?;
+            let release_path =
+                register_release_image(root, source_image_root, logical, &mut images)?;
+            material.insert(key.to_owned(), Value::String(release_path));
+        }
+        release_materials.push(Value::Object(material));
+    }
+
+    let mut release_objects = Vec::new();
+    for (id, directions) in &required_objects {
+        let source = objects_by_id
+            .get(id)
+            .ok_or_else(|| format!("world references unknown asset {id}"))?;
+        let mut object = source
+            .as_object()
+            .cloned()
+            .ok_or("catalog object must be an object")?;
+        object.remove("thumbnail");
+        let source_views = object["views"]
+            .as_object()
+            .ok_or_else(|| format!("asset {id} views must be an object"))?;
+        let mut release_views = Map::new();
+        for direction in directions {
+            let view = source_views
+                .get(direction)
+                .or_else(|| source_views.get("south"))
+                .or_else(|| source_views.values().next())
+                .ok_or_else(|| format!("asset {id} has no views"))?;
+            let mut release_view = view
+                .as_object()
+                .cloned()
+                .ok_or_else(|| format!("asset {id} view {direction} must be an object"))?;
+            let logical = release_view["image"]
+                .as_str()
+                .ok_or_else(|| format!("asset {id} view {direction} has no image"))?;
+            let release_path =
+                register_release_image(root, source_image_root, logical, &mut images)?;
+            release_view.insert("image".to_owned(), Value::String(release_path));
+            release_views.insert(direction.clone(), Value::Object(release_view));
+        }
+        object.insert("views".to_owned(), Value::Object(release_views));
+        release_objects.push(Value::Object(object));
+    }
+
+    let release_catalog = json!({
+        "schemaVersion": catalog["schemaVersion"].clone(),
+        "materials": release_materials,
+        "objects": release_objects
+    });
+    let override_objects = geometry_overrides["objects"]
+        .as_object()
+        .ok_or("geometry overrides objects must be an object")?;
+    let release_overrides = json!({
+        "schemaVersion": 1,
+        "objects": override_objects
+            .iter()
+            .filter(|(id, _)| required_objects.contains_key(*id))
+            .map(|(id, geometry)| (id.clone(), geometry.clone()))
+            .collect::<Map<_, _>>()
+    });
+
+    let release_layers = layer_values
+        .iter()
+        .filter(|layer| {
+            layer["id"]
+                .as_str()
+                .is_some_and(|id| exported_layers.contains(id))
+        })
+        .cloned()
+        .collect::<Vec<_>>();
+    manifest["editorLayers"] = Value::Array(release_layers);
+    if !manifest["activeLayerId"]
+        .as_str()
+        .is_some_and(|id| exported_layers.contains(id))
+    {
+        manifest["activeLayerId"] = Value::String(
+            exported_layers
+                .first()
+                .expect("validated exported layers")
+                .clone(),
+        );
+    }
+
+    let mut files = BTreeMap::<String, Vec<u8>>::new();
+    files.insert("catalog.json".into(), pretty_json_bytes(&release_catalog)?);
+    files.insert(
+        "geometry_overrides.json".into(),
+        pretty_json_bytes(&release_overrides)?,
+    );
+    files.insert("world.json".into(), pretty_json_bytes(&manifest)?);
+    for ((x, y), chunk) in chunks {
+        files.insert(format!("chunks/{x}_{y}.json"), pretty_json_bytes(&chunk)?);
+    }
+
+    let mut image_report = Vec::new();
+    let mut image_bytes = 0_u64;
+    for (logical, (release_path, bytes)) in images {
+        image_bytes += bytes.len() as u64;
+        image_report.push(json!({
+            "sourceLogicalPath": logical,
+            "releasePath": release_path,
+            "bytes": bytes.len(),
+            "sha256": sha256_bytes(&bytes)
+        }));
+        files.insert(release_path, bytes);
+    }
+    let metadata_bytes = files
+        .iter()
+        .filter(|(path, _)| !path.starts_with("images/"))
+        .map(|(_, bytes)| bytes.len() as u64)
+        .sum::<u64>();
+    let payload_bytes = image_bytes + metadata_bytes;
+    if payload_bytes > rules.release_max_bytes {
+        return Err(format!(
+            "release payload is {payload_bytes} bytes, exceeding the configured {} byte budget",
+            rules.release_max_bytes
+        )
+        .into());
+    }
+    let report = json!({
+        "schemaVersion": 1,
+        "worldId": world_id,
+        "chunkCount": coordinates.len(),
+        "materialCount": required_materials.len(),
+        "objectAssetCount": required_objects.len(),
+        "imageCount": image_report.len(),
+        "imageBytes": image_bytes,
+        "metadataBytes": metadata_bytes,
+        "payloadBytes": payload_bytes,
+        "sizeLimitBytes": rules.release_max_bytes,
+        "images": image_report
+    });
+    files.insert("asset_report.json".into(), pretty_json_bytes(&report)?);
+
+    let serialized_catalog = String::from_utf8(files["catalog.json"].clone())?;
+    for forbidden in [
+        "environment_generated/",
+        "environment_v2/",
+        "content/",
+        "packages/",
+    ] {
+        if serialized_catalog.contains(forbidden) {
+            return Err(
+                format!("release catalog retains workspace path fragment {forbidden}").into(),
+            );
+        }
+    }
+    Ok(ReleasePackage { files })
+}
+
+fn register_release_image(
+    root: &Path,
+    source_image_root: &Path,
+    logical: &str,
+    images: &mut BTreeMap<String, (String, Vec<u8>)>,
+) -> Result<String> {
+    if Path::new(logical).is_absolute() || logical.split('/').any(|component| component == "..") {
+        return Err(format!("asset image path is not bundle-relative: {logical}").into());
+    }
+    if let Some((release_path, _)) = images.get(logical) {
+        return Ok(release_path.clone());
+    }
+    let source = root.join(source_image_root).join(logical);
+    require_file(&source).map_err(|_| format!("referenced asset image is missing: {logical}"))?;
+    let bytes = fs::read(&source)?;
+    let digest = sha256_bytes(logical.as_bytes());
+    let extension = Path::new(logical)
+        .extension()
+        .and_then(|value| value.to_str())
+        .unwrap_or("bin");
+    let release_path = format!("images/{}.{}", &digest[..20], extension);
+    if images
+        .values()
+        .any(|(existing, _)| existing == &release_path)
+    {
+        return Err(format!("release image hash collision for {logical}").into());
+    }
+    images.insert(logical.to_owned(), (release_path.clone(), bytes));
+    Ok(release_path)
+}
+
+fn pretty_json_bytes<T: Serialize>(value: &T) -> Result<Vec<u8>> {
+    let mut bytes = serde_json::to_vec_pretty(value)?;
+    bytes.push(b'\n');
+    Ok(bytes)
+}
+
+fn sha256_bytes(bytes: &[u8]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(bytes);
+    format!("{:x}", hasher.finalize())
+}
+
+fn files_recursively(root: &Path) -> Result<Vec<PathBuf>> {
+    if !root.exists() {
+        return Ok(Vec::new());
+    }
+    let mut files = Vec::new();
+    let mut directories = vec![root.to_path_buf()];
+    while let Some(directory) = directories.pop() {
+        for entry in fs::read_dir(directory)? {
+            let path = entry?.path();
+            if path.is_dir() {
+                directories.push(path);
+            } else if path.is_file() {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    Ok(files)
+}
+
+fn remove_empty_directories(root: &Path) -> Result<()> {
+    let mut directories = Vec::new();
+    let mut pending = vec![root.to_path_buf()];
+    while let Some(directory) = pending.pop() {
+        for entry in fs::read_dir(&directory)? {
+            let path = entry?.path();
+            if path.is_dir() {
+                pending.push(path.clone());
+                directories.push(path);
+            }
+        }
+    }
+    directories.sort_by_key(|path| std::cmp::Reverse(path.components().count()));
+    for directory in directories {
+        if fs::read_dir(&directory)?.next().is_none() {
+            fs::remove_dir(directory)?;
+        }
     }
     Ok(())
 }

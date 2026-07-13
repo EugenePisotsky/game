@@ -1,6 +1,6 @@
 # World and Editor Architecture Improvements
 
-Status: design proposal, pending implementation.
+Status: foundation implemented; acceptance hardening and broader workflows continue.
 
 This document defines the next foundation for Neura's environment editor and
 game runtime. It covers rendering order, elevation, Figma-like editor layers,
@@ -36,18 +36,18 @@ It should be read with:
 - Implementing infinite procedural terrain in the first open-world version.
 - Building a full navmesh system before basic chunked collision is proven.
 
-## Current behavior and limitations
+## Original prototype behavior and limitations
 
-The current runtime places every environment object and the player in one
-scene list and sorts it by `x + y`. This works for ordinary trees, buildings,
-and actors whose logical position is their point of contact with the ground.
-It fails for flat details: grass positioned nearer the bottom is drawn after
-the player, buildings, and trees even though it belongs to the ground.
+The original runtime placed every environment object and the player in one
+scene list and sorted it by `x + y`. That worked for ordinary trees, buildings,
+and actors whose logical position was their point of contact with the ground.
+It failed for flat details: grass positioned nearer the bottom drew after the
+player, buildings, and trees even though it belonged to the ground.
 
-`PlacedEnvironmentObject.z` is serialized but is not currently used by the
-renderer. The editor selects the nearest object anchor and highlights a small
-ground diamond, not the complete visible object. The world is stored as one
-document, and terrain strokes are replayed during every render.
+`PlacedEnvironmentObject.z` was serialized but unused by the renderer. The
+editor selected the nearest object anchor and highlighted a small ground
+diamond rather than the complete visible object. The world was stored as one
+document, and terrain strokes replayed during every render.
 
 These are prototype constraints, not behaviors to preserve.
 
@@ -555,16 +555,49 @@ Migration must preserve current object IDs and world positions.
   layers, visibility and locking, active-layer placement, full-sprite bounding
   selection, topmost overlap cycling and candidate lists, Shift selection,
   marquee selection, multi-object movement, grouped inspection, and layer
-  reassignment are available and undoable.
-- Phase 3 is in progress: the catalog now supports circle, ellipse, rectangle,
-  polygon, and capsule geometry; importer collision profiles emit separate
-  footprints, blocking shapes, and walkable surfaces; the editor has a
-  collision overlay mode; and the game uses an actor-radius-expanded A* grid.
-  Interactive asset-geometry authoring and reviewed override persistence are
-  the remaining Phase 3 work.
-- Phases 4 and 5 have not started. The existing older tile-world chunk classes
-  are not considered implementation of the new painted-environment chunk
-  format.
+  reassignment are available and undoable. Existing groups can be reparented
+  by drag-and-drop with cycle prevention, collapsed locally, and excluded from
+  release export.
+- Phase 3 is implemented: the catalog and persistent override file support
+  circle, ellipse, rectangle, polygon, and capsule geometry; the editor can
+  author footprints, blockers, walkable surfaces, and selection geometry; and
+  preview every asset direction over a measurement grid with distinct pivot,
+  sort-anchor, footprint, blocker, walkable, selection, and actor-clearance
+  overlays. The game uses an actor-radius-expanded A* navigation grid.
+- Phase 4 is implemented for the finite 256 x 256 prototype: deterministic
+  32-unit chunk manifests, stable local coordinates, seam-indexed paint,
+  cross-boundary object indices, async player/viewport streaming, hysteresis,
+  cancellation, per-chunk dirty saves, asset reference counts, a bounded LRU
+  decoded-image cache, and per-chunk terrain picture caches are active.
+- Phase 5 is implemented: the Rust exporter traverses exported chunks and
+  layers, writes compact catalogs with bundle-local paths, copies only the 13
+  images referenced by the prototype, emits and enforces a byte report, and
+  detects missing, stale, or unexpected release files. The game uses this
+  self-contained package in every profile; the macOS release is sandboxed.
+  The editor's Build release action saves dirty chunks and invokes the same
+  deterministic Rust exporter.
+- Phase 0 is implemented for the foundation: both apps provide F1–F5
+  diagnostics from runtime geometry and ordering data, performance and cache
+  counters, pause/step controls, seven named fixed-camera/clock/seed scenes,
+  and `--debug-scene` launch support. The same fixtures are consumed by Flame
+  lifecycle tests, and native macOS game/editor smoke workflows use Flutter's
+  official integration-test runner. Focused semantic goldens and broader
+  author-save-export-play workflows remain acceptance-hardening work.
+
+### Acceptance evidence
+
+| Foundation | Authoritative checks |
+| --- | --- |
+| Diagnostics | `apps/game/test/neura_game_lifecycle_test.dart`, `apps/editor/test/editor_game_lifecycle_test.dart`, and both native `integration_test/` smoke workflows load the same named JSON scenes used interactively |
+| Rendering and movement | The game lifecycle suite asserts exact grass/actor/tree draw order and supported-direction movement; `apps/game/test/neura_game_test.dart` proves trunk, fence, and bridge navigation behavior |
+| Layers and geometry | `apps/editor/test/editor_controller_test.dart` covers undoable hierarchy, reparenting, visibility, locking, export exclusion, multi-move, offsets, bias, and all geometry roles; widget tests exercise the geometry inspector |
+| Chunking | `packages/neura_world/test/environment_chunks_test.dart` proves seam paint, stable local coordinates, large-object overlap indices, 3 x 3 streaming, hysteresis, reference counts, and cancellation; the Flame suite renders across repeated seams while asserting bounded cache state and uninterrupted navigation |
+| Release | `cargo run --manifest-path tool/environment_importer/Cargo.toml -- check` verifies source assets, catalog, geometry, chunks, references, exact release files, and byte budget; `packages/neura_assets/test/environment_release_test.dart` decodes every release image and rejects editor-family leakage |
+
+The macOS game integration test runs with the debug profile sandbox enabled.
+A release build is additionally inspected for its app-sandbox entitlement and
+contains only the compact environment release, named debug metadata, and the
+two selectable character appearances.
 
 ### Phase 0: developer diagnostics and test harness
 
@@ -724,6 +757,12 @@ A fixture should define:
 - fixed random seed;
 - expected loaded chunks and relevant object IDs;
 - optional assertions specific to the scenario.
+
+Both desktop entry points accept `--debug-scene=<name>`. For example, a built
+game executable can open `grass_below_actor`, while the editor can open
+`overlapping_selection` with its relevant object stack already selected.
+F1–F5 toggle the diagnostics described above; `P` pauses/resumes and `.` steps
+one deterministic 1/60-second update while paused.
 
 The editor and game should both be able to launch a fixture directly from a
 debug menu or command-line argument. Automated tests use the same files so a

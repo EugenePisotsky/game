@@ -217,11 +217,45 @@ positions represent the point beneath the character's feet.
 
 ## Movement with eight directional animations
 
-The available character art has eight facings. Moving continuously at an
-arbitrary angle while displaying the nearest facing causes visible lateral
-sliding. Neura instead decomposes every direct movement into at most two
-segments that exactly match supported directions. Future grid pathfinding will
-produce the same kind of major-direction segments.
+The actor never moves at a world-space angle that lacks an authored animation.
+After navigation finds and line-of-sight-smooths a collision-safe route, each
+smooth segment is converted into at most one diagonal and one axial leg. Those
+are the eight world vectors that project to the eight character sprite rows, so
+physical motion and the displayed walk direction always agree.
+
+The direction-leg planner considers the current facing, chooses the dogleg
+order with the fewest turns, and merges consecutive legs with the same facing
+across navigation segments. When two choices require the same number of turns,
+the shorter correction happens first so the character settles into the longer
+direction instead of making a tiny pivot immediately before arriving. Candidate
+legs are collision-checked; narrow routes are subdivided into smaller aligned
+doglegs when necessary.
+
+A single large dogleg can remain animation-correct but drift far from the
+straight route. The planner therefore keeps the executed path inside a bounded
+line corridor (currently `1.1` world units). Longer off-angle routes become a
+digital-line pattern that alternates their two neighboring supported
+directions. This intentionally accepts a few measured turns in exchange for a
+trajectory that reads as straight. The corridor width is the main feel-tuning
+parameter: reducing it follows the line more closely but turns more often;
+increasing it produces calmer movement with wider lateral drift.
+
+The subdivision cadence has a small bounded random variation, so turns do not
+arrive at visibly equal intervals. This changes timing, not the corridor or
+allowed directions. Named debug scenes seed the movement generator for
+repeatable regression tests; normal gameplay receives a fresh random sequence.
+
+Retargeting an actor that is already walking replaces its route but preserves
+the walk animation clock. Direction rows may change immediately to match the
+new first leg, while the footstep phase continues without restarting. Beginning
+movement from idle still starts a fresh walk cycle.
+
+Facing changes larger than 45 degrees briefly traverse the intermediate sprite
+rows along the shortest rotation before translation continues. A 90-degree
+change shows one intermediate facing; a 180-degree reversal shows three. Each
+intermediate lasts `65 ms` and uses the idle sheet, since the asset pack has no
+dedicated turning animation. Ordinary 45-degree corrections remain immediate
+so digital-line movement does not pause at every corner.
 
 Movement speed is measured in projected screen pixels per second rather than
 raw world units per second. Isometric projection gives different pixel lengths
@@ -229,11 +263,19 @@ to world axes and diagonals, so raw world speed would make some directions look
 up to twice as fast.
 
 Infinity Engine animation formats used both eight- and sixteen-orientation
-schemes. Its documented `path_smooth` behavior could either restrict
-pathfinding to major creature directions or allow arbitrary angles. Neura uses
-the restricted-major-direction approach because these Other Worlds sheets have
-eight authored facings. See the
+schemes. GemRB's maintainers report that its older pathfinder restricted actors
+to 45-degree movement, but that this did *not* match the original games, whose
+actors could move at arbitrary angles. Neura deliberately takes a hybrid
+approach because lateral sliding is conspicuous with these particular eight-row
+sprites: navigation remains geometrically smooth while execution approximates
+it with bounded-error major-direction legs. See GemRB's
+[pathfinder retrospective](https://www.gemrb.org/2020/07/16/new-pathfinder-smarter-movement.html)
+and the
 [Infinity Engine creature-animation format](https://iesdp.bgforge.net/file_formats/ie_formats/ini_anim).
+
+The gameplay camera is fixed to the actor's world position. It follows every
+major-direction leg and collision detour exactly, keeping the character centered
+instead of moving independently toward the clicked destination.
 
 ## Target appearance model
 

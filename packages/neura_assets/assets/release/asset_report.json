@@ -1,0 +1,92 @@
+{
+  "chunkCount": 64,
+  "imageBytes": 3792510,
+  "imageCount": 13,
+  "images": [
+    {
+      "bytes": 183879,
+      "releasePath": "images/f8b91868fd9d1824953a.png",
+      "sha256": "1c1955df1d55418b144e008190890dcbfab2866d7b4d35523ab4681f01589094",
+      "sourceLogicalPath": "environment_generated/objects/grass/021_1.png"
+    },
+    {
+      "bytes": 9273,
+      "releasePath": "images/68634f5b7d05c7c94bd6.png",
+      "sha256": "3106335c4891af92c42f486e6bd3cece502140ed2f593ce96ed84ca2f75a7daa",
+      "sourceLogicalPath": "environment_generated/objects/grass/022_1.png"
+    },
+    {
+      "bytes": 7033,
+      "releasePath": "images/cf916428ecd52e27423e.png",
+      "sha256": "781663b3acf25c68da462754f50f27a05b990bd8c15300a5edb73a84f96c81c3",
+      "sourceLogicalPath": "environment_generated/objects/grass/023_1.png"
+    },
+    {
+      "bytes": 21729,
+      "releasePath": "images/19cbb2a2736452db3fc4.png",
+      "sha256": "da918a8cf1875704f1b5bff3ce41e4c705a09c62209df4a9d933361e5058c943",
+      "sourceLogicalPath": "environment_generated/objects/rock/012_1.png"
+    },
+    {
+      "bytes": 14057,
+      "releasePath": "images/447fdef0792fbb3b8923.png",
+      "sha256": "91e2ea30c09b25c4c5f1fcf5188c53621623a528703505df5916cacd0349a601",
+      "sourceLogicalPath": "environment_generated/objects/rock/014_1.png"
+    },
+    {
+      "bytes": 367995,
+      "releasePath": "images/1fb4ad96981871063249.png",
+      "sha256": "ec29cf05b5946678d0abb5c7a1edea99e1ef9ce229388ab63058d7e2455a98b3",
+      "sourceLogicalPath": "environment_generated/objects/tree/006_1.png"
+    },
+    {
+      "bytes": 329669,
+      "releasePath": "images/c1bafce7370d0ecc7263.png",
+      "sha256": "2930809aa16ee180959b004080602ba752b6682b5ee06d8d94b79036ef75b998",
+      "sourceLogicalPath": "environment_generated/objects/tree/010_1.png"
+    },
+    {
+      "bytes": 119079,
+      "releasePath": "images/6b994758c9df4cd88f62.png",
+      "sha256": "73cc3dd3d317f6304cd85734897e5db8bb7d207c2c03c255e86f6e3cebba50d0",
+      "sourceLogicalPath": "environment_generated/objects/tree/014_1.png"
+    },
+    {
+      "bytes": 795642,
+      "releasePath": "images/7b35d9a6d52917dea3c9.png",
+      "sha256": "1e480e9be8c86f5fbe9512bad65da306e9ee554fbcc9de350594659a7c487e32",
+      "sourceLogicalPath": "environment_generated/objects/tree/018_1.png"
+    },
+    {
+      "bytes": 521769,
+      "releasePath": "images/76d7716fbc3f60cbf974.png",
+      "sha256": "9d4e77d4e58ebc793330753bf0392ca19afcede26c03635667d21c69a0942539",
+      "sourceLogicalPath": "environment_v2/materials/earth.png"
+    },
+    {
+      "bytes": 445044,
+      "releasePath": "images/a3189ed72026f945d0fd.png",
+      "sha256": "b4f151a11d879da55684ff484ca7bfac60125c9968f6fbbd6b3df9dec78cc23c",
+      "sourceLogicalPath": "environment_v2/materials/earth_decal.png"
+    },
+    {
+      "bytes": 553924,
+      "releasePath": "images/e630c5419c6d387a05c2.png",
+      "sha256": "c802e59b6fa96bc359854ec4b40e71e1a383cfe2439843b3255341c331a56825",
+      "sourceLogicalPath": "environment_v2/materials/meadow.png"
+    },
+    {
+      "bytes": 423417,
+      "releasePath": "images/1379bc99d4f5eb6adb90.png",
+      "sha256": "76e6ec6bfd368aba018c1cfd8c78c6941bdf923b78cd76f93711d802c6355c06",
+      "sourceLogicalPath": "environment_v2/materials/meadow_decal.png"
+    }
+  ],
+  "materialCount": 2,
+  "metadataBytes": 44461,
+  "objectAssetCount": 9,
+  "payloadBytes": 3836971,
+  "schemaVersion": 1,
+  "sizeLimitBytes": 67108864,
+  "worldId": "environment_starter"
+}

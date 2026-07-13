@@ -9,14 +9,22 @@ Run commands from the repository root:
 ```bash
 cargo run --manifest-path tool/environment_importer/Cargo.toml -- scan
 cargo run --manifest-path tool/environment_importer/Cargo.toml -- build
+cargo run --manifest-path tool/environment_importer/Cargo.toml -- build-world
+cargo run --manifest-path tool/environment_importer/Cargo.toml -- export-world
 cargo run --manifest-path tool/environment_importer/Cargo.toml -- check
 ```
 
 - `scan` validates source families and writes `environment_discovered.json`.
 - `build` also copies runtime PNGs, generates 192 x 192 thumbnails, merges
   overrides and manual entries, and writes `environment_catalog.json`.
-- `check` is read-only and fails when the manifest, catalog, or copied images
-  are stale. It is suitable for CI.
+- `build-world` deterministically splits the authored world into 32 x 32
+  environment chunks.
+- `export-world` follows the generated chunks, filters non-exported layers,
+  resolves only referenced material and directional object images, rewrites
+  them to bundle-local paths, and emits an asset-size report.
+- `check` is read-only and fails when the source manifest, catalog, copied
+  images, chunked world, release references, or release byte budget are stale.
+  `check-world` and `check-release` are also available as focused checks.
 
 ## Files
 
@@ -33,16 +41,17 @@ cargo run --manifest-path tool/environment_importer/Cargo.toml -- check
 Never hand-edit `environment_catalog.json` or files below
 `assets/images/environment_generated`; rebuild them through this tool.
 
-Full generated PNGs and thumbnails are an editor-side source library and are
-loaded from the workspace on demand. A future world-export step must package
-the images referenced by that world; bundling the complete library in every
-game or test would add roughly 200 MB and decode far more art than a scene
-needs.
+Full generated PNGs and thumbnails are an editor-side source library loaded
+from the workspace on demand. The release export under
+`packages/neura_assets/assets/release` contains only the images referenced by
+the exported chunks. The game reads that package through Flutter's asset
+bundle in debug and release modes; it never searches for a repository.
 
-The macOS editor and game debug profiles therefore run without the macOS app
-sandbox so they can read this workspace library during development. Release
-profiles remain sandboxed; the planned world-export step must copy referenced
-images into the release bundle instead of depending on repository paths.
+The macOS editor remains unsandboxed during development because it authors
+workspace catalogs and chunks. The game is sandboxed in every macOS profile.
+Its release catalog contains hashed bundle-local paths and the validator
+rejects unresolved references, stale files, unexpected files, and packages
+over the configured byte limit.
 
 ## Stable IDs and views
 

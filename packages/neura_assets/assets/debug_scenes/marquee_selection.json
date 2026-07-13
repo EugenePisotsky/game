@@ -1,0 +1,13 @@
+{
+  "id": "marquee_selection",
+  "description": "Dense grass row provides a deterministic marquee-selection fixture.",
+  "camera": {"x": 10.0, "y": 9.5},
+  "player": {"x": 10.0, "y": 9.5},
+  "facing": "east",
+  "viewportWidth": 800,
+  "viewportHeight": 600,
+  "clockSeconds": 0.0,
+  "randomSeed": 2104,
+  "relevantObjectIds": ["object_165", "object_166", "object_167", "object_168", "object_169"],
+  "expectedLoadedChunks": [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 1}]
+}

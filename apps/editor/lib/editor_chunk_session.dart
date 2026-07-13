@@ -9,15 +9,18 @@ class EditorChunkSession {
   EditorChunkSession({
     required this.manifest,
     required this.catalog,
-    required AssetBundle bundle,
-  }) : _bundleRepository = AssetBundleEnvironmentChunkRepository(bundle) {
+    AssetBundle? bundle,
+    EnvironmentChunkRepository? repository,
+  }) : assert(bundle != null || repository != null),
+       _sourceRepository =
+           repository ?? AssetBundleEnvironmentChunkRepository(bundle!) {
     _editorLayers = [
       for (final layer in manifest.editorLayers)
         EditorLayer.fromJson(layer.toJson()),
     ];
     _activeLayerId = manifest.activeLayerId;
     _repository = _EditorChunkRepository(
-      fallback: _bundleRepository,
+      fallback: _sourceRepository,
       workingChunks: _workingChunks,
     );
     streamer = EnvironmentChunkStreamingManager(
@@ -30,7 +33,7 @@ class EditorChunkSession {
 
   final EnvironmentWorldManifest manifest;
   final EnvironmentCatalog catalog;
-  final AssetBundleEnvironmentChunkRepository _bundleRepository;
+  final EnvironmentChunkRepository _sourceRepository;
   late final _EditorChunkRepository _repository;
   late final EnvironmentChunkStreamingManager streamer;
   final Map<EnvironmentChunkCoordinate, EnvironmentChunkDocument>
@@ -100,8 +103,14 @@ class EditorChunkSession {
     for (final coordinate in loadedCoordinates) {
       final chunk = split.chunks[coordinate];
       if (chunk == null) continue;
+      final previous =
+          _workingChunks[coordinate] ?? streamer.loadedChunks[coordinate];
       _workingChunks[coordinate] = chunk;
-      if (markDirty) _dirtyChunks.add(coordinate);
+      if (markDirty &&
+          previous?.toJsonString(pretty: false) !=
+              chunk.toJsonString(pretty: false)) {
+        _dirtyChunks.add(coordinate);
+      }
     }
   }
 

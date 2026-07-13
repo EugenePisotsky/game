@@ -1,0 +1,13 @@
+{
+  "id": "chunk_streaming_reversal",
+  "description": "Actor starts just beyond a seam for rapid east-west streaming reversal tests.",
+  "camera": {"x": 33.0, "y": 20.0},
+  "player": {"x": 33.0, "y": 20.0},
+  "facing": "west",
+  "viewportWidth": 800,
+  "viewportHeight": 600,
+  "clockSeconds": 0.0,
+  "randomSeed": 2107,
+  "relevantObjectIds": [],
+  "expectedLoadedChunks": [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 2, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 1}, {"x": 2, "y": 1}]
+}

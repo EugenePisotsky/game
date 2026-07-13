@@ -21,6 +21,13 @@ void main() {
     expect(path.last.y, 5);
     expect(path.any((point) => (point.y - 5).abs() > 1.5), isTrue);
     expect(path.every((point) => !grid.isBlocked(point)), isTrue);
+    var segmentStart = const WorldPoint(2, 5);
+    for (final point in path) {
+      expect(grid.isSegmentWalkable(segmentStart, point), isTrue);
+      segmentStart = point;
+    }
+    expect(grid.lastPath, path);
+    expect(grid.lastExpandedNodeCount, greaterThan(0));
   });
 
   test('navigation grid returns no path across a sealed wall', () {
@@ -35,5 +42,23 @@ void main() {
       grid.findPath(const WorldPoint(1, 3), const WorldPoint(5, 3)),
       isEmpty,
     );
+    expect(grid.lastPath, isEmpty);
+    expect(grid.lastExpandedNodeCount, greaterThan(0));
+  });
+
+  test('open arbitrary movement stays one straight segment', () {
+    final grid = NavigationGrid(
+      width: 10,
+      height: 10,
+      cellSize: 0.4,
+      isBlocked: (_) => false,
+    );
+    const start = WorldPoint(1.13, 2.27);
+    const destination = WorldPoint(3.04, 2.91);
+
+    final path = grid.findPath(start, destination);
+
+    expect(path, [destination]);
+    expect(grid.isSegmentWalkable(start, destination), isTrue);
   });
 }

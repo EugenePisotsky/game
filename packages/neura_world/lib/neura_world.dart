@@ -1,8 +1,9 @@
 export 'src/animal.dart';
 export 'src/environment/environment_document.dart';
+export 'src/environment/environment_debug_scene.dart';
 export 'src/environment/environment_chunks.dart';
 export 'src/environment/environment_chunk_streaming.dart';
-export 'src/environment/major_direction_movement.dart';
+export 'src/environment/directional_movement.dart';
 export 'src/environment/navigation_grid.dart';
 export 'src/movement_direction.dart';
 export 'src/player.dart';

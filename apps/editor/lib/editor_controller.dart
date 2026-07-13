@@ -6,7 +6,7 @@ import 'package:neura_world/neura_world.dart';
 
 enum EnvironmentEditorMode { paint, place, select, collision, erase }
 
-enum GeometryRole { footprint, blocking, walkable }
+enum GeometryRole { footprint, blocking, walkable, selection }
 
 enum GeometryShapeType { circle, ellipse, rectangle, capsule, polygon }
 
@@ -91,6 +91,10 @@ class EditorController extends ChangeNotifier {
         return _geometryShapeIndex < geometry.walkable.length
             ? geometry.walkable[_geometryShapeIndex]
             : null;
+      case GeometryRole.selection:
+        return _geometryShapeIndex < geometry.selection.length
+            ? geometry.selection[_geometryShapeIndex]
+            : null;
     }
   }
 
@@ -152,6 +156,11 @@ class EditorController extends ChangeNotifier {
           if (_geometryShapeIndex >= shapes.length) return geometry;
           shapes[_geometryShapeIndex] = shape;
           return geometry.copyWith(walkable: shapes, reviewed: false);
+        case GeometryRole.selection:
+          final shapes = [...geometry.selection];
+          if (_geometryShapeIndex >= shapes.length) return geometry;
+          shapes[_geometryShapeIndex] = shape;
+          return geometry.copyWith(selection: shapes, reviewed: false);
       }
     });
   }
@@ -197,6 +206,10 @@ class EditorController extends ChangeNotifier {
           final shapes = [...geometry.walkable, shape];
           _geometryShapeIndex = shapes.length - 1;
           return geometry.copyWith(walkable: shapes, reviewed: false);
+        case GeometryRole.selection:
+          final shapes = [...geometry.selection, shape];
+          _geometryShapeIndex = shapes.length - 1;
+          return geometry.copyWith(selection: shapes, reviewed: false);
       }
     });
   }
@@ -215,6 +228,10 @@ class EditorController extends ChangeNotifier {
           final shapes = [...geometry.walkable]..removeAt(_geometryShapeIndex);
           _geometryShapeIndex = math.max(0, _geometryShapeIndex - 1);
           return geometry.copyWith(walkable: shapes, reviewed: false);
+        case GeometryRole.selection:
+          final shapes = [...geometry.selection]..removeAt(_geometryShapeIndex);
+          _geometryShapeIndex = math.max(0, _geometryShapeIndex - 1);
+          return geometry.copyWith(selection: shapes, reviewed: false);
       }
     });
   }
@@ -407,6 +424,19 @@ class EditorController extends ChangeNotifier {
     });
   }
 
+  void setSelectedDirection(EnvironmentDirection direction) {
+    final selected = selectedObjects;
+    if (selected.isEmpty ||
+        selected.every((object) => object.direction == direction)) {
+      return;
+    }
+    _recordImmediate(() {
+      for (final object in selected) {
+        object.direction = direction;
+      }
+    });
+  }
+
   void adjustSelectedVerticalOffset(double delta) {
     final selected = selectedObjects;
     if (selected.isEmpty) return;
@@ -470,6 +500,35 @@ class EditorController extends ChangeNotifier {
     _recordImmediate(() => layer.name = trimmed);
   }
 
+  bool canReparentLayer(String layerId, String parentId) {
+    if (layerId == EnvironmentDocument.rootLayerId || layerId == parentId) {
+      return false;
+    }
+    final layer = _document.editorLayerById(layerId);
+    final parent = _document.editorLayerById(parentId);
+    if (layer == null || parent == null || layer.parentId == parentId) {
+      return false;
+    }
+    var ancestor = parent;
+    final visited = <String>{};
+    while (visited.add(ancestor.id)) {
+      if (ancestor.id == layerId) return false;
+      final next = ancestor.parentId;
+      if (next == null) break;
+      final resolved = _document.editorLayerById(next);
+      if (resolved == null) break;
+      ancestor = resolved;
+    }
+    return true;
+  }
+
+  bool reparentLayer(String layerId, String parentId) {
+    if (!canReparentLayer(layerId, parentId)) return false;
+    final layer = _document.editorLayerById(layerId)!;
+    _recordImmediate(() => layer.parentId = parentId);
+    return true;
+  }
+
   bool deleteLayer(String layerId) {
     if (layerId == EnvironmentDocument.rootLayerId ||
         _document.objects.any((object) => object.editorLayerId == layerId) ||
@@ -500,6 +559,13 @@ class EditorController extends ChangeNotifier {
     if (layer == null) return;
     _recordImmediate(() => layer.locked = !layer.locked);
     _normalizeSelection();
+  }
+
+  void toggleLayerExported(String layerId) {
+    if (layerId == EnvironmentDocument.rootLayerId) return;
+    final layer = _document.editorLayerById(layerId);
+    if (layer == null) return;
+    _recordImmediate(() => layer.exported = !layer.exported);
   }
 
   void moveSelectionToLayer(String layerId) {

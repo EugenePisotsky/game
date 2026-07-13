@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flame/cache.dart';
-import 'package:flame/components.dart' show Anchor;
+import 'package:flame/components.dart' show Anchor, FpsComponent;
 import 'package:flame/game.dart';
 import 'package:flame/sprite.dart';
 import 'package:neura_assets/neura_assets.dart';
@@ -12,7 +12,7 @@ import 'package:neura_world/neura_world.dart';
 
 import 'editor_controller.dart';
 
-class EditorGame extends FlameGame {
+class EditorGame extends FlameGame with HasPerformanceTracker {
   EditorGame(
     this.controller, {
     this.loadedChunks,
@@ -35,11 +35,38 @@ class EditorGame extends FlameGame {
   final Map<String, ui.Paint> _decalPaints = {};
   final Map<EnvironmentChunkCoordinate, ui.Picture> _terrainPictures = {};
   final Map<EnvironmentChunkCoordinate, int> _terrainPictureSignatures = {};
+  final FpsComponent _fpsComponent = FpsComponent(windowSize: 60);
   bool _isPanning = false;
   ui.Rect? _marqueeScreenRect;
   double zoom = 0.42;
+  bool showDiagnostics = true;
+  bool showRenderDebug = false;
+  bool showGeometryDebug = false;
+  bool showChunkDebug = false;
+  bool showNavigationDebug = false;
+  bool diagnosticsPaused = false;
 
   static const double elevationPixelsPerWorldUnit = 64;
+
+  int get decodedImageCount => _loadedImages.length;
+  int get decodedImageBytes => _loadedImages.values.fold(
+    0,
+    (sum, image) => sum + image.width * image.height * 4,
+  );
+  int get pendingImageCount => _loadingImages.length;
+  int get terrainPictureCount => _terrainPictures.length;
+  double get diagnosticsFps => _fpsComponent.fps;
+  double get diagnosticsFrameMilliseconds =>
+      diagnosticsFps <= 0 ? 0 : 1000 / diagnosticsFps;
+
+  void togglePause() {
+    diagnosticsPaused = !diagnosticsPaused;
+    diagnosticsPaused ? pauseEngine() : resumeEngine();
+  }
+
+  void stepDebug() {
+    if (diagnosticsPaused) update(1 / 60);
+  }
 
   final ui.Paint _mapOutlinePaint = ui.Paint()
     ..color = const ui.Color(0x669BB7A4)
@@ -81,6 +108,14 @@ class EditorGame extends FlameGame {
     ..color = const ui.Color(0xFFFF4D4D)
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 3;
+  final ui.Paint _geometryGridPaint = ui.Paint()
+    ..color = const ui.Color(0x2258D68D)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 1;
+  final ui.Paint _selectionGeometryPaint = ui.Paint()
+    ..color = const ui.Color(0xDDB987FF)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
 
   static final Float64List _identityMatrix = Float64List.fromList([
     1,
@@ -107,6 +142,7 @@ class EditorGame extends FlameGame {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    await add(_fpsComponent);
     final materialIds = <String>{
       controller.document.baseMaterialId,
       controller.selectedMaterialId,
@@ -154,9 +190,7 @@ class EditorGame extends FlameGame {
   }
 
   Future<ui.Image> _loadUncachedImage(String path) =>
-      path.startsWith('environment_generated/')
-      ? loadGeneratedEnvironmentImage(path)
-      : images.load(path);
+      loadWorkspaceEnvironmentImage(path);
 
   Future<void> _loadMaterial(String id) async {
     if (_repeatingPaints.containsKey(id) && _decalPaints.containsKey(id)) {
@@ -315,10 +349,13 @@ class EditorGame extends FlameGame {
     _renderObjectBand(canvas, EnvironmentRenderBand.overhead);
     _renderObjectBand(canvas, EnvironmentRenderBand.effects);
     _renderMapOutline(canvas);
-    _renderChunkBoundaries(canvas);
-    if (controller.mode == EnvironmentEditorMode.collision) {
+    if (showRenderDebug) _renderDepthDebug(canvas);
+    if (showChunkDebug) _renderChunkBoundaries(canvas);
+    if (controller.mode == EnvironmentEditorMode.collision ||
+        showGeometryDebug) {
       _renderGeometry(canvas);
     }
+    if (showNavigationDebug) _renderNavigationCells(canvas);
     _renderSelection(canvas);
     _renderCursor(canvas);
     canvas.restore();
@@ -584,6 +621,8 @@ class EditorGame extends FlameGame {
   }
 
   void _renderGeometry(ui.Canvas canvas) {
+    final selected = controller.selectedObject;
+    if (selected != null) _renderGeometryMeasurementGrid(canvas, selected);
     for (final object in controller.document.objects) {
       if (!controller.isLayerVisible(object.editorLayerId)) continue;
       final asset = controller.catalog.objectById(object.assetId);
@@ -598,6 +637,12 @@ class EditorGame extends FlameGame {
       }
       for (final shape in geometry.walkable) {
         _drawGeometryShape(canvas, shape, object, _walkablePaint);
+      }
+      for (final shape in geometry.selection) {
+        _drawGeometryShape(canvas, shape, object, _selectionGeometryPaint);
+      }
+      if (object.id == selected?.id) {
+        _renderGeometryAnchors(canvas, object, asset);
       }
     }
     final cursor = controller.hoveredPoint;
@@ -633,6 +678,132 @@ class EditorGame extends FlameGame {
         path..close(),
         blocked ? _blockedClearancePaint : _clearancePaint,
       );
+    }
+  }
+
+  void _renderGeometryMeasurementGrid(
+    ui.Canvas canvas,
+    PlacedEnvironmentObject object,
+  ) {
+    const radius = 3.0;
+    const spacing = 0.5;
+    for (var offset = -radius; offset <= radius; offset += spacing) {
+      _drawWorldLine(
+        canvas,
+        WorldPoint(object.x - radius, object.y + offset),
+        WorldPoint(object.x + radius, object.y + offset),
+        _geometryGridPaint,
+      );
+      _drawWorldLine(
+        canvas,
+        WorldPoint(object.x + offset, object.y - radius),
+        WorldPoint(object.x + offset, object.y + radius),
+        _geometryGridPaint,
+      );
+    }
+  }
+
+  void _renderGeometryAnchors(
+    ui.Canvas canvas,
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+  ) {
+    final pivot = projection.worldToScreen(Vector2(object.x, object.y))
+      ..y -= object.verticalOffset * elevationPixelsPerWorldUnit;
+    final pivotPaint = ui.Paint()
+      ..color = const ui.Color(0xDDB987FF)
+      ..style = ui.PaintingStyle.stroke
+      ..strokeWidth = 2 / zoom;
+    final size = 7 / zoom;
+    canvas
+      ..drawLine(
+        pivot.toOffset() + ui.Offset(-size, 0),
+        pivot.toOffset() + ui.Offset(size, 0),
+        pivotPaint,
+      )
+      ..drawLine(
+        pivot.toOffset() + ui.Offset(0, -size),
+        pivot.toOffset() + ui.Offset(0, size),
+        pivotPaint,
+      );
+    final sort = projection.worldToScreen(
+      Vector2(object.x + asset.sortAnchorX, object.y + asset.sortAnchorY),
+    );
+    canvas.drawCircle(
+      sort.toOffset(),
+      5 / zoom,
+      ui.Paint()
+        ..color = const ui.Color(0xFFE9C46A)
+        ..style = ui.PaintingStyle.stroke
+        ..strokeWidth = 2 / zoom,
+    );
+  }
+
+  void _drawWorldLine(
+    ui.Canvas canvas,
+    WorldPoint start,
+    WorldPoint end,
+    ui.Paint paint,
+  ) {
+    final a = projection.worldToScreen(Vector2(start.x, start.y));
+    final b = projection.worldToScreen(Vector2(end.x, end.y));
+    canvas.drawLine(a.toOffset(), b.toOffset(), paint);
+  }
+
+  void _renderDepthDebug(ui.Canvas canvas) {
+    final paint = ui.Paint()..color = const ui.Color(0xFFE9C46A);
+    for (final object in controller.document.objects) {
+      if (!controller.isLayerVisible(object.editorLayerId)) continue;
+      final asset = controller.catalog.objectById(object.assetId);
+      if (asset == null) continue;
+      final point = projection.worldToScreen(
+        Vector2(object.x + asset.sortAnchorX, object.y + asset.sortAnchorY),
+      );
+      canvas.drawCircle(point.toOffset(), 4 / zoom, paint);
+      final builder = ui.ParagraphBuilder(
+        ui.ParagraphStyle(fontSize: 10 / zoom),
+      )..pushStyle(ui.TextStyle(color: const ui.Color(0xFFE9C46A)));
+      builder.addText(
+        '${asset.renderBand.name} ${asset.depthAt(object.x, object.y, instanceSortBias: object.sortBias).toStringAsFixed(2)}',
+      );
+      final paragraph = builder.build()
+        ..layout(ui.ParagraphConstraints(width: 170 / zoom));
+      canvas.drawParagraph(
+        paragraph,
+        point.toOffset() + ui.Offset(7 / zoom, -7 / zoom),
+      );
+    }
+  }
+
+  void _renderNavigationCells(ui.Canvas canvas) {
+    final cursor = controller.hoveredPoint;
+    if (cursor == null) return;
+    const cell = 0.4;
+    const radius = 4.0;
+    final blockedPaint = ui.Paint()..color = const ui.Color(0x55E76F51);
+    final openPaint = ui.Paint()..color = const ui.Color(0x2258D68D);
+    for (var y = cursor.y - radius; y <= cursor.y + radius; y += cell) {
+      for (var x = cursor.x - radius; x <= cursor.x + radius; x += cell) {
+        if (!controller.document.contains(x, y)) continue;
+        final point = WorldPoint(x + cell / 2, y + cell / 2);
+        final blocked = controller.document.objects.any((object) {
+          final asset = controller.catalog.objectById(object.assetId);
+          return asset != null &&
+              environmentObjectBlocksPoint(
+                asset,
+                object,
+                point,
+                actorRadius: 0.18,
+                geometry: controller.catalog.geometryForAsset(asset),
+              );
+        });
+        final projected = projection.worldToScreen(Vector2(point.x, point.y));
+        canvas.drawCircle(
+          projected.toOffset(),
+          1.8 / zoom,
+          blocked ? blockedPaint : openPaint,
+        );
+      }
     }
   }
 
@@ -802,6 +973,19 @@ class EditorGame extends FlameGame {
       ..strokeWidth = 1.5;
     final clip = _loadedChunkClip();
     if (clip != null) canvas.drawPath(clip, paint);
+  }
+
+  @override
+  void onRemove() {
+    for (final picture in _terrainPictures.values) {
+      picture.dispose();
+    }
+    _terrainPictures.clear();
+    for (final image in _loadedImages.values) {
+      image.dispose();
+    }
+    _loadedImages.clear();
+    super.onRemove();
   }
 
   Vector2 get _mapCenterScreen {

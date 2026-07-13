@@ -12,21 +12,31 @@ import 'editor_chunk_session.dart';
 import 'editor_controller.dart';
 import 'editor_game.dart';
 
-const _catalogAsset =
-    'packages/neura_assets/assets/catalogs/environment_catalog.json';
-const _geometryOverridesAsset =
-    'packages/neura_assets/assets/catalogs/environment_geometry_overrides.json';
-
-void main() {
+void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
   PaintingBinding.instance.imageCache
     ..maximumSize = 160
     ..maximumSizeBytes = 32 << 20;
-  runApp(const NeuraEditorApp());
+  runApp(NeuraEditorApp(debugSceneName: _debugSceneArgument(args)));
+}
+
+String? _debugSceneArgument(List<String> args) {
+  for (var index = 0; index < args.length; index++) {
+    final argument = args[index];
+    if (argument.startsWith('--debug-scene=')) {
+      return argument.substring('--debug-scene='.length);
+    }
+    if (argument == '--debug-scene' && index + 1 < args.length) {
+      return args[index + 1];
+    }
+  }
+  return null;
 }
 
 class NeuraEditorApp extends StatelessWidget {
-  const NeuraEditorApp({super.key});
+  const NeuraEditorApp({this.debugSceneName, super.key});
+
+  final String? debugSceneName;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -42,12 +52,14 @@ class NeuraEditorApp extends StatelessWidget {
       scaffoldBackgroundColor: const Color(0xFF101411),
       useMaterial3: true,
     ),
-    home: const EditorBootstrap(),
+    home: EditorBootstrap(debugSceneName: debugSceneName),
   );
 }
 
 class EditorBootstrap extends StatefulWidget {
-  const EditorBootstrap({super.key});
+  const EditorBootstrap({this.debugSceneName, super.key});
+
+  final String? debugSceneName;
 
   @override
   State<EditorBootstrap> createState() => _EditorBootstrapState();
@@ -58,22 +70,39 @@ class _EditorBootstrapState extends State<EditorBootstrap> {
 
   Future<_EditorBootstrapData> _load() async {
     final sources = await Future.wait([
-      rootBundle.loadString(_catalogAsset),
-      rootBundle.loadString(_geometryOverridesAsset),
+      environmentCatalogFile().readAsString(),
+      environmentGeometryOverridesFile().readAsString(),
     ]);
     final catalog = EnvironmentCatalog.fromJsonString(sources[0])
       ..applyGeometryOverridesFromJsonString(sources[1]);
-    final manifest = await loadEnvironmentWorldManifest(rootBundle);
+    final manifest = await loadWorkspaceEnvironmentWorldManifest();
+    final debugSceneName = widget.debugSceneName;
+    final debugScene = debugSceneName == null
+        ? null
+        : await loadEnvironmentDebugScene(rootBundle, debugSceneName);
     final session = EditorChunkSession(
       manifest: manifest,
       catalog: catalog,
-      bundle: rootBundle,
+      repository: const WorkspaceEnvironmentChunkRepository(),
     );
-    final document = await session.initialize();
+    var document = await session.initialize();
+    if (debugScene != null) {
+      document =
+          await session.streamForBounds(
+            document,
+            minX: debugScene.camera.x - 16,
+            minY: debugScene.camera.y - 16,
+            maxX: debugScene.camera.x + 16,
+            maxY: debugScene.camera.y + 16,
+          ) ??
+          document;
+    }
     return _EditorBootstrapData(
       source: document.toJsonString(),
       catalog: catalog,
       chunkSession: session,
+      initialWorldCenter: debugScene?.camera,
+      debugRelevantObjectIds: debugScene?.relevantObjectIds ?? const [],
     );
   }
 
@@ -94,6 +123,8 @@ class _EditorBootstrapState extends State<EditorBootstrap> {
         starterSource: data.source,
         catalog: data.catalog,
         chunkSession: data.chunkSession,
+        initialWorldCenter: data.initialWorldCenter,
+        debugRelevantObjectIds: data.debugRelevantObjectIds,
       );
     },
   );
@@ -104,11 +135,15 @@ class _EditorBootstrapData {
     required this.source,
     required this.catalog,
     required this.chunkSession,
+    required this.initialWorldCenter,
+    required this.debugRelevantObjectIds,
   });
 
   final String source;
   final EnvironmentCatalog catalog;
   final EditorChunkSession chunkSession;
+  final WorldPoint? initialWorldCenter;
+  final List<String> debugRelevantObjectIds;
 }
 
 class EditorScreen extends StatefulWidget {
@@ -118,6 +153,8 @@ class EditorScreen extends StatefulWidget {
     this.renderGame = true,
     this.controllerOverride,
     this.chunkSession,
+    this.initialWorldCenter,
+    this.debugRelevantObjectIds = const [],
     super.key,
   });
 
@@ -126,6 +163,8 @@ class EditorScreen extends StatefulWidget {
   final bool renderGame;
   final EditorController? controllerOverride;
   final EditorChunkSession? chunkSession;
+  final WorldPoint? initialWorldCenter;
+  final List<String> debugRelevantObjectIds;
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
@@ -146,9 +185,11 @@ class _EditorScreenState extends State<EditorScreen> {
     loadedChunks: widget.chunkSession == null
         ? null
         : () => widget.chunkSession!.loadedCoordinates,
-    initialWorldCenter: widget.chunkSession?.manifest.playerSpawn.toWorld(
-      widget.chunkSession!.manifest.chunkSize,
-    ),
+    initialWorldCenter:
+        widget.initialWorldCenter ??
+        widget.chunkSession?.manifest.playerSpawn.toWorld(
+          widget.chunkSession!.manifest.chunkSize,
+        ),
     chunkSize: widget.chunkSession?.manifest.chunkSize ?? 32,
   );
   bool _gesturing = false;
@@ -159,6 +200,22 @@ class _EditorScreenState extends State<EditorScreen> {
   Duration? _lastPanEventTime;
   Timer? _scrollPanEndTimer;
   Timer? _chunkStreamTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    final available = controller.document.objects
+        .map((object) => object.id)
+        .toSet();
+    final relevant = widget.debugRelevantObjectIds
+        .where(available.contains)
+        .toList();
+    if (relevant.isNotEmpty) {
+      controller
+        ..selectMode(EnvironmentEditorMode.select)
+        ..selectObjectIds(relevant);
+    }
+  }
 
   @override
   void dispose() {
@@ -185,6 +242,19 @@ class _EditorScreenState extends State<EditorScreen> {
           controller.deleteSelected,
       const SingleActivator(LogicalKeyboardKey.backspace):
           controller.deleteSelected,
+      const SingleActivator(LogicalKeyboardKey.f1): () =>
+          setState(() => game.showDiagnostics = !game.showDiagnostics),
+      const SingleActivator(LogicalKeyboardKey.f2): () =>
+          setState(() => game.showRenderDebug = !game.showRenderDebug),
+      const SingleActivator(LogicalKeyboardKey.f3): () =>
+          setState(() => game.showGeometryDebug = !game.showGeometryDebug),
+      const SingleActivator(LogicalKeyboardKey.f4): () =>
+          setState(() => game.showChunkDebug = !game.showChunkDebug),
+      const SingleActivator(LogicalKeyboardKey.f5): () =>
+          setState(() => game.showNavigationDebug = !game.showNavigationDebug),
+      const SingleActivator(LogicalKeyboardKey.keyP): () =>
+          setState(game.togglePause),
+      const SingleActivator(LogicalKeyboardKey.period): game.stepDebug,
     },
     child: Focus(
       autofocus: true,
@@ -196,6 +266,9 @@ class _EditorScreenState extends State<EditorScreen> {
               onZoomIn: () => _zoomBy(1.2),
               onZoomOut: () => _zoomBy(1 / 1.2),
               onExport: _showExport,
+              onBuildRelease: widget.chunkSession == null
+                  ? null
+                  : _buildRelease,
               onImport: _showImport,
               onSaveChunks: widget.chunkSession == null ? null : _saveChunks,
               onReset: () => controller.replaceDocument(
@@ -310,6 +383,15 @@ class _EditorScreenState extends State<EditorScreen> {
             child: widget.renderGame
                 ? GameWidget(game: game)
                 : const ColoredBox(color: Color(0xFF111713)),
+          ),
+          Positioned(
+            left: 14,
+            top: 14,
+            child: _EditorDiagnosticsHud(
+              game: game,
+              controller: controller,
+              session: widget.chunkSession,
+            ),
           ),
           Positioned(
             left: 14,
@@ -452,6 +534,47 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
+  Future<void> _buildRelease() async {
+    final session = widget.chunkSession;
+    if (session == null) return;
+    await session.saveDirty(controller.document);
+    if (mounted) setState(() {});
+    final root = repositoryRootForNeuraAssets();
+    final result = await Process.run('cargo', const [
+      'run',
+      '--quiet',
+      '--manifest-path',
+      'tool/environment_importer/Cargo.toml',
+      '--',
+      'export-world',
+    ], workingDirectory: root.path);
+    if (!mounted) return;
+    if (result.exitCode != 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Release export failed: ${result.stderr}')),
+      );
+      return;
+    }
+    final report = await environmentReleaseAssetReportFile().readAsString();
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Release assets exported'),
+        content: SizedBox(
+          width: 620,
+          child: SelectableText(report, maxLines: 20),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _showImport() async {
     final field = TextEditingController();
     final source = await showDialog<String>(
@@ -499,6 +622,7 @@ class _Toolbar extends StatelessWidget {
     required this.onZoomIn,
     required this.onZoomOut,
     required this.onExport,
+    this.onBuildRelease,
     required this.onImport,
     required this.onReset,
     this.onSaveChunks,
@@ -508,6 +632,7 @@ class _Toolbar extends StatelessWidget {
   final VoidCallback onZoomIn;
   final VoidCallback onZoomOut;
   final VoidCallback onExport;
+  final VoidCallback? onBuildRelease;
   final VoidCallback onImport;
   final VoidCallback onReset;
   final VoidCallback? onSaveChunks;
@@ -553,7 +678,12 @@ class _Toolbar extends StatelessWidget {
           icon: const Icon(Icons.zoom_in),
         ),
         TextButton(onPressed: onImport, child: const Text('Import')),
-        TextButton(onPressed: onExport, child: const Text('Export')),
+        TextButton(onPressed: onExport, child: const Text('Copy JSON')),
+        if (onBuildRelease != null)
+          FilledButton.tonal(
+            onPressed: onBuildRelease,
+            child: const Text('Build release'),
+          ),
         if (onSaveChunks != null)
           TextButton(onPressed: onSaveChunks, child: const Text('Save chunks')),
         TextButton(onPressed: onReset, child: const Text('Reset')),
@@ -855,6 +985,97 @@ class _AssetThumbnail extends StatelessWidget {
   }
 }
 
+class _EditorDiagnosticsHud extends StatefulWidget {
+  const _EditorDiagnosticsHud({
+    required this.game,
+    required this.controller,
+    required this.session,
+  });
+
+  final EditorGame game;
+  final EditorController controller;
+  final EditorChunkSession? session;
+
+  @override
+  State<_EditorDiagnosticsHud> createState() => _EditorDiagnosticsHudState();
+}
+
+class _EditorDiagnosticsHudState extends State<_EditorDiagnosticsHud> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.game.showDiagnostics) return const SizedBox.shrink();
+    PlacedEnvironmentObject? hovered;
+    final hoveredId = widget.controller.hoveredObjectId;
+    for (final object in widget.controller.document.objects) {
+      if (object.id == hoveredId) {
+        hovered = object;
+        break;
+      }
+    }
+    final asset = hovered == null
+        ? null
+        : widget.controller.catalog.objectById(hovered.assetId);
+    EditorLayer? layer;
+    if (hovered != null) {
+      for (final candidate in widget.controller.document.editorLayers) {
+        if (candidate.id == hovered.editorLayerId) {
+          layer = candidate;
+          break;
+        }
+      }
+    }
+    final session = widget.session;
+    final streamer = session?.streamer;
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xD917211C),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0x557BD6A0)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Text(
+            'F1 HUD · F2 depth · F3 geometry · F4 chunks · F5 navigation · P pause\n'
+            'hover ${hovered?.id ?? '-'}  selected ${widget.controller.selectedObjectIds.length}  '
+            'layer ${layer?.name ?? '-'}\n'
+            'band ${asset?.renderBand.name ?? '-'}  '
+            'depth ${asset == null || hovered == null ? '-' : asset.depthAt(hovered.x, hovered.y, instanceSortBias: hovered.sortBias).toStringAsFixed(2)}\n'
+            'loaded ${session?.loadedCoordinates.length ?? '-'}  '
+            'preload ${streamer?.preloadingChunks.length ?? '-'}  '
+            'unload ${streamer?.pendingUnloadChunks.length ?? '-'}  '
+            'cancel ${streamer?.cancelledRequestCount ?? '-'}\n'
+            'decoded ${widget.game.decodedImageCount}  '
+            '${(widget.game.decodedImageBytes / (1 << 20)).toStringAsFixed(1)} MiB  '
+            'pending ${widget.game.pendingImageCount}  '
+            'terrain cache ${widget.game.terrainPictureCount}\n'
+            '${widget.game.diagnosticsFps.toStringAsFixed(1)} fps  '
+            '${widget.game.diagnosticsFrameMilliseconds.toStringAsFixed(1)} ms frame  '
+            '${widget.game.updateTime} ms update  ${widget.game.renderTime} ms render',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PaletteButton extends StatelessWidget {
   const _PaletteButton({
     required this.label,
@@ -900,10 +1121,18 @@ class _PaletteButton extends StatelessWidget {
   );
 }
 
-class _Inspector extends StatelessWidget {
+class _Inspector extends StatefulWidget {
   const _Inspector({required this.controller});
 
   final EditorController controller;
+
+  @override
+  State<_Inspector> createState() => _InspectorState();
+}
+
+class _InspectorState extends State<_Inspector> {
+  final Set<String> _collapsedLayerIds = {};
+  EditorController get controller => widget.controller;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -949,11 +1178,23 @@ class _Inspector extends StatelessWidget {
                 ),
               ],
             ),
-            for (final layer in controller.document.editorLayers)
+            for (final layer in _orderedLayers(
+              controller.document,
+              _collapsedLayerIds,
+            ))
               _EditorLayerRow(
                 controller: controller,
                 layer: layer,
                 depth: _layerDepth(controller.document, layer),
+                hasChildren: controller.document.editorLayers.any(
+                  (candidate) => candidate.parentId == layer.id,
+                ),
+                collapsed: _collapsedLayerIds.contains(layer.id),
+                onToggleCollapsed: () => setState(() {
+                  if (!_collapsedLayerIds.add(layer.id)) {
+                    _collapsedLayerIds.remove(layer.id);
+                  }
+                }),
               ),
             const Divider(height: 32),
             if (object == null) ...[
@@ -1096,6 +1337,29 @@ class _Inspector extends StatelessWidget {
     }
     return depth;
   }
+
+  static List<EditorLayer> _orderedLayers(
+    EnvironmentDocument document,
+    Set<String> collapsed,
+  ) {
+    final result = <EditorLayer>[];
+    final visited = <String>{};
+    void appendChildren(String? parentId) {
+      for (final layer in document.editorLayers.where(
+        (candidate) => candidate.parentId == parentId,
+      )) {
+        if (!visited.add(layer.id)) continue;
+        result.add(layer);
+        if (!collapsed.contains(layer.id)) appendChildren(layer.id);
+      }
+    }
+
+    appendChildren(null);
+    for (final layer in document.editorLayers) {
+      if (visited.add(layer.id)) result.add(layer);
+    }
+    return result;
+  }
 }
 
 class _EditorLayerRow extends StatelessWidget {
@@ -1103,16 +1367,22 @@ class _EditorLayerRow extends StatelessWidget {
     required this.controller,
     required this.layer,
     required this.depth,
+    required this.hasChildren,
+    required this.collapsed,
+    required this.onToggleCollapsed,
   });
 
   final EditorController controller;
   final EditorLayer layer;
   final int depth;
+  final bool hasChildren;
+  final bool collapsed;
+  final VoidCallback onToggleCollapsed;
 
   @override
   Widget build(BuildContext context) {
     final active = controller.document.activeLayerId == layer.id;
-    return Material(
+    final row = Material(
       color: active
           ? Theme.of(context).colorScheme.primaryContainer
                 .withValues(alpha: 0.4)
@@ -1125,6 +1395,20 @@ class _EditorLayerRow extends StatelessWidget {
           padding: EdgeInsets.only(left: 4 + depth * 14, top: 2, bottom: 2),
           child: Row(
             children: [
+              if (layer.id != EnvironmentDocument.rootLayerId) ...[
+                const Icon(Icons.drag_indicator, size: 14),
+                const SizedBox(width: 2),
+              ],
+              if (hasChildren)
+                InkWell(
+                  onTap: onToggleCollapsed,
+                  child: Icon(
+                    collapsed ? Icons.chevron_right : Icons.keyboard_arrow_down,
+                    size: 16,
+                  ),
+                )
+              else
+                const SizedBox(width: 16),
               Icon(depth == 0 ? Icons.public : Icons.folder_outlined, size: 16),
               const SizedBox(width: 6),
               Expanded(
@@ -1134,6 +1418,11 @@ class _EditorLayerRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (!layer.exported)
+                const Tooltip(
+                  message: 'Excluded from release export',
+                  child: Icon(Icons.block, size: 16),
+                ),
               IconButton(
                 visualDensity: VisualDensity.compact,
                 tooltip: layer.visible ? 'Hide layer' : 'Show layer',
@@ -1160,6 +1449,8 @@ class _EditorLayerRow extends StatelessWidget {
                 onSelected: (action) {
                   if (action == 'rename') {
                     _rename(context);
+                  } else if (action == 'toggle_export') {
+                    controller.toggleLayerExported(layer.id);
                   } else if (action == 'delete' &&
                       !controller.deleteLayer(layer.id)) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1174,6 +1465,15 @@ class _EditorLayerRow extends StatelessWidget {
                 itemBuilder: (context) => [
                   const PopupMenuItem(value: 'rename', child: Text('Rename')),
                   if (layer.id != EnvironmentDocument.rootLayerId)
+                    PopupMenuItem(
+                      value: 'toggle_export',
+                      child: Text(
+                        layer.exported
+                            ? 'Exclude from release'
+                            : 'Include in release',
+                      ),
+                    ),
+                  if (layer.id != EnvironmentDocument.rootLayerId)
                     const PopupMenuItem(value: 'delete', child: Text('Delete')),
                 ],
               ),
@@ -1181,6 +1481,35 @@ class _EditorLayerRow extends StatelessWidget {
           ),
         ),
       ),
+    );
+    final target = DragTarget<String>(
+      onWillAcceptWithDetails: (details) =>
+          controller.canReparentLayer(details.data, layer.id),
+      onAcceptWithDetails: (details) =>
+          controller.reparentLayer(details.data, layer.id),
+      builder: (context, candidates, rejected) => DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border: candidates.isEmpty
+              ? null
+              : Border.all(color: Theme.of(context).colorScheme.primary),
+        ),
+        child: row,
+      ),
+    );
+    if (layer.id == EnvironmentDocument.rootLayerId) return target;
+    return LongPressDraggable<String>(
+      data: layer.id,
+      feedback: Material(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Text(layer.name),
+        ),
+      ),
+      childWhenDragging: Opacity(opacity: 0.35, child: target),
+      child: target,
     );
   }
 
@@ -1224,6 +1553,7 @@ class _GeometryEditor extends StatelessWidget {
       ],
       GeometryRole.blocking => geometry.blocking,
       GeometryRole.walkable => geometry.walkable,
+      GeometryRole.selection => geometry.selection,
     };
     final shape = controller.selectedGeometryShape;
     return Column(
@@ -1231,6 +1561,29 @@ class _GeometryEditor extends StatelessWidget {
       children: [
         Text('ASSET GEOMETRY', style: Theme.of(context).textTheme.labelMedium),
         Text('profile ${asset.collisionProfile ?? 'none'}'),
+        Text(
+          'Purple cross pivot · yellow ring sort anchor\n'
+          'Blue footprint · red blocker · green walkable · purple selection',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<EnvironmentDirection>(
+          isExpanded: true,
+          initialValue: object.direction,
+          decoration: const InputDecoration(
+            labelText: 'Direction preview',
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+          items: [
+            for (final direction in EnvironmentDirection.values)
+              if (asset.views.containsKey(direction.name))
+                DropdownMenuItem(value: direction, child: Text(direction.name)),
+          ],
+          onChanged: (direction) {
+            if (direction != null) controller.setSelectedDirection(direction);
+          },
+        ),
         const SizedBox(height: 8),
         DropdownButtonFormField<GeometryRole>(
           isExpanded: true,
@@ -1252,6 +1605,10 @@ class _GeometryEditor extends StatelessWidget {
             DropdownMenuItem(
               value: GeometryRole.walkable,
               child: Text('Walkable'),
+            ),
+            DropdownMenuItem(
+              value: GeometryRole.selection,
+              child: Text('Selection'),
             ),
           ],
           onChanged: (role) {

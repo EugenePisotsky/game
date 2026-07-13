@@ -190,6 +190,44 @@ void main() {
     expect(controller.document.objects[1].x, 5);
   });
 
+  test(
+    'layers can be regrouped without cycles and every change is undoable',
+    () {
+      final controller = EditorController(world(), catalog: catalog)
+        ..addLayer()
+        ..renameLayer('layer_2', 'Vegetation')
+        ..setActiveLayer(EnvironmentDocument.rootLayerId)
+        ..addLayer()
+        ..renameLayer('layer_3', 'Structures');
+
+      expect(controller.reparentLayer('layer_2', 'layer_3'), isTrue);
+      expect(
+        controller.document.editorLayerById('layer_2')?.parentId,
+        'layer_3',
+      );
+      expect(controller.reparentLayer('layer_3', 'layer_2'), isFalse);
+      controller.undo();
+      expect(
+        controller.document.editorLayerById('layer_2')?.parentId,
+        EnvironmentDocument.rootLayerId,
+      );
+
+      controller
+        ..toggleLayerVisibility('layer_3')
+        ..toggleLayerLocked('layer_3')
+        ..toggleLayerExported('layer_3');
+      expect(controller.document.editorLayerById('layer_3')?.visible, isFalse);
+      expect(controller.document.editorLayerById('layer_3')?.locked, isTrue);
+      expect(controller.document.editorLayerById('layer_3')?.exported, isFalse);
+      controller.undo();
+      expect(controller.document.editorLayerById('layer_3')?.exported, isTrue);
+      controller.undo();
+      expect(controller.document.editorLayerById('layer_3')?.locked, isFalse);
+      controller.undo();
+      expect(controller.document.editorLayerById('layer_3')?.visible, isTrue);
+    },
+  );
+
   test('asset geometry edits participate in global undo and redo', () {
     final controller =
         EditorController(
@@ -222,5 +260,12 @@ void main() {
     expect(catalog.geometryOverrides, isNot(contains(tree.id)));
     controller.redo();
     expect(catalog.geometryForObjectId(tree.id)?.blocking, hasLength(1));
+
+    controller
+      ..selectGeometryRole(GeometryRole.selection)
+      ..addGeometryShape(GeometryShapeType.polygon);
+    expect(catalog.geometryForObjectId(tree.id)?.selection, hasLength(1));
+    controller.undo();
+    expect(catalog.geometryForObjectId(tree.id)?.selection, isEmpty);
   });
 }

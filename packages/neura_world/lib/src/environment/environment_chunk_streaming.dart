@@ -44,6 +44,7 @@ class EnvironmentChunkStreamingManager {
   final Set<EnvironmentChunkCoordinate> _pendingUnload = {};
   final Map<String, int> _assetReferenceCounts = {};
   int _generation = 0;
+  int _cancelledRequestCount = 0;
 
   Map<EnvironmentChunkCoordinate, EnvironmentChunkDocument> get loadedChunks =>
       Map.unmodifiable(_loaded);
@@ -55,6 +56,7 @@ class EnvironmentChunkStreamingManager {
       Map.unmodifiable(_assetReferenceCounts);
 
   bool get isLoading => _preloading.isNotEmpty;
+  int get cancelledRequestCount => _cancelledRequestCount;
 
   Future<bool> updateAround(WorldPoint point) {
     final center = manifest.coordinateFor(point);
@@ -106,7 +108,10 @@ class EnvironmentChunkStreamingManager {
       for (final coordinate in toLoad)
         repository.load(coordinate).then((chunk) => (coordinate, chunk)),
     ]);
-    if (generation != _generation) return false;
+    if (generation != _generation) {
+      _cancelledRequestCount += loaded.length;
+      return false;
+    }
 
     var changed = false;
     for (final entry in loaded) {

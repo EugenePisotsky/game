@@ -1,0 +1,353 @@
+{
+  "materials": [
+    {
+      "decal": "images/a3189ed72026f945d0fd.png",
+      "defaultRadius": 1.8,
+      "id": "ow3.ground.earth",
+      "name": "Worn earth",
+      "tags": [
+        "earth",
+        "road"
+      ],
+      "texture": "images/76d7716fbc3f60cbf974.png"
+    },
+    {
+      "decal": "images/1379bc99d4f5eb6adb90.png",
+      "defaultRadius": 2.2,
+      "id": "ow3.ground.meadow",
+      "name": "Sparse meadow",
+      "tags": [
+        "grass",
+        "meadow"
+      ],
+      "texture": "images/e630c5419c6d387a05c2.png"
+    }
+  ],
+  "objects": [
+    {
+      "category": "Ground cover",
+      "collisionProfile": "none",
+      "defaultSortBias": 0.0,
+      "id": "ow3.grass.021",
+      "name": "Grass 021",
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/f8b91868fd9d1824953a.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Ground cover",
+      "collisionProfile": "none",
+      "defaultSortBias": 0.0,
+      "id": "ow3.grass.022",
+      "name": "Grass 022",
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/68634f5b7d05c7c94bd6.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Ground cover",
+      "collisionProfile": "none",
+      "defaultSortBias": 0.0,
+      "id": "ow3.grass.023",
+      "name": "Grass 023",
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/cf916428ecd52e27423e.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Rocks",
+      "collisionProfile": "smallRock",
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.rock.012",
+      "name": "Rock 012",
+      "renderBand": "depthSorted",
+      "renderScale": 0.9,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/19cbb2a2736452db3fc4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Rocks",
+      "collisionProfile": "smallRock",
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.23
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.44,
+            "y": 0.3
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.rock.014",
+      "name": "Rock 014",
+      "renderBand": "depthSorted",
+      "renderScale": 0.9,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/447fdef0792fbb3b8923.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.006",
+      "name": "Tree 006",
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/1fb4ad96981871063249.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.010",
+      "name": "Tree 010",
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/c1bafce7370d0ecc7263.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.014",
+      "name": "Tree 014",
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/6b994758c9df4cd88f62.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.018",
+      "name": "Tree 018",
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "views": {
+        "south": {
+          "image": "images/7b35d9a6d52917dea3c9.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    }
+  ],
+  "schemaVersion": 2
+}

@@ -34,6 +34,8 @@ void main() {
         document,
         chunkSize: 32,
         playerSpawn: const WorldPoint(33, 4),
+        objectBounds: (object) =>
+            const EnvironmentObjectBounds(minX: 31, minY: 5, maxX: 36, maxY: 9),
       );
 
       expect(world.manifest.chunks, hasLength(2));
@@ -46,7 +48,10 @@ void main() {
         hasLength(1),
       );
       final right = world.chunks[const EnvironmentChunkCoordinate(1, 0)]!;
+      final left = world.chunks[const EnvironmentChunkCoordinate(0, 0)]!;
       expect(right.objects.single.localX, 1.5);
+      expect(right.overlapObjectIds, contains('tree'));
+      expect(left.overlapObjectIds, contains('tree'));
       expect(right.objects.single.toWorldObject(right.coordinate, 32).x, 33.5);
       expect(right.terrainStrokes.single.points.first.x, -2);
       expect(
@@ -113,6 +118,7 @@ void main() {
       expect(manager.loadedChunks.keys, [
         const EnvironmentChunkCoordinate(1, 0),
       ]);
+      expect(manager.cancelledRequestCount, 1);
     },
   );
 }

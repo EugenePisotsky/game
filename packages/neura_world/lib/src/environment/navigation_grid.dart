@@ -19,12 +19,16 @@ class NavigationGrid {
   final int columns;
   final int rows;
   final WorldBlockedTest isBlocked;
+  int lastExpandedNodeCount = 0;
+  List<WorldPoint> lastPath = const [];
 
   List<WorldPoint> findPath(WorldPoint start, WorldPoint destination) {
+    lastExpandedNodeCount = 0;
+    lastPath = const [];
     final startCell = _cellFor(start);
     final requestedEnd = _cellFor(destination);
     final endCell = _nearestOpen(requestedEnd);
-    if (endCell == null || isBlocked(start)) return const [];
+    if (endCell == null || isBlocked(start)) return lastPath;
 
     final open = <_GridCell>[startCell];
     final openSet = <_GridCell>{startCell};
@@ -45,8 +49,10 @@ class NavigationGrid {
       }
       final current = open.removeAt(bestIndex);
       openSet.remove(current);
+      lastExpandedNodeCount++;
       if (current == endCell) {
-        return _reconstruct(cameFrom, current, start, destination);
+        lastPath = _reconstruct(cameFrom, current, start, destination);
+        return lastPath;
       }
       closed.add(current);
 
@@ -67,7 +73,7 @@ class NavigationGrid {
         if (openSet.add(neighbor)) open.add(neighbor);
       }
     }
-    return const [];
+    return lastPath;
   }
 
   List<WorldPoint> _reconstruct(
@@ -89,19 +95,41 @@ class NavigationGrid {
     }
     if (!isBlocked(requestedDestination)) points.add(requestedDestination);
 
-    final compressed = <WorldPoint>[points.first];
-    for (var index = 1; index < points.length - 1; index++) {
-      final previous = compressed.last;
-      final current = points[index];
-      final next = points[index + 1];
-      final ax = current.x - previous.x;
-      final ay = current.y - previous.y;
-      final bx = next.x - current.x;
-      final by = next.y - current.y;
-      if ((ax * by - ay * bx).abs() > 0.0001) compressed.add(current);
+    return _smoothVisibleSegments(points);
+  }
+
+  /// Whether an actor can travel directly between two points without touching
+  /// a blocked cell or authored collider.
+  bool isSegmentWalkable(WorldPoint start, WorldPoint end) {
+    final dx = end.x - start.x;
+    final dy = end.y - start.y;
+    final distance = math.sqrt(dx * dx + dy * dy);
+    final steps = math.max(1, (distance / (cellSize / 3)).ceil());
+    for (var step = 0; step <= steps; step++) {
+      final t = step / steps;
+      final point = WorldPoint(start.x + dx * t, start.y + dy * t);
+      if (point.x < 0 || point.y < 0 || point.x > width || point.y > height) {
+        return false;
+      }
+      if (isBlocked(point)) return false;
     }
-    compressed.add(points.last);
-    return compressed.skip(1).toList();
+    return true;
+  }
+
+  List<WorldPoint> _smoothVisibleSegments(List<WorldPoint> points) {
+    if (points.length < 2) return const [];
+    final result = <WorldPoint>[];
+    var anchor = 0;
+    while (anchor < points.length - 1) {
+      var next = points.length - 1;
+      while (next > anchor + 1 &&
+          !isSegmentWalkable(points[anchor], points[next])) {
+        next--;
+      }
+      result.add(points[next]);
+      anchor = next;
+    }
+    return result;
   }
 
   _GridCell? _nearestOpen(_GridCell requested) {

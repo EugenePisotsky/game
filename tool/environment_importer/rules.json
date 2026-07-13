@@ -11,6 +11,8 @@
   "sourceWorldPath": "packages/neura_assets/assets/worlds/environment_starter.json",
   "worldManifestPath": "packages/neura_assets/assets/worlds/environment_world.json",
   "worldChunksRoot": "packages/neura_assets/assets/worlds/chunks",
+  "releaseRoot": "packages/neura_assets/assets/release",
+  "releaseMaxBytes": 67108864,
   "worldChunkSize": 32.0,
   "worldWidth": 256.0,
   "worldHeight": 256.0,
