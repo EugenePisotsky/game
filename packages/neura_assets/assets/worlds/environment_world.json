@@ -1,7 +1,11 @@
 {
-  "activeLayerId": "layer_world",
-  "baseMaterialId": "ow3.ground.meadow",
+  "schemaVersion": 1,
+  "id": "environment_starter",
+  "name": "Environment Study",
   "chunkSize": 32.0,
+  "width": 256.0,
+  "height": 256.0,
+  "baseMaterialId": "ow3.ground.meadow",
   "chunks": [
     {
       "x": 0,
@@ -260,30 +264,26 @@
       "y": 7
     }
   ],
-  "editorLayers": [
-    {
-      "exported": true,
-      "id": "layer_world",
-      "locked": false,
-      "name": "World",
-      "parentId": null,
-      "visible": true
-    }
-  ],
-  "height": 256.0,
-  "id": "environment_starter",
-  "name": "Environment Study",
   "playerSpawn": {
     "chunk": {
-      "x": 0,
-      "y": 0
+      "x": 3,
+      "y": 3
     },
     "localPosition": {
-      "x": 12.0,
-      "y": 20.5
+      "x": 13.033035278320312,
+      "y": 18.368194580078125
     }
   },
-  "schemaVersion": 1,
   "travelPoints": [],
-  "width": 256.0
+  "editorLayers": [
+    {
+      "id": "layer_world",
+      "name": "World",
+      "parentId": null,
+      "visible": true,
+      "locked": false,
+      "exported": true
+    }
+  ],
+  "activeLayerId": "layer_world"
 }

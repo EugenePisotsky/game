@@ -1,13 +1,13 @@
 {
   "id": "grass_below_actor",
   "description": "Actor standing over low grass verifies the ground-cover render band.",
-  "camera": {"x": 12.9, "y": 16.8},
-  "player": {"x": 12.9, "y": 16.8},
+  "camera": {"x": 12.8, "y": 18.2},
+  "player": {"x": 12.8, "y": 18.2},
   "facing": "south",
   "viewportWidth": 800,
   "viewportHeight": 600,
   "clockSeconds": 0.4,
   "randomSeed": 2101,
-  "relevantObjectIds": ["object_162", "object_163"],
+  "relevantObjectIds": ["object_134"],
   "expectedLoadedChunks": [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 1}]
 }

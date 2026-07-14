@@ -117,6 +117,152 @@ void main() {
       );
     },
   );
+
+  test('world extension and player spawn update the live manifest', () async {
+    final manifest = EnvironmentWorldManifest(
+      id: 'world',
+      name: 'World',
+      chunkSize: 32,
+      width: 32,
+      height: 32,
+      baseMaterialId: 'ground',
+      chunks: const [EnvironmentChunkCoordinate(0, 0)],
+      playerSpawn: const ChunkLocalPosition(
+        chunk: EnvironmentChunkCoordinate(0, 0),
+        localX: 4,
+        localY: 5,
+      ),
+    );
+    final chunk = EnvironmentChunkDocument(
+      worldId: 'world',
+      coordinate: const EnvironmentChunkCoordinate(0, 0),
+      size: 32,
+      baseMaterialId: 'ground',
+    );
+    final session = EditorChunkSession(
+      manifest: manifest,
+      catalog: EnvironmentCatalog(materials: const [], objects: const []),
+      bundle: _StringAssetBundle({
+        '$environmentWorldChunksAssetPrefix/0_0.json': chunk.toJsonString(),
+      }),
+    );
+    final document = await session.initialize();
+
+    final result = await session.extendWorld(
+      document,
+      EnvironmentWorldEdge.left,
+      visibleBounds: const EnvironmentObjectBounds(
+        minX: 0,
+        minY: 0,
+        maxX: 32,
+        maxY: 32,
+      ),
+    );
+
+    expect(session.manifest.width, 64);
+    expect(session.manifest.chunks, hasLength(2));
+    expect((result.worldShift.x, result.worldShift.y), (32, 0));
+    expect(session.dirtyCoordinates, hasLength(2));
+    expect(session.manifestDirty, isTrue);
+    expect((session.playerSpawn.x, session.playerSpawn.y), (36, 5));
+
+    session.setPlayerSpawn(const WorldPoint(10, 12));
+    expect((session.playerSpawn.x, session.playerSpawn.y), (10, 12));
+  });
+
+  test(
+    'finds and safely repairs duplicate IDs across distant chunks',
+    () async {
+      final manifest = EnvironmentWorldManifest(
+        id: 'world',
+        name: 'World',
+        chunkSize: 32,
+        width: 96,
+        height: 32,
+        baseMaterialId: 'ground',
+        chunks: const [
+          EnvironmentChunkCoordinate(0, 0),
+          EnvironmentChunkCoordinate(1, 0),
+          EnvironmentChunkCoordinate(2, 0),
+        ],
+        playerSpawn: const ChunkLocalPosition(
+          chunk: EnvironmentChunkCoordinate(0, 0),
+          localX: 4,
+          localY: 4,
+        ),
+      );
+      EnvironmentChunkDocument chunk(EnvironmentChunkCoordinate coordinate) {
+        final hasObject = coordinate.x != 1;
+        final worldX = coordinate.x * 32 + 5.0;
+        return EnvironmentChunkDocument(
+          worldId: manifest.id,
+          coordinate: coordinate,
+          size: 32,
+          baseMaterialId: 'ground',
+          objects: hasObject
+              ? [
+                  ChunkPlacedEnvironmentObject(
+                    id: 'object_105',
+                    assetId: coordinate.x == 0 ? 'tree' : 'grass',
+                    localX: 5,
+                    localY: 5,
+                    editorLayerId: EnvironmentDocument.rootLayerId,
+                    bounds: EnvironmentObjectBounds(
+                      minX: worldX - 0.5,
+                      minY: 4.5,
+                      maxX: worldX + 0.5,
+                      maxY: 5.5,
+                    ),
+                  ),
+                ]
+              : null,
+          overlapObjectIds: hasObject ? {'object_105'} : null,
+        );
+      }
+
+      final chunks = {
+        for (final coordinate in manifest.chunks) coordinate: chunk(coordinate),
+      };
+      final session = EditorChunkSession(
+        manifest: manifest,
+        catalog: EnvironmentCatalog(materials: const [], objects: const []),
+        bundle: _StringAssetBundle({
+          for (final entry in chunks.entries)
+            '$environmentWorldChunksAssetPrefix/${entry.key.key}.json': entry
+                .value
+                .toJsonString(),
+        }),
+      );
+      final document = await session.initialize();
+
+      final issues = await session.findDuplicateObjectIds(document);
+      expect(issues, hasLength(1));
+      expect(issues.single.id, 'object_105');
+      expect(
+        issues.single.occurrences.map((occurrence) => occurrence.chunk),
+        const [
+          EnvironmentChunkCoordinate(0, 0),
+          EnvironmentChunkCoordinate(2, 0),
+        ],
+      );
+
+      final repaired = await session.repairDuplicateObjectIds(document);
+      expect(repaired.repairs, hasLength(1));
+      expect(
+        repaired.repairs.single.chunk,
+        const EnvironmentChunkCoordinate(2, 0),
+      );
+      expect(
+        repaired.repairs.single.replacementId,
+        startsWith('object_105_repair_2_0_'),
+      );
+      expect(await session.findDuplicateObjectIds(repaired.document), isEmpty);
+      expect(
+        session.dirtyCoordinates,
+        contains(const EnvironmentChunkCoordinate(2, 0)),
+      );
+    },
+  );
 }
 
 class _StringAssetBundle extends CachingAssetBundle {

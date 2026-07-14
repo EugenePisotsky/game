@@ -4,17 +4,37 @@ import 'package:flutter/foundation.dart';
 import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_world/neura_world.dart';
 
-enum EnvironmentEditorMode { paint, place, select, collision, erase }
+enum EnvironmentEditorMode {
+  paint,
+  place,
+  path,
+  select,
+  collision,
+  erase,
+  spawn,
+}
 
 enum GeometryRole { footprint, blocking, walkable, selection }
 
 enum GeometryShapeType { circle, ellipse, rectangle, capsule, polygon }
 
+class PathPlacementPreview {
+  const PathPlacementPreview({required this.point, required this.direction});
+
+  final WorldPoint point;
+  final EnvironmentDirection direction;
+}
+
+enum _PathDragHandle { start, end }
+
 class EditorController extends ChangeNotifier {
   EditorController(this._document, {required this.catalog});
 
   final EnvironmentCatalog catalog;
+  final _HoverNotifier _hoverNotifier = _HoverNotifier();
   EnvironmentDocument _document;
+
+  Listenable get hoverListenable => _hoverNotifier;
 
   EnvironmentDocument get document => _document;
 
@@ -29,9 +49,34 @@ class EditorController extends ChangeNotifier {
 
   String _selectedObjectAssetId = 'ow3.tree.blossom';
   String get selectedObjectAssetId => _selectedObjectAssetId;
+  EnvironmentDirection _placementDirection = EnvironmentDirection.south;
+  EnvironmentDirection get placementDirection => _placementDirection;
+
+  double _pathPieceLength = 3.2;
+  double get pathPieceLength => _pathPieceLength;
+  double _pathGap = 0;
+  double get pathGap => _pathGap;
+  double _pathOpening = 0;
+  double get pathOpening => _pathOpening;
+  int _pathDirectionOffset = 0;
+  int get pathDirectionOffset => _pathDirectionOffset;
+  WorldPoint? _pathStart;
+  WorldPoint? get pathStart => _pathStart;
+  WorldPoint? _pathEnd;
+  WorldPoint? get pathEnd => _pathEnd;
+  bool get hasPathDraft => _pathStart != null && _pathEnd != null;
+  _PathDragHandle? _activePathDragHandle;
+  bool _pathGestureStarted = false;
+  List<PathPlacementPreview> get pathPreviewPlacements =>
+      List.unmodifiable(_buildPathPlacements());
 
   double _brushRadius = 2.2;
   double get brushRadius => _brushRadius;
+  double _brushFlow = 0.22;
+  double get brushFlow => _brushFlow;
+  double _brushScatter = 0.28;
+  double get brushScatter => _brushScatter;
+  int _nextStrokeSeed = 1;
 
   WorldPoint? _hoveredPoint;
   WorldPoint? get hoveredPoint => _hoveredPoint;
@@ -102,12 +147,18 @@ class EditorController extends ChangeNotifier {
   final List<_EditorSnapshot> _redo = [];
   _EditorSnapshot? _gestureBefore;
   TerrainStroke? _activeStroke;
+  int _terrainRevision = 0;
+  TerrainStroke? _lastTerrainChangedStroke;
   bool _gestureChanged = false;
   bool _placedThisGesture = false;
-  int _nextObjectId = 100;
+  final String _objectIdNamespace = _nextObjectIdNamespace();
+  int _nextObjectId = 0;
 
   bool get canUndo => _undo.isNotEmpty;
   bool get canRedo => _redo.isNotEmpty;
+  int get terrainRevision => _terrainRevision;
+  TerrainStroke? get lastTerrainChangedStroke => _lastTerrainChangedStroke;
+  TerrainStroke? get activeTerrainStroke => _activeStroke;
 
   void selectPaintMaterial(EnvironmentMaterial material) {
     _mode = EnvironmentEditorMode.paint;
@@ -118,13 +169,81 @@ class EditorController extends ChangeNotifier {
 
   void selectObjectAsset(EnvironmentObjectAsset object) {
     _mode = EnvironmentEditorMode.place;
-    _selectedObjectAssetId = object.id;
+    _selectObjectAsset(object);
+    notifyListeners();
+  }
+
+  void selectPathObjectAsset(EnvironmentObjectAsset object) {
+    _mode = EnvironmentEditorMode.path;
+    _selectObjectAsset(object);
+    _pathPieceLength = _suggestedPathPieceLength(object);
     notifyListeners();
   }
 
   void selectMode(EnvironmentEditorMode mode) {
     if (_mode == mode) return;
     _mode = mode;
+    if (mode == EnvironmentEditorMode.path) {
+      final asset = catalog.objectById(_selectedObjectAssetId);
+      if (asset != null) _pathPieceLength = _suggestedPathPieceLength(asset);
+    }
+    notifyListeners();
+  }
+
+  void setPathPieceLength(double value) {
+    _pathPieceLength = value.clamp(0.25, 8);
+    notifyListeners();
+  }
+
+  void setPathGap(double value) {
+    _pathGap = value.clamp(-1.5, 6);
+    notifyListeners();
+  }
+
+  void setPathOpening(double value) {
+    _pathOpening = value.clamp(0, 12);
+    notifyListeners();
+  }
+
+  void rotatePathOrientation() {
+    _pathDirectionOffset = (_pathDirectionOffset + 1) % 8;
+    notifyListeners();
+  }
+
+  void applyPathDraft() {
+    if (!hasPathDraft ||
+        !isLayerVisible(_document.activeLayerId) ||
+        isLayerLocked(_document.activeLayerId)) {
+      return;
+    }
+    final placements = _buildPathPlacements();
+    if (placements.isEmpty) return;
+    _recordImmediate(() {
+      _selectedObjectIds.clear();
+      for (final placement in placements) {
+        final object = PlacedEnvironmentObject(
+          id: _newPlacedObjectId(),
+          assetId: _selectedObjectAssetId,
+          x: placement.point.x,
+          y: placement.point.y,
+          editorLayerId: _document.activeLayerId,
+          direction: placement.direction,
+        );
+        _document.objects.add(object);
+        _selectedObjectIds.add(object.id);
+        _primarySelectedObjectId = object.id;
+      }
+      _pathStart = null;
+      _pathEnd = null;
+      _activePathDragHandle = null;
+    });
+  }
+
+  void cancelPathDraft() {
+    if (!hasPathDraft) return;
+    _pathStart = null;
+    _pathEnd = null;
+    _activePathDragHandle = null;
     notifyListeners();
   }
 
@@ -258,10 +377,20 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setBrushFlow(double value) {
+    _brushFlow = value.clamp(0.05, 0.6);
+    notifyListeners();
+  }
+
+  void setBrushScatter(double value) {
+    _brushScatter = value.clamp(0, 0.65);
+    notifyListeners();
+  }
+
   void hover(WorldPoint? point) {
     if (_hoveredPoint?.x == point?.x && _hoveredPoint?.y == point?.y) return;
     _hoveredPoint = point;
-    notifyListeners();
+    _hoverNotifier.changed();
   }
 
   void hoverObjects(Iterable<String> objectIds) {
@@ -273,7 +402,13 @@ class EditorController extends ChangeNotifier {
     }
     _hoveredObjectId = hovered;
     _overlapCandidateIds = candidates;
-    notifyListeners();
+    _hoverNotifier.changed();
+  }
+
+  @override
+  void dispose() {
+    _hoverNotifier.dispose();
+    super.dispose();
   }
 
   void selectCandidates(Iterable<String> objectIds, {bool additive = false}) {
@@ -340,6 +475,8 @@ class EditorController extends ChangeNotifier {
     _gestureChanged = false;
     _placedThisGesture = false;
     _activeStroke = null;
+    _activePathDragHandle = null;
+    _pathGestureStarted = false;
   }
 
   void applyAt(WorldPoint point) {
@@ -350,17 +487,41 @@ class EditorController extends ChangeNotifier {
         _paint(point);
       case EnvironmentEditorMode.place:
         if (!_placedThisGesture) _place(point);
+      case EnvironmentEditorMode.path:
+        if (!_pathGestureStarted) {
+          _pathGestureStarted = true;
+          _activePathDragHandle = _pathHandleNear(point);
+          if (_activePathDragHandle == null) {
+            _pathStart = point;
+            _pathEnd = point;
+            _activePathDragHandle = _PathDragHandle.end;
+          }
+        }
+        switch (_activePathDragHandle) {
+          case _PathDragHandle.start:
+            _pathStart = point;
+            break;
+          case _PathDragHandle.end:
+            _pathEnd = point;
+            break;
+          case null:
+            break;
+        }
+        _hoveredPoint = point;
+        _hoverNotifier.changed();
       case EnvironmentEditorMode.select:
       case EnvironmentEditorMode.collision:
         _selectNearest(point);
       case EnvironmentEditorMode.erase:
         if (!_placedThisGesture) _eraseNearest(point);
+      case EnvironmentEditorMode.spawn:
+        break;
     }
-    notifyListeners();
   }
 
   void endGesture() {
     final before = _gestureBefore;
+    final committedTerrainStroke = _gestureChanged ? _activeStroke : null;
     if (_gestureChanged && before != null) {
       _undo.add(before);
       if (_undo.length > 100) _undo.removeAt(0);
@@ -368,6 +529,11 @@ class EditorController extends ChangeNotifier {
     }
     _gestureBefore = null;
     _activeStroke = null;
+    _activePathDragHandle = null;
+    _pathGestureStarted = false;
+    if (committedTerrainStroke != null) {
+      _markTerrainChanged(committedTerrainStroke);
+    }
     _gestureChanged = false;
     _placedThisGesture = false;
     notifyListeners();
@@ -391,7 +557,7 @@ class EditorController extends ChangeNotifier {
       ..y = point.y;
     _gestureChanged = true;
     _hoveredPoint = point;
-    notifyListeners();
+    _hoverNotifier.changed();
   }
 
   void moveSelectionDuringGesture(WorldPoint from, WorldPoint to) {
@@ -411,7 +577,7 @@ class EditorController extends ChangeNotifier {
     }
     _gestureChanged = true;
     _hoveredPoint = to;
-    notifyListeners();
+    _hoverNotifier.changed();
   }
 
   void rotateSelected() {
@@ -419,14 +585,29 @@ class EditorController extends ChangeNotifier {
     if (selected.isEmpty) return;
     _recordImmediate(() {
       for (final object in selected) {
-        object.direction = object.direction.next;
+        final asset = catalog.objectById(object.assetId);
+        if (asset == null) continue;
+        final supported = _clockwiseDirections
+            .where((direction) => asset.supportsDirection(direction.name))
+            .toList();
+        if (supported.length < 2) continue;
+        final current = supported.indexOf(object.direction);
+        object.direction = supported[(current + 1) % supported.length];
       }
+      _rememberPlacementDirection(selected);
     });
   }
 
   void setSelectedDirection(EnvironmentDirection direction) {
     final selected = selectedObjects;
     if (selected.isEmpty ||
+        selected.any(
+          (object) =>
+              !(catalog
+                      .objectById(object.assetId)
+                      ?.supportsDirection(direction.name) ??
+                  false),
+        ) ||
         selected.every((object) => object.direction == direction)) {
       return;
     }
@@ -434,6 +615,7 @@ class EditorController extends ChangeNotifier {
       for (final object in selected) {
         object.direction = direction;
       }
+      _rememberPlacementDirection(selected);
     });
   }
 
@@ -608,6 +790,7 @@ class EditorController extends ChangeNotifier {
     if (!canUndo) return;
     _redo.add(_snapshot());
     _restore(_undo.removeLast());
+    _markTerrainChanged();
     _normalizeSelection();
     notifyListeners();
   }
@@ -616,6 +799,7 @@ class EditorController extends ChangeNotifier {
     if (!canRedo) return;
     _undo.add(_snapshot());
     _restore(_redo.removeLast());
+    _markTerrainChanged();
     _normalizeSelection();
     notifyListeners();
   }
@@ -626,6 +810,7 @@ class EditorController extends ChangeNotifier {
     _redo.clear();
     _selectedObjectIds.clear();
     _primarySelectedObjectId = null;
+    _markTerrainChanged();
     notifyListeners();
   }
 
@@ -641,7 +826,12 @@ class EditorController extends ChangeNotifier {
       stroke = TerrainStroke(
         materialId: _selectedMaterialId,
         radius: _brushRadius,
-        opacity: 0.88,
+        opacity: _brushFlow,
+        seed: _nextTerrainStrokeSeed(),
+        spacing: 0.72,
+        scatter: _brushScatter,
+        sizeJitter: 0.18,
+        opacityJitter: 0.16,
         points: [],
       );
       _document.terrainStrokes.add(stroke);
@@ -658,17 +848,28 @@ class EditorController extends ChangeNotifier {
     _gestureChanged = true;
   }
 
+  void _markTerrainChanged([TerrainStroke? stroke]) {
+    _terrainRevision++;
+    _lastTerrainChangedStroke = stroke;
+  }
+
+  int _nextTerrainStrokeSeed() {
+    final index = _document.terrainStrokes.length + _nextStrokeSeed++;
+    return (index * 1103515245 + 12345) & 0x7FFFFFFF;
+  }
+
   void _place(WorldPoint point) {
     if (!isLayerVisible(_document.activeLayerId) ||
         isLayerLocked(_document.activeLayerId)) {
       return;
     }
     final object = PlacedEnvironmentObject(
-      id: 'object_${_nextObjectId++}',
+      id: _newPlacedObjectId(),
       assetId: _selectedObjectAssetId,
       x: point.x,
       y: point.y,
       editorLayerId: _document.activeLayerId,
+      direction: _placementDirection,
     );
     _document.objects.add(object);
     _selectedObjectIds
@@ -677,6 +878,177 @@ class EditorController extends ChangeNotifier {
     _primarySelectedObjectId = object.id;
     _placedThisGesture = true;
     _gestureChanged = true;
+  }
+
+  String _newPlacedObjectId() {
+    while (true) {
+      final candidate = 'object_${_objectIdNamespace}_${_nextObjectId++}';
+      if (_document.objects.every((object) => object.id != candidate)) {
+        return candidate;
+      }
+    }
+  }
+
+  List<PathPlacementPreview> _buildPathPlacements() {
+    final start = _pathStart;
+    final end = _pathEnd;
+    final asset = catalog.objectById(_selectedObjectAssetId);
+    if (start == null || end == null || asset == null) return const [];
+    final dx = end.x - start.x;
+    final dy = end.y - start.y;
+    final length = math.sqrt(dx * dx + dy * dy);
+    final direction = _nearestSupportedPathDirection(asset, dx, dy);
+    if (length < 0.001) {
+      return [PathPlacementPreview(point: start, direction: direction)];
+    }
+    final requestedStep = math.max(0.1, _pathPieceLength + _pathGap);
+    var count = (length / requestedStep).floor() + 1;
+    count = math.min(500, math.max(1, count));
+    if (count == 1) {
+      return [
+        PathPlacementPreview(
+          point: WorldPoint((start.x + end.x) / 2, (start.y + end.y) / 2),
+          direction: direction,
+        ),
+      ];
+    }
+    final step = count == 500 && length / requestedStep >= 500
+        ? length / (count - 1)
+        : requestedStep;
+    final occupiedLength = (count - 1) * step;
+    final firstDistance = math.max(0, (length - occupiedLength) / 2);
+    final openingCenter = length / 2;
+    return [
+      for (var index = 0; index < count; index++)
+        if (_pathOpening <= 0 ||
+            (firstDistance + index * step - openingCenter).abs() >=
+                _pathOpening / 2)
+          PathPlacementPreview(
+            point: WorldPoint(
+              start.x + dx * ((firstDistance + index * step) / length),
+              start.y + dy * ((firstDistance + index * step) / length),
+            ),
+            direction: direction,
+          ),
+    ];
+  }
+
+  _PathDragHandle? _pathHandleNear(WorldPoint point) {
+    const handleRadius = 1.1;
+    final start = _pathStart;
+    final end = _pathEnd;
+    if (start == null || end == null) return null;
+    final startDistance = _distanceBetween(start, point);
+    final endDistance = _distanceBetween(end, point);
+    if (math.min(startDistance, endDistance) > handleRadius) return null;
+    return startDistance <= endDistance
+        ? _PathDragHandle.start
+        : _PathDragHandle.end;
+  }
+
+  static double _distanceBetween(WorldPoint a, WorldPoint b) {
+    final dx = a.x - b.x;
+    final dy = a.y - b.y;
+    return math.sqrt(dx * dx + dy * dy);
+  }
+
+  void _selectObjectAsset(EnvironmentObjectAsset object) {
+    if (_selectedObjectAssetId != object.id) {
+      _selectedObjectAssetId = object.id;
+      _placementDirection = _defaultDirectionFor(object);
+    }
+  }
+
+  EnvironmentDirection _defaultDirectionFor(EnvironmentObjectAsset asset) {
+    if (asset.supportsDirection(EnvironmentDirection.south.name)) {
+      return EnvironmentDirection.south;
+    }
+    return _clockwiseDirections.firstWhere(
+      (direction) => asset.supportsDirection(direction.name),
+      orElse: () => EnvironmentDirection.south,
+    );
+  }
+
+  void _rememberPlacementDirection(List<PlacedEnvironmentObject> selected) {
+    if (selected.isEmpty ||
+        selected.any((object) => object.assetId != _selectedObjectAssetId)) {
+      return;
+    }
+    final direction = selected.first.direction;
+    if (selected.every((object) => object.direction == direction)) {
+      _placementDirection = direction;
+    }
+  }
+
+  EnvironmentDirection _nearestSupportedPathDirection(
+    EnvironmentObjectAsset asset,
+    double dx,
+    double dy,
+  ) {
+    final screenX = dx - dy;
+    final screenY = dx + dy;
+    final sector =
+        ((math.atan2(screenY, screenX) / (math.pi / 4)).round() + 8) % 8;
+    final desired = const [
+      EnvironmentDirection.east,
+      EnvironmentDirection.southEast,
+      EnvironmentDirection.south,
+      EnvironmentDirection.southWest,
+      EnvironmentDirection.west,
+      EnvironmentDirection.northWest,
+      EnvironmentDirection.north,
+      EnvironmentDirection.northEast,
+    ][sector];
+    final desiredIndex =
+        (_clockwiseDirections.indexOf(desired) + _pathDirectionOffset) % 8;
+    EnvironmentDirection? nearest;
+    var nearestDistance = 9;
+    for (final direction in _clockwiseDirections) {
+      if (!asset.supportsDirection(direction.name)) continue;
+      final index = _clockwiseDirections.indexOf(direction);
+      final clockwise = (index - desiredIndex + 8) % 8;
+      final distance = math.min(clockwise, 8 - clockwise);
+      if (distance < nearestDistance) {
+        nearest = direction;
+        nearestDistance = distance;
+      }
+    }
+    return nearest ?? EnvironmentDirection.south;
+  }
+
+  static double _suggestedPathPieceLength(EnvironmentObjectAsset asset) {
+    if (!asset.geometry.reviewed) {
+      return (3.2 * asset.renderScale).clamp(0.25, 8).toDouble();
+    }
+    final footprint = asset.geometry.footprint;
+    final length = switch (footprint) {
+      EnvironmentCapsule() =>
+        math.sqrt(
+              math.pow(footprint.end.x - footprint.start.x, 2) +
+                  math.pow(footprint.end.y - footprint.start.y, 2),
+            ) +
+            footprint.radius * 2,
+      EnvironmentRectangle() => math.max(
+        footprint.size.x.abs(),
+        footprint.size.y.abs(),
+      ),
+      EnvironmentEllipse() =>
+        math.max(footprint.radius.x.abs(), footprint.radius.y.abs()) * 2,
+      EnvironmentCircle() => footprint.radius * 2,
+      EnvironmentPolygon() when footprint.points.isNotEmpty =>
+        _polygonPathLength(footprint),
+      _ => 3.2 * asset.renderScale,
+    };
+    return length.clamp(0.25, 8).toDouble();
+  }
+
+  static double _polygonPathLength(EnvironmentPolygon polygon) {
+    final xs = polygon.points.map((point) => point.x);
+    final ys = polygon.points.map((point) => point.y);
+    return math.max(
+      xs.reduce(math.max) - xs.reduce(math.min),
+      ys.reduce(math.max) - ys.reduce(math.min),
+    );
   }
 
   void _selectNearest(WorldPoint point) {
@@ -783,6 +1155,29 @@ class EditorController extends ChangeNotifier {
     }
     return result;
   }
+}
+
+class _HoverNotifier extends ChangeNotifier {
+  void changed() => notifyListeners();
+}
+
+const _clockwiseDirections = [
+  EnvironmentDirection.south,
+  EnvironmentDirection.southWest,
+  EnvironmentDirection.west,
+  EnvironmentDirection.northWest,
+  EnvironmentDirection.north,
+  EnvironmentDirection.northEast,
+  EnvironmentDirection.east,
+  EnvironmentDirection.southEast,
+];
+
+int _objectIdNamespaceSequence = 0;
+
+String _nextObjectIdNamespace() {
+  final timestamp = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+  final sequence = (_objectIdNamespaceSequence++).toRadixString(36);
+  return '${timestamp}_$sequence';
 }
 
 class _EditorSnapshot {

@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flame/game.dart' show Vector2;
 import 'package:flame_test/flame_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_game/neura_game.dart';
 import 'package:neura_world/neura_world.dart';
 
@@ -17,35 +18,25 @@ void main() {
       expect(game.isLoaded, isTrue);
       expect(game.size.x, 800);
       expect(game.size.y, 600);
-      expect(game.playerPosition.x, 12);
-      expect(game.playerPosition.y, 20.5);
-      expect(game.currentChunk?.x, 0);
-      expect(game.currentChunk?.y, 0);
-      expect(game.loadedChunkCount, 4);
+      final authoredSpawn = game.worldManifest.playerSpawn.toWorld(
+        game.worldManifest.chunkSize,
+      );
+      expect(game.playerPosition.x, authoredSpawn.x);
+      expect(game.playerPosition.y, authoredSpawn.y);
+      expect(
+        game.currentChunk,
+        game.worldManifest.coordinateFor(authoredSpawn),
+      );
+      expect(game.loadedChunkCount, inInclusiveRange(1, 9));
       expect(game.terrainPictureCount, game.loadedChunkCount);
       expect(game.decodedImageCount, greaterThan(0));
       expect(game.pendingAssetRequests, 0);
-      final order = game.debugRenderOrder;
-      expect(order.indexOf('object_162'), lessThan(order.indexOf('player')));
-      expect(order.indexOf('object_185'), greaterThan(-1));
-
-      await game.teleportTo(const WorldPoint(4.6, 9));
-      expect(
-        game.debugRenderOrder.indexOf('player'),
-        lessThan(game.debugRenderOrder.indexOf('object_185')),
-      );
-      await game.teleportTo(const WorldPoint(4.6, 10.2));
-      expect(
-        game.debugRenderOrder.indexOf('player'),
-        greaterThan(game.debugRenderOrder.indexOf('object_185')),
-      );
+      expect(game.debugRenderOrder, contains('player'));
 
       await game.teleportTo(const WorldPoint(140, 20));
-      expect(game.inactiveAssetCount, greaterThan(0));
-      final hits = game.assetCacheHits;
-      await game.teleportTo(const WorldPoint(12, 20.5));
-      expect(game.assetCacheHits, greaterThan(hits));
-      expect(game.inactiveAssetCount, lessThanOrEqualTo(24));
+      expect(game.currentChunk, const EnvironmentChunkCoordinate(4, 0));
+      await game.teleportTo(const WorldPoint(16, 16));
+      expect(game.currentChunk, const EnvironmentChunkCoordinate(0, 0));
     },
   );
 
@@ -55,8 +46,8 @@ void main() {
     (game) async {
       expect(game.debugScene?.id, 'grass_below_actor');
       expect(game.debugRandomSeed, 2101);
-      expect(game.playerPosition.x, closeTo(12.9, 0.0001));
-      expect(game.playerPosition.y, closeTo(16.8, 0.0001));
+      expect(game.playerPosition.x, closeTo(12.8, 0.0001));
+      expect(game.playerPosition.y, closeTo(18.2, 0.0001));
       expect(game.diagnosticsPaused, isTrue);
       expect(
         game.chunkStreamer.loadedChunks.keys.toSet(),
@@ -100,6 +91,37 @@ void main() {
   );
 
   testWithGame<NeuraGame>(
+    'painted non-walkable water participates in navigation',
+    NeuraGame.new,
+    (game) async {
+      await game.teleportTo(const WorldPoint(100, 100));
+      game.environmentCatalog.materials.add(
+        const EnvironmentMaterial(
+          id: 'test.water',
+          name: 'Test water',
+          texturePath: 'unused.png',
+          decalPath: 'unused.png',
+          tags: ['water', 'non-walkable'],
+        ),
+      );
+      game.document.terrainStrokes.add(
+        TerrainStroke(
+          materialId: 'test.water',
+          radius: 2,
+          opacity: 1,
+          points: const [WorldPoint(102, 100)],
+        ),
+      );
+
+      expect(game.navigationGrid.isBlocked(const WorldPoint(102, 100)), isTrue);
+      expect(
+        game.navigationGrid.isBlocked(const WorldPoint(106, 100)),
+        isFalse,
+      );
+    },
+  );
+
+  testWithGame<NeuraGame>(
     'retargeting while walking preserves the animation phase',
     NeuraGame.new,
     (game) async {
@@ -115,6 +137,25 @@ void main() {
 
       expect(game.isMoving, isTrue);
       expect(game.animationTime, phaseBeforeRetarget);
+    },
+  );
+
+  testWithGame<NeuraGame>(
+    'native retargeting applies only the newest asynchronous route',
+    NeuraGame.new,
+    (game) async {
+      await game.teleportTo(const WorldPoint(100, 100));
+
+      final obsolete = game.requestMovementAsync(const WorldPoint(112, 100));
+      final newest = game.requestMovementAsync(const WorldPoint(100, 112));
+
+      expect(await obsolete, isFalse);
+      expect(await newest, isTrue);
+      expect(game.destination?.x, closeTo(100, 0.0001));
+      expect(game.destination?.y, closeTo(112, 0.0001));
+      expect(game.pendingNavigationRequests, 0);
+      expect(game.navigationExpandedNodes, greaterThan(0));
+      expect(game.lastNavigationMicros, greaterThanOrEqualTo(0));
     },
   );
 
@@ -191,7 +232,7 @@ void main() {
   );
 
   testWithGame<NeuraGame>(
-    'camera remains locked to the actor while it detours around a tree',
+    'camera remains locked to the actor while crossing the blank world',
     NeuraGame.new,
     (game) async {
       const start = WorldPoint(3.5, 9.56);
@@ -200,7 +241,7 @@ void main() {
 
       expect(game.requestMovement(target), isTrue);
       final plannedWaypointCount = game.movementWaypoints.length;
-      expect(plannedWaypointCount, greaterThan(1));
+      expect(plannedWaypointCount, 1);
       var legStart = Vector2(start.x, start.y);
       for (final waypoint in game.movementWaypoints) {
         expect(isDirectionAlignedDelta(waypoint - legStart), isTrue);
@@ -226,7 +267,7 @@ void main() {
         }
       }
 
-      expect(maximumActorDeviation, greaterThan(0.15));
+      expect(maximumActorDeviation, lessThan(0.0001));
       expect(maximumCameraSeparation, lessThan(0.0001));
       expect(facingTransitions, lessThanOrEqualTo(plannedWaypointCount * 4));
       expect(game.cameraPosition.x, closeTo(target.x, 0.0001));

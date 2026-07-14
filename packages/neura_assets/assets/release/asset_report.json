@@ -1,73 +1,391 @@
 {
   "chunkCount": 64,
-  "imageBytes": 3792510,
-  "imageCount": 13,
+  "imageBytes": 12994360,
+  "imageCount": 68,
   "images": [
     {
+      "bytes": 555416,
+      "releasePath": "images/659ef46971ecf6fda281.png",
+      "sha256": "7b0b0e6874d507e747bb42546e1e43031bb4af82a83550fd0d54200756ed3288",
+      "sourceLogicalPath": "environment_generated/materials/007_decal.png"
+    },
+    {
+      "bytes": 507993,
+      "releasePath": "images/bc97418109bf5fc09c0e.png",
+      "sha256": "a01a9c288df00f281517ec2c047a4a9eb60565dfb4e8bdeef8e8429b71058efb",
+      "sourceLogicalPath": "environment_generated/materials/007_tile.png"
+    },
+    {
+      "bytes": 933854,
+      "releasePath": "images/ef53b8898f08675428bf.png",
+      "sha256": "83d6c5775f79e70c9f9b537611c34dd5eaea9d4da273f363cf6f5b0c56702132",
+      "sourceLogicalPath": "environment_generated/objects/ow1/building/031_1.png"
+    },
+    {
+      "bytes": 366108,
+      "releasePath": "images/6b564bc3f7f8e707a26a.png",
+      "sha256": "e7e88b6812cd37ef16d33a88e679915def21b9c19574623e121ee7b66ac7b43a",
+      "sourceLogicalPath": "environment_generated/objects/ow1/building/038_5.png"
+    },
+    {
+      "bytes": 641738,
+      "releasePath": "images/4c71f73f720808fac887.png",
+      "sha256": "c219897965bed87365da4ac7ccc21211abfd40ec4dcd52b1c0eb6d8b05465d14",
+      "sourceLogicalPath": "environment_generated/objects/ow1/building/041_6.png"
+    },
+    {
+      "bytes": 64526,
+      "releasePath": "images/90d0522bdf45bd718899.png",
+      "sha256": "de5f0a2d87463115b5f69535832929c764a29839e5c1fbaccb6c868d67cf2f98",
+      "sourceLogicalPath": "environment_generated/objects/ow2/castleWell/001_1.png"
+    },
+    {
+      "bytes": 61608,
+      "releasePath": "images/4808a0959bc0c526487c.png",
+      "sha256": "b6c67e4436e1493b61fdb135491bcc5a0a7169b08cca4314ea094d1bac6c934b",
+      "sourceLogicalPath": "environment_generated/objects/ow2/castleWell/001_4.png"
+    },
+    {
+      "bytes": 211607,
+      "releasePath": "images/2d0d067fc3ae6119d908.png",
+      "sha256": "8dd9ed794d5e30fe9185c109de88a51adead9a39a88dcffd8498d9af14c0b0bb",
+      "sourceLogicalPath": "environment_generated/objects/ow3/barn/002_8.png"
+    },
+    {
+      "bytes": 11734,
+      "releasePath": "images/db269626844b10e47810.png",
+      "sha256": "4f0c73d114a7ca01e6fe2d4e79960017de3c684f1326781e9f50a4163e20b2c2",
+      "sourceLogicalPath": "environment_generated/objects/ow3/basket/002_1.png"
+    },
+    {
+      "bytes": 20215,
+      "releasePath": "images/e6779d90a295c7da6d87.png",
+      "sha256": "6fa7d745545daea9d47dee99da839f722b194958a094775e31eaecf95064a49b",
+      "sourceLogicalPath": "environment_generated/objects/ow3/bench/001_7.png"
+    },
+    {
+      "bytes": 19241,
+      "releasePath": "images/c1361a24ff36f5db6e54.png",
+      "sha256": "58655cb56b3725d8762cb5a36083ffa70413deec0cc5b8b96c16e1c1d4ffd65d",
+      "sourceLogicalPath": "environment_generated/objects/ow3/bench/005_4.png"
+    },
+    {
+      "bytes": 11404,
+      "releasePath": "images/d1f23f6433d67fb52510.png",
+      "sha256": "c336a37699224ef677dfb05a66c2fd4ebf8329f57210d7c5f92b9b6a11847d53",
+      "sourceLogicalPath": "environment_generated/objects/ow3/bucket/002_1.png"
+    },
+    {
+      "bytes": 26014,
+      "releasePath": "images/e9a270c989894712baf3.png",
+      "sha256": "a6a4319a12e51cb28568e97f4b41bdf823f15b00da37cc6f4a1fd89f51aeefae",
+      "sourceLogicalPath": "environment_generated/objects/ow3/bush/008_1.png"
+    },
+    {
+      "bytes": 16937,
+      "releasePath": "images/755001a9f45d76bf9223.png",
+      "sha256": "c9c7b401611572bf6ccf74a4687d0a2b663947d38d96bd6f822cb91d7cd141f0",
+      "sourceLogicalPath": "environment_generated/objects/ow3/bush/010_1.png"
+    },
+    {
+      "bytes": 16041,
+      "releasePath": "images/04984b44e4960f37820e.png",
+      "sha256": "85061db5ccbb3308404ee39057f8851aabf4a1d5ddf0b2e476bdc4dff402fd18",
+      "sourceLogicalPath": "environment_generated/objects/ow3/bush/012_1.png"
+    },
+    {
+      "bytes": 18017,
+      "releasePath": "images/c9258a4b63e0bd4a9516.png",
+      "sha256": "2c926063e488d5c84bb7389b57e526262617d12d6cd12f895007fd98011c3526",
+      "sourceLogicalPath": "environment_generated/objects/ow3/bush/023_1.png"
+    },
+    {
+      "bytes": 44340,
+      "releasePath": "images/a36b0bfc5e587d80e688.png",
+      "sha256": "2195c840f07aa91554bd9a2a59b1c5c77bd483161fd0275bfc6260dd92f86301",
+      "sourceLogicalPath": "environment_generated/objects/ow3/cart/009_6.png"
+    },
+    {
+      "bytes": 26167,
+      "releasePath": "images/63bcb9775e7459e97813.png",
+      "sha256": "900db8652b381ea0cddda8042a6939fec595a167667d70ac5e35c6f3b67adabc",
+      "sourceLogicalPath": "environment_generated/objects/ow3/cart/010_6.png"
+    },
+    {
+      "bytes": 8137,
+      "releasePath": "images/b3528cf19bdd887ee3ab.png",
+      "sha256": "abb54c345e8c97e3cdc01bfa6cecb6904193c62e2c640906cb7e685a38a90356",
+      "sourceLogicalPath": "environment_generated/objects/ow3/cooperPiggin/001_1.png"
+    },
+    {
+      "bytes": 13048,
+      "releasePath": "images/88afdae0bcc16c8667b7.png",
+      "sha256": "7adcc3c938f6ea68239aa2e47e1318eabb041b7240bfc3c86905b747d18eb75e",
+      "sourceLogicalPath": "environment_generated/objects/ow3/crate/004_1.png"
+    },
+    {
+      "bytes": 38720,
+      "releasePath": "images/9735eec70fe53369e504.png",
+      "sha256": "f801097356915bbf23f01a6d194fbef8ef32ce7156edba2f5605230c4f3b2cf4",
+      "sourceLogicalPath": "environment_generated/objects/ow3/crates/006_1.png"
+    },
+    {
+      "bytes": 211634,
+      "releasePath": "images/18ce9aec0bd4185d59b6.png",
+      "sha256": "5e1f04aa84d9cf50a19608777c46a2cd3fa04edd976b93162e59386fbc3035ea",
+      "sourceLogicalPath": "environment_generated/objects/ow3/crop/002_4.png"
+    },
+    {
+      "bytes": 18899,
+      "releasePath": "images/c1c392d70af2c8c9c927.png",
+      "sha256": "3b20ae7cc4a0672136485962335262a82981c7efe9d3dac156f233da2bb4a936",
+      "sourceLogicalPath": "environment_generated/objects/ow3/dungeonClutter/001_1.png"
+    },
+    {
+      "bytes": 32079,
+      "releasePath": "images/021a497ca64814da8d6f.png",
+      "sha256": "b95ad17321bd8cb71b6aafc8214411e4034266fbb47e71e1e5d7e1e9ac36cb21",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/001_3.png"
+    },
+    {
+      "bytes": 33006,
+      "releasePath": "images/a22d48b38102f438f82e.png",
+      "sha256": "4d48b30a7a73e2e4fcfab959f4e0c0c679b629ae562d3bb8509377feb0f9d7ca",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/001_4.png"
+    },
+    {
+      "bytes": 33599,
+      "releasePath": "images/94e34a78fd389bcf0868.png",
+      "sha256": "b5628a90811cedcc7b584a1ee6ce438689c260ae1cd46da724ec837cc6b2075b",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/002_3.png"
+    },
+    {
+      "bytes": 34374,
+      "releasePath": "images/7ad4f32f20b782ecc562.png",
+      "sha256": "48ab04efb651b8803f3d249e2f1654359d776b6cba6afa9c4c5a97f53a1ccb42",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/002_4.png"
+    },
+    {
+      "bytes": 38251,
+      "releasePath": "images/c909ed9a6140e27500b4.png",
+      "sha256": "5fe4c510e8a2cb51ab20a3132ff5fffbfb7284c867b5d1107db209cb89029da7",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/003_3.png"
+    },
+    {
+      "bytes": 38880,
+      "releasePath": "images/9492c36644f8c289b94f.png",
+      "sha256": "40e19ba3aecaa05fdfb52b7966ea19b951392edac3d678279f90b091a24533f4",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/003_4.png"
+    },
+    {
+      "bytes": 10908,
+      "releasePath": "images/7107ddd2b0315224528d.png",
+      "sha256": "f7180584203604ede7f4f59cb891f734376604e04fe21fe06c1002c62886d242",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/021_1.png"
+    },
+    {
+      "bytes": 11572,
+      "releasePath": "images/bb2aacbe511648ed1609.png",
+      "sha256": "05430f20952db609f178619571ab1e6ce01ee19a90eab8ad2377f29e845d4bc7",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/021_2.png"
+    },
+    {
+      "bytes": 12083,
+      "releasePath": "images/5f382e996c050ab686d8.png",
+      "sha256": "c695e63090e377645d4657c9674416474fa0c65deff8d6a3bed010b43847f839",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/022_1.png"
+    },
+    {
+      "bytes": 11340,
+      "releasePath": "images/a03a31fda77660013dc5.png",
+      "sha256": "7974e087a68abe7d616fdb299a0f900c50602b75feeaf4d998a8c10ed913ec3a",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/028_1.png"
+    },
+    {
+      "bytes": 35787,
+      "releasePath": "images/81bcedad9c8577ac5442.png",
+      "sha256": "36d20fcb2a9cca6b740514b39633ecf42185e73e556c272ae1e853ef47aa22a0",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/040_1.png"
+    },
+    {
+      "bytes": 35689,
+      "releasePath": "images/f95506cb9771f626e62d.png",
+      "sha256": "409c13467f993d816fd0a9ac2096ca8fdc1a02b71c252ef9419e3ad44b768e9b",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/040_4.png"
+    },
+    {
+      "bytes": 19581,
+      "releasePath": "images/67f9c5fdbf6d0a23706e.png",
+      "sha256": "523b8e041712432da764a4b8b1f1c4b9ab70b434b347cfeafd908a51cd04f265",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/043_1.png"
+    },
+    {
+      "bytes": 23165,
+      "releasePath": "images/eec8958ace6dd910fec6.png",
+      "sha256": "85247fb71ed51002024af06e3d9aefbeb545ecd578117e1bee25d69a8544801f",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/043_2.png"
+    },
+    {
+      "bytes": 19391,
+      "releasePath": "images/1216c303b461fcf7acdc.png",
+      "sha256": "8f44fbe9e1bfc21e7e11e9e48819d98daed53d54163298fa76e5cc9d30679de7",
+      "sourceLogicalPath": "environment_generated/objects/ow3/flower/043_5.png"
+    },
+    {
+      "bytes": 14242,
+      "releasePath": "images/946e3223dacf4496ecea.png",
+      "sha256": "194adc6e756f35edc7807e712c13e285bdf062430b064fafd5b66a4dd36e6728",
+      "sourceLogicalPath": "environment_generated/objects/ow3/grainBag/001_1.png"
+    },
+    {
       "bytes": 183879,
-      "releasePath": "images/f8b91868fd9d1824953a.png",
+      "releasePath": "images/4dbcade3e97565d552a9.png",
       "sha256": "1c1955df1d55418b144e008190890dcbfab2866d7b4d35523ab4681f01589094",
-      "sourceLogicalPath": "environment_generated/objects/grass/021_1.png"
+      "sourceLogicalPath": "environment_generated/objects/ow3/grass/021_1.png"
     },
     {
-      "bytes": 9273,
-      "releasePath": "images/68634f5b7d05c7c94bd6.png",
-      "sha256": "3106335c4891af92c42f486e6bd3cece502140ed2f593ce96ed84ca2f75a7daa",
-      "sourceLogicalPath": "environment_generated/objects/grass/022_1.png"
+      "bytes": 419320,
+      "releasePath": "images/0d4e697cc6bbb7a32585.png",
+      "sha256": "dd1128036a4a659f73618f49f1452b1a45d11a3452fb652a1b4744b89a08e8ab",
+      "sourceLogicalPath": "environment_generated/objects/ow3/grass/021_2.png"
     },
     {
-      "bytes": 7033,
-      "releasePath": "images/cf916428ecd52e27423e.png",
-      "sha256": "781663b3acf25c68da462754f50f27a05b990bd8c15300a5edb73a84f96c81c3",
-      "sourceLogicalPath": "environment_generated/objects/grass/023_1.png"
+      "bytes": 298061,
+      "releasePath": "images/d935cd30c5990be4ad30.png",
+      "sha256": "15b4162f7a7280e1120cce836b38ca0edbc1effd4d58598619013785c7d24686",
+      "sourceLogicalPath": "environment_generated/objects/ow3/grass/021_3.png"
     },
     {
-      "bytes": 21729,
-      "releasePath": "images/19cbb2a2736452db3fc4.png",
-      "sha256": "da918a8cf1875704f1b5bff3ce41e4c705a09c62209df4a9d933361e5058c943",
-      "sourceLogicalPath": "environment_generated/objects/rock/012_1.png"
+      "bytes": 323782,
+      "releasePath": "images/2102a85275d38458ed19.png",
+      "sha256": "a6fa52f712288d1fe5f686c90fc123abb132ce499449cbaddef56a833bf21fae",
+      "sourceLogicalPath": "environment_generated/objects/ow3/grass/021_4.png"
     },
     {
-      "bytes": 14057,
-      "releasePath": "images/447fdef0792fbb3b8923.png",
-      "sha256": "91e2ea30c09b25c4c5f1fcf5188c53621623a528703505df5916cacd0349a601",
-      "sourceLogicalPath": "environment_generated/objects/rock/014_1.png"
+      "bytes": 42249,
+      "releasePath": "images/9d577ae87b1e576f4d07.png",
+      "sha256": "a0ffe555e97221e30996e358103dda9f74079ee5167bf631bdd8a8c1b51ec74c",
+      "sourceLogicalPath": "environment_generated/objects/ow3/haystack/002_3.png"
+    },
+    {
+      "bytes": 46227,
+      "releasePath": "images/122ae457deb676ee2b92.png",
+      "sha256": "a643eb23f1462a7ef57d230531e94436d6db3dbda448c30b6c9d5d4e8725252d",
+      "sourceLogicalPath": "environment_generated/objects/ow3/hedge/001_4.png"
+    },
+    {
+      "bytes": 44841,
+      "releasePath": "images/4d3769dbf6a51588d744.png",
+      "sha256": "cb15625a1562ace5bf5834b526da7e6ae4fdd24664d22a0b505f9384e03ae896",
+      "sourceLogicalPath": "environment_generated/objects/ow3/outhouse/001_6.png"
+    },
+    {
+      "bytes": 47663,
+      "releasePath": "images/f7c2540d968766c70bef.png",
+      "sha256": "25fb7ab62fad22f8002a3f98b63a2fe45e057f83b59f3832db20f26f6d22ecad",
+      "sourceLogicalPath": "environment_generated/objects/ow3/outhouse/001_8.png"
+    },
+    {
+      "bytes": 293334,
+      "releasePath": "images/3dbd2cf18db7da6fd2e2.png",
+      "sha256": "6db4e261a78829924c20affdfddfc9e26330967378f727a02d3bbfc5e3a2aa48",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/003_1.png"
+    },
+    {
+      "bytes": 394831,
+      "releasePath": "images/af3d5143b3917877b135.png",
+      "sha256": "b2bd8888ef63509e3d71b99383881567f7875c9f2daf6ea2d441058365f899d4",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/004_1.png"
     },
     {
       "bytes": 367995,
-      "releasePath": "images/1fb4ad96981871063249.png",
+      "releasePath": "images/88fcb2fbf52b0e97e029.png",
       "sha256": "ec29cf05b5946678d0abb5c7a1edea99e1ef9ce229388ab63058d7e2455a98b3",
-      "sourceLogicalPath": "environment_generated/objects/tree/006_1.png"
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/006_1.png"
+    },
+    {
+      "bytes": 374265,
+      "releasePath": "images/99e184893a5bb2ae3050.png",
+      "sha256": "4d899bc3ab0ae85b24c527e1a3eac772e0d6d3bab8136cf571ee10eb38982a29",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/006_6.png"
     },
     {
       "bytes": 329669,
-      "releasePath": "images/c1bafce7370d0ecc7263.png",
+      "releasePath": "images/c2bba9c1872b9fa9f584.png",
       "sha256": "2930809aa16ee180959b004080602ba752b6682b5ee06d8d94b79036ef75b998",
-      "sourceLogicalPath": "environment_generated/objects/tree/010_1.png"
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/010_1.png"
     },
     {
-      "bytes": 119079,
-      "releasePath": "images/6b994758c9df4cd88f62.png",
-      "sha256": "73cc3dd3d317f6304cd85734897e5db8bb7d207c2c03c255e86f6e3cebba50d0",
-      "sourceLogicalPath": "environment_generated/objects/tree/014_1.png"
+      "bytes": 277089,
+      "releasePath": "images/a0d02be26803f072350b.png",
+      "sha256": "9b43bd9da23ed06bd62ca2827e0f5aaf2c5a945017efce2e2446e35954c013a8",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/012_1.png"
+    },
+    {
+      "bytes": 127285,
+      "releasePath": "images/3b66b24f327f20b0291e.png",
+      "sha256": "5dc5e22440a6e5d702431eb462fba1d71c43853ca88a855cacbcb092b82405cf",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/016_1.png"
     },
     {
       "bytes": 795642,
-      "releasePath": "images/7b35d9a6d52917dea3c9.png",
+      "releasePath": "images/8c1f880354fc5f0350ae.png",
       "sha256": "1e480e9be8c86f5fbe9512bad65da306e9ee554fbcc9de350594659a7c487e32",
-      "sourceLogicalPath": "environment_generated/objects/tree/018_1.png"
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/018_1.png"
     },
     {
-      "bytes": 521769,
-      "releasePath": "images/76d7716fbc3f60cbf974.png",
-      "sha256": "9d4e77d4e58ebc793330753bf0392ca19afcede26c03635667d21c69a0942539",
-      "sourceLogicalPath": "environment_v2/materials/earth.png"
+      "bytes": 596395,
+      "releasePath": "images/81c191ba424d9932f663.png",
+      "sha256": "95d2d2bd5b031881a9e3faddd5f2c7241537decf1933abe93b02bb720f414925",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/020_5.png"
     },
     {
-      "bytes": 445044,
-      "releasePath": "images/a3189ed72026f945d0fd.png",
-      "sha256": "b4f151a11d879da55684ff484ca7bfac60125c9968f6fbbd6b3df9dec78cc23c",
-      "sourceLogicalPath": "environment_v2/materials/earth_decal.png"
+      "bytes": 119104,
+      "releasePath": "images/54a8cd204916ce568ae2.png",
+      "sha256": "fdc46079d01a25d97eb571a66b848deeb1a98cfacba578fbe5e7a031378bfd54",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/033_1.png"
+    },
+    {
+      "bytes": 232005,
+      "releasePath": "images/b089b386e2e010dfa809.png",
+      "sha256": "02736b0b955d69f6fb608da364b62e7354eacb53373bbf14c9d5134a834f3e57",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/036_1.png"
+    },
+    {
+      "bytes": 218015,
+      "releasePath": "images/d166b3dcd66ae08ed35f.png",
+      "sha256": "81350bfa16b61c4ef727ddcdb8b10db36217bc4e97c50f42d55096d9c6b5d988",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/036_2.png"
+    },
+    {
+      "bytes": 321668,
+      "releasePath": "images/b8d9898aa1caefe64ead.png",
+      "sha256": "1cc01055847883d7ab68025a76bbabfbdfad673fffe0c23ca85d9be2ce034f94",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/039_1.png"
+    },
+    {
+      "bytes": 14497,
+      "releasePath": "images/1b8b478cea989610b232.png",
+      "sha256": "530d59a5b34acb2c7e9d6210eb05207c4eccf8fd73f75776321b3a6545a0b693",
+      "sourceLogicalPath": "environment_generated/objects/ow3/vine/001_1.png"
+    },
+    {
+      "bytes": 31735,
+      "releasePath": "images/3b5668d1b33f691cf747.png",
+      "sha256": "497711cec8a8b02d42215c3417e2fb4aa62ab84ce124a3505e67aade3a21248f",
+      "sourceLogicalPath": "environment_generated/objects/ow3/vine/002_1.png"
+    },
+    {
+      "bytes": 13938,
+      "releasePath": "images/60c80818b6273f065c6f.png",
+      "sha256": "b0a8f14ea1bc032293fba3e0f0eef17cfc4caac58f911a24bae030eb58c4168d",
+      "sourceLogicalPath": "environment_generated/objects/ow3/washBasket/001_1.png"
+    },
+    {
+      "bytes": 9472,
+      "releasePath": "images/64c3daab38669b21b14d.png",
+      "sha256": "248f292451df015b0cc0c83db5896946940f6c8d2a2397ea75e74b364891d7cc",
+      "sourceLogicalPath": "environment_generated/objects/ow3/waterBucket/001_1.png"
     },
     {
       "bytes": 553924,
@@ -80,12 +398,24 @@
       "releasePath": "images/1379bc99d4f5eb6adb90.png",
       "sha256": "76e6ec6bfd368aba018c1cfd8c78c6941bdf923b78cd76f93711d802c6355c06",
       "sourceLogicalPath": "environment_v2/materials/meadow_decal.png"
+    },
+    {
+      "bytes": 30521,
+      "releasePath": "images/aab0b8e58d88867f1988.png",
+      "sha256": "69fc3d9164e29b6fec770d5c4a1c96da24e37c34fef5d4feee114d91a034b504",
+      "sourceLogicalPath": "environment_v2/objects/Bush1_1.png"
+    },
+    {
+      "bytes": 1816192,
+      "releasePath": "images/0574dd2853b79ed8f80c.png",
+      "sha256": "aa3985e977bd23414f31b4dc9a0fc83a1b0cd811f5003d00ed336462f7fa84fb",
+      "sourceLogicalPath": "environment_v2/objects/Tree30_1.png"
     }
   ],
   "materialCount": 2,
-  "metadataBytes": 44461,
-  "objectAssetCount": 9,
-  "payloadBytes": 3836971,
+  "metadataBytes": 267471,
+  "objectAssetCount": 50,
+  "payloadBytes": 13261831,
   "schemaVersion": 1,
   "sizeLimitBytes": 67108864,
   "worldId": "environment_starter"

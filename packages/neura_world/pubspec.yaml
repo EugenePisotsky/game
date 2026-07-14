@@ -9,6 +9,11 @@ environment:
 resolution: workspace
 
 dependencies:
+  ffi: ^2.2.0
+  flutter_rust_bridge: 2.11.1
+  hooks: ^1.0.1
+  native_toolchain_rust: ^1.0.3
+  path: ^1.9.1
   vector_math: ^2.2.0
 
 dev_dependencies:

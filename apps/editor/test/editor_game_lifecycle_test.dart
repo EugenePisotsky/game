@@ -49,4 +49,58 @@ void main() {
       game.controller.dispose();
     },
   );
+
+  final streamedDocument = EnvironmentDocument(
+    id: 'editor_raster_fixture',
+    name: 'Editor Raster Fixture',
+    width: 32,
+    height: 32,
+    baseMaterialId: 'ow3.ground.meadow',
+    terrainStrokes: [
+      TerrainStroke(
+        materialId: 'ow3.ground.earth',
+        radius: 2,
+        opacity: 0.4,
+        points: const [WorldPoint(5, 5), WorldPoint(8, 8)],
+      ),
+    ],
+  );
+  final loadedChunks = <EnvironmentChunkCoordinate>{
+    const EnvironmentChunkCoordinate(0, 0),
+  };
+
+  testWithGame<EditorGame>(
+    'flattens loaded chunk terrain into a bounded raster and evicts it',
+    () => EditorGame(
+      EditorController(
+        EnvironmentDocument.fromJson(streamedDocument.toJson()),
+        catalog: catalog,
+      ),
+      loadedChunks: () => loadedChunks,
+    ),
+    (game) async {
+      void renderFrame() {
+        final recorder = ui.PictureRecorder();
+        game.render(ui.Canvas(recorder));
+        recorder.endRecording().dispose();
+      }
+
+      for (
+        var attempt = 0;
+        attempt < 20 && game.terrainRasterCount == 0;
+        attempt++
+      ) {
+        renderFrame();
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+
+      expect(game.terrainRasterCount, 1);
+      expect(game.terrainRasterBytes, 4 * (1 << 20));
+
+      loadedChunks.clear();
+      renderFrame();
+      expect(game.terrainPictureCount, 0);
+      game.controller.dispose();
+    },
+  );
 }

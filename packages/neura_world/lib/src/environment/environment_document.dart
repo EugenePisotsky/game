@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 enum EnvironmentDirection {
   south,
@@ -83,17 +84,36 @@ class TerrainStroke {
     required this.radius,
     required this.opacity,
     required this.points,
+    this.seed = 0,
+    this.spacing = legacySpacing,
+    this.scatter = 0,
+    this.sizeJitter = 0,
+    this.opacityJitter = 0,
   });
+
+  static const double legacySpacing = 0.22;
 
   final String materialId;
   final double radius;
   final double opacity;
   final List<WorldPoint> points;
+  final int seed;
+  final double spacing;
+  final double scatter;
+  final double sizeJitter;
+  final double opacityJitter;
+
+  double get maximumStampExtent => radius * (1 + scatter + sizeJitter);
 
   Map<String, Object> toJson() => {
     'materialId': materialId,
     'radius': radius,
     'opacity': opacity,
+    'seed': seed,
+    'spacing': spacing,
+    'scatter': scatter,
+    'sizeJitter': sizeJitter,
+    'opacityJitter': opacityJitter,
     'points': [for (final point in points) point.toJson()],
   };
 
@@ -101,10 +121,159 @@ class TerrainStroke {
     materialId: json['materialId'] as String,
     radius: (json['radius'] as num).toDouble(),
     opacity: (json['opacity'] as num).toDouble(),
+    seed: (json['seed'] as num?)?.toInt() ?? 0,
+    spacing: (json['spacing'] as num? ?? TerrainStroke.legacySpacing)
+        .toDouble(),
+    scatter: (json['scatter'] as num? ?? 0).toDouble(),
+    sizeJitter: (json['sizeJitter'] as num? ?? 0).toDouble(),
+    opacityJitter: (json['opacityJitter'] as num? ?? 0).toDouble(),
     points: [
       for (final value in json['points'] as List<Object?>)
         WorldPoint.fromJson(value as Map<String, Object?>),
     ],
+  );
+}
+
+class TerrainBrushStamp {
+  const TerrainBrushStamp({
+    required this.center,
+    required this.radius,
+    required this.opacity,
+  });
+
+  final WorldPoint center;
+  final double radius;
+  final double opacity;
+}
+
+/// Converts a pointer polyline into stable brush stamps whose density does not
+/// depend on the platform's pointer-event frequency.
+Iterable<TerrainBrushStamp> terrainStrokeStamps(TerrainStroke stroke) sync* {
+  if (stroke.points.isEmpty || stroke.radius <= 0 || stroke.opacity <= 0) {
+    return;
+  }
+  final spacing = math.max(0.15, stroke.radius * stroke.spacing);
+  var stampIndex = 0;
+
+  TerrainBrushStamp makeStamp(WorldPoint base) {
+    final angle = _strokeRandom(stroke.seed, stampIndex, 0) * math.pi * 2;
+    final distance =
+        math.sqrt(_strokeRandom(stroke.seed, stampIndex, 1)) *
+        stroke.scatter *
+        stroke.radius;
+    final sizeVariation =
+        (_strokeRandom(stroke.seed, stampIndex, 2) * 2 - 1) * stroke.sizeJitter;
+    final opacityVariation =
+        (_strokeRandom(stroke.seed, stampIndex, 3) * 2 - 1) *
+        stroke.opacityJitter;
+    stampIndex++;
+    return TerrainBrushStamp(
+      center: WorldPoint(
+        base.x + math.cos(angle) * distance,
+        base.y + math.sin(angle) * distance,
+      ),
+      radius: math.max(
+        stroke.radius * 0.1,
+        stroke.radius * (1 + sizeVariation),
+      ),
+      opacity: (stroke.opacity * (1 + opacityVariation)).clamp(0, 1),
+    );
+  }
+
+  yield makeStamp(stroke.points.first);
+  var previous = stroke.points.first;
+  var distanceToNext = spacing;
+  for (final point in stroke.points.skip(1)) {
+    final dx = point.x - previous.x;
+    final dy = point.y - previous.y;
+    final segmentLength = math.sqrt(dx * dx + dy * dy);
+    if (segmentLength <= 1e-9) {
+      previous = point;
+      continue;
+    }
+    var traversed = 0.0;
+    while (traversed + distanceToNext <= segmentLength) {
+      traversed += distanceToNext;
+      final t = traversed / segmentLength;
+      yield makeStamp(WorldPoint(previous.x + dx * t, previous.y + dy * t));
+      distanceToNext = spacing;
+    }
+    distanceToNext -= segmentLength - traversed;
+    previous = point;
+  }
+}
+
+double _strokeRandom(int seed, int stampIndex, int channel) {
+  var value =
+      (seed ^ (stampIndex * 0x9E3779B9) ^ (channel * 0x85EBCA6B)) & 0xFFFFFFFF;
+  value ^= value >> 16;
+  value = (value * 0x7FEB352D) & 0xFFFFFFFF;
+  value ^= value >> 15;
+  value = (value * 0x846CA68B) & 0xFFFFFFFF;
+  value ^= value >> 16;
+  return (value & 0xFFFFFFFF) / 0x100000000;
+}
+
+/// Returns the visually dominant painted material at [point]. Later strokes
+/// override earlier strokes, matching the renderer's draw order.
+String environmentMaterialAtPoint(
+  EnvironmentDocument document,
+  WorldPoint point, {
+  double coverage = 0.75,
+}) {
+  for (final stroke in document.terrainStrokes.reversed) {
+    if (_terrainStrokeCovers(stroke, point, coverage)) {
+      return stroke.materialId;
+    }
+  }
+  return document.baseMaterialId;
+}
+
+bool _terrainStrokeCovers(
+  TerrainStroke stroke,
+  WorldPoint point,
+  double coverage,
+) {
+  if (stroke.points.isEmpty || stroke.opacity <= 0) return false;
+  final radius = stroke.radius * coverage;
+  final radiusSquared = radius * radius;
+  if (stroke.points.length == 1) {
+    return _distanceSquared(point, stroke.points.first) <= radiusSquared;
+  }
+  for (var index = 1; index < stroke.points.length; index++) {
+    if (_segmentDistanceSquared(
+          point,
+          stroke.points[index - 1],
+          stroke.points[index],
+        ) <=
+        radiusSquared) {
+      return true;
+    }
+  }
+  return false;
+}
+
+double _distanceSquared(WorldPoint a, WorldPoint b) {
+  final dx = a.x - b.x;
+  final dy = a.y - b.y;
+  return dx * dx + dy * dy;
+}
+
+double _segmentDistanceSquared(
+  WorldPoint point,
+  WorldPoint start,
+  WorldPoint end,
+) {
+  final dx = end.x - start.x;
+  final dy = end.y - start.y;
+  final lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared <= 1e-12) return _distanceSquared(point, start);
+  final projection =
+      ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared;
+  final t = math.max(0.0, math.min(1.0, projection));
+  return _distanceSquared(
+    point,
+    WorldPoint(start.x + dx * t, start.y + dy * t),
   );
 }
 

@@ -395,6 +395,16 @@ Objects are owned by the chunk containing their sort anchor. Large footprints
 remain discoverable from neighboring chunks through bounds metadata and are
 not duplicated as independent instances.
 
+Ownership is storage, not duplication: an object record appears in exactly one
+chunk while neighboring chunks may list its ID in `overlapObjectIds`. Placed
+object IDs must therefore be unique across the entire world, including chunks
+that are not currently loaded. New editor placements use a timestamped
+session namespace instead of a counter that restarts with the application.
+Before a release build, the editor scans every chunk for legacy ID collisions.
+Its repair flow lists each asset, world position, and owning chunk, preserves
+the first identity, renames later occurrences, rebuilds all overlap references,
+and saves the affected chunks before continuing.
+
 ### Terrain paint at scale
 
 Replaying every brush stamp each frame will not scale. The editor may preserve
@@ -405,8 +415,47 @@ as one of:
 - material-weight/splat masks;
 - cached chunk render texture regenerated when the chunk changes.
 
+Interactive terrain strokes use distance-based resampling rather than one
+stamp per pointer event. New strokes persist a deterministic seed, spacing,
+flow, scatter, size jitter, and opacity jitter. This keeps density independent
+of mouse polling frequency, produces irregular natural edges, and guarantees
+that editor, game, save/reload, and release export reproduce the same result.
+The initial editor exposes Size, Flow, and Scatter; spacing and jitter remain
+stable brush defaults until material-specific presets are introduced. Legacy
+strokes without these fields retain their original centered dense rendering.
+
+The editor's streaming renderer keeps the JSON strokes authoritative but
+flattens committed paint into one transparent 1024 x 1024 RGBA overlay per
+populated loaded chunk. Empty chunks keep only an empty-cache marker. The
+in-progress stroke renders directly for immediate feedback; committing it
+invalidates only overlapping chunks, which are rebaked one at a time. A dirty
+chunk temporarily falls back to direct stroke rendering so paint never
+disappears while its replacement raster is being produced. Raster images are
+disposed when their chunks unload or the world is rebased. At 32 x 32 world
+units, each populated chunk overlay has a predictable 4 MiB decoded footprint.
+
 Brush strokes crossing a chunk boundary must be split or indexed into every
 affected chunk so editing either side remains deterministic.
+
+### Repeated objects along a path
+
+The editor's Path tool previews and places repeated ordinary objects along a
+dragged world-space line. Piece length controls the asset's physical cadence;
+Gap adds regular separation or overlap; Opening removes a centered range for a
+gate or passage. Each preview chooses the closest direction actually supplied
+by the asset, and the orientation control cycles the mapping when static art
+uses a different directional convention. Releasing the pointer retains the
+line as an editable draft: either endpoint can be dragged and all settings keep
+updating the preview. Apply creates one multi-selection and one undo entry;
+Cancel or Escape discards the draft. The resulting objects remain independent,
+so existing chunk ownership, collision geometry, selection, save, and release
+export require no procedural runtime representation.
+
+Reviewed footprint geometry supplies the initial piece length. Assets without
+reviewed geometry use a scale-aware visual estimate and can be tuned from the
+live preview. A later retained-polyline format may add editable bends, multiple
+openings, corner assets, end caps, and mixed variants without changing the
+first version's generated-object contract.
 
 ### Runtime streaming
 
@@ -442,6 +491,20 @@ Store positions as chunk coordinate plus local coordinate in serialized data.
 Runtime systems may expose convenient world coordinates, but rendering and
 physics should operate near a local origin. Origin rebasing can be introduced
 if very large coordinates produce visible precision issues.
+
+The first editor implementation keeps runtime coordinates non-negative. The
+World dialog can append a complete chunk row or column on any of the four
+isometric edges. Extending an upper edge rebases existing chunk coordinates,
+object bounds, travel points, and player spawn by one chunk while shifting the
+editor camera by the same amount, so authored content does not jump visually.
+Lower-edge extensions preserve existing coordinates. The manifest and chunks
+are authoritative after the initial bootstrap; the asset importer validates
+them but does not need to regenerate them.
+
+Player spawn is a chunk-local manifest position. **World → Place player spawn**
+turns the next canvas click into a spawn placement, renders a cyan marker, and
+saves it with the manifest. The game consumes the new position after **Build
+release** exports the authored world.
 
 ## Asset lifetime and release packaging
 
@@ -568,7 +631,12 @@ Migration must preserve current object IDs and world positions.
   32-unit chunk manifests, stable local coordinates, seam-indexed paint,
   cross-boundary object indices, async player/viewport streaming, hysteresis,
   cancellation, per-chunk dirty saves, asset reference counts, a bounded LRU
-  decoded-image cache, and per-chunk terrain picture caches are active.
+  decoded-image cache, game terrain picture caches, and editor terrain raster
+  overlays are active.
+- Phase 4 world authoring is expandable: the editor adds full rows or columns
+  on any isometric edge, rebases upper-edge content without a visual jump,
+  streams the resized world immediately, and places/persists the player spawn
+  from the canvas. The original 256 x 256 size is now only the starter size.
 - Phase 5 is implemented: the Rust exporter traverses exported chunks and
   layers, writes compact catalogs with bundle-local paths, copies only the 13
   images referenced by the prototype, emits and enforces a byte report, and

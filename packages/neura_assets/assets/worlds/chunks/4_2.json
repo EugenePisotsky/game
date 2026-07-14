@@ -1,13 +1,104 @@
 {
-  "baseMaterialId": "ow3.ground.meadow",
+  "schemaVersion": 1,
+  "worldId": "environment_starter",
   "coordinate": {
     "x": 4,
     "y": 2
   },
-  "objects": [],
-  "overlapObjectIds": [],
-  "schemaVersion": 1,
   "size": 32.0,
+  "baseMaterialId": "ow3.ground.meadow",
   "terrainStrokes": [],
-  "worldId": "environment_starter"
+  "objects": [
+    {
+      "id": "object_hkdo4qsyjc_0_229",
+      "assetId": "ow3.fence.001",
+      "localPosition": {
+        "x": 4.740201631212841,
+        "y": 30.855193242003807
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 132.60020163121285,
+          "y": 93.11519324200381
+        },
+        "max": {
+          "x": 132.88020163121283,
+          "y": 96.5951932420038
+        }
+      }
+    },
+    {
+      "id": "object_hkdo4qsyjc_0_230",
+      "assetId": "ow3.fence.001",
+      "localPosition": {
+        "x": 4.221360628844309,
+        "y": 27.95117808807275
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 132.08136062884432,
+          "y": 90.21117808807276
+        },
+        "max": {
+          "x": 132.3613606288443,
+          "y": 93.69117808807275
+        }
+      }
+    },
+    {
+      "id": "object_hkdo4qsyjc_0_231",
+      "assetId": "ow3.fence.001",
+      "localPosition": {
+        "x": 3.7025196264757767,
+        "y": 25.047162934141696
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 131.5625196264758,
+          "y": 87.3071629341417
+        },
+        "max": {
+          "x": 131.84251962647576,
+          "y": 90.78716293414169
+        }
+      }
+    },
+    {
+      "id": "object_hkdo4qsyjc_0_240",
+      "assetId": "ow3.fence.001",
+      "localPosition": {
+        "x": 2.1340209498012257,
+        "y": 23.49638021370238
+      },
+      "verticalOffset": 0.0,
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 128.39402094980122,
+          "y": 87.35638021370238
+        },
+        "max": {
+          "x": 131.87402094980123,
+          "y": 87.63638021370238
+        }
+      }
+    }
+  ],
+  "overlapObjectIds": [
+    "object_hkdo4qsyjc_0_229",
+    "object_hkdo4qsyjc_0_230",
+    "object_hkdo4qsyjc_0_231",
+    "object_hkdo4qsyjc_0_239",
+    "object_hkdo4qsyjc_0_240"
+  ]
 }

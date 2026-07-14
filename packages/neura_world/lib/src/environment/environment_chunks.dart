@@ -425,26 +425,27 @@ class EnvironmentChunkedWorld {
 
     for (final stroke in document.terrainStrokes) {
       if (stroke.points.isEmpty) continue;
+      final extent = stroke.maximumStampExtent;
       final minX =
           stroke.points
               .map((point) => point.x)
               .reduce((a, b) => a < b ? a : b) -
-          stroke.radius;
+          extent;
       final minY =
           stroke.points
               .map((point) => point.y)
               .reduce((a, b) => a < b ? a : b) -
-          stroke.radius;
+          extent;
       final maxX =
           stroke.points
               .map((point) => point.x)
               .reduce((a, b) => a > b ? a : b) +
-          stroke.radius;
+          extent;
       final maxY =
           stroke.points
               .map((point) => point.y)
               .reduce((a, b) => a > b ? a : b) +
-          stroke.radius;
+          extent;
       for (final coordinate in coordinates) {
         final bounds = EnvironmentObjectBounds(
           minX: minX,
@@ -458,6 +459,11 @@ class EnvironmentChunkedWorld {
             materialId: stroke.materialId,
             radius: stroke.radius,
             opacity: stroke.opacity,
+            seed: stroke.seed,
+            spacing: stroke.spacing,
+            scatter: stroke.scatter,
+            sizeJitter: stroke.sizeJitter,
+            opacityJitter: stroke.opacityJitter,
             points: [
               for (final point in stroke.points)
                 WorldPoint(
@@ -535,4 +541,146 @@ class EnvironmentChunkedWorld {
       chunks: chunks,
     );
   }
+}
+
+enum EnvironmentWorldEdge { left, right, top, bottom }
+
+/// Adds one complete chunk row or column to a rectangular world.
+///
+/// The runtime world keeps its origin at zero. Extending [left] or [top]
+/// therefore rebases existing content by one chunk, which preserves its visual
+/// relationship to the editor camera without requiring signed world bounds.
+EnvironmentChunkedWorld extendEnvironmentChunkedWorld(
+  EnvironmentWorldManifest manifest,
+  Map<EnvironmentChunkCoordinate, EnvironmentChunkDocument> sourceChunks,
+  EnvironmentWorldEdge edge,
+) {
+  final size = manifest.chunkSize;
+  final columns = (manifest.width / size).ceil();
+  final rows = (manifest.height / size).ceil();
+  final expected = {
+    for (var y = 0; y < rows; y++)
+      for (var x = 0; x < columns; x++) EnvironmentChunkCoordinate(x, y),
+  };
+  if (!manifest.chunks.toSet().containsAll(expected) ||
+      !sourceChunks.keys.toSet().containsAll(expected)) {
+    throw StateError('World extension requires a complete rectangular world.');
+  }
+
+  final shiftX = edge == EnvironmentWorldEdge.left ? 1 : 0;
+  final shiftY = edge == EnvironmentWorldEdge.top ? 1 : 0;
+  final worldShiftX = shiftX * size;
+  final worldShiftY = shiftY * size;
+  final nextColumns =
+      columns +
+      (edge == EnvironmentWorldEdge.left || edge == EnvironmentWorldEdge.right
+          ? 1
+          : 0);
+  final nextRows =
+      rows +
+      (edge == EnvironmentWorldEdge.top || edge == EnvironmentWorldEdge.bottom
+          ? 1
+          : 0);
+
+  final chunks = <EnvironmentChunkCoordinate, EnvironmentChunkDocument>{};
+  for (final entry in sourceChunks.entries) {
+    final coordinate = EnvironmentChunkCoordinate(
+      entry.key.x + shiftX,
+      entry.key.y + shiftY,
+    );
+    final source = entry.value;
+    chunks[coordinate] = EnvironmentChunkDocument(
+      worldId: source.worldId,
+      coordinate: coordinate,
+      size: source.size,
+      baseMaterialId: source.baseMaterialId,
+      terrainStrokes: source.terrainStrokes,
+      objects: [
+        for (final object in source.objects)
+          ChunkPlacedEnvironmentObject(
+            id: object.id,
+            assetId: object.assetId,
+            localX: object.localX,
+            localY: object.localY,
+            verticalOffset: object.verticalOffset,
+            sortBias: object.sortBias,
+            editorLayerId: object.editorLayerId,
+            direction: object.direction,
+            bounds: EnvironmentObjectBounds(
+              minX: object.bounds.minX + worldShiftX,
+              minY: object.bounds.minY + worldShiftY,
+              maxX: object.bounds.maxX + worldShiftX,
+              maxY: object.bounds.maxY + worldShiftY,
+            ),
+          ),
+      ],
+      overlapObjectIds: source.overlapObjectIds,
+    );
+  }
+
+  for (var y = 0; y < nextRows; y++) {
+    for (var x = 0; x < nextColumns; x++) {
+      final coordinate = EnvironmentChunkCoordinate(x, y);
+      chunks.putIfAbsent(
+        coordinate,
+        () => EnvironmentChunkDocument(
+          worldId: manifest.id,
+          coordinate: coordinate,
+          size: size,
+          baseMaterialId: manifest.baseMaterialId,
+        ),
+      );
+    }
+  }
+
+  final allObjects = [for (final chunk in chunks.values) ...chunk.objects];
+  for (final entry in chunks.entries.toList()) {
+    final chunk = entry.value;
+    chunks[entry.key] = EnvironmentChunkDocument(
+      worldId: chunk.worldId,
+      coordinate: chunk.coordinate,
+      size: chunk.size,
+      baseMaterialId: chunk.baseMaterialId,
+      terrainStrokes: chunk.terrainStrokes,
+      objects: chunk.objects,
+      overlapObjectIds: {
+        for (final object in allObjects)
+          if (object.bounds.overlapsChunk(entry.key, size)) object.id,
+      },
+    );
+  }
+
+  ChunkLocalPosition shiftPosition(ChunkLocalPosition position) =>
+      ChunkLocalPosition(
+        chunk: EnvironmentChunkCoordinate(
+          position.chunk.x + shiftX,
+          position.chunk.y + shiftY,
+        ),
+        localX: position.localX,
+        localY: position.localY,
+      );
+
+  final coordinates = chunks.keys.toList()..sort();
+  return EnvironmentChunkedWorld(
+    manifest: EnvironmentWorldManifest(
+      id: manifest.id,
+      name: manifest.name,
+      chunkSize: size,
+      width: nextColumns * size,
+      height: nextRows * size,
+      baseMaterialId: manifest.baseMaterialId,
+      chunks: coordinates,
+      playerSpawn: shiftPosition(manifest.playerSpawn),
+      travelPoints: [
+        for (final point in manifest.travelPoints)
+          EnvironmentTravelPoint(
+            id: point.id,
+            position: shiftPosition(point.position),
+          ),
+      ],
+      editorLayers: manifest.editorLayers,
+      activeLayerId: manifest.activeLayerId,
+    ),
+    chunks: chunks,
+  );
 }

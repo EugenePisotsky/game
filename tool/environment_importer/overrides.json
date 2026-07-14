@@ -32,6 +32,21 @@
       "texture": "environment_v2/materials/meadow.png",
       "decal": "environment_v2/materials/meadow_decal.png",
       "tags": ["grass", "meadow"]
+    },
+    "ow3.water.001": {
+      "name": "Dark green water",
+      "defaultRadius": 2.8,
+      "tags": ["water", "dark", "green", "non-walkable"]
+    },
+    "ow3.water.002": {
+      "name": "Bright blue water",
+      "defaultRadius": 2.8,
+      "tags": ["water", "blue", "bright", "non-walkable"]
+    },
+    "ow3.water.003": {
+      "name": "Muted blue water",
+      "defaultRadius": 2.8,
+      "tags": ["water", "blue", "muted", "non-walkable"]
     }
   },
   "objects": {

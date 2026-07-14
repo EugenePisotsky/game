@@ -8,6 +8,6 @@
   "viewportHeight": 600,
   "clockSeconds": 0.0,
   "randomSeed": 2104,
-  "relevantObjectIds": ["object_165", "object_166", "object_167", "object_168", "object_169"],
+  "relevantObjectIds": ["object_165", "object_166", "object_167"],
   "expectedLoadedChunks": [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 1}]
 }

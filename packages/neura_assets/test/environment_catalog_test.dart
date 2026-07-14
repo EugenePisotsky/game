@@ -67,6 +67,86 @@ void main() {
     );
   });
 
+  test('hierarchical categories and directional modes are validated', () {
+    final catalog = EnvironmentCatalog.fromJsonString('''
+      {
+        "materials": [],
+        "objects": [
+          {
+            "id": "barrel",
+            "name": "Barrel",
+            "family": "barrel",
+            "sourcePack": "ow3",
+            "categoryPath": ["Props", "Containers"],
+            "viewMode": "fourWay",
+            "renderScale": 1.0,
+            "views": {
+              "south": {"image": "1.png"},
+              "west": {"image": "2.png"},
+              "east": {"image": "3.png"},
+              "north": {"image": "4.png"}
+            }
+          }
+        ]
+      }
+    ''');
+
+    final barrel = catalog.objects.single;
+    expect(barrel.category, 'Containers');
+    expect(barrel.categoryBreadcrumb, 'Props / Containers');
+    expect(barrel.topLevelCategory, 'Props');
+    expect(barrel.family, 'barrel');
+    expect(barrel.sourcePack, 'ow3');
+    expect(barrel.viewMode, EnvironmentAssetViewMode.fourWay);
+    expect(() => barrel.viewFor('southWest'), throwsStateError);
+  });
+
+  test('declared view mode cannot hide an incomplete source set', () {
+    expect(
+      () => EnvironmentCatalog.fromJsonString('''
+        {
+          "materials": [],
+          "objects": [
+            {
+              "id": "bad",
+              "name": "Bad",
+              "category": "Props",
+              "viewMode": "fourWay",
+              "renderScale": 1.0,
+              "views": {"south": {"image": "only.png"}}
+            }
+          ]
+        }
+      '''),
+      throwsFormatException,
+    );
+  });
+
+  test('release catalogs may retain only referenced directional views', () {
+    final catalog = EnvironmentCatalog.fromJsonString('''
+      {
+        "materials": [],
+        "objects": [
+          {
+            "id": "tree",
+            "name": "Tree",
+            "category": "Trees",
+            "viewMode": "eightWay",
+            "partialViews": true,
+            "renderScale": 1.0,
+            "views": {
+              "south": {"image": "south.png"},
+              "northWest": {"image": "north_west.png"}
+            }
+          }
+        ]
+      }
+    ''');
+
+    expect(catalog.objects.single.viewMode, EnvironmentAssetViewMode.eightWay);
+    expect(catalog.objects.single.views.keys, {'south', 'northWest'});
+  });
+
   test('generated assets carry role-specific physical geometry', () async {
     final catalog = EnvironmentCatalog.fromJsonString(
       await File('assets/catalogs/environment_catalog.json').readAsString(),
@@ -83,6 +163,22 @@ void main() {
     expect(grass.geometry.blocking, isEmpty);
     expect(fence.geometry.blocking.single, isA<EnvironmentCapsule>());
     expect(bridge.geometry.walkable.single, isA<EnvironmentRectangle>());
+  });
+
+  test('generated water materials are paintable and block movement', () async {
+    final catalog = EnvironmentCatalog.fromJsonString(
+      await File('assets/catalogs/environment_catalog.json').readAsString(),
+    );
+
+    for (var number = 1; number <= 3; number++) {
+      final id = 'ow3.water.${number.toString().padLeft(3, '0')}';
+      final water = catalog.materialById(id);
+      expect(water, isNotNull, reason: id);
+      expect(water!.blocksMovement, isTrue, reason: id);
+      expect(File('assets/images/${water.texturePath}').existsSync(), isTrue);
+      expect(File('assets/images/${water.decalPath}').existsSync(), isTrue);
+      expect(File('assets/images/${water.thumbnailPath}').existsSync(), isTrue);
+    }
   });
 
   test(

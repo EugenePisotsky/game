@@ -45,10 +45,18 @@ enum Command {
     Build,
     /// Verify that generated files match the source and configuration.
     Check,
+    /// Verify only discovered visual assets and their generated catalog/images.
+    CheckAssets,
     /// Split the authored environment document into runtime world chunks.
     BuildWorld,
     /// Verify the generated world manifest and chunks.
     CheckWorld,
+    /// Erase all authored terrain and objects while preserving the world grid.
+    ClearWorld {
+        /// Confirm the destructive reset.
+        #[arg(long)]
+        yes: bool,
+    },
     /// Export the authored world and only its referenced images for release.
     ExportWorld,
     /// Verify the self-contained release world and its size budget.
@@ -59,8 +67,7 @@ enum Command {
 #[serde(rename_all = "camelCase")]
 struct Rules {
     schema_version: u32,
-    pack_id: String,
-    source_root: PathBuf,
+    packs: Vec<PackRule>,
     generated_image_root: PathBuf,
     catalog_path: PathBuf,
     manifest_path: PathBuf,
@@ -76,8 +83,27 @@ struct Rules {
     world_width: f64,
     world_height: f64,
     player_spawn: RulePoint,
-    ground: GroundRule,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PackRule {
+    id: String,
+    source_root: PathBuf,
+    ground: Option<GroundRule>,
+    #[serde(default)]
     objects: Vec<ObjectRule>,
+    #[serde(default)]
+    deferred: Vec<DeferredRule>,
+    #[serde(default)]
+    split_incomplete_kinds: BTreeSet<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DeferredRule {
+    pattern: String,
+    reason: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -91,24 +117,44 @@ struct RulePoint {
 struct GroundRule {
     tile_pattern: String,
     decal_pattern: String,
+    water_pattern: String,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct ObjectRule {
     kind: String,
-    category: String,
-    pattern: String,
+    #[serde(default)]
+    display_name: Option<String>,
+    category_path: Vec<String>,
+    #[serde(default)]
+    source_prefix: Option<String>,
+    #[serde(default)]
+    pattern: Option<String>,
+    #[serde(default)]
+    singleton_pattern: Option<String>,
     directionless_pattern: Option<String>,
-    expected_views: u8,
+    allowed_view_counts: Vec<u8>,
+    #[serde(default)]
+    prefer_directional: bool,
+    #[serde(default = "default_rule_render_scale")]
     render_scale: f64,
+    #[serde(default = "default_render_band")]
     render_band: String,
+    #[serde(default)]
     sort_anchor_x: f64,
+    #[serde(default)]
     sort_anchor_y: f64,
+    #[serde(default)]
     default_sort_bias: f64,
+    #[serde(default = "default_pivot_x")]
     pivot_x: f64,
+    #[serde(default = "default_pivot_y")]
     pivot_y: f64,
-    collision_profile: String,
+    #[serde(default)]
+    collision_profile: Option<String>,
+    #[serde(default)]
+    tags: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -123,29 +169,62 @@ struct SourceImage {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 struct DiscoveredMaterial {
+    pack_id: String,
+    #[serde(
+        default = "default_material_kind",
+        skip_serializing_if = "is_ground_material_kind"
+    )]
+    kind: String,
     number: u32,
     tile: SourceImage,
-    decal: SourceImage,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    decal: Option<SourceImage>,
+}
+
+fn default_material_kind() -> String {
+    "ground".into()
+}
+
+fn is_ground_material_kind(kind: &String) -> bool {
+    kind == "ground"
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 struct DiscoveredObject {
+    pack_id: String,
     kind: String,
-    category: String,
+    category_path: Vec<String>,
     number: u32,
-    expected_views: u8,
-    directionless: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    source_variant: Option<u8>,
+    view_mode: String,
     views: BTreeMap<u8, SourceImage>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+struct DiscoveredSourceStatus {
+    source: String,
+    status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    family: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    asset_number: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    view: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    reason: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 struct Manifest {
     schema_version: u32,
-    pack_id: String,
+    packs: Vec<String>,
     materials: Vec<DiscoveredMaterial>,
     objects: Vec<DiscoveredObject>,
+    sources: Vec<DiscoveredSourceStatus>,
     warnings: Vec<String>,
 }
 
@@ -187,6 +266,7 @@ struct ObjectOverride {
     pivot_y: Option<f64>,
     collision_profile: Option<String>,
     tags: Option<Vec<String>>,
+    category_path: Option<Vec<String>>,
     view_images: Option<BTreeMap<String, String>>,
     #[serde(default)]
     exclude: bool,
@@ -220,6 +300,14 @@ struct CatalogObject {
     id: String,
     name: String,
     category: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    family: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    source_pack: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    category_path: Vec<String>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    view_mode: String,
     render_scale: f64,
     #[serde(default = "default_render_band")]
     render_band: String,
@@ -254,6 +342,10 @@ fn default_pivot_x() -> f64 {
     0.5
 }
 
+fn default_rule_render_scale() -> f64 {
+    1.0
+}
+
 fn default_render_band() -> String {
     "depthSorted".to_owned()
 }
@@ -276,6 +368,7 @@ fn run() -> Result<()> {
     if rules.schema_version != 1 {
         return Err(format!("unsupported rules schema {}", rules.schema_version).into());
     }
+    validate_rules(&rules)?;
 
     match cli.command {
         Command::Scan => {
@@ -296,6 +389,11 @@ fn run() -> Result<()> {
             print_summary(&manifest, "verified");
             println!("  chunked world and release bundle are current");
         }
+        Command::CheckAssets => {
+            let manifest = scan(&root, &rules)?;
+            check(&root, &rules, &manifest)?;
+            print_summary(&manifest, "verified");
+        }
         Command::BuildWorld => {
             build_world(&root, &rules)?;
             println!("built chunked environment world");
@@ -303,6 +401,15 @@ fn run() -> Result<()> {
         Command::CheckWorld => {
             check_world(&root, &rules)?;
             println!("verified chunked environment world");
+        }
+        Command::ClearWorld { yes } => {
+            if !yes {
+                return Err(
+                    "clear-world erases all authored terrain and objects; rerun with --yes".into(),
+                );
+            }
+            clear_world(&root, &rules)?;
+            println!("cleared authored environment world");
         }
         Command::ExportWorld => {
             export_world(&root, &rules)?;
@@ -316,67 +423,215 @@ fn run() -> Result<()> {
     Ok(())
 }
 
-fn scan(root: &Path, rules: &Rules) -> Result<Manifest> {
-    let source_root = root.join(&rules.source_root);
-    let tile_regex = Regex::new(&rules.ground.tile_pattern)?;
-    let decal_regex = Regex::new(&rules.ground.decal_pattern)?;
-    let object_regexes = rules
-        .objects
-        .iter()
-        .map(|rule| {
-            Ok((
-                Regex::new(&rule.pattern)?,
-                rule.directionless_pattern
-                    .as_ref()
-                    .map(|pattern| Regex::new(pattern))
-                    .transpose()?,
-            ))
-        })
-        .collect::<Result<Vec<_>>>()?;
-
-    let mut tiles = BTreeMap::<u32, SourceImage>::new();
-    let mut decals = BTreeMap::<u32, SourceImage>::new();
-    let mut grouped = BTreeMap::<(usize, u32), BTreeMap<u8, SourceImage>>::new();
-    let mut directionless = BTreeMap::<(usize, u32), SourceImage>::new();
-
-    for entry in fs::read_dir(&source_root)? {
-        let path = entry?.path();
-        if !path.is_file() {
-            continue;
+fn validate_rules(rules: &Rules) -> Result<()> {
+    let mut pack_ids = BTreeSet::new();
+    for pack in &rules.packs {
+        if !pack_ids.insert(pack.id.as_str()) {
+            return Err(format!("duplicate source pack id {}", pack.id).into());
         }
-        let Some(file_name) = path.file_name().and_then(|name| name.to_str()) else {
-            continue;
-        };
-
-        if let Some(captures) = tile_regex.captures(file_name) {
-            tiles.insert(parse_capture(&captures, 1)?, inspect_image(root, &path)?);
-            continue;
-        }
-        if let Some(captures) = decal_regex.captures(file_name) {
-            decals.insert(parse_capture(&captures, 1)?, inspect_image(root, &path)?);
-            continue;
-        }
-
-        for (rule_index, (view_regex, directionless_regex)) in object_regexes.iter().enumerate() {
-            if let Some(captures) = view_regex.captures(file_name) {
-                let number = parse_capture(&captures, 1)?;
-                let view = parse_capture(&captures, 2)? as u8;
-                let replaced = grouped
-                    .entry((rule_index, number))
-                    .or_default()
-                    .insert(view, inspect_image(root, &path)?);
-                if replaced.is_some() {
-                    return Err(format!("duplicate view for {file_name}").into());
-                }
-                break;
+        let mut kinds = BTreeSet::new();
+        for rule in &pack.objects {
+            if !kinds.insert(rule.kind.as_str()) {
+                return Err(format!("duplicate family {} in pack {}", rule.kind, pack.id).into());
             }
-            if let Some(captures) = directionless_regex
-                .as_ref()
-                .and_then(|regex| regex.captures(file_name))
+            if rule.category_path.is_empty() {
+                return Err(format!("family {} has an empty category path", rule.kind).into());
+            }
+            if rule.allowed_view_counts.is_empty()
+                || rule
+                    .allowed_view_counts
+                    .iter()
+                    .any(|count| ![1, 4, 8].contains(count))
             {
-                let number = parse_capture(&captures, 1)?;
-                directionless.insert((rule_index, number), inspect_image(root, &path)?);
-                break;
+                return Err(format!(
+                    "family {} has unsupported allowed view counts {:?}",
+                    rule.kind, rule.allowed_view_counts
+                )
+                .into());
+            }
+            directional_pattern(rule)?;
+            singleton_pattern(rule)?;
+            directionless_pattern(rule)?;
+        }
+        for kind in &pack.split_incomplete_kinds {
+            if !kinds.contains(kind.as_str()) {
+                return Err(
+                    format!("pack {} splits unknown incomplete family {kind}", pack.id).into(),
+                );
+            }
+        }
+    }
+    Ok(())
+}
+
+fn scan(root: &Path, rules: &Rules) -> Result<Manifest> {
+    let mut tiles = BTreeMap::<(usize, u32), SourceImage>::new();
+    let mut decals = BTreeMap::<(usize, u32), SourceImage>::new();
+    let mut waters = BTreeMap::<(usize, u32), SourceImage>::new();
+    let mut grouped = BTreeMap::<(usize, usize, u32), BTreeMap<u8, SourceImage>>::new();
+    let mut directionless = BTreeMap::<(usize, usize, u32), SourceImage>::new();
+    let mut group_statuses = BTreeMap::<(usize, usize, u32), Vec<usize>>::new();
+    let mut directionless_statuses = BTreeMap::<(usize, usize, u32), usize>::new();
+    let mut sources = Vec::<DiscoveredSourceStatus>::new();
+
+    for (pack_index, pack) in rules.packs.iter().enumerate() {
+        let source_root = root.join(&pack.source_root);
+        let ground_regexes = pack
+            .ground
+            .as_ref()
+            .map(|ground| -> Result<(Regex, Regex, Regex)> {
+                Ok((
+                    Regex::new(&ground.tile_pattern)?,
+                    Regex::new(&ground.decal_pattern)?,
+                    Regex::new(&ground.water_pattern)?,
+                ))
+            })
+            .transpose()?;
+        let object_regexes = pack
+            .objects
+            .iter()
+            .map(|rule| {
+                Ok((
+                    Regex::new(&directional_pattern(rule)?)?,
+                    singleton_pattern(rule)?
+                        .map(|pattern| Regex::new(&pattern))
+                        .transpose()?,
+                    directionless_pattern(rule)?
+                        .map(|pattern| Regex::new(&pattern))
+                        .transpose()?,
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let deferred_regexes = pack
+            .deferred
+            .iter()
+            .map(|rule| Ok((Regex::new(&rule.pattern)?, &rule.reason)))
+            .collect::<Result<Vec<_>>>()?;
+
+        let mut paths = fs::read_dir(&source_root)?
+            .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+            .filter(|path| {
+                path.is_file()
+                    && path
+                        .extension()
+                        .and_then(|extension| extension.to_str())
+                        .is_some_and(|extension| extension.eq_ignore_ascii_case("png"))
+            })
+            .collect::<Vec<_>>();
+        paths.sort();
+
+        for path in paths {
+            let file_name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .ok_or("source filename is not UTF-8")?;
+            let source = relative_path(root, &path)?;
+
+            if let Some((tile_regex, decal_regex, water_regex)) = &ground_regexes {
+                if let Some(captures) = tile_regex.captures(file_name) {
+                    let number = parse_capture(&captures, 1)?;
+                    insert_unique_source_image(
+                        &mut tiles,
+                        (pack_index, number),
+                        inspect_image(root, &path)?,
+                        file_name,
+                    )?;
+                    sources.push(classified_source(source, "ground", number, None));
+                    continue;
+                }
+                if let Some(captures) = decal_regex.captures(file_name) {
+                    let number = parse_capture(&captures, 1)?;
+                    insert_unique_source_image(
+                        &mut decals,
+                        (pack_index, number),
+                        inspect_image(root, &path)?,
+                        file_name,
+                    )?;
+                    sources.push(classified_source(source, "ground", number, None));
+                    continue;
+                }
+                if let Some(captures) = water_regex.captures(file_name) {
+                    let number = parse_capture(&captures, 1)?;
+                    insert_unique_source_image(
+                        &mut waters,
+                        (pack_index, number),
+                        inspect_image(root, &path)?,
+                        file_name,
+                    )?;
+                    sources.push(classified_source(source, "water", number, None));
+                    continue;
+                }
+            }
+
+            let mut matches = Vec::<(usize, u32, Option<u8>)>::new();
+            for (rule_index, (view_regex, singleton_regex, directionless_regex)) in
+                object_regexes.iter().enumerate()
+            {
+                if let Some(captures) = view_regex.captures(file_name) {
+                    matches.push((
+                        rule_index,
+                        parse_capture(&captures, 1)?,
+                        Some(parse_capture(&captures, 2)? as u8),
+                    ));
+                }
+                if let Some(captures) = singleton_regex
+                    .as_ref()
+                    .and_then(|regex| regex.captures(file_name))
+                {
+                    matches.push((rule_index, 1, Some(parse_capture(&captures, 1)? as u8)));
+                }
+                if let Some(captures) = directionless_regex
+                    .as_ref()
+                    .and_then(|regex| regex.captures(file_name))
+                {
+                    matches.push((rule_index, parse_capture(&captures, 1)?, None));
+                }
+            }
+            if matches.len() > 1 {
+                return Err(format!("source {file_name} matches multiple object rules").into());
+            }
+            if let Some((rule_index, number, view)) = matches.pop() {
+                let rule = &pack.objects[rule_index];
+                let key = (pack_index, rule_index, number);
+                let status_index = sources.len();
+                sources.push(classified_source(source, &rule.kind, number, view));
+                let image = inspect_image(root, &path)?;
+                if let Some(view) = view {
+                    let replaced = grouped.entry(key).or_default().insert(view, image);
+                    if replaced.is_some() {
+                        return Err(format!("duplicate view for {file_name}").into());
+                    }
+                    group_statuses.entry(key).or_default().push(status_index);
+                } else {
+                    if directionless.insert(key, image).is_some() {
+                        return Err(format!("duplicate directionless asset for {file_name}").into());
+                    }
+                    directionless_statuses.insert(key, status_index);
+                }
+                continue;
+            }
+
+            if let Some((_, reason)) = deferred_regexes
+                .iter()
+                .find(|(regex, _)| regex.is_match(file_name))
+            {
+                sources.push(DiscoveredSourceStatus {
+                    source,
+                    status: "deferred".into(),
+                    family: None,
+                    asset_number: None,
+                    view: None,
+                    reason: Some((*reason).clone()),
+                });
+            } else {
+                sources.push(DiscoveredSourceStatus {
+                    source,
+                    status: "unclassified".into(),
+                    family: None,
+                    asset_number: None,
+                    view: None,
+                    reason: None,
+                });
             }
         }
     }
@@ -387,74 +642,209 @@ fn scan(root: &Path, rules: &Rules) -> Result<Manifest> {
         .copied()
         .collect::<BTreeSet<_>>();
     let mut materials = Vec::new();
-    for number in material_numbers {
+    for (pack_index, number) in material_numbers {
+        let pack_id = rules.packs[pack_index].id.clone();
         let tile = tiles
-            .remove(&number)
-            .ok_or_else(|| format!("ground {number} has a decal but no tile"))?;
+            .remove(&(pack_index, number))
+            .ok_or_else(|| format!("{pack_id} ground {number} has a decal but no tile"))?;
         let decal = decals
-            .remove(&number)
-            .ok_or_else(|| format!("ground {number} has a tile but no decal"))?;
+            .remove(&(pack_index, number))
+            .ok_or_else(|| format!("{pack_id} ground {number} has a tile but no decal"))?;
         materials.push(DiscoveredMaterial {
+            pack_id,
+            kind: "ground".into(),
             number,
             tile,
-            decal,
+            decal: Some(decal),
         });
     }
-
-    let mut warnings = Vec::new();
-    let mut objects = Vec::new();
-    for ((rule_index, number), mut views) in grouped {
-        let rule = &rules.objects[rule_index];
-        validate_views(&rule.kind, number, rule.expected_views, &views)?;
-        objects.push(DiscoveredObject {
-            kind: rule.kind.clone(),
-            category: rule.category.clone(),
-            number,
-            expected_views: rule.expected_views,
-            directionless: false,
-            views: std::mem::take(&mut views),
-        });
-    }
-    for ((rule_index, number), image) in directionless {
-        let rule = &rules.objects[rule_index];
-        if objects
-            .iter()
-            .any(|object| object.kind == rule.kind && object.number == number)
-        {
-            return Err(format!(
-                "{} {number} has directional and directionless files",
-                rule.kind
-            )
-            .into());
-        }
-        warnings.push(format!(
-            "{}.{} is directionless; all views use {}",
-            rule.kind, number, image.source
-        ));
-        objects.push(DiscoveredObject {
-            kind: rule.kind.clone(),
-            category: rule.category.clone(),
-            number,
-            expected_views: rule.expected_views,
-            directionless: true,
-            views: (1..=rule.expected_views)
-                .map(|view| (view, image.clone()))
-                .collect(),
-        });
-    }
-    objects.sort_by(|left, right| {
-        left.kind
-            .cmp(&right.kind)
+    materials.extend(
+        waters
+            .into_iter()
+            .map(|((pack_index, number), tile)| DiscoveredMaterial {
+                pack_id: rules.packs[pack_index].id.clone(),
+                kind: "water".into(),
+                number,
+                tile,
+                decal: None,
+            }),
+    );
+    materials.sort_by(|left, right| {
+        left.pack_id
+            .cmp(&right.pack_id)
+            .then(left.kind.cmp(&right.kind))
             .then(left.number.cmp(&right.number))
     });
 
+    let mut warnings = Vec::new();
+    let mut objects = Vec::new();
+    let object_keys = grouped
+        .keys()
+        .chain(directionless.keys())
+        .copied()
+        .collect::<BTreeSet<_>>();
+    for key @ (pack_index, rule_index, number) in object_keys {
+        let pack = &rules.packs[pack_index];
+        let rule = &pack.objects[rule_index];
+        let views = grouped.remove(&key).unwrap_or_default();
+        let fixed = directionless.remove(&key);
+        let mut invalid_reason = None;
+
+        if !views.is_empty() && fixed.is_some() && !rule.prefer_directional {
+            invalid_reason = Some(format!(
+                "{} {} has both directional and directionless sources",
+                rule.kind, number
+            ));
+        }
+
+        if !views.is_empty() && invalid_reason.is_none() {
+            match validated_view_count(&rule.kind, number, &rule.allowed_view_counts, &views) {
+                Ok(view_count) => {
+                    objects.push(DiscoveredObject {
+                        pack_id: pack.id.clone(),
+                        kind: rule.kind.clone(),
+                        category_path: rule.category_path.clone(),
+                        number,
+                        source_variant: None,
+                        view_mode: view_mode_for_count(view_count)?.into(),
+                        views,
+                    });
+                    if fixed.is_some() {
+                        let status = directionless_statuses[&key];
+                        sources[status].status = "excluded".into();
+                        sources[status].reason = Some(
+                            "directional views take precedence for this reviewed family".into(),
+                        );
+                    }
+                    continue;
+                }
+                Err(error) => {
+                    if pack.split_incomplete_kinds.contains(&rule.kind) {
+                        for (source_variant, image) in views {
+                            objects.push(DiscoveredObject {
+                                pack_id: pack.id.clone(),
+                                kind: rule.kind.clone(),
+                                category_path: rule.category_path.clone(),
+                                number,
+                                source_variant: Some(source_variant),
+                                view_mode: "fixed".into(),
+                                views: [(1, image)].into_iter().collect(),
+                            });
+                        }
+                        continue;
+                    }
+                    invalid_reason = Some(error.to_string());
+                }
+            }
+        } else if views.is_empty() && invalid_reason.is_none() {
+            if rule.allowed_view_counts.contains(&1) {
+                objects.push(DiscoveredObject {
+                    pack_id: pack.id.clone(),
+                    kind: rule.kind.clone(),
+                    category_path: rule.category_path.clone(),
+                    number,
+                    source_variant: None,
+                    view_mode: "fixed".into(),
+                    views: [(1, fixed.expect("object key came from directionless map"))]
+                        .into_iter()
+                        .collect(),
+                });
+                continue;
+            }
+            invalid_reason = Some(format!(
+                "{} {} does not permit fixed art",
+                rule.kind, number
+            ));
+        }
+
+        let reason = invalid_reason.expect("invalid object has a reason");
+        warnings.push(reason.clone());
+        for status in group_statuses.get(&key).into_iter().flatten() {
+            sources[*status].status = "invalid".into();
+            sources[*status].reason = Some(reason.clone());
+        }
+        if let Some(status) = directionless_statuses.get(&key) {
+            sources[*status].status = "invalid".into();
+            sources[*status].reason = Some(reason.clone());
+        }
+    }
+    objects.sort_by(|left, right| {
+        left.pack_id
+            .cmp(&right.pack_id)
+            .then(left.kind.cmp(&right.kind))
+            .then(left.number.cmp(&right.number))
+            .then(left.source_variant.cmp(&right.source_variant))
+    });
+    sources.sort_by(|left, right| left.source.cmp(&right.source));
+
     Ok(Manifest {
-        schema_version: 1,
-        pack_id: rules.pack_id.clone(),
+        schema_version: 2,
+        packs: rules.packs.iter().map(|pack| pack.id.clone()).collect(),
         materials,
         objects,
+        sources,
         warnings,
     })
+}
+
+fn directional_pattern(rule: &ObjectRule) -> Result<String> {
+    rule.pattern
+        .clone()
+        .or_else(|| {
+            rule.source_prefix
+                .as_ref()
+                .map(|prefix| format!(r"^{}(\d+)_0*([1-8])\.png$", regex::escape(prefix)))
+        })
+        .or_else(|| rule.singleton_pattern.as_ref().map(|_| r"^$".to_owned()))
+        .ok_or_else(|| format!("family {} has no source prefix or pattern", rule.kind).into())
+}
+
+fn singleton_pattern(rule: &ObjectRule) -> Result<Option<String>> {
+    Ok(rule.singleton_pattern.clone())
+}
+
+fn directionless_pattern(rule: &ObjectRule) -> Result<Option<String>> {
+    if let Some(pattern) = &rule.directionless_pattern {
+        return Ok(Some(pattern.clone()));
+    }
+    if rule.allowed_view_counts.contains(&1) {
+        let prefix = rule.source_prefix.as_ref().ok_or_else(|| {
+            format!(
+                "family {} permits fixed art but has no directionless pattern or source prefix",
+                rule.kind
+            )
+        })?;
+        return Ok(Some(format!(r"^{}(\d+)\.png$", regex::escape(prefix))));
+    }
+    Ok(None)
+}
+
+fn classified_source(
+    source: String,
+    family: &str,
+    asset_number: u32,
+    view: Option<u8>,
+) -> DiscoveredSourceStatus {
+    DiscoveredSourceStatus {
+        source,
+        status: "classified".into(),
+        family: Some(family.into()),
+        asset_number: Some(asset_number),
+        view,
+        reason: None,
+    }
+}
+
+fn insert_unique_source_image<K: Ord>(
+    values: &mut BTreeMap<K, SourceImage>,
+    key: K,
+    image: SourceImage,
+    file_name: &str,
+) -> Result<()> {
+    if values.insert(key, image).is_some() {
+        return Err(format!("duplicate source asset for {file_name}").into());
+    }
+    Ok(())
 }
 
 fn build(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
@@ -468,18 +858,19 @@ fn build(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
         copy_if_changed(
             root,
             &material.tile,
-            &directory.join(format!("{:03}_tile.png", material.number)),
+            &directory.join(material_file_name(material, "tile")),
         )?;
-        copy_if_changed(
-            root,
-            &material.decal,
-            &directory.join(format!("{:03}_decal.png", material.number)),
-        )?;
+        let decal_path = directory.join(material_file_name(material, "decal"));
+        if let Some(decal) = &material.decal {
+            copy_if_changed(root, decal, &decal_path)?;
+        } else {
+            make_soft_decal(&root.join(&material.tile.source), &decal_path)?;
+        }
         make_thumbnail(
             &root.join(&material.tile.source),
             &generated_root
                 .join("thumbnails/ground")
-                .join(format!("{:03}.png", material.number)),
+                .join(material_thumbnail_name(material)),
             true,
         )?;
     }
@@ -488,19 +879,17 @@ fn build(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
             copy_if_changed(
                 root,
                 image,
-                &generated_root
-                    .join("objects")
-                    .join(&object.kind)
-                    .join(format!("{:03}_{view}.png", object.number)),
+                &generated_root.join(object_image_path(object, *view)),
             )?;
         }
-        let preview = object.views.get(&1).expect("validated first view");
+        let preview_view = if object.views.contains_key(&7) { 7 } else { 1 };
+        let preview = object
+            .views
+            .get(&preview_view)
+            .expect("validated preview view");
         make_thumbnail(
             &root.join(&preview.source),
-            &generated_root
-                .join("thumbnails")
-                .join(&object.kind)
-                .join(format!("{:03}.png", object.number)),
+            &generated_root.join(object_thumbnail_path(object)),
             false,
         )?;
     }
@@ -531,30 +920,32 @@ fn check(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
     for material in &manifest.materials {
         verify_copy(
             &material.tile,
-            &generated_root.join(format!("materials/{:03}_tile.png", material.number)),
+            &generated_root
+                .join("materials")
+                .join(material_file_name(material, "tile")),
         )?;
-        verify_copy(
-            &material.decal,
-            &generated_root.join(format!("materials/{:03}_decal.png", material.number)),
-        )?;
+        let decal_path = generated_root
+            .join("materials")
+            .join(material_file_name(material, "decal"));
+        if let Some(decal) = &material.decal {
+            verify_copy(decal, &decal_path)?;
+        } else {
+            verify_soft_decal(&root.join(&material.tile.source), &decal_path)?;
+        }
         require_file(
-            &generated_root.join(format!("thumbnails/ground/{:03}.png", material.number)),
+            &generated_root
+                .join("thumbnails/ground")
+                .join(material_thumbnail_name(material)),
         )?;
     }
     for object in &manifest.objects {
         for (view, image) in &object.views {
             verify_copy(
                 image,
-                &generated_root.join(format!(
-                    "objects/{}/{:03}_{view}.png",
-                    object.kind, object.number
-                )),
+                &generated_root.join(object_image_path(object, *view)),
             )?;
         }
-        require_file(&generated_root.join(format!(
-            "thumbnails/{}/{:03}.png",
-            object.kind, object.number
-        )))?;
+        require_file(&generated_root.join(object_thumbnail_path(object)))?;
     }
     Ok(())
 }
@@ -772,20 +1163,178 @@ fn build_world(root: &Path, rules: &Rules) -> Result<()> {
     Ok(())
 }
 
-fn check_world(root: &Path, rules: &Rules) -> Result<()> {
-    let (expected_manifest, expected_chunks) = generate_world(root, rules)?;
-    let expected_manifest: serde_json::Value =
-        serde_json::from_slice(&serde_json::to_vec(&expected_manifest)?)?;
-    let actual_manifest: serde_json::Value = read_json(&root.join(&rules.world_manifest_path))?;
-    if actual_manifest != expected_manifest {
-        return Err("environment world manifest is stale; run build-world".into());
-    }
+fn clear_world(root: &Path, rules: &Rules) -> Result<()> {
+    use serde_json::{Value, json};
+
+    let manifest_path = root.join(&rules.world_manifest_path);
+    let mut manifest: Value = read_json(&manifest_path)?;
+    let world_id = manifest["id"]
+        .as_str()
+        .ok_or("world manifest has no id")?
+        .to_owned();
+    let chunk_size = manifest["chunkSize"]
+        .as_f64()
+        .filter(|value| *value > 0.0)
+        .ok_or("world manifest chunkSize must be positive")?;
+    let base_material = manifest["baseMaterialId"]
+        .as_str()
+        .ok_or("world manifest has no baseMaterialId")?
+        .to_owned();
+    let coordinates = manifest["chunks"]
+        .as_array()
+        .ok_or("world manifest chunks must be an array")?
+        .iter()
+        .map(|value| {
+            Ok((
+                value["x"].as_i64().ok_or("chunk x must be an integer")? as i32,
+                value["y"].as_i64().ok_or("chunk y must be an integer")? as i32,
+            ))
+        })
+        .collect::<Result<BTreeSet<_>>>()?;
+    let first = coordinates
+        .first()
+        .copied()
+        .ok_or("world manifest has no chunks")?;
+    let root_layer = json!({
+        "id": "layer_world",
+        "name": "World",
+        "parentId": null,
+        "visible": true,
+        "locked": false,
+        "exported": true
+    });
+
+    manifest["playerSpawn"] = json!({
+        "chunk": {"x": first.0, "y": first.1},
+        "localPosition": {"x": chunk_size / 2.0, "y": chunk_size / 2.0}
+    });
+    manifest["travelPoints"] = json!([]);
+    manifest["editorLayers"] = json!([root_layer.clone()]);
+    manifest["activeLayerId"] = json!("layer_world");
+
     let chunks_root = root.join(&rules.world_chunks_root);
-    for (name, expected) in &expected_chunks {
-        let expected: serde_json::Value = serde_json::from_slice(&serde_json::to_vec(expected)?)?;
-        let actual: serde_json::Value = read_json(&chunks_root.join(name))?;
-        if actual != expected {
-            return Err(format!("environment chunk {name} is stale; run build-world").into());
+    fs::create_dir_all(&chunks_root)?;
+    let expected = coordinates
+        .iter()
+        .map(|(x, y)| format!("{x}_{y}.json"))
+        .collect::<BTreeSet<_>>();
+    for entry in fs::read_dir(&chunks_root)? {
+        let path = entry?.path();
+        let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+            continue;
+        };
+        if path.is_file() && name.ends_with(".json") && !expected.contains(name) {
+            fs::remove_file(path)?;
+        }
+    }
+    for &(x, y) in &coordinates {
+        write_json(
+            &chunks_root.join(format!("{x}_{y}.json")),
+            &json!({
+                "schemaVersion": 1,
+                "worldId": world_id.clone(),
+                "coordinate": {"x": x, "y": y},
+                "size": chunk_size,
+                "baseMaterialId": base_material.clone(),
+                "terrainStrokes": [],
+                "objects": [],
+                "overlapObjectIds": []
+            }),
+        )?;
+    }
+    write_json(&manifest_path, &manifest)?;
+
+    let source_path = root.join(&rules.source_world_path);
+    if source_path.exists() {
+        let mut source: Value = read_json(&source_path)?;
+        source["width"] = manifest["width"].clone();
+        source["height"] = manifest["height"].clone();
+        source["baseMaterialId"] = json!(base_material);
+        source["terrainStrokes"] = json!([]);
+        source["objects"] = json!([]);
+        source["editorLayers"] = json!([root_layer]);
+        source["activeLayerId"] = json!("layer_world");
+        write_json(&source_path, &source)?;
+    }
+    Ok(())
+}
+
+fn check_world(root: &Path, rules: &Rules) -> Result<()> {
+    let manifest: serde_json::Value = read_json(&root.join(&rules.world_manifest_path))?;
+    let world_id = manifest["id"].as_str().ok_or("world manifest has no id")?;
+    let chunk_size = manifest["chunkSize"]
+        .as_f64()
+        .filter(|value| *value > 0.0)
+        .ok_or("world manifest chunkSize must be positive")?;
+    let width = manifest["width"]
+        .as_f64()
+        .filter(|value| *value > 0.0)
+        .ok_or("world manifest width must be positive")?;
+    let height = manifest["height"]
+        .as_f64()
+        .filter(|value| *value > 0.0)
+        .ok_or("world manifest height must be positive")?;
+    let base_material = manifest["baseMaterialId"]
+        .as_str()
+        .ok_or("world manifest has no baseMaterialId")?;
+    let coordinates = manifest["chunks"]
+        .as_array()
+        .ok_or("world manifest chunks must be an array")?
+        .iter()
+        .map(|value| {
+            Ok((
+                value["x"].as_i64().ok_or("chunk x must be an integer")? as i32,
+                value["y"].as_i64().ok_or("chunk y must be an integer")? as i32,
+            ))
+        })
+        .collect::<Result<BTreeSet<_>>>()?;
+    let columns = (width / chunk_size).ceil() as i32;
+    let rows = (height / chunk_size).ceil() as i32;
+    let expected_coordinates = (0..rows)
+        .flat_map(|y| (0..columns).map(move |x| (x, y)))
+        .collect::<BTreeSet<_>>();
+    if coordinates != expected_coordinates {
+        return Err("world chunks must form a complete rectangular grid".into());
+    }
+
+    let spawn_chunk = &manifest["playerSpawn"]["chunk"];
+    let spawn = (
+        spawn_chunk["x"]
+            .as_i64()
+            .ok_or("player spawn chunk x must be an integer")? as i32,
+        spawn_chunk["y"]
+            .as_i64()
+            .ok_or("player spawn chunk y must be an integer")? as i32,
+    );
+    if !coordinates.contains(&spawn) {
+        return Err("player spawn must belong to an authored chunk".into());
+    }
+    let local_spawn = &manifest["playerSpawn"]["localPosition"];
+    for axis in ["x", "y"] {
+        let value = local_spawn[axis]
+            .as_f64()
+            .ok_or("player spawn local position must be numeric")?;
+        if !(0.0..chunk_size).contains(&value) {
+            return Err("player spawn local position must be inside its chunk".into());
+        }
+    }
+
+    let chunks_root = root.join(&rules.world_chunks_root);
+    for &(x, y) in &coordinates {
+        let name = format!("{x}_{y}.json");
+        let chunk: serde_json::Value = read_json(&chunks_root.join(&name))?;
+        if chunk["worldId"].as_str() != Some(world_id)
+            || chunk["coordinate"]["x"].as_i64() != Some(x as i64)
+            || chunk["coordinate"]["y"].as_i64() != Some(y as i64)
+        {
+            return Err(format!("environment chunk {name} has the wrong identity").into());
+        }
+        if chunk["size"].as_f64() != Some(chunk_size)
+            || chunk["baseMaterialId"].as_str() != Some(base_material)
+        {
+            return Err(
+                format!("environment chunk {name} disagrees with its world manifest").into(),
+            );
         }
     }
     let actual_names = fs::read_dir(&chunks_root)?
@@ -793,7 +1342,10 @@ fn check_world(root: &Path, rules: &Rules) -> Result<()> {
         .filter_map(|entry| entry.file_name().into_string().ok())
         .filter(|name| name.ends_with(".json"))
         .collect::<BTreeSet<_>>();
-    let expected_names = expected_chunks.keys().cloned().collect::<BTreeSet<_>>();
+    let expected_names = coordinates
+        .iter()
+        .map(|(x, y)| format!("{x}_{y}.json"))
+        .collect::<BTreeSet<_>>();
     if actual_names != expected_names {
         return Err("world chunk directory contains missing or stale chunk files".into());
     }
@@ -928,7 +1480,7 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
     }
 
     let mut chunks = BTreeMap::<(i32, i32), Value>::new();
-    let mut included_object_ids = BTreeSet::new();
+    let mut included_object_ids = BTreeMap::<String, ((i32, i32), String, f64, f64)>::new();
     let mut required_objects = BTreeMap::<String, BTreeSet<String>>::new();
     let mut required_materials = BTreeSet::from([manifest["baseMaterialId"]
         .as_str()
@@ -950,6 +1502,9 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
         if chunk["baseMaterialId"].as_str() != manifest["baseMaterialId"].as_str() {
             return Err(format!("chunk {x}_{y} base material disagrees with the world").into());
         }
+        let chunk_size = chunk["size"]
+            .as_f64()
+            .ok_or_else(|| format!("chunk {x}_{y} size is invalid"))?;
         for stroke in chunk["terrainStrokes"].as_array().into_iter().flatten() {
             required_materials.insert(
                 stroke["materialId"]
@@ -983,12 +1538,30 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
             let object_id = object["id"]
                 .as_str()
                 .ok_or_else(|| format!("chunk {x}_{y} object has no id"))?;
-            if !included_object_ids.insert(object_id.to_owned()) {
-                return Err(format!("object {object_id} is owned by more than one chunk").into());
-            }
             let asset_id = object["assetId"]
                 .as_str()
                 .ok_or_else(|| format!("object {object_id} has no assetId"))?;
+            let local_x = object["localPosition"]["x"]
+                .as_f64()
+                .ok_or_else(|| format!("object {object_id} localPosition.x is invalid"))?;
+            let local_y = object["localPosition"]["y"]
+                .as_f64()
+                .ok_or_else(|| format!("object {object_id} localPosition.y is invalid"))?;
+            let world_x = x as f64 * chunk_size + local_x;
+            let world_y = y as f64 * chunk_size + local_y;
+            if let Some((first_chunk, first_asset, first_x, first_y)) =
+                included_object_ids.get(object_id)
+            {
+                return Err(format!(
+                    "duplicate object id `{object_id}`\n  first: chunk {}_{}, asset `{first_asset}`, world position ({first_x:.2}, {first_y:.2})\n  second: chunk {x}_{y}, asset `{asset_id}`, world position ({world_x:.2}, {world_y:.2})\nEach placed object must have a unique world-wide ID. Open Build release in the editor and choose `Repair and continue`, or inspect the two chunk files listed above.",
+                    first_chunk.0, first_chunk.1,
+                )
+                .into());
+            }
+            included_object_ids.insert(
+                object_id.to_owned(),
+                ((x, y), asset_id.to_owned(), world_x, world_y),
+            );
             let direction = object["direction"].as_str().unwrap_or("south");
             required_objects
                 .entry(asset_id.to_owned())
@@ -1025,7 +1598,7 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
         })?;
         overlaps.retain(|id| {
             id.as_str()
-                .is_some_and(|id| included_object_ids.contains(id))
+                .is_some_and(|id| included_object_ids.contains_key(id))
         });
     }
     for (object_id, bounds) in &object_bounds {
@@ -1125,6 +1698,7 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
             release_views.insert(direction.clone(), Value::Object(release_view));
         }
         object.insert("views".to_owned(), Value::Object(release_views));
+        object.insert("partialViews".to_owned(), Value::Bool(true));
         release_objects.push(Value::Object(object));
     }
 
@@ -1346,6 +1920,10 @@ fn generate_world(
         let radius = stroke["radius"]
             .as_f64()
             .ok_or("stroke radius must be numeric")?;
+        let extent = radius
+            * (1.0
+                + stroke["scatter"].as_f64().unwrap_or(0.0)
+                + stroke["sizeJitter"].as_f64().unwrap_or(0.0));
         let points = stroke["points"]
             .as_array()
             .ok_or("stroke points must be an array")?;
@@ -1368,10 +1946,10 @@ fn generate_world(
                     .ok_or_else(|| "stroke y must be numeric".into())
             })
             .collect::<Result<Vec<_>>>()?;
-        let min_x = xs.iter().copied().fold(f64::INFINITY, f64::min) - radius;
-        let max_x = xs.iter().copied().fold(f64::NEG_INFINITY, f64::max) + radius;
-        let min_y = ys.iter().copied().fold(f64::INFINITY, f64::min) - radius;
-        let max_y = ys.iter().copied().fold(f64::NEG_INFINITY, f64::max) + radius;
+        let min_x = xs.iter().copied().fold(f64::INFINITY, f64::min) - extent;
+        let max_x = xs.iter().copied().fold(f64::NEG_INFINITY, f64::max) + extent;
+        let min_y = ys.iter().copied().fold(f64::INFINITY, f64::min) - extent;
+        let max_y = ys.iter().copied().fold(f64::NEG_INFINITY, f64::max) + extent;
         for &(x, y) in &coordinates {
             if !bounds_overlap_chunk((min_x, min_y, max_x, max_y), (x, y), rules.world_chunk_size) {
                 continue;
@@ -1560,7 +2138,12 @@ fn create_catalog(
 ) -> Result<Catalog> {
     let mut materials = Vec::new();
     for material in &manifest.materials {
-        let generated_id = format!("{}.ground.{:03}", rules.pack_id, material.number);
+        let generated_id = format!(
+            "{}.{kind}.{:03}",
+            material.pack_id,
+            material.number,
+            kind = material.kind
+        );
         let override_value = overrides.materials.get(&generated_id);
         if override_value.is_some_and(|value| value.exclude) {
             continue;
@@ -1571,21 +2154,23 @@ fn create_catalog(
                 .unwrap_or(generated_id),
             name: override_value
                 .and_then(|value| value.name.clone())
-                .unwrap_or_else(|| format!("Ground {:03}", material.number)),
+                .unwrap_or_else(|| {
+                    format!("{} {:03}", title_case(&material.kind), material.number)
+                }),
             texture: override_value
                 .and_then(|value| value.texture.clone())
                 .unwrap_or_else(|| {
                     format!(
-                        "environment_generated/materials/{:03}_tile.png",
-                        material.number
+                        "environment_generated/materials/{}",
+                        material_file_name(material, "tile")
                     )
                 }),
             decal: override_value
                 .and_then(|value| value.decal.clone())
                 .unwrap_or_else(|| {
                     format!(
-                        "environment_generated/materials/{:03}_decal.png",
-                        material.number
+                        "environment_generated/materials/{}",
+                        material_file_name(material, "decal")
                     )
                 }),
             default_radius: override_value
@@ -1593,10 +2178,16 @@ fn create_catalog(
                 .unwrap_or(1.8),
             tags: override_value
                 .and_then(|value| value.tags.clone())
-                .unwrap_or_default(),
+                .unwrap_or_else(|| {
+                    if material.kind == "water" {
+                        vec!["water".into(), "non-walkable".into()]
+                    } else {
+                        Vec::new()
+                    }
+                }),
             thumbnail: Some(format!(
-                "environment_generated/thumbnails/ground/{:03}.png",
-                material.number
+                "environment_generated/thumbnails/ground/{}",
+                material_thumbnail_name(material)
             )),
         });
     }
@@ -1605,11 +2196,12 @@ fn create_catalog(
     let mut objects = Vec::new();
     for object in &manifest.objects {
         let rule = rules
-            .objects
+            .packs
             .iter()
-            .find(|rule| rule.kind == object.kind)
-            .ok_or_else(|| format!("missing rule for {}", object.kind))?;
-        let generated_id = format!("{}.{}.{:03}", rules.pack_id, object.kind, object.number);
+            .find(|pack| pack.id == object.pack_id)
+            .and_then(|pack| pack.objects.iter().find(|rule| rule.kind == object.kind))
+            .ok_or_else(|| format!("missing rule for {} {}", object.pack_id, object.kind))?;
+        let generated_id = generated_object_id(object);
         let override_value = overrides.objects.get(&generated_id);
         if override_value.is_some_and(|value| value.exclude) {
             continue;
@@ -1636,8 +2228,8 @@ fn create_catalog(
                             .cloned()
                             .unwrap_or_else(|| {
                                 format!(
-                                    "environment_generated/objects/{}/{:03}_{view}.png",
-                                    object.kind, object.number
+                                    "environment_generated/{}",
+                                    object_image_path(object, *view).display()
                                 )
                             }),
                         pivot_x,
@@ -1652,8 +2244,30 @@ fn create_catalog(
                 .unwrap_or(generated_id),
             name: override_value
                 .and_then(|value| value.name.clone())
-                .unwrap_or_else(|| format!("{} {:03}", title_case(&object.kind), object.number)),
-            category: object.category.clone(),
+                .unwrap_or_else(|| {
+                    let base = format!(
+                        "{} {:03}",
+                        rule.display_name
+                            .clone()
+                            .unwrap_or_else(|| title_case(&object.kind)),
+                        object.number
+                    );
+                    match object.source_variant {
+                        Some(variant) => format!("{base} / Variant {variant}"),
+                        None => base,
+                    }
+                }),
+            category: object
+                .category_path
+                .last()
+                .cloned()
+                .unwrap_or_else(|| "Uncategorized".into()),
+            family: object.kind.clone(),
+            source_pack: object.pack_id.clone(),
+            category_path: override_value
+                .and_then(|value| value.category_path.clone())
+                .unwrap_or_else(|| object.category_path.clone()),
+            view_mode: object.view_mode.clone(),
             render_scale: override_value
                 .and_then(|value| value.render_scale)
                 .unwrap_or(rule.render_scale),
@@ -1670,23 +2284,27 @@ fn create_catalog(
                 .and_then(|value| value.default_sort_bias)
                 .unwrap_or(rule.default_sort_bias),
             geometry: serde_json::Value::Null,
-            collision_profile: Some(
-                override_value
-                    .and_then(|value| value.collision_profile.clone())
-                    .unwrap_or_else(|| rule.collision_profile.clone()),
-            ),
+            collision_profile: override_value
+                .and_then(|value| value.collision_profile.clone())
+                .or_else(|| rule.collision_profile.clone()),
             tags: override_value
                 .and_then(|value| value.tags.clone())
-                .unwrap_or_default(),
+                .unwrap_or_else(|| rule.tags.clone()),
             thumbnail: Some(format!(
-                "environment_generated/thumbnails/{}/{:03}.png",
-                object.kind, object.number
+                "environment_generated/{}",
+                object_thumbnail_path(object).display()
             )),
             views,
         });
     }
     objects.append(&mut manual.objects);
     for object in &mut objects {
+        if object.category_path.is_empty() {
+            object.category_path = vec![object.category.clone()];
+        }
+        if object.view_mode.is_empty() {
+            object.view_mode = view_mode_for_count(object.views.len() as u8)?.into();
+        }
         if object.geometry.is_null() {
             object.geometry = geometry_for_profile(object.collision_profile.as_deref());
         }
@@ -1708,6 +2326,7 @@ fn create_catalog(
             )
             .into());
         }
+        validate_catalog_view_mode(object)?;
     }
 
     let mut ids = BTreeSet::new();
@@ -1744,6 +2363,11 @@ fn geometry_for_profile(profile: Option<&str>) -> serde_json::Value {
         Some("fence") => json!({
             "footprint": capsule(-0.8, 0.0, 0.8, 0.0, 0.14),
             "blocking": [capsule(-0.8, 0.0, 0.8, 0.0, 0.11)],
+            "reviewed": false
+        }),
+        Some("fenceSegment") => json!({
+            "footprint": capsule(-1.6, 0.0, 1.6, 0.0, 0.14),
+            "blocking": [capsule(-1.55, 0.0, 1.55, 0.0, 0.11)],
             "reviewed": false
         }),
         Some("building") => json!({
@@ -1794,16 +2418,57 @@ fn capsule(start_x: f64, start_y: f64, end_x: f64, end_y: f64, radius: f64) -> s
     })
 }
 
-fn validate_views(
+fn validated_view_count(
     kind: &str,
     number: u32,
-    expected: u8,
+    allowed: &[u8],
     views: &BTreeMap<u8, SourceImage>,
-) -> Result<()> {
+) -> Result<u8> {
     let actual = views.keys().copied().collect::<Vec<_>>();
-    let wanted = (1..=expected).collect::<Vec<_>>();
+    let Some(count) = allowed
+        .iter()
+        .copied()
+        .find(|count| actual == (1..=*count).collect::<Vec<_>>())
+    else {
+        return Err(format!(
+            "{kind} {number} has views {actual:?}; allowed complete counts are {allowed:?}"
+        )
+        .into());
+    };
+    if ![4, 8].contains(&count) {
+        return Err(format!("{kind} {number} has unsupported directional count {count}").into());
+    }
+    Ok(count)
+}
+
+fn view_mode_for_count(count: u8) -> Result<&'static str> {
+    match count {
+        1 => Ok("fixed"),
+        4 => Ok("fourWay"),
+        8 => Ok("eightWay"),
+        _ => Err(format!("unsupported view count {count}; expected 1, 4, or 8").into()),
+    }
+}
+
+fn validate_catalog_view_mode(object: &CatalogObject) -> Result<()> {
+    let expected = match object.view_mode.as_str() {
+        "fixed" => vec!["south"],
+        "fourWay" => vec!["south", "west", "east", "north"],
+        "eightWay" => DIRECTIONS.to_vec(),
+        mode => return Err(format!("object {} has unknown view mode {mode}", object.id).into()),
+    };
+    let actual = object
+        .views
+        .keys()
+        .map(String::as_str)
+        .collect::<BTreeSet<_>>();
+    let wanted = expected.into_iter().collect::<BTreeSet<_>>();
     if actual != wanted {
-        return Err(format!("{kind} {number} has views {actual:?}; expected {wanted:?}").into());
+        return Err(format!(
+            "object {} declares {} but has directions {:?}",
+            object.id, object.view_mode, actual
+        )
+        .into());
     }
     Ok(())
 }
@@ -1816,6 +2481,50 @@ fn inspect_image(root: &Path, path: &Path) -> Result<SourceImage> {
         height,
         sha256: sha256_file(path)?,
     })
+}
+
+fn material_stem(material: &DiscoveredMaterial) -> String {
+    if material.kind == "ground" {
+        format!("{:03}", material.number)
+    } else {
+        format!("{}_{:03}", material.kind, material.number)
+    }
+}
+
+fn material_file_name(material: &DiscoveredMaterial, role: &str) -> String {
+    format!("{}_{role}.png", material_stem(material))
+}
+
+fn material_thumbnail_name(material: &DiscoveredMaterial) -> String {
+    format!("{}.png", material_stem(material))
+}
+
+fn object_image_path(object: &DiscoveredObject, view: u8) -> PathBuf {
+    PathBuf::from("objects")
+        .join(&object.pack_id)
+        .join(&object.kind)
+        .join(match object.source_variant {
+            Some(variant) => format!("{:03}_v{variant}_{view}.png", object.number),
+            None => format!("{:03}_{view}.png", object.number),
+        })
+}
+
+fn object_thumbnail_path(object: &DiscoveredObject) -> PathBuf {
+    PathBuf::from("thumbnails")
+        .join(&object.pack_id)
+        .join(&object.kind)
+        .join(match object.source_variant {
+            Some(variant) => format!("{:03}_v{variant}.png", object.number),
+            None => format!("{:03}.png", object.number),
+        })
+}
+
+fn generated_object_id(object: &DiscoveredObject) -> String {
+    let base = format!("{}.{}.{:03}", object.pack_id, object.kind, object.number);
+    match object.source_variant {
+        Some(variant) => format!("{base}.v{variant}"),
+        None => base,
+    }
 }
 
 fn copy_if_changed(root: &Path, source: &SourceImage, destination: &Path) -> Result<()> {
@@ -1844,6 +2553,54 @@ fn make_thumbnail(source: &Path, destination: &Path, fill: bool) -> Result<()> {
     let y = (192_u32.saturating_sub(resized.height())) / 2;
     canvas.copy_from(&resized.to_rgba8(), x, y)?;
     DynamicImage::ImageRgba8(canvas).save_with_format(destination, ImageFormat::Png)?;
+    Ok(())
+}
+
+fn soft_decal_pixels(source: &Path) -> Result<RgbaImage> {
+    let mut image = image::open(source)?.to_rgba8();
+    let half_width = image.width() as f64 / 2.0;
+    let half_height = image.height() as f64 / 2.0;
+    for y in 0..image.height() {
+        for x in 0..image.width() {
+            let normalized_x = (x as f64 + 0.5 - half_width) / half_width;
+            let normalized_y = (y as f64 + 0.5 - half_height) / half_height;
+            let distance = (normalized_x * normalized_x + normalized_y * normalized_y).sqrt();
+            let fade = soft_decal_alpha(distance);
+            let pixel = image.get_pixel_mut(x, y);
+            pixel.0[3] = (pixel.0[3] as f64 * fade).round() as u8;
+        }
+    }
+    Ok(image)
+}
+
+fn soft_decal_alpha(distance: f64) -> f64 {
+    if distance <= 0.68 {
+        1.0
+    } else if distance >= 1.0 {
+        0.0
+    } else {
+        let t = (distance - 0.68) / 0.32;
+        1.0 - t * t * (3.0 - 2.0 * t)
+    }
+}
+
+fn make_soft_decal(source: &Path, destination: &Path) -> Result<()> {
+    let expected = soft_decal_pixels(source)?;
+    if destination.is_file() && image::open(destination)?.to_rgba8() == expected {
+        return Ok(());
+    }
+    if let Some(parent) = destination.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    DynamicImage::ImageRgba8(expected).save_with_format(destination, ImageFormat::Png)?;
+    Ok(())
+}
+
+fn verify_soft_decal(source: &Path, destination: &Path) -> Result<()> {
+    require_file(destination)?;
+    if image::open(destination)?.to_rgba8() != soft_decal_pixels(source)? {
+        return Err(format!("generated soft decal is stale: {}", destination.display()).into());
+    }
     Ok(())
 }
 
@@ -1927,6 +2684,14 @@ fn print_summary(manifest: &Manifest, action: &str) {
     for (kind, count) in counts {
         println!("  {kind}: {count}");
     }
+    let mut statuses = BTreeMap::<&str, usize>::new();
+    for source in &manifest.sources {
+        *statuses.entry(&source.status).or_default() += 1;
+    }
+    println!("  source coverage:");
+    for (status, count) in statuses {
+        println!("    {status}: {count}");
+    }
     for warning in &manifest.warnings {
         println!("warning: {warning}");
     }
@@ -1952,10 +2717,44 @@ mod tests {
             sha256: "hash".into(),
         };
         let complete = (1..=4).map(|view| (view, image.clone())).collect();
-        assert!(validate_views("bush", 1, 4, &complete).is_ok());
+        assert_eq!(
+            validated_view_count("bush", 1, &[4, 8], &complete).unwrap(),
+            4
+        );
 
         let incomplete = [(1, image)].into_iter().collect();
-        assert!(validate_views("bush", 1, 4, &incomplete).is_err());
+        assert!(validated_view_count("bush", 1, &[4, 8], &incomplete).is_err());
+    }
+
+    #[test]
+    fn only_supported_visual_view_modes_are_emitted() {
+        assert_eq!(view_mode_for_count(1).unwrap(), "fixed");
+        assert_eq!(view_mode_for_count(4).unwrap(), "fourWay");
+        assert_eq!(view_mode_for_count(8).unwrap(), "eightWay");
+        assert!(view_mode_for_count(2).is_err());
+    }
+
+    #[test]
+    fn split_fixed_variants_have_stable_distinct_ids() {
+        let object = DiscoveredObject {
+            pack_id: "ow3".into(),
+            kind: "wall".into(),
+            category_path: vec!["Buildings".into(), "Building Parts".into()],
+            number: 5,
+            source_variant: Some(3),
+            view_mode: "fixed".into(),
+            views: BTreeMap::new(),
+        };
+
+        assert_eq!(generated_object_id(&object), "ow3.wall.005.v3");
+        assert_eq!(
+            object_image_path(&object, 1),
+            PathBuf::from("objects/ow3/wall/005_v3_1.png")
+        );
+        assert_eq!(
+            object_thumbnail_path(&object),
+            PathBuf::from("thumbnails/ow3/wall/005_v3.png")
+        );
     }
 
     #[test]
@@ -1968,5 +2767,23 @@ mod tests {
                 < geometry["footprint"]["radius"]["x"].as_f64().unwrap()
         );
         assert_eq!(geometry["reviewed"], false);
+    }
+
+    #[test]
+    fn generated_fence_collision_reaches_neighboring_path_pieces() {
+        let geometry = geometry_for_profile(Some("fenceSegment"));
+        assert_eq!(geometry["footprint"]["type"], "capsule");
+        assert_eq!(geometry["footprint"]["start"]["x"], -1.6);
+        assert_eq!(geometry["footprint"]["end"]["x"], 1.6);
+        assert_eq!(geometry["blocking"][0]["end"]["x"], 1.55);
+    }
+
+    #[test]
+    fn generated_material_decal_has_an_opaque_center_and_soft_edge() {
+        assert_eq!(soft_decal_alpha(0.0), 1.0);
+        assert_eq!(soft_decal_alpha(0.68), 1.0);
+        assert!(soft_decal_alpha(0.8) < 1.0);
+        assert!(soft_decal_alpha(0.8) > 0.0);
+        assert_eq!(soft_decal_alpha(1.0), 0.0);
     }
 }

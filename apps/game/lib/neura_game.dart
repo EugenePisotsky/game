@@ -15,6 +15,8 @@ import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_rendering/neura_rendering.dart';
 import 'package:neura_world/neura_world.dart';
 
+import 'native_navigation_adapter.dart';
+
 /// Small playable proof that the painted environment and modular Other Worlds
 /// character sheets share one coherent isometric space.
 class NeuraGame extends FlameGame
@@ -43,6 +45,7 @@ class NeuraGame extends FlameGame
   late final CharacterCatalog characterCatalog;
   late final math.Random _movementRandom;
   late NavigationGrid navigationGrid;
+  RustNavigationWorld? _nativeNavigationWorld;
   EnvironmentDebugScene? debugScene;
   EnvironmentChunkCoordinate? _streamingCenter;
 
@@ -64,6 +67,10 @@ class NeuraGame extends FlameGame
   int _assetCacheMisses = 0;
   int _assetCacheEvictions = 0;
   int _pendingAssetRequests = 0;
+  int _navigationRequestSerial = 0;
+  int _pendingNavigationRequests = 0;
+  int _lastNavigationMicros = 0;
+  Future<void>? _navigationRefresh;
 
   static const double playerSpeedPixelsPerSecond = 210;
   static const double elevationPixelsPerWorldUnit = 64;
@@ -81,6 +88,11 @@ class NeuraGame extends FlameGame
     ..color = const ui.Color(0x338DA596)
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 1.5;
+  final ui.Paint _navigationBlockedPaint = ui.Paint()
+    ..color = const ui.Color(0x55E76F51);
+  final ui.Paint _navigationPathPaint = ui.Paint()
+    ..color = const ui.Color(0xFF71C4FF)
+    ..style = ui.PaintingStyle.stroke;
 
   static final Float64List _identityMatrix = Float64List.fromList([
     1,
@@ -135,6 +147,8 @@ class NeuraGame extends FlameGame
   int get cancelledChunkRequests => chunkStreamer.cancelledRequestCount;
   int get currentPathLength => _movementWaypoints.length;
   int get navigationExpandedNodes => navigationGrid.lastExpandedNodeCount;
+  int get pendingNavigationRequests => _pendingNavigationRequests;
+  int get lastNavigationMicros => _lastNavigationMicros;
   int get terrainPictureCount => _terrainPictures.length;
   int? get debugRandomSeed => debugScene?.randomSeed;
   double get diagnosticsFps => _fpsComponent.fps;
@@ -197,6 +211,7 @@ class NeuraGame extends FlameGame
   }
 
   Future<void> teleportTo(WorldPoint point) async {
+    _navigationRequestSerial++;
     playerPosition.setValues(
       point.x.clamp(0, worldManifest.width),
       point.y.clamp(0, worldManifest.height),
@@ -215,6 +230,7 @@ class NeuraGame extends FlameGame
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    await initNeuraWorldRust();
     await add(_fpsComponent);
     final requestedDebugScene = debugSceneName;
     if (requestedDebugScene != null) {
@@ -304,12 +320,13 @@ class NeuraGame extends FlameGame
         walk: _loadedImages[character.walkPath]!,
       );
     }
-    navigationGrid = NavigationGrid(
-      width: worldManifest.width,
-      height: worldManifest.height,
-      cellSize: 0.4,
-      isBlocked: _isPlayerBlocked,
+    _nativeNavigationWorld = await RustNavigationWorld.create(
+      buildNativeNavigationWorldInput(
+        document: document,
+        catalog: environmentCatalog,
+      ),
     );
+    _applyNavigationSnapshot(_nativeNavigationWorld!.snapshot);
     _synchronizeTerrainPictures();
     if (debugScene != null) {
       diagnosticsPaused = true;
@@ -327,6 +344,27 @@ class NeuraGame extends FlameGame
       for (final chunk in chunkStreamer.loadedChunks.values)
         ...chunk.worldObjects,
     ],
+    terrainStrokes: [
+      for (final chunk in chunkStreamer.loadedChunks.values)
+        for (final stroke in chunk.terrainStrokes)
+          TerrainStroke(
+            materialId: stroke.materialId,
+            radius: stroke.radius,
+            opacity: stroke.opacity,
+            seed: stroke.seed,
+            spacing: stroke.spacing,
+            scatter: stroke.scatter,
+            sizeJitter: stroke.sizeJitter,
+            opacityJitter: stroke.opacityJitter,
+            points: [
+              for (final point in stroke.points)
+                WorldPoint(
+                  point.x + chunk.coordinate.x * chunk.size,
+                  point.y + chunk.coordinate.y * chunk.size,
+                ),
+            ],
+          ),
+    ],
     editorLayers: worldManifest.editorLayers,
     activeLayerId: worldManifest.activeLayerId,
   );
@@ -338,13 +376,39 @@ class NeuraGame extends FlameGame
     _streamingCenter = coordinate;
     final changed = await chunkStreamer.updateAround(position);
     if (!changed) return;
+    _navigationRequestSerial++;
     document = _documentFromLoadedChunks();
+    final refresh = _refreshNavigationAfterStreaming();
+    _navigationRefresh = refresh;
+    try {
+      await refresh;
+    } finally {
+      if (identical(_navigationRefresh, refresh)) {
+        _navigationRefresh = null;
+      }
+    }
+  }
+
+  Future<void> _refreshNavigationAfterStreaming() async {
     await _synchronizeChunkAssets();
+    final nativeWorld = _nativeNavigationWorld;
+    if (nativeWorld == null) return;
+    final snapshot = await nativeWorld.replace(
+      buildNativeNavigationWorldInput(
+        document: document,
+        catalog: environmentCatalog,
+      ),
+    );
+    _applyNavigationSnapshot(snapshot);
+  }
+
+  void _applyNavigationSnapshot(NativeNavigationSnapshot snapshot) {
     navigationGrid = NavigationGrid(
       width: worldManifest.width,
       height: worldManifest.height,
-      cellSize: 0.4,
+      cellSize: navigationCellSize,
       isBlocked: _isPlayerBlocked,
+      blockedCells: snapshot.blockedCells,
     );
   }
 
@@ -505,6 +569,11 @@ class NeuraGame extends FlameGame
           materialId: stroke.materialId,
           radius: stroke.radius,
           opacity: stroke.opacity,
+          seed: stroke.seed,
+          spacing: stroke.spacing,
+          scatter: stroke.scatter,
+          sizeJitter: stroke.sizeJitter,
+          opacityJitter: stroke.opacityJitter,
           points: [
             for (final point in stroke.points)
               WorldPoint(point.x + originX, point.y + originY),
@@ -521,17 +590,18 @@ class NeuraGame extends FlameGame
     final projected =
         (event.canvasPosition - size / 2) / zoom + _cameraProjectedPosition;
     final world = projection.screenToWorld(projected);
-    requestMovement(
-      WorldPoint(
-        world.x.clamp(0.0, document.width.toDouble()),
-        world.y.clamp(0.0, document.height.toDouble()),
+    unawaited(
+      requestMovementAsync(
+        WorldPoint(
+          world.x.clamp(0.0, document.width.toDouble()),
+          world.y.clamp(0.0, document.height.toDouble()),
+        ),
       ),
     );
   }
 
   bool requestMovement(WorldPoint requested) {
     if (!isLoaded) return false;
-    final wasMoving = isMoving;
     final requestedDestination = WorldPoint(
       requested.x.clamp(0.0, document.width.toDouble()),
       requested.y.clamp(0.0, document.height.toDouble()),
@@ -540,6 +610,47 @@ class NeuraGame extends FlameGame
       WorldPoint(playerPosition.x, playerPosition.y),
       requestedDestination,
     );
+    return _applyMovementRoute(route);
+  }
+
+  Future<bool> requestMovementAsync(WorldPoint requested) async {
+    if (!isLoaded) return false;
+    final nativeWorld = _nativeNavigationWorld;
+    if (nativeWorld == null) return requestMovement(requested);
+    final requestSerial = ++_navigationRequestSerial;
+    final requestedDestination = WorldPoint(
+      requested.x.clamp(0.0, document.width.toDouble()),
+      requested.y.clamp(0.0, document.height.toDouble()),
+    );
+    _pendingNavigationRequests++;
+    try {
+      final refresh = _navigationRefresh;
+      if (refresh != null) await refresh;
+      if (requestSerial != _navigationRequestSerial) return false;
+      final result = await nativeWorld.findPath(
+        start: NativeNavigationPoint(x: playerPosition.x, y: playerPosition.y),
+        destination: NativeNavigationPoint(
+          x: requestedDestination.x,
+          y: requestedDestination.y,
+        ),
+      );
+      if (requestSerial != _navigationRequestSerial) return false;
+      final route = [
+        for (final point in result.points) WorldPoint(point.x, point.y),
+      ];
+      navigationGrid.recordExternalPath(
+        route,
+        expandedNodes: result.expandedNodes,
+      );
+      _lastNavigationMicros = result.elapsedMicros;
+      return _applyMovementRoute(route);
+    } finally {
+      _pendingNavigationRequests--;
+    }
+  }
+
+  bool _applyMovementRoute(Iterable<WorldPoint> route) {
+    final wasMoving = isMoving;
     _movementWaypoints
       ..clear()
       ..addAll(
@@ -606,6 +717,10 @@ class NeuraGame extends FlameGame
   }
 
   bool _isPlayerBlocked(WorldPoint point) {
+    final material = environmentCatalog.materialById(
+      environmentMaterialAtPoint(document, point),
+    );
+    if (material?.blocksMovement ?? false) return true;
     const playerRadius = 0.18;
     for (final object in document.objects) {
       final asset = environmentCatalog.objectById(object.assetId);
@@ -736,29 +851,9 @@ class NeuraGame extends FlameGame
     final paint = _decalPaints[stroke.materialId];
     if (material == null || paint == null) return;
     final image = _loadedImages[material.decalPath]!;
-    paint.color = ui.Color.fromRGBO(255, 255, 255, stroke.opacity);
-    final spacing = math.max(0.15, stroke.radius * 0.22);
-    WorldPoint? previous;
-    for (final point in stroke.points) {
-      if (previous == null) {
-        _drawStamp(canvas, point, stroke.radius, paint, image);
-      } else {
-        final dx = point.x - previous.x;
-        final dy = point.y - previous.y;
-        final distance = math.sqrt(dx * dx + dy * dy);
-        final steps = math.max(1, (distance / spacing).ceil());
-        for (var step = 1; step <= steps; step++) {
-          final t = step / steps;
-          _drawStamp(
-            canvas,
-            WorldPoint(previous.x + dx * t, previous.y + dy * t),
-            stroke.radius,
-            paint,
-            image,
-          );
-        }
-      }
-      previous = point;
+    for (final stamp in terrainStrokeStamps(stroke)) {
+      paint.color = ui.Color.fromRGBO(255, 255, 255, stamp.opacity);
+      _drawStamp(canvas, stamp.center, stamp.radius, paint, image);
     }
   }
 
@@ -1075,11 +1170,7 @@ class NeuraGame extends FlameGame
   }
 
   void _renderNavigationDebug(ui.Canvas canvas) {
-    final blockedPaint = ui.Paint()..color = const ui.Color(0x55E76F51);
-    final pathPaint = ui.Paint()
-      ..color = const ui.Color(0xFF71C4FF)
-      ..style = ui.PaintingStyle.stroke
-      ..strokeWidth = 3 / zoom;
+    _navigationPathPaint.strokeWidth = 3 / zoom;
     final cell = navigationGrid.cellSize;
     final minX = math.max(0.0, playerPosition.x - 5);
     final maxX = math.min(worldManifest.width, playerPosition.x + 5);
@@ -1088,9 +1179,13 @@ class NeuraGame extends FlameGame
     for (var y = minY; y <= maxY; y += cell) {
       for (var x = minX; x <= maxX; x += cell) {
         final point = WorldPoint(x + cell / 2, y + cell / 2);
-        if (!_isPlayerBlocked(point)) continue;
+        if (!navigationGrid.isCellBlocked(point)) continue;
         final center = projection.worldToScreen(Vector2(point.x, point.y));
-        canvas.drawCircle(center.toOffset(), 2.2 / zoom, blockedPaint);
+        canvas.drawCircle(
+          center.toOffset(),
+          2.2 / zoom,
+          _navigationBlockedPaint,
+        );
       }
     }
     final pathPoints = <Vector2>[
@@ -1102,7 +1197,7 @@ class NeuraGame extends FlameGame
       for (final point in pathPoints.skip(1)) {
         path.lineTo(point.x, point.y);
       }
-      canvas.drawPath(path, pathPaint);
+      canvas.drawPath(path, _navigationPathPaint);
     }
   }
 
@@ -1122,6 +1217,9 @@ class NeuraGame extends FlameGame
 
   @override
   void onRemove() {
+    _navigationRequestSerial++;
+    _nativeNavigationWorld?.close();
+    _nativeNavigationWorld = null;
     for (final picture in _terrainPictures.values) {
       picture.dispose();
     }

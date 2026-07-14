@@ -97,6 +97,81 @@ void main() {
     },
   );
 
+  test('extending upper-left rebases content and adds an empty edge', () {
+    final source = _gridWorld(2, 1);
+    final manifest = EnvironmentWorldManifest(
+      id: source.manifest.id,
+      name: source.manifest.name,
+      chunkSize: 32,
+      width: 64,
+      height: 32,
+      baseMaterialId: source.manifest.baseMaterialId,
+      chunks: source.manifest.chunks,
+      playerSpawn: const ChunkLocalPosition(
+        chunk: EnvironmentChunkCoordinate(0, 0),
+        localX: 7,
+        localY: 8,
+      ),
+      travelPoints: const [
+        EnvironmentTravelPoint(
+          id: 'exit',
+          position: ChunkLocalPosition(
+            chunk: EnvironmentChunkCoordinate(1, 0),
+            localX: 2,
+            localY: 3,
+          ),
+        ),
+      ],
+    );
+
+    final extended = extendEnvironmentChunkedWorld(
+      manifest,
+      source.chunks,
+      EnvironmentWorldEdge.left,
+    );
+
+    expect(extended.manifest.width, 96);
+    expect(extended.manifest.height, 32);
+    expect(extended.chunks, hasLength(3));
+    expect(
+      extended.chunks[const EnvironmentChunkCoordinate(0, 0)]!.objects,
+      isEmpty,
+    );
+    final shifted = extended.chunks[const EnvironmentChunkCoordinate(1, 0)]!;
+    expect(shifted.objects.single.localX, 4);
+    expect(shifted.worldObjects.single.x, 36);
+    expect(shifted.objects.single.bounds.minX, 35);
+    final spawn = extended.manifest.playerSpawn.toWorld(32);
+    expect((spawn.x, spawn.y), (39, 8));
+    final exit = extended.manifest.travelPoints.single.position.toWorld(32);
+    expect((exit.x, exit.y), (66, 3));
+  });
+
+  test('extending lower-left preserves existing world coordinates', () {
+    final source = _gridWorld(2, 1);
+    final extended = extendEnvironmentChunkedWorld(
+      source.manifest,
+      source.chunks,
+      EnvironmentWorldEdge.bottom,
+    );
+
+    expect(extended.manifest.width, 64);
+    expect(extended.manifest.height, 64);
+    expect(extended.chunks, hasLength(4));
+    expect(
+      extended.chunks[const EnvironmentChunkCoordinate(0, 1)]!.objects,
+      isEmpty,
+    );
+    expect(
+      extended
+          .chunks[const EnvironmentChunkCoordinate(0, 0)]!
+          .worldObjects
+          .single
+          .x,
+      4,
+    );
+  });
+
   test(
     'obsolete asynchronous chunk requests are ignored after reversal',
     () async {

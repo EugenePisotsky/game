@@ -1,15 +1,11 @@
 {
   "materials": [
     {
-      "decal": "images/a3189ed72026f945d0fd.png",
+      "decal": "images/659ef46971ecf6fda281.png",
       "defaultRadius": 1.8,
-      "id": "ow3.ground.earth",
-      "name": "Worn earth",
-      "tags": [
-        "earth",
-        "road"
-      ],
-      "texture": "images/76d7716fbc3f60cbf974.png"
+      "id": "ow3.ground.007",
+      "name": "Ground 007",
+      "texture": "images/bc97418109bf5fc09c0e.png"
     },
     {
       "decal": "images/1379bc99d4f5eb6adb90.png",
@@ -25,144 +21,1105 @@
   ],
   "objects": [
     {
-      "category": "Ground cover",
-      "collisionProfile": "none",
+      "category": "Houses",
+      "categoryPath": [
+        "Buildings",
+        "Houses"
+      ],
       "defaultSortBias": 0.0,
+      "family": "building",
+      "id": "ow1.building.031",
+      "name": "Building 031",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.8,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow1",
+      "tags": [
+        "building",
+        "house"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/ef53b8898f08675428bf.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        }
+      }
+    },
+    {
+      "category": "Houses",
+      "categoryPath": [
+        "Buildings",
+        "Houses"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "building",
+      "id": "ow1.building.038",
+      "name": "Building 038",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.8,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow1",
+      "tags": [
+        "building",
+        "house"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "southWest": {
+          "image": "images/6b564bc3f7f8e707a26a.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        }
+      }
+    },
+    {
+      "category": "Houses",
+      "categoryPath": [
+        "Buildings",
+        "Houses"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "building",
+      "id": "ow1.building.041",
+      "name": "Building 041",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.8,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow1",
+      "tags": [
+        "building",
+        "house"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "northWest": {
+          "image": "images/4c71f73f720808fac887.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        }
+      }
+    },
+    {
+      "category": "Outdoor Structures",
+      "categoryPath": [
+        "Structures",
+        "Outdoor Structures"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "castleWell",
+      "id": "ow2.castleWell.001",
+      "name": "Castle well 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow2",
+      "tags": [
+        "castle",
+        "well"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "north": {
+          "image": "images/4808a0959bc0c526487c.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "images/90d0522bdf45bd718899.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Agricultural",
+      "categoryPath": [
+        "Buildings",
+        "Agricultural"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "barn",
+      "id": "ow3.barn.002",
+      "name": "Barn 002",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "barn",
+        "building",
+        "agricultural"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "northEast": {
+          "image": "images/2d0d067fc3ae6119d908.png",
+          "pivotX": 0.5,
+          "pivotY": 0.97
+        }
+      }
+    },
+    {
+      "category": "Containers",
+      "categoryPath": [
+        "Props",
+        "Containers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "basket",
+      "id": "ow3.basket.002",
+      "name": "Basket 002",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "basket",
+        "container"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/db269626844b10e47810.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Seating",
+      "categoryPath": [
+        "Furniture",
+        "Seating"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "bench",
+      "id": "ow3.bench.001",
+      "name": "Bench 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "bench",
+        "seating"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "southEast": {
+          "image": "images/e6779d90a295c7da6d87.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Seating",
+      "categoryPath": [
+        "Furniture",
+        "Seating"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "bench",
+      "id": "ow3.bench.005",
+      "name": "Bench 005",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "bench",
+        "seating"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "north": {
+          "image": "images/c1361a24ff36f5db6e54.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Containers",
+      "categoryPath": [
+        "Props",
+        "Containers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "bucket",
+      "id": "ow3.bucket.002",
+      "name": "Bucket 002",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/d1f23f6433d67fb52510.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Bushes",
+      "categoryPath": [
+        "Environment",
+        "Bushes"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "bush",
+      "id": "ow3.bush.008",
+      "name": "Bush 008",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.5,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "bush"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/e9a270c989894712baf3.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Bushes",
+      "categoryPath": [
+        "Environment",
+        "Bushes"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "bush",
+      "id": "ow3.bush.010",
+      "name": "Bush 010",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.5,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "bush"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/755001a9f45d76bf9223.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Bushes",
+      "categoryPath": [
+        "Environment",
+        "Bushes"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "bush",
+      "id": "ow3.bush.012",
+      "name": "Bush 012",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.5,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "bush"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/04984b44e4960f37820e.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Bushes",
+      "categoryPath": [
+        "Environment",
+        "Bushes"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "bush",
+      "id": "ow3.bush.023",
+      "name": "Bush 023",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.5,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "bush"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/c9258a4b63e0bd4a9516.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Bushes",
+      "categoryPath": [
+        "Environment",
+        "Bushes"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "bush",
+      "id": "ow3.bush.small",
+      "name": "Small bush",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.7,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "bush",
+        "small"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/aab0b8e58d88867f1988.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Transport",
+      "categoryPath": [
+        "Props",
+        "Transport"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "cart",
+      "id": "ow3.cart.009",
+      "name": "Cart 009",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "cart",
+        "transport"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "northWest": {
+          "image": "images/a36b0bfc5e587d80e688.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Transport",
+      "categoryPath": [
+        "Props",
+        "Transport"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "cart",
+      "id": "ow3.cart.010",
+      "name": "Cart 010",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "cart",
+        "transport"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "northWest": {
+          "image": "images/63bcb9775e7459e97813.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Containers",
+      "categoryPath": [
+        "Props",
+        "Containers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "cooperPiggin",
+      "id": "ow3.cooperPiggin.001",
+      "name": "Cooper piggin 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/b3528cf19bdd887ee3ab.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Containers",
+      "categoryPath": [
+        "Props",
+        "Containers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "crate",
+      "id": "ow3.crate.004",
+      "name": "Crate 004",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "crate",
+        "container"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/88afdae0bcc16c8667b7.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Containers",
+      "categoryPath": [
+        "Props",
+        "Containers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "crates",
+      "id": "ow3.crates.006",
+      "name": "Crates 006",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/9735eec70fe53369e504.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Ground Cover",
+      "categoryPath": [
+        "Environment",
+        "Ground Cover"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "crop",
+      "id": "ow3.crop.002",
+      "name": "Crop 002",
+      "partialViews": true,
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "crop",
+        "agricultural"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "north": {
+          "image": "images/18ce9aec0bd4185d59b6.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Decoration",
+      "categoryPath": [
+        "Props",
+        "Decoration"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "dungeonClutter",
+      "id": "ow3.dungeonClutter.001",
+      "name": "Dungeon clutter 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "dungeon",
+        "clutter"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/c1c392d70af2c8c9c927.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Fences & Gates",
+      "categoryPath": [
+        "Structures",
+        "Fences & Gates"
+      ],
+      "collisionProfile": "fenceSegment",
+      "defaultSortBias": 0.0,
+      "family": "fence",
+      "geometry": {
+        "blocking": [
+          {
+            "end": {
+              "x": 1.55,
+              "y": 0.0
+            },
+            "radius": 0.11,
+            "start": {
+              "x": -1.55,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
+        "footprint": {
+          "end": {
+            "x": 1.6,
+            "y": 0.0
+          },
+          "radius": 0.14,
+          "start": {
+            "x": -1.6,
+            "y": 0.0
+          },
+          "type": "capsule"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.fence.001",
+      "name": "Fence 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "fence",
+        "structure"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "east": {
+          "image": "images/021a497ca64814da8d6f.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "images/a22d48b38102f438f82e.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Fences & Gates",
+      "categoryPath": [
+        "Structures",
+        "Fences & Gates"
+      ],
+      "collisionProfile": "fenceSegment",
+      "defaultSortBias": 0.0,
+      "family": "fence",
+      "geometry": {
+        "blocking": [
+          {
+            "end": {
+              "x": 1.55,
+              "y": 0.0
+            },
+            "radius": 0.11,
+            "start": {
+              "x": -1.55,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
+        "footprint": {
+          "end": {
+            "x": 1.6,
+            "y": 0.0
+          },
+          "radius": 0.14,
+          "start": {
+            "x": -1.6,
+            "y": 0.0
+          },
+          "type": "capsule"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.fence.002",
+      "name": "Fence 002",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "fence",
+        "structure"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "east": {
+          "image": "images/94e34a78fd389bcf0868.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "images/7ad4f32f20b782ecc562.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Fences & Gates",
+      "categoryPath": [
+        "Structures",
+        "Fences & Gates"
+      ],
+      "collisionProfile": "fenceSegment",
+      "defaultSortBias": 0.0,
+      "family": "fence",
+      "geometry": {
+        "blocking": [
+          {
+            "end": {
+              "x": 1.55,
+              "y": 0.0
+            },
+            "radius": 0.11,
+            "start": {
+              "x": -1.55,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
+        "footprint": {
+          "end": {
+            "x": 1.6,
+            "y": 0.0
+          },
+          "radius": 0.14,
+          "start": {
+            "x": -1.6,
+            "y": 0.0
+          },
+          "type": "capsule"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.fence.003",
+      "name": "Fence 003",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "fence",
+        "structure"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "east": {
+          "image": "images/c909ed9a6140e27500b4.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "north": {
+          "image": "images/9492c36644f8c289b94f.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Flowers",
+      "categoryPath": [
+        "Environment",
+        "Flowers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "flower",
+      "id": "ow3.flower.021",
+      "name": "Flower 021",
+      "partialViews": true,
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "flower",
+        "ground cover"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/7107ddd2b0315224528d.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "images/bb2aacbe511648ed1609.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Flowers",
+      "categoryPath": [
+        "Environment",
+        "Flowers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "flower",
+      "id": "ow3.flower.022",
+      "name": "Flower 022",
+      "partialViews": true,
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "flower",
+        "ground cover"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/5f382e996c050ab686d8.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Flowers",
+      "categoryPath": [
+        "Environment",
+        "Flowers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "flower",
+      "id": "ow3.flower.028",
+      "name": "Flower 028",
+      "partialViews": true,
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "flower",
+        "ground cover"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/a03a31fda77660013dc5.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Flowers",
+      "categoryPath": [
+        "Environment",
+        "Flowers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "flower",
+      "id": "ow3.flower.040",
+      "name": "Flower 040",
+      "partialViews": true,
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "flower",
+        "ground cover"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "north": {
+          "image": "images/f95506cb9771f626e62d.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "south": {
+          "image": "images/81bcedad9c8577ac5442.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Flowers",
+      "categoryPath": [
+        "Environment",
+        "Flowers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "flower",
+      "id": "ow3.flower.043",
+      "name": "Flower 043",
+      "partialViews": true,
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "flower",
+        "ground cover"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/67f9c5fdbf6d0a23706e.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "southWest": {
+          "image": "images/1216c303b461fcf7acdc.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "images/eec8958ace6dd910fec6.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Containers",
+      "categoryPath": [
+        "Props",
+        "Containers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "grainBag",
+      "id": "ow3.grainBag.001",
+      "name": "Grain bag 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/946e3223dacf4496ecea.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Ground Cover",
+      "categoryPath": [
+        "Environment",
+        "Ground Cover"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "grass",
       "id": "ow3.grass.021",
       "name": "Grass 021",
+      "partialViews": true,
       "renderBand": "groundCover",
       "renderScale": 1.0,
       "sortAnchorX": 0.0,
       "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "grass",
+        "ground cover"
+      ],
+      "viewMode": "fourWay",
       "views": {
-        "south": {
-          "image": "images/f8b91868fd9d1824953a.png",
+        "east": {
+          "image": "images/d935cd30c5990be4ad30.png",
           "pivotX": 0.5,
           "pivotY": 1.0
-        }
-      }
-    },
-    {
-      "category": "Ground cover",
-      "collisionProfile": "none",
-      "defaultSortBias": 0.0,
-      "id": "ow3.grass.022",
-      "name": "Grass 022",
-      "renderBand": "groundCover",
-      "renderScale": 1.0,
-      "sortAnchorX": 0.0,
-      "sortAnchorY": 0.0,
-      "views": {
-        "south": {
-          "image": "images/68634f5b7d05c7c94bd6.png",
-          "pivotX": 0.5,
-          "pivotY": 1.0
-        }
-      }
-    },
-    {
-      "category": "Ground cover",
-      "collisionProfile": "none",
-      "defaultSortBias": 0.0,
-      "id": "ow3.grass.023",
-      "name": "Grass 023",
-      "renderBand": "groundCover",
-      "renderScale": 1.0,
-      "sortAnchorX": 0.0,
-      "sortAnchorY": 0.0,
-      "views": {
-        "south": {
-          "image": "images/cf916428ecd52e27423e.png",
-          "pivotX": 0.5,
-          "pivotY": 1.0
-        }
-      }
-    },
-    {
-      "category": "Rocks",
-      "collisionProfile": "smallRock",
-      "defaultSortBias": 0.0,
-      "geometry": {
-        "blocking": [
-          {
-            "center": {
-              "x": 0.0,
-              "y": 0.0
-            },
-            "radius": {
-              "x": 0.34,
-              "y": 0.23
-            },
-            "type": "ellipse"
-          }
-        ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
         },
-        "reviewed": false
-      },
-      "id": "ow3.rock.012",
-      "name": "Rock 012",
-      "renderBand": "depthSorted",
-      "renderScale": 0.9,
-      "sortAnchorX": 0.0,
-      "sortAnchorY": 0.0,
-      "views": {
+        "north": {
+          "image": "images/2102a85275d38458ed19.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
         "south": {
-          "image": "images/19cbb2a2736452db3fc4.png",
+          "image": "images/4dbcade3e97565d552a9.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "west": {
+          "image": "images/0d4e697cc6bbb7a32585.png",
           "pivotX": 0.5,
           "pivotY": 1.0
         }
       }
     },
     {
-      "category": "Rocks",
-      "collisionProfile": "smallRock",
+      "category": "Agricultural",
+      "categoryPath": [
+        "Props",
+        "Agricultural"
+      ],
       "defaultSortBias": 0.0,
-      "geometry": {
-        "blocking": [
-          {
-            "center": {
-              "x": 0.0,
-              "y": 0.0
-            },
-            "radius": {
-              "x": 0.34,
-              "y": 0.23
-            },
-            "type": "ellipse"
-          }
-        ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
-        "reviewed": false
-      },
-      "id": "ow3.rock.014",
-      "name": "Rock 014",
+      "family": "haystack",
+      "id": "ow3.haystack.002",
+      "name": "Haystack 002",
+      "partialViews": true,
       "renderBand": "depthSorted",
-      "renderScale": 0.9,
+      "renderScale": 1.0,
       "sortAnchorX": 0.0,
       "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "fourWay",
       "views": {
-        "south": {
-          "image": "images/447fdef0792fbb3b8923.png",
+        "east": {
+          "image": "images/9d577ae87b1e576f4d07.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Bushes",
+      "categoryPath": [
+        "Environment",
+        "Bushes"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "hedge",
+      "id": "ow3.hedge.001",
+      "name": "Hedge 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "fourWay",
+      "views": {
+        "north": {
+          "image": "images/122ae457deb676ee2b92.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Outdoor Structures",
+      "categoryPath": [
+        "Buildings",
+        "Outdoor Structures"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "outhouse",
+      "id": "ow3.outhouse.001",
+      "name": "Outhouse 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "eightWay",
+      "views": {
+        "northEast": {
+          "image": "images/f7c2540d968766c70bef.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        },
+        "northWest": {
+          "image": "images/4d3769dbf6a51588d744.png",
           "pivotX": 0.5,
           "pivotY": 1.0
         }
@@ -170,8 +1127,125 @@
     },
     {
       "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
       "collisionProfile": "treeTrunk",
       "defaultSortBias": 0.0,
+      "family": "tree",
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.003",
+      "name": "Tree 003",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/3dbd2cf18db7da6fd2e2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "family": "tree",
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.004",
+      "name": "Tree 004",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/af3d5143b3917877b135.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "family": "tree",
       "geometry": {
         "blocking": [
           {
@@ -201,13 +1275,24 @@
       },
       "id": "ow3.tree.006",
       "name": "Tree 006",
+      "partialViews": true,
       "renderBand": "depthSorted",
       "renderScale": 0.75,
       "sortAnchorX": 0.0,
       "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
       "views": {
+        "northWest": {
+          "image": "images/99e184893a5bb2ae3050.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
         "south": {
-          "image": "images/1fb4ad96981871063249.png",
+          "image": "images/88fcb2fbf52b0e97e029.png",
           "pivotX": 0.5,
           "pivotY": 0.96
         }
@@ -215,8 +1300,13 @@
     },
     {
       "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
       "collisionProfile": "treeTrunk",
       "defaultSortBias": 0.0,
+      "family": "tree",
       "geometry": {
         "blocking": [
           {
@@ -246,13 +1336,19 @@
       },
       "id": "ow3.tree.010",
       "name": "Tree 010",
+      "partialViews": true,
       "renderBand": "depthSorted",
       "renderScale": 0.75,
       "sortAnchorX": 0.0,
       "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
       "views": {
         "south": {
-          "image": "images/c1bafce7370d0ecc7263.png",
+          "image": "images/c2bba9c1872b9fa9f584.png",
           "pivotX": 0.5,
           "pivotY": 0.96
         }
@@ -260,8 +1356,13 @@
     },
     {
       "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
       "collisionProfile": "treeTrunk",
       "defaultSortBias": 0.0,
+      "family": "tree",
       "geometry": {
         "blocking": [
           {
@@ -289,15 +1390,21 @@
         },
         "reviewed": false
       },
-      "id": "ow3.tree.014",
-      "name": "Tree 014",
+      "id": "ow3.tree.012",
+      "name": "Tree 012",
+      "partialViews": true,
       "renderBand": "depthSorted",
       "renderScale": 0.75,
       "sortAnchorX": 0.0,
       "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
       "views": {
         "south": {
-          "image": "images/6b994758c9df4cd88f62.png",
+          "image": "images/a0d02be26803f072350b.png",
           "pivotX": 0.5,
           "pivotY": 0.96
         }
@@ -305,8 +1412,69 @@
     },
     {
       "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
       "collisionProfile": "treeTrunk",
       "defaultSortBias": 0.0,
+      "family": "tree",
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.016",
+      "name": "Tree 016",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/3b66b24f327f20b0291e.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "family": "tree",
       "geometry": {
         "blocking": [
           {
@@ -336,15 +1504,416 @@
       },
       "id": "ow3.tree.018",
       "name": "Tree 018",
+      "partialViews": true,
       "renderBand": "depthSorted",
       "renderScale": 0.75,
       "sortAnchorX": 0.0,
       "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
       "views": {
         "south": {
-          "image": "images/7b35d9a6d52917dea3c9.png",
+          "image": "images/8c1f880354fc5f0350ae.png",
           "pivotX": 0.5,
           "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "family": "tree",
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.020",
+      "name": "Tree 020",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "southWest": {
+          "image": "images/81c191ba424d9932f663.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "family": "tree",
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.033",
+      "name": "Tree 033",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/54a8cd204916ce568ae2.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "family": "tree",
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.036",
+      "name": "Tree 036",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/b089b386e2e010dfa809.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        },
+        "west": {
+          "image": "images/d166b3dcd66ae08ed35f.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "family": "tree",
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.039",
+      "name": "Tree 039",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.75,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/b8d9898aa1caefe64ead.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Trees",
+      "categoryPath": [
+        "Environment",
+        "Trees"
+      ],
+      "collisionProfile": "treeTrunk",
+      "defaultSortBias": 0.0,
+      "family": "tree",
+      "geometry": {
+        "blocking": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.03
+            },
+            "radius": {
+              "x": 0.24,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "footprint": {
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          },
+          "type": "ellipse"
+        },
+        "reviewed": false
+      },
+      "id": "ow3.tree.round_large",
+      "name": "Large round tree",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 0.65,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "tree",
+        "large",
+        "round"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "south": {
+          "image": "images/0574dd2853b79ed8f80c.png",
+          "pivotX": 0.5,
+          "pivotY": 0.96
+        }
+      }
+    },
+    {
+      "category": "Ground Cover",
+      "categoryPath": [
+        "Environment",
+        "Ground Cover"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "vine",
+      "id": "ow3.vine.001",
+      "name": "Vine 001",
+      "partialViews": true,
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "vine",
+        "plant"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/1b8b478cea989610b232.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Ground Cover",
+      "categoryPath": [
+        "Environment",
+        "Ground Cover"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "vine",
+      "id": "ow3.vine.002",
+      "name": "Vine 002",
+      "partialViews": true,
+      "renderBand": "groundCover",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "tags": [
+        "vine",
+        "plant"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/3b5668d1b33f691cf747.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Containers",
+      "categoryPath": [
+        "Props",
+        "Containers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "washBasket",
+      "id": "ow3.washBasket.001",
+      "name": "Wash basket 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "fourWay",
+      "views": {
+        "south": {
+          "image": "images/60c80818b6273f065c6f.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Containers",
+      "categoryPath": [
+        "Props",
+        "Containers"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "waterBucket",
+      "id": "ow3.waterBucket.001",
+      "name": "Water bucket 001",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "ow3",
+      "viewMode": "fixed",
+      "views": {
+        "south": {
+          "image": "images/64c3daab38669b21b14d.png",
+          "pivotX": 0.5,
+          "pivotY": 1.0
         }
       }
     }

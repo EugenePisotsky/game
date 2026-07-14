@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -16,6 +17,7 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   EditorGame(
     this.controller, {
     this.loadedChunks,
+    this.playerSpawn,
     WorldPoint? initialWorldCenter,
     this.chunkSize = 32,
   }) : _viewCenterWorld = initialWorldCenter {
@@ -24,8 +26,9 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
 
   final EditorController controller;
   final Set<EnvironmentChunkCoordinate> Function()? loadedChunks;
+  final WorldPoint Function()? playerSpawn;
   final double chunkSize;
-  final WorldPoint? _viewCenterWorld;
+  WorldPoint? _viewCenterWorld;
   final IsometricProjection projection = const IsometricProjection();
   final Vector2 _panOffset = Vector2.zero();
   final Vector2 _panVelocity = Vector2.zero();
@@ -33,8 +36,12 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   final Set<String> _loadingImages = {};
   final Map<String, ui.Paint> _repeatingPaints = {};
   final Map<String, ui.Paint> _decalPaints = {};
-  final Map<EnvironmentChunkCoordinate, ui.Picture> _terrainPictures = {};
-  final Map<EnvironmentChunkCoordinate, int> _terrainPictureSignatures = {};
+  final Map<EnvironmentChunkCoordinate, _TerrainRaster> _terrainRasters = {};
+  final Set<EnvironmentChunkCoordinate> _emptyTerrainRasters = {};
+  final Set<EnvironmentChunkCoordinate> _dirtyTerrainChunks = {};
+  EnvironmentChunkCoordinate? _terrainBakeInFlight;
+  int _seenTerrainRevision = -1;
+  int _terrainCacheGeneration = 0;
   final FpsComponent _fpsComponent = FpsComponent(windowSize: 60);
   bool _isPanning = false;
   ui.Rect? _marqueeScreenRect;
@@ -47,6 +54,7 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   bool diagnosticsPaused = false;
 
   static const double elevationPixelsPerWorldUnit = 64;
+  static const int _terrainRasterResolution = 1024;
 
   int get decodedImageCount => _loadedImages.length;
   int get decodedImageBytes => _loadedImages.values.fold(
@@ -54,7 +62,16 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     (sum, image) => sum + image.width * image.height * 4,
   );
   int get pendingImageCount => _loadingImages.length;
-  int get terrainPictureCount => _terrainPictures.length;
+  int get terrainPictureCount =>
+      _terrainRasters.length + _emptyTerrainRasters.length;
+  int get terrainRasterCount => _terrainRasters.length;
+  int get terrainRasterBytes =>
+      _terrainRasters.length *
+      _terrainRasterResolution *
+      _terrainRasterResolution *
+      4;
+  int get pendingTerrainBakeCount =>
+      _dirtyTerrainChunks.length + (_terrainBakeInFlight == null ? 0 : 1);
   double get diagnosticsFps => _fpsComponent.fps;
   double get diagnosticsFrameMilliseconds =>
       diagnosticsFps <= 0 ? 0 : 1000 / diagnosticsFps;
@@ -116,6 +133,23 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     ..color = const ui.Color(0xDDB987FF)
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 2;
+  final ui.Paint _spawnPaint = ui.Paint()
+    ..color = const ui.Color(0xFF64D8FF)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 3;
+  final ui.Paint _pathPreviewSpritePaint = ui.Paint()
+    ..color = const ui.Color(0xAAFFFFFF);
+  final ui.Paint _pathPreviewLinePaint = ui.Paint()
+    ..color = const ui.Color(0xFF64D8FF)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
+  final ui.Paint _pathHandleFillPaint = ui.Paint()
+    ..color = const ui.Color(0xFF10241F)
+    ..style = ui.PaintingStyle.fill;
+  final ui.Paint _pathHandleStrokePaint = ui.Paint()
+    ..color = const ui.Color(0xFF64D8FF)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2.5;
 
   static final Float64List _identityMatrix = Float64List.fromList([
     1,
@@ -316,6 +350,14 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     zoom = (zoom * factor).clamp(0.2, 1.4);
   }
 
+  void rebaseWorld(WorldPoint shift) {
+    final center = _viewCenterWorld;
+    if (center != null) {
+      _viewCenterWorld = WorldPoint(center.x + shift.x, center.y + shift.y);
+    }
+    _clearTerrainRasters();
+  }
+
   @override
   void update(double dt) {
     super.update(dt);
@@ -342,13 +384,18 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
         _renderStroke(canvas, stroke);
       }
     } else {
-      _renderCachedChunkTerrain(canvas);
+      _synchronizeTerrainRasters();
+      _renderRasterChunkTerrain(canvas);
+      final activeStroke = controller.activeTerrainStroke;
+      if (activeStroke != null) _renderStroke(canvas, activeStroke);
     }
     _renderObjectBand(canvas, EnvironmentRenderBand.groundCover);
     _renderObjectBand(canvas, EnvironmentRenderBand.depthSorted);
     _renderObjectBand(canvas, EnvironmentRenderBand.overhead);
     _renderObjectBand(canvas, EnvironmentRenderBand.effects);
+    _renderPathPreview(canvas);
     _renderMapOutline(canvas);
+    _renderPlayerSpawn(canvas);
     if (showRenderDebug) _renderDepthDebug(canvas);
     if (showChunkDebug) _renderChunkBoundaries(canvas);
     if (controller.mode == EnvironmentEditorMode.collision ||
@@ -421,78 +468,202 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
       return;
     }
     final image = _loadedImages[material.decalPath]!;
-    paint.color = ui.Color.fromRGBO(255, 255, 255, stroke.opacity);
-    final spacing = math.max(0.15, stroke.radius * 0.22);
-    WorldPoint? previous;
-    for (final point in stroke.points) {
-      if (previous == null) {
-        _drawStamp(canvas, point, stroke.radius, paint, image);
-      } else {
-        final dx = point.x - previous.x;
-        final dy = point.y - previous.y;
-        final distance = math.sqrt(dx * dx + dy * dy);
-        final steps = math.max(1, (distance / spacing).ceil());
-        for (var step = 1; step <= steps; step++) {
-          final t = step / steps;
-          _drawStamp(
-            canvas,
-            WorldPoint(previous.x + dx * t, previous.y + dy * t),
-            stroke.radius,
-            paint,
-            image,
-          );
-        }
-      }
-      previous = point;
+    for (final stamp in terrainStrokeStamps(stroke)) {
+      paint.color = ui.Color.fromRGBO(255, 255, 255, stamp.opacity);
+      _drawStamp(canvas, stamp.center, stamp.radius, paint, image);
     }
   }
 
-  void _renderCachedChunkTerrain(ui.Canvas canvas) {
+  void _synchronizeTerrainRasters() {
     final chunks = loadedChunks!.call();
-    final stale = _terrainPictures.keys
-        .where((coordinate) => !chunks.contains(coordinate))
-        .toList();
+    final stale = <EnvironmentChunkCoordinate>{
+      ..._terrainRasters.keys.where(
+        (coordinate) => !chunks.contains(coordinate),
+      ),
+      ..._emptyTerrainRasters.where(
+        (coordinate) => !chunks.contains(coordinate),
+      ),
+    };
     for (final coordinate in stale) {
-      _terrainPictures.remove(coordinate)?.dispose();
-      _terrainPictureSignatures.remove(coordinate);
+      _terrainRasters.remove(coordinate)?.dispose();
+      _emptyTerrainRasters.remove(coordinate);
+      _dirtyTerrainChunks.remove(coordinate);
     }
+    _dirtyTerrainChunks.removeWhere(
+      (coordinate) => !chunks.contains(coordinate),
+    );
+
+    final revision = controller.terrainRevision;
+    if (_seenTerrainRevision != revision) {
+      final changedStroke = revision == _seenTerrainRevision + 1
+          ? controller.lastTerrainChangedStroke
+          : null;
+      for (final coordinate in chunks) {
+        if (changedStroke == null ||
+            _strokeAffectsChunk(changedStroke, coordinate)) {
+          _dirtyTerrainChunks.add(coordinate);
+        }
+      }
+      _seenTerrainRevision = revision;
+    }
+
     for (final coordinate in chunks) {
-      final strokes = controller.document.terrainStrokes
-          .where((stroke) => _strokeAffectsChunk(stroke, coordinate))
-          .toList();
-      var ready = true;
-      for (final stroke in strokes) {
-        if (!_decalPaints.containsKey(stroke.materialId)) {
-          _loadMaterial(stroke.materialId);
-          ready = false;
-        }
+      final isCached =
+          _terrainRasters.containsKey(coordinate) ||
+          _emptyTerrainRasters.contains(coordinate);
+      if (!isCached && coordinate != _terrainBakeInFlight) {
+        _dirtyTerrainChunks.add(coordinate);
       }
-      if (!ready) continue;
-      final signature = Object.hashAll([
-        controller.document.baseMaterialId,
-        for (final stroke in strokes)
-          Object.hash(
-            stroke.materialId,
-            stroke.radius,
-            stroke.opacity,
-            Object.hashAll([
-              for (final point in stroke.points) Object.hash(point.x, point.y),
-            ]),
-          ),
-      ]);
-      if (_terrainPictureSignatures[coordinate] != signature) {
-        _terrainPictures.remove(coordinate)?.dispose();
-        final recorder = ui.PictureRecorder();
-        final pictureCanvas = ui.Canvas(recorder)
+    }
+
+    if (_terrainBakeInFlight == null && _dirtyTerrainChunks.isNotEmpty) {
+      final coordinate = _dirtyTerrainChunks.first;
+      _dirtyTerrainChunks.remove(coordinate);
+      unawaited(_bakeTerrainChunk(coordinate));
+    }
+  }
+
+  void _renderRasterChunkTerrain(ui.Canvas canvas) {
+    final activeStroke = controller.activeTerrainStroke;
+    for (final coordinate in loadedChunks!.call()) {
+      final needsFallback =
+          _dirtyTerrainChunks.contains(coordinate) ||
+          _terrainBakeInFlight == coordinate ||
+          (!_terrainRasters.containsKey(coordinate) &&
+              !_emptyTerrainRasters.contains(coordinate));
+      if (needsFallback) {
+        canvas
+          ..save()
           ..clipPath(_chunkPath(coordinate));
-        for (final stroke in strokes) {
-          _renderStroke(pictureCanvas, stroke);
+        for (final stroke in controller.document.terrainStrokes) {
+          if (!identical(stroke, activeStroke) &&
+              _strokeAffectsChunk(stroke, coordinate)) {
+            _renderStroke(canvas, stroke);
+          }
         }
-        _terrainPictures[coordinate] = recorder.endRecording();
-        _terrainPictureSignatures[coordinate] = signature;
+        canvas.restore();
+        continue;
       }
-      final picture = _terrainPictures[coordinate];
-      if (picture != null) canvas.drawPicture(picture);
+
+      final raster = _terrainRasters[coordinate];
+      if (raster == null) continue;
+      final minX = coordinate.x * chunkSize;
+      final minY = coordinate.y * chunkSize;
+      _drawTexturedWorldQuad(
+        canvas,
+        WorldPoint(minX, minY),
+        WorldPoint(minX + chunkSize, minY + chunkSize),
+        raster.paint,
+        ui.Rect.fromLTWH(
+          0,
+          0,
+          raster.image.width.toDouble(),
+          raster.image.height.toDouble(),
+        ),
+        raster.image,
+      );
+    }
+  }
+
+  Future<void> _bakeTerrainChunk(EnvironmentChunkCoordinate coordinate) async {
+    final activeStroke = controller.activeTerrainStroke;
+    final strokes = controller.document.terrainStrokes
+        .where(
+          (stroke) =>
+              !identical(stroke, activeStroke) &&
+              _strokeAffectsChunk(stroke, coordinate),
+        )
+        .toList();
+    for (final stroke in strokes) {
+      final material = controller.catalog.materialById(stroke.materialId);
+      if (material == null) continue;
+      if (!_loadedImages.containsKey(material.decalPath)) {
+        unawaited(_loadMaterial(stroke.materialId));
+        _dirtyTerrainChunks.add(coordinate);
+        return;
+      }
+    }
+
+    final chunks = loadedChunks!.call();
+    if (!chunks.contains(coordinate)) return;
+    if (strokes.isEmpty) {
+      _terrainRasters.remove(coordinate)?.dispose();
+      _emptyTerrainRasters.add(coordinate);
+      return;
+    }
+
+    _terrainBakeInFlight = coordinate;
+    final generation = _terrainCacheGeneration;
+    final originX = coordinate.x * chunkSize;
+    final originY = coordinate.y * chunkSize;
+    final pixelsPerWorldUnit = _terrainRasterResolution / chunkSize;
+    final recorder = ui.PictureRecorder();
+    final rasterCanvas = ui.Canvas(recorder);
+    for (final stroke in strokes) {
+      final material = controller.catalog.materialById(stroke.materialId);
+      if (material == null) continue;
+      final image = _loadedImages[material.decalPath];
+      if (image == null) continue;
+      final source = ui.Rect.fromLTWH(
+        0,
+        0,
+        image.width.toDouble(),
+        image.height.toDouble(),
+      );
+      final paint = ui.Paint()..filterQuality = ui.FilterQuality.low;
+      for (final stamp in terrainStrokeStamps(stroke)) {
+        paint.color = ui.Color.fromRGBO(255, 255, 255, stamp.opacity);
+        final radius = stamp.radius * pixelsPerWorldUnit;
+        final centerX = (stamp.center.x - originX) * pixelsPerWorldUnit;
+        final centerY = (stamp.center.y - originY) * pixelsPerWorldUnit;
+        rasterCanvas.drawImageRect(
+          image,
+          source,
+          ui.Rect.fromLTWH(
+            centerX - radius,
+            centerY - radius,
+            radius * 2,
+            radius * 2,
+          ),
+          paint,
+        );
+      }
+    }
+    final picture = recorder.endRecording();
+    try {
+      final image = await picture.toImage(
+        _terrainRasterResolution,
+        _terrainRasterResolution,
+      );
+      if (generation != _terrainCacheGeneration ||
+          !loadedChunks!.call().contains(coordinate)) {
+        image.dispose();
+        return;
+      }
+      final raster = _TerrainRaster(
+        image,
+        ui.Paint()
+          ..filterQuality = ui.FilterQuality.low
+          ..shader = ui.ImageShader(
+            image,
+            ui.TileMode.clamp,
+            ui.TileMode.clamp,
+            _identityMatrix,
+          ),
+      );
+      _terrainRasters.remove(coordinate)?.dispose();
+      _terrainRasters[coordinate] = raster;
+      _emptyTerrainRasters.remove(coordinate);
+    } catch (_) {
+      if (generation == _terrainCacheGeneration &&
+          loadedChunks!.call().contains(coordinate)) {
+        _dirtyTerrainChunks.add(coordinate);
+      }
+    } finally {
+      picture.dispose();
+      if (generation == _terrainCacheGeneration) {
+        _terrainBakeInFlight = null;
+      }
     }
   }
 
@@ -501,14 +672,15 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     EnvironmentChunkCoordinate coordinate,
   ) {
     if (stroke.points.isEmpty) return false;
+    final extent = stroke.maximumStampExtent;
     final minX =
-        stroke.points.map((point) => point.x).reduce(math.min) - stroke.radius;
+        stroke.points.map((point) => point.x).reduce(math.min) - extent;
     final minY =
-        stroke.points.map((point) => point.y).reduce(math.min) - stroke.radius;
+        stroke.points.map((point) => point.y).reduce(math.min) - extent;
     final maxX =
-        stroke.points.map((point) => point.x).reduce(math.max) + stroke.radius;
+        stroke.points.map((point) => point.x).reduce(math.max) + extent;
     final maxY =
-        stroke.points.map((point) => point.y).reduce(math.max) + stroke.radius;
+        stroke.points.map((point) => point.y).reduce(math.max) + extent;
     return EnvironmentObjectBounds(
       minX: minX,
       minY: minY,
@@ -606,6 +778,55 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     }
   }
 
+  void _renderPathPreview(ui.Canvas canvas) {
+    if (controller.mode != EnvironmentEditorMode.path) return;
+    final start = controller.pathStart;
+    final end = controller.pathEnd;
+    if (start != null && end != null) {
+      final startScreen = projection
+          .worldToScreen(Vector2(start.x, start.y))
+          .toOffset();
+      final endScreen = projection
+          .worldToScreen(Vector2(end.x, end.y))
+          .toOffset();
+      canvas.drawLine(startScreen, endScreen, _pathPreviewLinePaint);
+    }
+    final asset = controller.catalog.objectById(
+      controller.selectedObjectAssetId,
+    );
+    if (asset == null) return;
+    for (final placement in controller.pathPreviewPlacements) {
+      final view = asset.viewFor(placement.direction.name);
+      final image = _loadedImages[view.imagePath];
+      if (image == null) {
+        _loadImage(view.imagePath);
+        continue;
+      }
+      Sprite(image).render(
+        canvas,
+        position: projection.worldToScreen(
+          Vector2(placement.point.x, placement.point.y),
+        ),
+        size: Vector2(
+          image.width * asset.renderScale,
+          image.height * asset.renderScale,
+        ),
+        anchor: Anchor(view.pivotX, view.pivotY),
+        overridePaint: _pathPreviewSpritePaint,
+      );
+    }
+    if (start != null && end != null) {
+      for (final point in [start, end]) {
+        final handle = projection
+            .worldToScreen(Vector2(point.x, point.y))
+            .toOffset();
+        canvas
+          ..drawCircle(handle, 6, _pathHandleFillPaint)
+          ..drawCircle(handle, 6, _pathHandleStrokePaint);
+      }
+    }
+  }
+
   void _renderSelection(ui.Canvas canvas) {
     final hoveredId = controller.hoveredObjectId;
     if (hoveredId != null &&
@@ -648,17 +869,7 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     final cursor = controller.hoveredPoint;
     if (cursor != null) {
       const actorRadius = 0.18;
-      final blocked = controller.document.objects.any((object) {
-        final asset = controller.catalog.objectById(object.assetId);
-        return asset != null &&
-            environmentObjectBlocksPoint(
-              asset,
-              object,
-              cursor,
-              actorRadius: actorRadius,
-              geometry: controller.catalog.geometryForAsset(asset),
-            );
-      });
+      final blocked = _isNavigationBlocked(cursor, actorRadius: actorRadius);
       final points = [
         for (var index = 0; index < 24; index++)
           WorldPoint(
@@ -786,17 +997,7 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
       for (var x = cursor.x - radius; x <= cursor.x + radius; x += cell) {
         if (!controller.document.contains(x, y)) continue;
         final point = WorldPoint(x + cell / 2, y + cell / 2);
-        final blocked = controller.document.objects.any((object) {
-          final asset = controller.catalog.objectById(object.assetId);
-          return asset != null &&
-              environmentObjectBlocksPoint(
-                asset,
-                object,
-                point,
-                actorRadius: 0.18,
-                geometry: controller.catalog.geometryForAsset(asset),
-              );
-        });
+        final blocked = _isNavigationBlocked(point);
         final projected = projection.worldToScreen(Vector2(point.x, point.y));
         canvas.drawCircle(
           projected.toOffset(),
@@ -805,6 +1006,24 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
         );
       }
     }
+  }
+
+  bool _isNavigationBlocked(WorldPoint point, {double actorRadius = 0.18}) {
+    final material = controller.catalog.materialById(
+      environmentMaterialAtPoint(controller.document, point),
+    );
+    if (material?.blocksMovement ?? false) return true;
+    return controller.document.objects.any((object) {
+      final asset = controller.catalog.objectById(object.assetId);
+      return asset != null &&
+          environmentObjectBlocksPoint(
+            asset,
+            object,
+            point,
+            actorRadius: actorRadius,
+            geometry: controller.catalog.geometryForAsset(asset),
+          );
+    });
   }
 
   void _drawGeometryShape(
@@ -926,6 +1145,25 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     canvas.drawPath(path..close(), _mapOutlinePaint);
   }
 
+  void _renderPlayerSpawn(ui.Canvas canvas) {
+    final spawn = playerSpawn?.call();
+    if (spawn == null) return;
+    final center = projection.worldToScreen(Vector2(spawn.x, spawn.y));
+    final radius = 12 / zoom;
+    canvas
+      ..drawCircle(center.toOffset(), radius, _spawnPaint)
+      ..drawLine(
+        center.toOffset() + ui.Offset(-radius * 1.4, 0),
+        center.toOffset() + ui.Offset(radius * 1.4, 0),
+        _spawnPaint,
+      )
+      ..drawLine(
+        center.toOffset() + ui.Offset(0, -radius * 1.4),
+        center.toOffset() + ui.Offset(0, radius * 1.4),
+        _spawnPaint,
+      );
+  }
+
   ui.Path? _loadedChunkClip() {
     final chunks = loadedChunks?.call();
     if (chunks == null) return null;
@@ -977,15 +1215,24 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
 
   @override
   void onRemove() {
-    for (final picture in _terrainPictures.values) {
-      picture.dispose();
-    }
-    _terrainPictures.clear();
+    _clearTerrainRasters();
     for (final image in _loadedImages.values) {
       image.dispose();
     }
     _loadedImages.clear();
     super.onRemove();
+  }
+
+  void _clearTerrainRasters() {
+    _terrainCacheGeneration++;
+    for (final raster in _terrainRasters.values) {
+      raster.dispose();
+    }
+    _terrainRasters.clear();
+    _emptyTerrainRasters.clear();
+    _dirtyTerrainChunks.clear();
+    _terrainBakeInFlight = null;
+    _seenTerrainRevision = -1;
   }
 
   Vector2 get _mapCenterScreen {
@@ -999,4 +1246,13 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
           : Vector2(center.x, center.y),
     );
   }
+}
+
+class _TerrainRaster {
+  const _TerrainRaster(this.image, this.paint);
+
+  final ui.Image image;
+  final ui.Paint paint;
+
+  void dispose() => image.dispose();
 }

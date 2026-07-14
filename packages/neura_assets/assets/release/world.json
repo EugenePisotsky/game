@@ -275,12 +275,12 @@
   "name": "Environment Study",
   "playerSpawn": {
     "chunk": {
-      "x": 0,
-      "y": 0
+      "x": 3,
+      "y": 3
     },
     "localPosition": {
-      "x": 12.0,
-      "y": 20.5
+      "x": 13.033035278320312,
+      "y": 18.368194580078125
     }
   },
   "schemaVersion": 1,

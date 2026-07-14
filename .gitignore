@@ -48,6 +48,15 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 
-# Purchased source asset libraries. Curated runtime copies live in
-# packages/neura_assets and are committed with the project.
+# Purchased source asset libraries remain local. The importer builds a local
+# editor cache and the release exporter commits only referenced derivatives.
 /content/
+
+# Pack-wide editor caches are deterministic products of the local purchased
+# sources. The release exporter still commits only world-referenced images.
+/packages/neura_assets/assets/images/environment_generated/objects/ow1/
+/packages/neura_assets/assets/images/environment_generated/objects/ow2/
+/packages/neura_assets/assets/images/environment_generated/objects/ow3/
+/packages/neura_assets/assets/images/environment_generated/thumbnails/ow1/
+/packages/neura_assets/assets/images/environment_generated/thumbnails/ow2/
+/packages/neura_assets/assets/images/environment_generated/thumbnails/ow3/

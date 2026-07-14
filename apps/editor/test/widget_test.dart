@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_editor/editor_controller.dart';
@@ -37,13 +38,112 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('NEURA ENVIRONMENT DESIGNER'), findsOneWidget);
+    expect(find.text('GROUND'), findsNothing);
+    await tester.tap(find.byTooltip('Add asset palette to widget tree'));
+    await tester.pumpAndSettle();
     expect(find.text('GROUND'), findsOneWidget);
     expect(find.text('OBJECTS'), findsOneWidget);
     expect(find.text('Environment Study'), findsOneWidget);
     expect(find.text('Worn earth'), findsOneWidget);
+    final search = find.byWidgetPredicate(
+      (widget) =>
+          widget is TextField && widget.decoration?.hintText == 'Search assets',
+    );
+    await tester.tap(search);
+    await tester.enterText(search, 'tree');
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(tester.widget<TextField>(search).controller?.text, 'tre');
+    await tester.enterText(search, '');
+    await tester.pump();
     await tester.tap(find.text('OBJECTS'));
     await tester.pumpAndSettle();
     expect(find.text('Blossoming tree'), findsOneWidget);
+    expect(find.text('All (2)'), findsOneWidget);
+    await tester.tap(find.text('All (2)'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Structures (1)').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Wooden fence'), findsOneWidget);
+    expect(find.text('Blossoming tree'), findsNothing);
+    await tester.tap(find.text('Path'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Piece '), findsOneWidget);
+    expect(find.textContaining('Gap '), findsOneWidget);
+    expect(find.textContaining('Opening '), findsOneWidget);
+    expect(find.textContaining('Rotate orientation'), findsOneWidget);
+    expect(find.text('Apply'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+  });
+
+  testWidgets('canvas delete, undo, and redo shortcuts edit the world', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final catalog = EnvironmentCatalog(
+      materials: const [
+        EnvironmentMaterial(
+          id: 'earth',
+          name: 'Earth',
+          texturePath: 'earth.png',
+          decalPath: 'earth_decal.png',
+        ),
+      ],
+      objects: const [
+        EnvironmentObjectAsset(
+          id: 'tree',
+          name: 'Tree',
+          category: 'Trees',
+          renderScale: 1,
+          views: {'south': EnvironmentObjectView(imagePath: 'tree.png')},
+        ),
+      ],
+    );
+    final document = EnvironmentDocument(
+      id: 'shortcuts',
+      name: 'Shortcuts',
+      width: 10,
+      height: 10,
+      baseMaterialId: 'earth',
+      objects: [
+        PlacedEnvironmentObject(id: 'tree_1', assetId: 'tree', x: 2, y: 2),
+      ],
+    );
+    final controller = EditorController(document, catalog: catalog)
+      ..selectObjectIds(['tree_1']);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditorScreen(
+          starterSource: document.toJsonString(),
+          catalog: catalog,
+          controllerOverride: controller,
+          renderGame: false,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await tester.pump();
+    expect(controller.document.objects, isEmpty);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
+    expect(controller.document.objects, hasLength(1));
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
+    expect(controller.document.objects, isEmpty);
   });
 
   testWidgets('edits selected asset collision geometry', (tester) async {

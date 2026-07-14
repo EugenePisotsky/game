@@ -1,7 +1,5 @@
 {
   "schemaVersion": 1,
-  "packId": "ow3",
-  "sourceRoot": "content/Other Worlds Core Tiles 3",
   "generatedImageRoot": "packages/neura_assets/assets/images/environment_generated",
   "catalogPath": "packages/neura_assets/assets/catalogs/environment_catalog.json",
   "manifestPath": "packages/neura_assets/assets/catalogs/environment_discovered.json",
@@ -17,67 +15,2014 @@
   "worldWidth": 256.0,
   "worldHeight": 256.0,
   "playerSpawn": {"x": 12.0, "y": 20.5},
-  "ground": {
-    "tilePattern": "^Ground_tile_OtherWorldsCore_(\\d+)\\.png$",
-    "decalPattern": "^Ground_Decal_OtherWorldsCore_(\\d+)\\.png$"
-  },
-  "objects": [
+  "packs": [
     {
-      "kind": "tree",
-      "category": "Trees",
-      "pattern": "^Tree(\\d+)_([1-8])\\.png$",
-      "expectedViews": 8,
-      "renderScale": 0.75,
-      "renderBand": "depthSorted",
-      "sortAnchorX": 0.0,
-      "sortAnchorY": 0.0,
-      "defaultSortBias": 0.0,
-      "pivotX": 0.5,
-      "pivotY": 0.96,
-      "collisionProfile": "treeTrunk"
+      "id": "ow1",
+      "sourceRoot": "content/Other Worlds Core Tiles 1",
+      "objects": [
+        {
+          "kind": "building",
+          "categoryPath": ["Buildings", "Houses"],
+          "pattern": "^Building(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Building(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "renderScale": 0.8,
+          "pivotY": 0.97,
+          "tags": ["building", "house"]
+        }
+      ]
     },
     {
-      "kind": "bush",
-      "category": "Shrubs",
-      "pattern": "^Bush(\\d+)_([1-4])\\.png$",
-      "expectedViews": 4,
-      "renderScale": 1.5,
-      "renderBand": "depthSorted",
-      "sortAnchorX": 0.0,
-      "sortAnchorY": 0.0,
-      "defaultSortBias": 0.0,
-      "pivotX": 0.5,
-      "pivotY": 1.0,
-      "collisionProfile": "none"
+      "id": "ow2",
+      "sourceRoot": "content/Other Worlds Core Tiles 2",
+      "splitIncompleteKinds": ["interior", "castleDormer", "castleGateDoor"],
+      "objects": [
+        {
+          "kind": "bridge",
+          "categoryPath": ["Structures", "Bridges & Docks"],
+          "pattern": "^Bridge(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["bridge"]
+        },
+        {
+          "kind": "castle",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Castle(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "fortification"]
+        },
+        {
+          "kind": "castleTower",
+          "displayName": "Castle tower",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Castle_Tower(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "tower", "fortification"]
+        },
+        {
+          "kind": "castleFlag",
+          "displayName": "Castle flag",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^Castle_Flag(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "flag"]
+        },
+        {
+          "kind": "castleStairs",
+          "displayName": "Castle stairs",
+          "categoryPath": ["Structures", "Stairs & Platforms"],
+          "pattern": "^Castle_Stairs(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "stairs"]
+        },
+        {
+          "kind": "interior",
+          "categoryPath": ["Buildings", "Interiors"],
+          "pattern": "^Interior(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["building", "interior"]
+        },
+        {
+          "kind": "interiorMid",
+          "displayName": "Interior middle",
+          "categoryPath": ["Buildings", "Interiors"],
+          "pattern": "^Interior(14)Mid_0*([1-8])\\.png$",
+          "allowedViewCounts": [4],
+          "tags": ["building", "interior"]
+        },
+        {
+          "kind": "keep",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Keep(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["keep", "castle", "fortification"]
+        },
+        {
+          "kind": "castleBattlementStone",
+          "displayName": "Stone battlement",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^Castle2_BattlementStone(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "battlement", "stone"]
+        },
+        {
+          "kind": "castleBattlementWood",
+          "displayName": "Wooden battlement",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^Castle2_BattlementWood(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "battlement", "wood"]
+        },
+        {
+          "kind": "castleDoor",
+          "displayName": "Castle door",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^Castle2_Door(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "door"]
+        },
+        {
+          "kind": "castleDormer",
+          "displayName": "Castle dormer",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^Castle2_Dormer(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "dormer", "roof"]
+        },
+        {
+          "kind": "castleFence",
+          "displayName": "Castle fence",
+          "categoryPath": ["Structures", "Fences & Gates"],
+          "pattern": "^Castle2_Fence(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "fence"],
+          "collisionProfile": "fenceSegment"
+        },
+        {
+          "kind": "castleGateDoor",
+          "displayName": "Castle gate door",
+          "categoryPath": ["Structures", "Fences & Gates"],
+          "pattern": "^Castle2_GateDoor(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "gate", "door"]
+        },
+        {
+          "kind": "castleGatehouseStone",
+          "displayName": "Stone gatehouse",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Castle2_GatehouseStone(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "gatehouse", "stone"]
+        },
+        {
+          "kind": "castleGatehouseWood",
+          "displayName": "Wooden gatehouse",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Castle2_GatehouseWood(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "gatehouse", "wood"]
+        },
+        {
+          "kind": "castleGuardTowerStone",
+          "displayName": "Stone guard tower",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Castle2_GuardTowerStone(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "guard tower", "stone"]
+        },
+        {
+          "kind": "castleGuardTowerWood",
+          "displayName": "Wooden guard tower",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Castle2_GuardTowerWood(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "guard tower", "wood"]
+        },
+        {
+          "kind": "castleLanternPost",
+          "displayName": "Castle lantern post",
+          "categoryPath": ["Props", "Lighting & Fire"],
+          "pattern": "^Castle2_LanternPost(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "lantern", "lighting"]
+        },
+        {
+          "kind": "castlePortcullis",
+          "displayName": "Castle portcullis",
+          "categoryPath": ["Structures", "Fences & Gates"],
+          "pattern": "^Castle2_Portcullis(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "portcullis", "gate"]
+        },
+        {
+          "kind": "castleSpikes",
+          "displayName": "Castle spikes",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^Castle2_Spikes(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "spikes"]
+        },
+        {
+          "kind": "castleStable",
+          "displayName": "Castle stable",
+          "categoryPath": ["Buildings", "Agricultural"],
+          "pattern": "^Castle2_Stable(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "stable", "agricultural"]
+        },
+        {
+          "kind": "castleStairs2",
+          "displayName": "Castle stairs",
+          "categoryPath": ["Structures", "Stairs & Platforms"],
+          "pattern": "^Castle2_Stairs(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "stairs"]
+        },
+        {
+          "kind": "castleTowerWood",
+          "displayName": "Wooden castle tower",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Castle2_TowerWood(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "tower", "wood"]
+        },
+        {
+          "kind": "castleWalkway",
+          "displayName": "Castle walkway",
+          "categoryPath": ["Structures", "Stairs & Platforms"],
+          "pattern": "^Castle2_Walkway(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "walkway"]
+        },
+        {
+          "kind": "castleWallStone",
+          "displayName": "Stone castle wall",
+          "categoryPath": ["Terrain Pieces", "Walls"],
+          "pattern": "^Castle2_WallStone(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "wall", "stone"]
+        },
+        {
+          "kind": "castleWallWood",
+          "displayName": "Wooden castle wall",
+          "categoryPath": ["Terrain Pieces", "Walls"],
+          "pattern": "^Castle2_WallWood(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "wall", "wood"]
+        },
+        {
+          "kind": "castleWell",
+          "displayName": "Castle well",
+          "categoryPath": ["Structures", "Outdoor Structures"],
+          "pattern": "^Castle2_Well(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "well"]
+        },
+        {
+          "kind": "castleWindow",
+          "displayName": "Castle window",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^Castle2_Window(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "window"]
+        },
+        {
+          "kind": "castleWitchPost",
+          "displayName": "Castle witch post",
+          "categoryPath": ["Props", "Decoration"],
+          "pattern": "^Castle2_WitchPost(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["castle", "post", "decoration"]
+        }
+      ]
     },
     {
-      "kind": "grass",
-      "category": "Ground cover",
-      "pattern": "^Grass(\\d+)_0?([1-4])\\.png$",
-      "expectedViews": 4,
-      "renderScale": 1.0,
-      "renderBand": "groundCover",
-      "sortAnchorX": 0.0,
-      "sortAnchorY": 0.0,
-      "defaultSortBias": 0.0,
-      "pivotX": 0.5,
-      "pivotY": 1.0,
-      "collisionProfile": "none"
-    },
-    {
-      "kind": "rock",
-      "category": "Rocks",
-      "pattern": "^Rock(\\d+)_0?([1-4])\\.png$",
-      "directionlessPattern": "^Rock(\\d+)\\.png$",
-      "expectedViews": 4,
-      "renderScale": 0.9,
-      "renderBand": "depthSorted",
-      "sortAnchorX": 0.0,
-      "sortAnchorY": 0.0,
-      "defaultSortBias": 0.0,
-      "pivotX": 0.5,
-      "pivotY": 1.0,
-      "collisionProfile": "smallRock"
+      "id": "ow3",
+      "sourceRoot": "content/Other Worlds Core Tiles 3",
+      "splitIncompleteKinds": [
+        "barrel", "stool", "table", "shelf", "bottle", "buildingAddon",
+        "wall", "cliff", "dungeonInterior", "tableSet", "floor", "stairs",
+        "tower", "drawbridge", "fireplace", "column", "picture", "bookShelf",
+        "dungeonCandelabra", "dungeonAxe", "dungeonHalberd", "grate",
+        "underFloor", "arch", "curtain", "dungeonBlockBrazier",
+        "dungeonBrazier", "dungeonSconce", "dungeonShackles",
+        "dungeonTallCandle", "dungeonTorch", "dungeonTorchLamp",
+        "dungeonWallPeg", "hangingCandle", "hangingLantern", "hangingPapers",
+        "hangingShield", "pedestal", "step", "wallChandelier", "well"
+      ],
+      "ground": {
+        "tilePattern": "^Ground_tile_OtherWorldsCore_(\\d+)\\.png$",
+        "decalPattern": "^Ground_Decal_OtherWorldsCore_(\\d+)\\.png$",
+        "waterPattern": "^WaterTile(\\d+)\\.png$"
+      },
+      "deferred": [
+        {
+          "pattern": "^(?:Top|Bottom|Head)_.+\\.png$",
+          "reason": "characterPart"
+        },
+        {
+          "pattern": "^Anim_.+\\.png$",
+          "reason": "animationSheet"
+        },
+        {
+          "pattern": "^WaterWheel\\d+_\\d+\\.png$",
+          "reason": "animationFrames"
+        },
+        {
+          "pattern": "^(?:CavernFog|Clouds|Darkness|Fog|SandStorm).*\\.png$",
+          "reason": "visualEffect"
+        }
+      ],
+      "objects": [
+        {
+          "kind": "tree",
+          "categoryPath": ["Environment", "Trees"],
+          "pattern": "^Tree(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [8],
+          "renderScale": 0.75,
+          "pivotY": 0.96,
+          "collisionProfile": "treeTrunk",
+          "tags": ["tree"]
+        },
+        {
+          "kind": "bush",
+          "categoryPath": ["Environment", "Bushes"],
+          "pattern": "^Bush(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4],
+          "renderScale": 1.5,
+          "tags": ["bush"]
+        },
+        {
+          "kind": "grass",
+          "categoryPath": ["Environment", "Ground Cover"],
+          "pattern": "^Grass(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4],
+          "renderBand": "groundCover",
+          "tags": ["grass", "ground cover"]
+        },
+        {
+          "kind": "rock",
+          "categoryPath": ["Environment", "Rocks"],
+          "pattern": "^Rock(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Rock(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4],
+          "renderScale": 0.9,
+          "collisionProfile": "smallRock",
+          "tags": ["rock"]
+        },
+        {
+          "kind": "barn",
+          "categoryPath": ["Buildings", "Agricultural"],
+          "pattern": "^Barn(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [8],
+          "pivotY": 0.97,
+          "tags": ["barn", "building", "agricultural"]
+        },
+        {
+          "kind": "barrel",
+          "categoryPath": ["Props", "Containers"],
+          "pattern": "^Barrel(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Barrel(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["barrel", "container"]
+        },
+        {
+          "kind": "crate",
+          "categoryPath": ["Props", "Containers"],
+          "pattern": "^Crate(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Crate(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["crate", "container"]
+        },
+        {
+          "kind": "bag",
+          "categoryPath": ["Props", "Containers"],
+          "pattern": "^Bag(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Bag(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["bag", "container"]
+        },
+        {
+          "kind": "basket",
+          "categoryPath": ["Props", "Containers"],
+          "pattern": "^Basket(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Basket(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["basket", "container"]
+        },
+        {
+          "kind": "pot",
+          "categoryPath": ["Props", "Containers"],
+          "pattern": "^Pot(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Pot(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["pot", "container"]
+        },
+        {
+          "kind": "jar",
+          "categoryPath": ["Props", "Containers"],
+          "pattern": "^Jar(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Jar(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["jar", "container"]
+        },
+        {
+          "kind": "chair",
+          "categoryPath": ["Furniture", "Seating"],
+          "pattern": "^Chair(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["chair", "seating"]
+        },
+        {
+          "kind": "bench",
+          "categoryPath": ["Furniture", "Seating"],
+          "pattern": "^Bench(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["bench", "seating"]
+        },
+        {
+          "kind": "stool",
+          "categoryPath": ["Furniture", "Seating"],
+          "pattern": "^Stool(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["stool", "seating"]
+        },
+        {
+          "kind": "table",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "pattern": "^Table(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["table", "furniture"]
+        },
+        {
+          "kind": "desk",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "pattern": "^Desk(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["desk", "furniture"]
+        },
+        {
+          "kind": "shelf",
+          "categoryPath": ["Furniture", "Shelving & Cabinets"],
+          "pattern": "^Shelf(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["shelf", "storage", "furniture"]
+        },
+        {
+          "kind": "bed",
+          "categoryPath": ["Furniture", "Beds"],
+          "pattern": "^Bed(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["bed", "furniture"]
+        },
+        {
+          "kind": "book",
+          "categoryPath": ["Small Items", "Books & Scrolls"],
+          "pattern": "^Book(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Book(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["book"]
+        },
+        {
+          "kind": "scroll",
+          "categoryPath": ["Small Items", "Books & Scrolls"],
+          "pattern": "^Scroll(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Scroll(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["scroll"]
+        },
+        {
+          "kind": "bottle",
+          "categoryPath": ["Small Items", "Bottles & Potions"],
+          "pattern": "^Bottle(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Bottle(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["bottle"]
+        },
+        {
+          "kind": "potion",
+          "categoryPath": ["Small Items", "Bottles & Potions"],
+          "pattern": "^Potion(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Potion(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["potion", "bottle"]
+        },
+        {
+          "kind": "vial",
+          "categoryPath": ["Small Items", "Bottles & Potions"],
+          "pattern": "^Vial(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Vial(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["vial", "bottle"]
+        },
+        {
+          "kind": "buildingAddon",
+          "displayName": "Building addon",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^BuildingAddon(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^BuildingAddon(\\d+)_?\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["building", "building part"]
+        },
+        {
+          "kind": "wall",
+          "categoryPath": ["Terrain Pieces", "Walls"],
+          "pattern": "^Wall(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Wall(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["wall", "terrain piece"]
+        },
+        {
+          "kind": "chest",
+          "categoryPath": ["Props", "Containers"],
+          "pattern": "^Chest(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["chest", "container"]
+        },
+        {
+          "kind": "chestStatic",
+          "displayName": "Chest",
+          "categoryPath": ["Props", "Containers"],
+          "pattern": "^$",
+          "directionlessPattern": "^Chest_(\\d+)\\.png$",
+          "allowedViewCounts": [1],
+          "tags": ["chest", "container"]
+        },
+        {
+          "kind": "flower",
+          "categoryPath": ["Environment", "Flowers"],
+          "pattern": "^Flower(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Flower(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "renderBand": "groundCover",
+          "tags": ["flower", "ground cover"]
+        },
+        {
+          "kind": "cliff",
+          "categoryPath": ["Environment", "Cliffs"],
+          "pattern": "^Cliff(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Cliff(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["cliff", "terrain piece"]
+        },
+        {
+          "kind": "cart",
+          "categoryPath": ["Props", "Transport"],
+          "pattern": "^Cart(\\d+)_([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["cart", "transport"]
+        },
+        {
+          "kind": "cartAlt",
+          "displayName": "Cart alternate",
+          "categoryPath": ["Props", "Transport"],
+          "pattern": "^Cart(\\d+)_0([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["cart", "transport", "alternate"]
+        },
+        {
+          "kind": "door",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "pattern": "^Door(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Door(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["door", "building part"]
+        },
+        {
+          "kind": "wagon",
+          "categoryPath": ["Props", "Transport"],
+          "pattern": "^Wagon(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["wagon", "transport"]
+        },
+        {
+          "kind": "dungeonInterior",
+          "displayName": "Dungeon interior",
+          "categoryPath": ["Buildings", "Interiors"],
+          "pattern": "^Dungeon_InteriorDungeon(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["dungeon", "interior"]
+        },
+        {
+          "kind": "tableSet",
+          "displayName": "Table set",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "pattern": "^TableSet(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^TableSet(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["table", "furniture"]
+        },
+        {
+          "kind": "marketStand",
+          "displayName": "Market stand",
+          "categoryPath": ["Props", "Market"],
+          "pattern": "^MarketStand(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["market", "stand"]
+        },
+        {
+          "kind": "mushroom",
+          "categoryPath": ["Environment", "Ground Cover"],
+          "pattern": "^Mushroom(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Mushroom(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "renderBand": "groundCover",
+          "tags": ["mushroom", "ground cover"]
+        },
+        {
+          "kind": "floor",
+          "categoryPath": ["Terrain Pieces", "Floors"],
+          "pattern": "^Floor(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Floor(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["floor", "terrain piece"]
+        },
+        {
+          "kind": "vine",
+          "categoryPath": ["Environment", "Ground Cover"],
+          "pattern": "^Vine(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Vine(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "renderBand": "groundCover",
+          "tags": ["vine", "plant"]
+        },
+        {
+          "kind": "stairs",
+          "categoryPath": ["Structures", "Stairs & Platforms"],
+          "pattern": "^Stairs(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Stairs(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["stairs", "structure"]
+        },
+        {
+          "kind": "tower",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Tower(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Tower(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["tower", "fortification"]
+        },
+        {
+          "kind": "darkTower",
+          "displayName": "Dark tower",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^DarkTower(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["tower", "fortification", "dark"]
+        },
+        {
+          "kind": "fence",
+          "categoryPath": ["Structures", "Fences & Gates"],
+          "pattern": "^Fence(\\d+)_([1-8])\\.png$",
+          "directionlessPattern": "^Fence(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["fence", "structure"],
+          "collisionProfile": "fenceSegment"
+        },
+        {
+          "kind": "fenceAlt",
+          "displayName": "Fence alternate",
+          "categoryPath": ["Structures", "Fences & Gates"],
+          "pattern": "^Fence(\\d+)_0([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["fence", "structure", "alternate"],
+          "collisionProfile": "fenceSegment"
+        },
+        {
+          "kind": "dock",
+          "categoryPath": ["Structures", "Bridges & Docks"],
+          "pattern": "^Dock(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["dock", "bridge", "wood"]
+        },
+        {
+          "kind": "riverBank",
+          "displayName": "River bank",
+          "categoryPath": ["Terrain Pieces", "River Banks"],
+          "pattern": "^$",
+          "directionlessPattern": "^RiverBank_(\\d+)\\.png$",
+          "allowedViewCounts": [1],
+          "tags": ["river bank", "terrain piece"]
+        },
+        {
+          "kind": "crop",
+          "categoryPath": ["Environment", "Ground Cover"],
+          "pattern": "^Crop(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Crop(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "renderBand": "groundCover",
+          "tags": ["crop", "agricultural"]
+        },
+        {
+          "kind": "drawbridge",
+          "categoryPath": ["Structures", "Bridges & Docks"],
+          "pattern": "^Drawbridge(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Drawbridge(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["drawbridge", "bridge"]
+        },
+        {
+          "kind": "gatehouse",
+          "categoryPath": ["Buildings", "Fortifications"],
+          "pattern": "^Gatehouse(\\d+)_0*([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["gatehouse", "fortification"]
+        },
+        {
+          "kind": "fireplace",
+          "categoryPath": ["Props", "Lighting & Fire"],
+          "pattern": "^Fireplace(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Fireplace(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["fireplace", "fire", "lighting"]
+        },
+        {
+          "kind": "cabinet",
+          "categoryPath": ["Furniture", "Shelving & Cabinets"],
+          "pattern": "^Cabinet(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Cabinet(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["cabinet", "storage", "furniture"]
+        },
+        {
+          "kind": "bookStack",
+          "displayName": "Book stack",
+          "categoryPath": ["Small Items", "Books & Scrolls"],
+          "pattern": "^BookStack(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^BookStack(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["book", "stack"]
+        },
+        {
+          "kind": "rug",
+          "categoryPath": ["Props", "Decoration"],
+          "pattern": "^Rug(\\d+)_0*([1-8])\\.png$",
+          "directionlessPattern": "^Rug(\\d+)\\.png$",
+          "allowedViewCounts": [1, 4, 8],
+          "renderBand": "groundCover",
+          "tags": ["rug", "decoration"]
+        },
+        {
+          "kind": "firewood",
+          "sourcePrefix": "Firewood",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "anvil",
+          "sourcePrefix": "Anvil",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "tool",
+          "sourcePrefix": "Tool",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "spinningWheel",
+          "sourcePrefix": "SpinningWheel",
+          "displayName": "Spinning wheel",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bellows",
+          "sourcePrefix": "Bellows",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cobblerBench",
+          "sourcePrefix": "CobblerBench",
+          "displayName": "Cobbler bench",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cobblerTool",
+          "sourcePrefix": "CobblerTool",
+          "displayName": "Cobbler tool",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cuttingBoard",
+          "sourcePrefix": "CuttingBoard",
+          "displayName": "Cutting board",
+          "categoryPath": ["Small Items", "Food & Drink"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "mortarPestle",
+          "sourcePrefix": "MortarPestle",
+          "displayName": "Mortar and pestle",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "wheelbarrow",
+          "sourcePrefix": "Wheelbarrow",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bucket",
+          "sourcePrefix": "Bucket",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true
+        },
+        {
+          "kind": "cage",
+          "sourcePrefix": "Cage",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true
+        },
+        {
+          "kind": "candle",
+          "sourcePrefix": "Candle",
+          "categoryPath": ["Props", "Lighting & Fire"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true
+        },
+        {
+          "kind": "skullCandle",
+          "sourcePrefix": "SkullCandle",
+          "displayName": "Skull candle",
+          "categoryPath": ["Props", "Lighting & Fire"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "campfire",
+          "sourcePrefix": "Campfire",
+          "categoryPath": ["Props", "Lighting & Fire"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cup",
+          "sourcePrefix": "Cup",
+          "categoryPath": ["Small Items", "Tableware"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "paper",
+          "sourcePrefix": "Paper",
+          "categoryPath": ["Small Items", "Books & Scrolls"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "foodSausage",
+          "sourcePrefix": "Food_Sausage",
+          "displayName": "Sausage",
+          "categoryPath": ["Small Items", "Food & Drink"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "foodBread",
+          "sourcePrefix": "Food_Bread",
+          "displayName": "Bread",
+          "categoryPath": ["Small Items", "Food & Drink"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "foodCheese",
+          "sourcePrefix": "Food_Cheese",
+          "displayName": "Cheese",
+          "categoryPath": ["Small Items", "Food & Drink"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "hangingPlant",
+          "sourcePrefix": "HangingPlant",
+          "displayName": "Hanging plant",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "columns",
+          "sourcePrefix": "Columns",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "column",
+          "sourcePrefix": "Column",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true
+        },
+        {
+          "kind": "columnTop",
+          "sourcePrefix": "ColumnTop",
+          "displayName": "Column top",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bannister",
+          "sourcePrefix": "Bannister",
+          "categoryPath": ["Structures", "Stairs & Platforms"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bar",
+          "sourcePrefix": "Bar",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "telescope",
+          "sourcePrefix": "Telescope",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "throne",
+          "sourcePrefix": "Throne",
+          "categoryPath": ["Furniture", "Seating"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "picture",
+          "sourcePrefix": "Picture",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "drawers",
+          "sourcePrefix": "Drawers",
+          "categoryPath": ["Furniture", "Shelving & Cabinets"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "globe",
+          "sourcePrefix": "Globe",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "quill",
+          "sourcePrefix": "Quill",
+          "categoryPath": ["Small Items", "Books & Scrolls"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "scales",
+          "sourcePrefix": "Scales",
+          "categoryPath": ["Props", "Market"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "vase",
+          "sourcePrefix": "Vase",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true
+        },
+        {
+          "kind": "washTub",
+          "sourcePrefix": "WashTub",
+          "displayName": "Wash tub",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "stoneTable",
+          "sourcePrefix": "StoneTable",
+          "displayName": "Stone table",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "tray",
+          "sourcePrefix": "Tray",
+          "categoryPath": ["Small Items", "Tableware"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "wagonWheel",
+          "sourcePrefix": "WagonWheel",
+          "displayName": "Wagon wheel",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true
+        },
+        {
+          "kind": "altar",
+          "sourcePrefix": "Altar",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bedFrame",
+          "sourcePrefix": "BedFrame",
+          "displayName": "Bed frame",
+          "categoryPath": ["Furniture", "Beds"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bookShelf",
+          "sourcePrefix": "BookShelf",
+          "displayName": "Book shelf",
+          "categoryPath": ["Furniture", "Shelving & Cabinets"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bookStand",
+          "sourcePrefix": "BookStand",
+          "displayName": "Book stand",
+          "categoryPath": ["Furniture", "Shelving & Cabinets"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bottleRack",
+          "sourcePrefix": "BottleRack",
+          "displayName": "Bottle rack",
+          "categoryPath": ["Furniture", "Shelving & Cabinets"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bowl",
+          "sourcePrefix": "Bowl",
+          "categoryPath": ["Small Items", "Tableware"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "broom",
+          "sourcePrefix": "Broom",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "coalBag",
+          "sourcePrefix": "CoalBag",
+          "displayName": "Coal bag",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "coinPurse",
+          "sourcePrefix": "CoinPurse",
+          "displayName": "Coin purse",
+          "categoryPath": ["Small Items", "Miscellaneous"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "crates",
+          "sourcePrefix": "Crates",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "deadBush",
+          "sourcePrefix": "DeadBush",
+          "displayName": "Dead bush",
+          "categoryPath": ["Environment", "Bushes"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "deadTree",
+          "sourcePrefix": "DeadTree",
+          "displayName": "Dead tree",
+          "categoryPath": ["Environment", "Trees"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "dockLadder",
+          "sourcePrefix": "DockLadder",
+          "displayName": "Dock ladder",
+          "categoryPath": ["Structures", "Bridges & Docks"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "grainBag",
+          "sourcePrefix": "GrainBag",
+          "displayName": "Grain bag",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "haystack",
+          "sourcePrefix": "Haystack",
+          "categoryPath": ["Props", "Agricultural"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "keg",
+          "sourcePrefix": "Keg",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "ladder",
+          "sourcePrefix": "Ladder",
+          "categoryPath": ["Structures", "Stairs & Platforms"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "lectern",
+          "sourcePrefix": "Lectern",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "outhouse",
+          "sourcePrefix": "Outhouse",
+          "categoryPath": ["Buildings", "Outdoor Structures"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "oven",
+          "sourcePrefix": "Oven",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "pew",
+          "sourcePrefix": "Pew",
+          "categoryPath": ["Furniture", "Seating"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "pottedPlant",
+          "sourcePrefix": "PottedPlant",
+          "displayName": "Potted plant",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "rolledRug",
+          "sourcePrefix": "RolledRug",
+          "displayName": "Rolled rug",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "rope",
+          "sourcePrefix": "Rope",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "sack",
+          "sourcePrefix": "Sack",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "sacks",
+          "sourcePrefix": "Sacks",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "standingMirror",
+          "sourcePrefix": "StandingMirror",
+          "displayName": "Standing mirror",
+          "categoryPath": ["Furniture", "Shelving & Cabinets"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "tankard",
+          "sourcePrefix": "Tankard",
+          "categoryPath": ["Small Items", "Tableware"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "windmill",
+          "sourcePrefix": "Windmill",
+          "categoryPath": ["Buildings", "Agricultural"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "woodPile",
+          "sourcePrefix": "WoodPile",
+          "displayName": "Wood pile",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "woodStack",
+          "sourcePrefix": "WoodStack",
+          "displayName": "Wood stack",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "dungeonBone",
+          "sourcePrefix": "Dungeon_Bone",
+          "displayName": "Dungeon bone",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "bone"]
+        },
+        {
+          "kind": "dungeonBoneStack",
+          "sourcePrefix": "Dungeon_BoneStack",
+          "displayName": "Dungeon bone stack",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "bone"]
+        },
+        {
+          "kind": "dungeonRoots",
+          "sourcePrefix": "Dungeon_Roots",
+          "displayName": "Dungeon roots",
+          "categoryPath": ["Environment", "Ground Cover"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "roots"]
+        },
+        {
+          "kind": "dungeonTortureDevice",
+          "sourcePrefix": "Dungeon_TortureDevice",
+          "displayName": "Torture device",
+          "categoryPath": ["Props", "Dungeon"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon"]
+        },
+        {
+          "kind": "dungeonAltar",
+          "sourcePrefix": "Dungeon_Altar",
+          "displayName": "Dungeon altar",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "altar"]
+        },
+        {
+          "kind": "dungeonBook",
+          "sourcePrefix": "Dungeon_Book",
+          "displayName": "Dungeon book",
+          "categoryPath": ["Small Items", "Books & Scrolls"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "book"]
+        },
+        {
+          "kind": "dungeonCage",
+          "sourcePrefix": "Dungeon_Cage",
+          "displayName": "Dungeon cage",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["dungeon", "cage"]
+        },
+        {
+          "kind": "dungeonEvilSkull",
+          "sourcePrefix": "Dungeon_EvilSkull",
+          "displayName": "Evil skull",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "skull"]
+        },
+        {
+          "kind": "dungeonLargeSkeleton",
+          "sourcePrefix": "Dungeon_LargeSkeleton",
+          "displayName": "Large skeleton",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "skeleton"]
+        },
+        {
+          "kind": "dungeonNiche",
+          "sourcePrefix": "Dungeon_Niche",
+          "displayName": "Dungeon niche",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "niche"]
+        },
+        {
+          "kind": "dungeonPillar",
+          "sourcePrefix": "Dungeon_Pillar",
+          "displayName": "Dungeon pillar",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "pillar"]
+        },
+        {
+          "kind": "dungeonPortal",
+          "sourcePrefix": "Dungeon_Portal",
+          "displayName": "Dungeon portal",
+          "categoryPath": ["Structures", "Outdoor Structures"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "portal"]
+        },
+        {
+          "kind": "dungeonStand",
+          "sourcePrefix": "Dungeon_Stand",
+          "displayName": "Dungeon stand",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon"]
+        },
+        {
+          "kind": "dungeonStool",
+          "sourcePrefix": "Dungeon_Stool",
+          "displayName": "Dungeon stool",
+          "categoryPath": ["Furniture", "Seating"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "stool"]
+        },
+        {
+          "kind": "dungeonTable",
+          "sourcePrefix": "Dungeon_Table",
+          "displayName": "Dungeon table",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "table"]
+        },
+        {
+          "kind": "dungeonCandelabra",
+          "sourcePrefix": "Dungeon_Candelabra",
+          "displayName": "Dungeon candelabra",
+          "categoryPath": ["Props", "Lighting & Fire"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "lighting"]
+        },
+        {
+          "kind": "dungeonBarrel",
+          "sourcePrefix": "Dungeon_Barrel",
+          "displayName": "Dungeon barrel",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true,
+          "tags": ["dungeon", "barrel"]
+        },
+        {
+          "kind": "dungeonCandles",
+          "sourcePrefix": "Dungeon_Candles",
+          "displayName": "Dungeon candles",
+          "categoryPath": ["Props", "Lighting & Fire"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "lighting"]
+        },
+        {
+          "kind": "dungeonClutter",
+          "sourcePrefix": "Dungeon_Clutter",
+          "displayName": "Dungeon clutter",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "clutter"]
+        },
+        {
+          "kind": "dungeonDarkThrone",
+          "sourcePrefix": "Dungeon_DarkThrone",
+          "displayName": "Dark throne",
+          "categoryPath": ["Furniture", "Seating"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "throne"]
+        },
+        {
+          "kind": "dungeonMirror",
+          "sourcePrefix": "Dungeon_Mirror",
+          "displayName": "Dungeon mirror",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "mirror"]
+        },
+        {
+          "kind": "dungeonRocks",
+          "sourcePrefix": "Dungeon_Rocks",
+          "displayName": "Dungeon rocks",
+          "categoryPath": ["Environment", "Rocks"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "rock"]
+        },
+        {
+          "kind": "dungeonSmallBox",
+          "sourcePrefix": "Dungeon_SmallBox",
+          "displayName": "Dungeon small box",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "box"]
+        },
+        {
+          "kind": "dungeonStock",
+          "sourcePrefix": "Dungeon_Stock",
+          "displayName": "Dungeon stocks",
+          "categoryPath": ["Props", "Dungeon"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon"]
+        },
+        {
+          "kind": "dungeonTomb",
+          "sourcePrefix": "Dungeon_Tomb",
+          "displayName": "Dungeon tomb",
+          "categoryPath": ["Props", "Dungeon"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "tomb"]
+        },
+        {
+          "kind": "dungeonWingedAltar",
+          "sourcePrefix": "Dungeon_WingedAltar",
+          "displayName": "Winged altar",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "altar"]
+        },
+        {
+          "kind": "dungeonWingedAltarBase",
+          "sourcePrefix": "Dungeon_WingedAltarBase",
+          "displayName": "Winged altar base",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "altar"]
+        },
+        {
+          "kind": "dungeonWingedAltarTable",
+          "sourcePrefix": "Dungeon_WingedAltarTable",
+          "displayName": "Winged altar table",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "altar"]
+        },
+        {
+          "kind": "dungeonWingedAltarLectern",
+          "sourcePrefix": "Dungeon_WingedAltarLectern",
+          "displayName": "Winged altar lectern",
+          "categoryPath": ["Furniture", "Tables & Desks"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "altar"]
+        },
+        {
+          "kind": "dungeonAxe",
+          "sourcePrefix": "Dungeon_Axe",
+          "displayName": "Dungeon axe",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "weapon"]
+        },
+        {
+          "kind": "dungeonSword",
+          "sourcePrefix": "Dungeon_Sword",
+          "displayName": "Dungeon sword",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "weapon"]
+        },
+        {
+          "kind": "dungeonHalberd",
+          "sourcePrefix": "Dungeon_Halberd",
+          "displayName": "Dungeon halberd",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8],
+          "tags": ["dungeon", "weapon"]
+        },
+        {
+          "kind": "sword",
+          "categoryPath": ["Small Items", "Weapons"],
+          "pattern": "^Sword(\\d+)_([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["weapon", "sword"]
+        },
+        {
+          "kind": "swordAlt",
+          "displayName": "Sword alternate",
+          "categoryPath": ["Small Items", "Weapons"],
+          "pattern": "^Sword(\\d+)_0{3}([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["weapon", "sword", "alternate"]
+        },
+        {
+          "kind": "halberd",
+          "categoryPath": ["Small Items", "Weapons"],
+          "pattern": "^Halberd(\\d+)_([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["weapon", "halberd"]
+        },
+        {
+          "kind": "halberdAlt",
+          "displayName": "Halberd alternate",
+          "categoryPath": ["Small Items", "Weapons"],
+          "pattern": "^Halberd(\\d+)_0{3}([1-8])\\.png$",
+          "allowedViewCounts": [4, 8],
+          "tags": ["weapon", "halberd", "alternate"]
+        },
+        {
+          "kind": "spear",
+          "sourcePrefix": "Spear",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bow",
+          "sourcePrefix": "Bow",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "dagger",
+          "sourcePrefix": "Dagger",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "shield",
+          "sourcePrefix": "Shield",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "staff",
+          "sourcePrefix": "Staff",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "crossbow",
+          "sourcePrefix": "Xbow",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "weaponAxe",
+          "sourcePrefix": "Weapon_Axe",
+          "displayName": "Axe",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "weaponDagger",
+          "sourcePrefix": "Weapon_Dagger",
+          "displayName": "Dagger",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "weaponGreatSword",
+          "sourcePrefix": "Weapon_GreatSword",
+          "displayName": "Great sword",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "weaponMace",
+          "sourcePrefix": "Weapon_Mace",
+          "displayName": "Mace",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "weaponShield",
+          "sourcePrefix": "Weapon_Shield",
+          "displayName": "Shield",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "skull",
+          "sourcePrefix": "Skull",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "spiderweb",
+          "sourcePrefix": "Spiderweb",
+          "categoryPath": ["Environment", "Ground Cover"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "stoneCircle",
+          "sourcePrefix": "StoneCircle",
+          "displayName": "Stone circle",
+          "categoryPath": ["Structures", "Outdoor Structures"],
+          "allowedViewCounts": [1, 4, 8],
+          "preferDirectional": true
+        },
+        {
+          "kind": "grate",
+          "sourcePrefix": "Grate",
+          "categoryPath": ["Terrain Pieces", "Floors"],
+          "allowedViewCounts": [1, 4, 8],
+          "renderBand": "groundCover"
+        },
+        {
+          "kind": "beam",
+          "sourcePrefix": "Beam",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bellowLeaning",
+          "sourcePrefix": "BellowLeaning",
+          "displayName": "Leaning bellows",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "bunzen",
+          "sourcePrefix": "Bunzen",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cane",
+          "sourcePrefix": "Cane",
+          "categoryPath": ["Small Items", "Miscellaneous"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "chopper",
+          "sourcePrefix": "Chopper",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "clothingFolded",
+          "sourcePrefix": "ClothingFolded",
+          "displayName": "Folded clothing",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "coalScuttle",
+          "sourcePrefix": "CoalScuttle",
+          "displayName": "Coal scuttle",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cobblerBoot",
+          "sourcePrefix": "CobblerBoot",
+          "displayName": "Cobbler boot",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cobblerFootDummy",
+          "sourcePrefix": "CobblerFootDummy",
+          "displayName": "Cobbler foot dummy",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cobblerShoe",
+          "sourcePrefix": "CobblerShoe",
+          "displayName": "Cobbler shoe",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "coffer",
+          "sourcePrefix": "Coffer",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cooperBrokenBarrel",
+          "sourcePrefix": "CooperBrokenBarrel",
+          "displayName": "Broken cooper barrel",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cooperChurn",
+          "sourcePrefix": "CooperChurn",
+          "displayName": "Cooper churn",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "cooperPiggin",
+          "sourcePrefix": "CooperPiggin",
+          "displayName": "Cooper piggin",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "crane",
+          "sourcePrefix": "Crane",
+          "categoryPath": ["Structures", "Outdoor Structures"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "ewer",
+          "sourcePrefix": "Ewer",
+          "categoryPath": ["Small Items", "Tableware"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "food",
+          "sourcePrefix": "Food",
+          "categoryPath": ["Small Items", "Food & Drink"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "foodMelon",
+          "sourcePrefix": "Food_Melon",
+          "displayName": "Melon",
+          "categoryPath": ["Small Items", "Food & Drink"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "foodPretzel",
+          "sourcePrefix": "Food_Pretzel",
+          "displayName": "Pretzel",
+          "categoryPath": ["Small Items", "Food & Drink"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "hammer",
+          "sourcePrefix": "Hammer",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "hangingKeys",
+          "sourcePrefix": "HangingKeys",
+          "displayName": "Hanging keys",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "hangingWagonWheel",
+          "sourcePrefix": "HangingWagonWheel",
+          "displayName": "Hanging wagon wheel",
+          "categoryPath": ["Props", "Decoration"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "hayFork",
+          "sourcePrefix": "HayFork",
+          "displayName": "Hay fork",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "helm",
+          "sourcePrefix": "Helm",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "horseshoe",
+          "sourcePrefix": "Horseshoe",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "incubator",
+          "sourcePrefix": "Incubator",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "key",
+          "sourcePrefix": "Key",
+          "categoryPath": ["Small Items", "Miscellaneous"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "knife",
+          "sourcePrefix": "Knife",
+          "categoryPath": ["Small Items", "Weapons"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "ladle",
+          "singletonPattern": "^Ladle_0*([1-8])\\.png$",
+          "categoryPath": ["Small Items", "Tableware"],
+          "allowedViewCounts": [8]
+        },
+        {
+          "kind": "largePress",
+          "sourcePrefix": "LargePress",
+          "displayName": "Large press",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "leanto",
+          "sourcePrefix": "Leanto",
+          "displayName": "Lean-to",
+          "categoryPath": ["Buildings", "Outdoor Structures"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "magnifyingGlass",
+          "sourcePrefix": "MagnifyingGlass",
+          "displayName": "Magnifying glass",
+          "categoryPath": ["Small Items", "Miscellaneous"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "peel",
+          "sourcePrefix": "Peel",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "pipe",
+          "sourcePrefix": "Pipe",
+          "categoryPath": ["Small Items", "Miscellaneous"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "pitcher",
+          "sourcePrefix": "Pitcher",
+          "categoryPath": ["Small Items", "Tableware"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "rake",
+          "sourcePrefix": "Rake",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "scissors",
+          "sourcePrefix": "Scissors",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "sickle",
+          "sourcePrefix": "Sickle",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "spoon",
+          "sourcePrefix": "Spoon",
+          "categoryPath": ["Small Items", "Tableware"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "stoneBase",
+          "sourcePrefix": "StoneBase",
+          "displayName": "Stone base",
+          "categoryPath": ["Buildings", "Building Parts"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "swordBlank",
+          "sourcePrefix": "SwordBlank",
+          "displayName": "Sword blank",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "toolCase",
+          "sourcePrefix": "ToolCase",
+          "displayName": "Tool case",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "toy",
+          "sourcePrefix": "Toy",
+          "categoryPath": ["Small Items", "Miscellaneous"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "underFloor",
+          "sourcePrefix": "UnderFloor",
+          "displayName": "Under floor",
+          "categoryPath": ["Terrain Pieces", "Floors"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "vice",
+          "sourcePrefix": "Vice",
+          "categoryPath": ["Props", "Tools & Workshop"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {
+          "kind": "washBasket",
+          "sourcePrefix": "WashBasket",
+          "displayName": "Wash basket",
+          "categoryPath": ["Props", "Containers"],
+          "allowedViewCounts": [1, 4, 8]
+        },
+        {"kind":"alchemyPowder","sourcePrefix":"AlchemyPowder","displayName":"Alchemy powder","categoryPath":["Small Items","Alchemy"],"allowedViewCounts":[1]},
+        {"kind":"appleCrate","sourcePrefix":"AppleCrate","displayName":"Apple crate","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"arch","sourcePrefix":"Arch","categoryPath":["Buildings","Building Parts"],"allowedViewCounts":[4,8]},
+        {"kind":"astro","sourcePrefix":"Astro","categoryPath":["Props","Decoration"],"allowedViewCounts":[4]},
+        {"kind":"astroChart","sourcePrefix":"AstroChart","displayName":"Astrological chart","categoryPath":["Props","Decoration"],"allowedViewCounts":[4]},
+        {"kind":"barrelRack","sourcePrefix":"BarrelRack","displayName":"Barrel rack","categoryPath":["Furniture","Shelving & Cabinets"],"allowedViewCounts":[4]},
+        {"kind":"bedCushion","sourcePrefix":"BedCushion","displayName":"Bed cushion","categoryPath":["Furniture","Beds"],"allowedViewCounts":[4]},
+        {"kind":"bedding","sourcePrefix":"Bedding","categoryPath":["Furniture","Beds"],"allowedViewCounts":[4]},
+        {"kind":"bedroll","sourcePrefix":"Bedroll","categoryPath":["Furniture","Beds"],"allowedViewCounts":[4]},
+        {"kind":"bell","sourcePrefix":"Bell","categoryPath":["Small Items","Miscellaneous"],"allowedViewCounts":[1]},
+        {"kind":"blockade","sourcePrefix":"Blockade","categoryPath":["Structures","Fences & Gates"],"allowedViewCounts":[4]},
+        {"kind":"bobbin","sourcePrefix":"Bobbin","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[4]},
+        {"kind":"bookStackLower","pattern":"^Bookstack(\\d+)_0*([1-8])\\.png$","displayName":"Book stack","categoryPath":["Small Items","Books & Scrolls"],"allowedViewCounts":[4,8]},
+        {"kind":"bottles","sourcePrefix":"Bottles","categoryPath":["Small Items","Bottles & Potions"],"allowedViewCounts":[4]},
+        {"kind":"broomLeaning","sourcePrefix":"BroomLeaning","displayName":"Leaning broom","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[4]},
+        {"kind":"bundle","sourcePrefix":"Bundle","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"burner","sourcePrefix":"Burner","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[4]},
+        {"kind":"butterChurn","sourcePrefix":"ButterChurn","displayName":"Butter churn","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[1]},
+        {"kind":"cabbageCrate","sourcePrefix":"CabbageCrate","displayName":"Cabbage crate","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"campfireSpit","sourcePrefix":"CampfireSpit","displayName":"Campfire spit","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[4]},
+        {"kind":"campfireTripod","sourcePrefix":"CampfireTripod","displayName":"Campfire tripod","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[4]},
+        {"kind":"candelabra","sourcePrefix":"Candelabra","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[1,4],"preferDirectional":true},
+        {"kind":"cannister","sourcePrefix":"Cannister","categoryPath":["Props","Containers"],"allowedViewCounts":[1]},
+        {"kind":"carrotBasket","sourcePrefix":"CarrotBasket","displayName":"Carrot basket","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"cartWheelGround","sourcePrefix":"CartWheelGround","displayName":"Cart wheel (ground)","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[1]},
+        {"kind":"cartWheelWall","sourcePrefix":"CartWheelWall","displayName":"Cart wheel (wall)","categoryPath":["Props","Wall Decoration"],"allowedViewCounts":[4]},
+        {"kind":"caveEntrance","sourcePrefix":"CaveEntrance","displayName":"Cave entrance","categoryPath":["Terrain Pieces","Entrances"],"allowedViewCounts":[1]},
+        {"kind":"chain","sourcePrefix":"Chain","categoryPath":["Small Items","Tools"],"allowedViewCounts":[1]},
+        {"kind":"chalice","sourcePrefix":"Chalice","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1]},
+        {"kind":"chandelier","sourcePrefix":"Chandelier","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"chickenCrate","sourcePrefix":"ChickenCrate","displayName":"Chicken crate","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"clothBolt","sourcePrefix":"ClothBolt","displayName":"Cloth bolt","categoryPath":["Props","Workshop Materials"],"allowedViewCounts":[4]},
+        {"kind":"cobblerBrush","sourcePrefix":"CobblerBrush","displayName":"Cobbler brush","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[4]},
+        {"kind":"coinBox","sourcePrefix":"CoinBox","displayName":"Coin box","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"cooperBarrel","sourcePrefix":"CooperBarrel","displayName":"Cooper barrel","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"cooperBucket","sourcePrefix":"CooperBucket","displayName":"Cooper bucket","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"cooperCask","sourcePrefix":"CooperCask","displayName":"Cooper cask","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"cooperKeg","sourcePrefix":"CooperKeg","displayName":"Cooper keg","categoryPath":["Props","Containers"],"allowedViewCounts":[1]},
+        {"kind":"crystalBall","sourcePrefix":"CrystalBall","displayName":"Crystal ball","categoryPath":["Props","Decoration"],"allowedViewCounts":[1]},
+        {"kind":"curtain","sourcePrefix":"Curtain","categoryPath":["Furniture","Decoration"],"allowedViewCounts":[4,8]},
+        {"kind":"divider","sourcePrefix":"Divider","categoryPath":["Furniture","Room Dividers"],"allowedViewCounts":[4]},
+        {"kind":"dungeonBlockBrazier","sourcePrefix":"Dungeon_BlockBrazier","displayName":"Dungeon block brazier","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"dungeonBowl","sourcePrefix":"Dungeon_Bowl","displayName":"Dungeon bowl","categoryPath":["Dungeon","Small Props"],"allowedViewCounts":[1]},
+        {"kind":"dungeonBrasero","sourcePrefix":"Dungeon_Brasero","displayName":"Dungeon brazier","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"dungeonBrazier","sourcePrefix":"Dungeon_Brazier","displayName":"Dungeon brazier","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"dungeonBucket","sourcePrefix":"Dungeon_Bucket","displayName":"Dungeon bucket","categoryPath":["Dungeon","Containers"],"allowedViewCounts":[1]},
+        {"kind":"dungeonCandle","sourcePrefix":"Dungeon_Candle","displayName":"Dungeon candle","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"dungeonCandlestick","sourcePrefix":"Dungeon_Candlestick","displayName":"Dungeon candlestick","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"dungeonCasket","sourcePrefix":"Dungeon_Casket","displayName":"Dungeon casket","categoryPath":["Dungeon","Containers"],"allowedViewCounts":[4]},
+        {"kind":"dungeonChain","sourcePrefix":"Dungeon_Chain","displayName":"Dungeon chain","categoryPath":["Dungeon","Small Props"],"allowedViewCounts":[1]},
+        {"kind":"dungeonChalice","sourcePrefix":"Dungeon_Chalice","displayName":"Dungeon chalice","categoryPath":["Dungeon","Small Props"],"allowedViewCounts":[1]},
+        {"kind":"dungeonCrate","sourcePrefix":"Dungeon_Crate","displayName":"Dungeon crate","categoryPath":["Dungeon","Containers"],"allowedViewCounts":[4]},
+        {"kind":"dungeonDaggerAlt","sourcePrefix":"Dungeon_Dagger","displayName":"Dungeon dagger","categoryPath":["Dungeon","Weapons"],"allowedViewCounts":[8]},
+        {"kind":"dungeonEbonSkulls","sourcePrefix":"Dungeon_EbonSkulls","displayName":"Dungeon ebon skulls","categoryPath":["Dungeon","Decoration"],"allowedViewCounts":[8]},
+        {"kind":"dungeonHammer","sourcePrefix":"Dungeon_Hammer","displayName":"Dungeon hammer","categoryPath":["Dungeon","Tools"],"allowedViewCounts":[8]},
+        {"kind":"dungeonHangingBall","sourcePrefix":"Dungeon_HangingBall","displayName":"Dungeon hanging ball","categoryPath":["Dungeon","Decoration"],"allowedViewCounts":[1]},
+        {"kind":"dungeonHangingCandles","sourcePrefix":"Dungeon_HangingCandles","displayName":"Dungeon hanging candles","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"dungeonHangingLamp","sourcePrefix":"Dungeon_HangingLamp","displayName":"Dungeon hanging lamp","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"dungeonLantern","sourcePrefix":"Dungeon_Lantern","displayName":"Dungeon lantern","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"dungeonOccultChainPole","sourcePrefix":"Dungeon_OccultChainPole","displayName":"Occult chain pole","categoryPath":["Dungeon","Decoration"],"allowedViewCounts":[1]},
+        {"kind":"dungeonOccultTable","sourcePrefix":"Dungeon_OccultTable","displayName":"Occult table","categoryPath":["Dungeon","Furniture"],"allowedViewCounts":[1]},
+        {"kind":"dungeonOddStandard","sourcePrefix":"Dungeon_OddStandard","displayName":"Dungeon standard","categoryPath":["Dungeon","Decoration"],"allowedViewCounts":[8]},
+        {"kind":"dungeonPliers","sourcePrefix":"Dungeon_Pliers","displayName":"Dungeon pliers","categoryPath":["Dungeon","Tools"],"allowedViewCounts":[8]},
+        {"kind":"dungeonRitualRug","sourcePrefix":"Dungeon_RitualRug","displayName":"Ritual rug","categoryPath":["Dungeon","Decoration"],"allowedViewCounts":[1]},
+        {"kind":"dungeonSaw","sourcePrefix":"Dungeon_Saw","displayName":"Dungeon saw","categoryPath":["Dungeon","Tools"],"allowedViewCounts":[8]},
+        {"kind":"dungeonSconce","sourcePrefix":"Dungeon_Sconce","displayName":"Dungeon sconce","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"dungeonShackles","sourcePrefix":"Dungeon_Shackles","displayName":"Dungeon shackles","categoryPath":["Dungeon","Decoration"],"allowedViewCounts":[4,8]},
+        {"kind":"dungeonTallCandle","sourcePrefix":"Dungeon_TallCandle","displayName":"Dungeon tall candle","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"dungeonTombGround","sourcePrefix":"Dungeon_TombGround","displayName":"Dungeon ground tomb","categoryPath":["Dungeon","Tombs"],"allowedViewCounts":[4]},
+        {"kind":"dungeonTorch","sourcePrefix":"Dungeon_Torch","displayName":"Dungeon torch","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"dungeonTorchLamp","sourcePrefix":"Dungeon_TorchLamp","displayName":"Dungeon torch lamp","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"dungeonVase","sourcePrefix":"Dungeon_Vase","displayName":"Dungeon vase","categoryPath":["Dungeon","Small Props"],"allowedViewCounts":[1]},
+        {"kind":"dungeonWallCandles","sourcePrefix":"Dungeon_WallCandles","displayName":"Dungeon wall candles","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[8]},
+        {"kind":"dungeonWallLamp","sourcePrefix":"Dungeon_WallLamp","displayName":"Dungeon wall lamp","categoryPath":["Dungeon","Lighting & Fire"],"allowedViewCounts":[8]},
+        {"kind":"dungeonWallPeg","sourcePrefix":"Dungeon_WallPeg","displayName":"Dungeon wall peg","categoryPath":["Dungeon","Decoration"],"allowedViewCounts":[4,8]},
+        {"kind":"dungeonWeaponsLeaning","sourcePrefix":"Dungeon_WeaponsLeaning","displayName":"Leaning dungeon weapons","categoryPath":["Dungeon","Weapons"],"allowedViewCounts":[8]},
+        {"kind":"dungeonWingedAltarBaseAlt","singletonPattern":"^Dungeon_WingedAltarBase_0*([1-8])\\.png$","displayName":"Winged altar base","categoryPath":["Dungeon","Altars"],"allowedViewCounts":[8]},
+        {"kind":"dungeonWingedAltarShelfAlt","singletonPattern":"^Dungeon_WingedAltarShelf_0*([1-8])\\.png$","displayName":"Winged altar shelf","categoryPath":["Dungeon","Altars"],"allowedViewCounts":[4]},
+        {"kind":"dungeonWingedAltarTableAlt","singletonPattern":"^Dungeon_WingedAltarTable_0*([1-8])\\.png$","displayName":"Winged altar table","categoryPath":["Dungeon","Altars"],"allowedViewCounts":[4]},
+        {"kind":"dungeonWingedAltarAlt","singletonPattern":"^Dungeon_WingedAltar_0*([1-8])\\.png$","displayName":"Winged altar","categoryPath":["Dungeon","Altars"],"allowedViewCounts":[8]},
+        {"kind":"firepit","sourcePrefix":"Firepit","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[4]},
+        {"kind":"flourTub","sourcePrefix":"FlourTub","displayName":"Flour tub","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"foodApple","sourcePrefix":"Food_Apple","displayName":"Apple","categoryPath":["Small Items","Food"],"allowedViewCounts":[1]},
+        {"kind":"foodCabbage","sourcePrefix":"Food_Cabbage","displayName":"Cabbage","categoryPath":["Small Items","Food"],"allowedViewCounts":[1]},
+        {"kind":"foodCorn","sourcePrefix":"Food_Corn","displayName":"Corn","categoryPath":["Small Items","Food"],"allowedViewCounts":[4]},
+        {"kind":"foodDonut","sourcePrefix":"Food_Donut","displayName":"Donut","categoryPath":["Small Items","Food"],"allowedViewCounts":[1]},
+        {"kind":"foodTray","sourcePrefix":"Food_Tray","displayName":"Food tray","categoryPath":["Small Items","Food"],"allowedViewCounts":[4]},
+        {"kind":"footStool","sourcePrefix":"FootStool","displayName":"Foot stool","categoryPath":["Furniture","Seating"],"allowedViewCounts":[4]},
+        {"kind":"goblet","sourcePrefix":"Goblet","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1]},
+        {"kind":"grainJar","sourcePrefix":"GrainJar","displayName":"Grain jar","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"ham","sourcePrefix":"Ham","categoryPath":["Small Items","Food"],"allowedViewCounts":[4]},
+        {"kind":"hangingCandle","sourcePrefix":"HangingCandle","displayName":"Hanging candle","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"hangingHam","sourcePrefix":"HangingHam","displayName":"Hanging ham","categoryPath":["Props","Food Displays"],"allowedViewCounts":[4]},
+        {"kind":"hangingHerbs","sourcePrefix":"HangingHerbs","displayName":"Hanging herbs","categoryPath":["Props","Food Displays"],"allowedViewCounts":[4]},
+        {"kind":"hangingLantern","sourcePrefix":"HangingLantern","displayName":"Hanging lantern","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"hangingOnion","pattern":"^$","directionlessPattern":"^HangingOnion(\\d+)_\\.png$","displayName":"Hanging onion","categoryPath":["Props","Food Displays"],"allowedViewCounts":[1]},
+        {"kind":"hangingPapers","sourcePrefix":"HangingPapers","displayName":"Hanging papers","categoryPath":["Props","Wall Decoration"],"allowedViewCounts":[4,8]},
+        {"kind":"hangingRope","sourcePrefix":"HangingRope","displayName":"Hanging rope","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[4]},
+        {"kind":"hangingShield","sourcePrefix":"HangingShield","displayName":"Hanging shield","categoryPath":["Props","Wall Decoration"],"allowedViewCounts":[4,8]},
+        {"kind":"hangingWheel","sourcePrefix":"HangingWheel","displayName":"Hanging wheel","categoryPath":["Props","Wall Decoration"],"allowedViewCounts":[4]},
+        {"kind":"hay","sourcePrefix":"Hay","categoryPath":["Props","Agricultural"],"allowedViewCounts":[1]},
+        {"kind":"hedge","sourcePrefix":"Hedge","categoryPath":["Environment","Bushes"],"allowedViewCounts":[4]},
+        {"kind":"hourglassAlt","pattern":"^$","directionlessPattern":"^Hour[Gg]lass(\\d+)\\.png$","displayName":"Hourglass","categoryPath":["Small Items","Miscellaneous"],"allowedViewCounts":[1]},
+        {"kind":"incenseBurner","sourcePrefix":"IncenseBurner","displayName":"Incense burner","categoryPath":["Props","Decoration"],"allowedViewCounts":[1]},
+        {"kind":"jug","sourcePrefix":"Jug","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1]},
+        {"kind":"kettle","sourcePrefix":"Kettle","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1]},
+        {"kind":"lamp","sourcePrefix":"Lamp","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"lanternAlt","sourcePrefix":"Lantern","displayName":"Lantern","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[1]},
+        {"kind":"meadBarrel","pattern":"^MeadBarrel(\\d+)_0*([1-8])\\.png$","directionlessPattern":"^MeadBarrel(\\d+)_?\\.png$","displayName":"Mead barrel","categoryPath":["Props","Containers"],"allowedViewCounts":[1,4],"preferDirectional":true},
+        {"kind":"merchantScale","sourcePrefix":"MerchantScale","displayName":"Merchant scale","categoryPath":["Props","Market"],"allowedViewCounts":[4]},
+        {"kind":"orb","sourcePrefix":"Orb","categoryPath":["Props","Decoration"],"allowedViewCounts":[1]},
+        {"kind":"pearCrate","sourcePrefix":"PearCrate","displayName":"Pear crate","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"pedestal","sourcePrefix":"Pedestal","categoryPath":["Props","Decoration"],"allowedViewCounts":[4,8]},
+        {"kind":"pillow","sourcePrefix":"Pillow","categoryPath":["Furniture","Beds"],"allowedViewCounts":[4]},
+        {"kind":"planetarium","sourcePrefix":"Planetarium","categoryPath":["Props","Decoration"],"allowedViewCounts":[1]},
+        {"kind":"plate","sourcePrefix":"Plate","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1,4],"preferDirectional":true},
+        {"kind":"plateStack","sourcePrefix":"PlateStack","displayName":"Plate stack","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1]},
+        {"kind":"potFood","sourcePrefix":"Pot_Food","displayName":"Food pot","categoryPath":["Small Items","Food"],"allowedViewCounts":[4]},
+        {"kind":"pouch","sourcePrefix":"Pouch","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"projectileArrow","sourcePrefix":"Projectile_Arrow","displayName":"Arrow projectile","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[1]},
+        {"kind":"projectileBolt","sourcePrefix":"Projectile_Bolt","displayName":"Bolt projectile","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[1]},
+        {"kind":"rollingPin","sourcePrefix":"RollingPin","displayName":"Rolling pin","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[4]},
+        {"kind":"royalPlatform","pattern":"^$","directionlessPattern":"^RoyalPlatform(\\d+)_\\.png$","displayName":"Royal platform","categoryPath":["Structures","Stairs & Platforms"],"allowedViewCounts":[1]},
+        {"kind":"spectacles","sourcePrefix":"Spectacles","categoryPath":["Small Items","Miscellaneous"],"allowedViewCounts":[4]},
+        {"kind":"step","sourcePrefix":"Step","categoryPath":["Structures","Stairs & Platforms"],"allowedViewCounts":[4,8]},
+        {"kind":"stump","sourcePrefix":"Stump","categoryPath":["Environment","Trees"],"allowedViewCounts":[4]},
+        {"kind":"tin","sourcePrefix":"Tin","categoryPath":["Props","Containers"],"allowedViewCounts":[1]},
+        {"kind":"toolRack","sourcePrefix":"ToolRack","displayName":"Tool rack","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[4]},
+        {"kind":"trough","sourcePrefix":"Trough","categoryPath":["Props","Agricultural"],"allowedViewCounts":[4]},
+        {"kind":"urn","sourcePrefix":"Urn","categoryPath":["Props","Containers"],"allowedViewCounts":[1]},
+        {"kind":"vat","sourcePrefix":"Vat","categoryPath":["Props","Containers"],"allowedViewCounts":[4]},
+        {"kind":"wagonWheelRim","sourcePrefix":"WagonWheelRim","displayName":"Wagon wheel rim","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[1]},
+        {"kind":"wallAlt","pattern":"^Wall(\\d+)a_0*([1-8])\\.png$","displayName":"Wall alternative","categoryPath":["Buildings","Building Parts"],"allowedViewCounts":[8]},
+        {"kind":"wallChandelier","sourcePrefix":"WallChandelier","displayName":"Wall chandelier","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[4,8]},
+        {"kind":"washSoap","sourcePrefix":"WashSoap","displayName":"Wash soap","categoryPath":["Small Items","Miscellaneous"],"allowedViewCounts":[4]},
+        {"kind":"waterBucket","sourcePrefix":"WaterBucket","displayName":"Water bucket","categoryPath":["Props","Containers"],"allowedViewCounts":[1]},
+        {"kind":"well","sourcePrefix":"Well","categoryPath":["Structures","Outdoor Structures"],"allowedViewCounts":[4,8]},
+        {"kind":"xbow","singletonPattern":"^Xbow_0*([1-8])\\.png$","displayName":"Crossbow","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[8]}
+      ]
     }
   ]
 }

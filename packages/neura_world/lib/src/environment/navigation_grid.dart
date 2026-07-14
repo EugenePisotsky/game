@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'environment_document.dart';
 
@@ -8,19 +9,47 @@ class NavigationGrid {
   NavigationGrid({
     required this.width,
     required this.height,
-    required this.isBlocked,
+    required WorldBlockedTest isBlocked,
     this.cellSize = 0.4,
+    Uint8List? blockedCells,
   }) : columns = (width / cellSize).ceil(),
-       rows = (height / cellSize).ceil();
+       rows = (height / cellSize).ceil(),
+       _sourceIsBlocked = isBlocked,
+       _blockedCells = blockedCells {
+    if (blockedCells != null && blockedCells.length != columns * rows) {
+      throw ArgumentError.value(
+        blockedCells.length,
+        'blockedCells',
+        'Expected ${columns * rows} navigation cells.',
+      );
+    }
+  }
 
   final double width;
   final double height;
   final double cellSize;
   final int columns;
   final int rows;
-  final WorldBlockedTest isBlocked;
+  final WorldBlockedTest _sourceIsBlocked;
+  final Uint8List? _blockedCells;
   int lastExpandedNodeCount = 0;
   List<WorldPoint> lastPath = const [];
+
+  bool isBlocked(WorldPoint point) => _sourceIsBlocked(point);
+
+  bool isCellBlocked(WorldPoint point) {
+    if (point.x < 0 || point.y < 0 || point.x > width || point.y > height) {
+      return true;
+    }
+    final cached = _blockedCells;
+    if (cached == null) return isBlocked(point);
+    return cached[_indexFor(_cellFor(point))] != 0;
+  }
+
+  void recordExternalPath(List<WorldPoint> path, {required int expandedNodes}) {
+    lastPath = List.unmodifiable(path);
+    lastExpandedNodeCount = expandedNodes;
+  }
 
   List<WorldPoint> findPath(WorldPoint start, WorldPoint destination) {
     lastExpandedNodeCount = 0;
@@ -111,7 +140,7 @@ class NavigationGrid {
       if (point.x < 0 || point.y < 0 || point.x > width || point.y > height) {
         return false;
       }
-      if (isBlocked(point)) return false;
+      if (isCellBlocked(point)) return false;
     }
     return true;
   }
@@ -159,8 +188,13 @@ class NavigationGrid {
     }
   }
 
-  bool _blockedCell(_GridCell cell) =>
-      !_inside(cell) || isBlocked(_center(cell));
+  bool _blockedCell(_GridCell cell) {
+    if (!_inside(cell)) return true;
+    final cached = _blockedCells;
+    return cached == null
+        ? _sourceIsBlocked(_center(cell))
+        : cached[_indexFor(cell)] != 0;
+  }
 
   bool _inside(_GridCell cell) =>
       cell.x >= 0 && cell.y >= 0 && cell.x < columns && cell.y < rows;
@@ -174,6 +208,8 @@ class NavigationGrid {
     math.min(width, (cell.x + 0.5) * cellSize),
     math.min(height, (cell.y + 0.5) * cellSize),
   );
+
+  int _indexFor(_GridCell cell) => cell.y * columns + cell.x;
 
   double _heuristic(_GridCell a, _GridCell b) {
     final dx = (a.x - b.x).abs();

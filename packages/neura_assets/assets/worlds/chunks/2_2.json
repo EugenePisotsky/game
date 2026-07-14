@@ -1,13 +1,147 @@
 {
-  "baseMaterialId": "ow3.ground.meadow",
+  "schemaVersion": 1,
+  "worldId": "environment_starter",
   "coordinate": {
     "x": 2,
     "y": 2
   },
-  "objects": [],
-  "overlapObjectIds": [],
-  "schemaVersion": 1,
   "size": 32.0,
+  "baseMaterialId": "ow3.ground.meadow",
   "terrainStrokes": [],
-  "worldId": "environment_starter"
+  "objects": [
+    {
+      "id": "object_hkdo4qsyjc_0_6",
+      "assetId": "ow3.fence.002",
+      "localPosition": {
+        "x": 31.78961615687645,
+        "y": 26.89427312715874
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 95.64961615687645,
+          "y": 89.15427312715875
+        },
+        "max": {
+          "x": 95.92961615687645,
+          "y": 92.63427312715874
+        }
+      }
+    },
+    {
+      "id": "object_hkdo4qsyjc_0_7",
+      "assetId": "ow3.fence.002",
+      "localPosition": {
+        "x": 31.216567966306727,
+        "y": 23.92019832040505
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 95.07656796630673,
+          "y": 86.18019832040505
+        },
+        "max": {
+          "x": 95.35656796630673,
+          "y": 89.66019832040504
+        }
+      }
+    },
+    {
+      "id": "object_hkdo4qsyjc_0_149",
+      "assetId": "ow3.fence.002",
+      "localPosition": {
+        "x": 31.433686825073636,
+        "y": 17.232342830842228
+      },
+      "verticalOffset": 0.0,
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 93.69368682507364,
+          "y": 81.09234283084223
+        },
+        "max": {
+          "x": 97.17368682507363,
+          "y": 81.37234283084223
+        }
+      }
+    },
+    {
+      "id": "object_hkdo4qsyjc_0_150",
+      "assetId": "ow3.fence.003",
+      "localPosition": {
+        "x": 30.83625030517578,
+        "y": 21.238914489746094
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 94.69625030517578,
+          "y": 83.4989144897461
+        },
+        "max": {
+          "x": 94.97625030517578,
+          "y": 86.97891448974609
+        }
+      }
+    },
+    {
+      "id": "object_hkdo4qsyjc_0_151",
+      "assetId": "ow3.fence.002",
+      "localPosition": {
+        "x": 30.157508850097656,
+        "y": 18.249855041503906
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 94.01750885009766,
+          "y": 80.50985504150391
+        },
+        "max": {
+          "x": 94.29750885009766,
+          "y": 83.9898550415039
+        }
+      }
+    },
+    {
+      "id": "object_hkdo4qsyjc_0_160",
+      "assetId": "ow3.tree.033",
+      "localPosition": {
+        "x": 31.415908813476562,
+        "y": 18.676895141601562
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 94.89590881347657,
+          "y": 82.31689514160156
+        },
+        "max": {
+          "x": 95.93590881347656,
+          "y": 83.03689514160156
+        }
+      }
+    }
+  ],
+  "overlapObjectIds": [
+    "object_hkdo4qsyjc_0_149",
+    "object_hkdo4qsyjc_0_150",
+    "object_hkdo4qsyjc_0_151",
+    "object_hkdo4qsyjc_0_160",
+    "object_hkdo4qsyjc_0_6",
+    "object_hkdo4qsyjc_0_7"
+  ]
 }

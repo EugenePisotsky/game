@@ -219,6 +219,42 @@ enum EnvironmentRenderBand {
   }
 }
 
+enum EnvironmentAssetViewMode {
+  fixed,
+  fourWay,
+  eightWay;
+
+  static EnvironmentAssetViewMode infer(Iterable<String> directions) {
+    final values = directions.toSet();
+    if (values.length == 1 && values.contains('south')) return fixed;
+    if (values.length == 4 && values.containsAll(_cardinalDirections)) {
+      return fourWay;
+    }
+    if (values.length == 8 && values.containsAll(_allDirections)) {
+      return eightWay;
+    }
+    throw FormatException('Unsupported environment view set: $values.');
+  }
+
+  static const _cardinalDirections = {'south', 'west', 'east', 'north'};
+  static const _allDirections = {
+    'south',
+    'west',
+    'east',
+    'north',
+    'southWest',
+    'northWest',
+    'southEast',
+    'northEast',
+  };
+
+  Set<String> get directions => switch (this) {
+    fixed => const {'south'},
+    fourWay => _cardinalDirections,
+    eightWay => _allDirections,
+  };
+}
+
 class EnvironmentCatalog {
   EnvironmentCatalog({
     required this.materials,
@@ -336,6 +372,8 @@ class EnvironmentMaterial {
   final List<String> tags;
   final String? thumbnailPath;
 
+  bool get blocksMovement => tags.contains('non-walkable');
+
   factory EnvironmentMaterial.fromJson(Map<String, Object?> json) =>
       EnvironmentMaterial(
         id: json['id'] as String,
@@ -358,6 +396,10 @@ class EnvironmentObjectAsset {
     required this.category,
     required this.renderScale,
     required this.views,
+    this.family = '',
+    this.sourcePack = '',
+    this.categoryPath = const [],
+    this.viewMode = EnvironmentAssetViewMode.fixed,
     this.renderBand = EnvironmentRenderBand.depthSorted,
     this.sortAnchorX = 0,
     this.sortAnchorY = 0,
@@ -371,6 +413,10 @@ class EnvironmentObjectAsset {
   final String id;
   final String name;
   final String category;
+  final String family;
+  final String sourcePack;
+  final List<String> categoryPath;
+  final EnvironmentAssetViewMode viewMode;
   final double renderScale;
   final EnvironmentRenderBand renderBand;
   final double sortAnchorX;
@@ -382,42 +428,97 @@ class EnvironmentObjectAsset {
   final String? thumbnailPath;
   final String? collisionProfile;
 
-  EnvironmentObjectView viewFor(String direction) =>
-      views[direction] ?? views['south'] ?? views.values.first;
+  String get categoryBreadcrumb =>
+      (categoryPath.isEmpty ? [category] : categoryPath).join(' / ');
+
+  String get topLevelCategory =>
+      categoryPath.isEmpty ? category : categoryPath.first;
+
+  bool supportsDirection(String direction) => views.containsKey(direction);
+
+  EnvironmentObjectView viewFor(String direction) {
+    final view = views[direction];
+    if (view == null) {
+      throw StateError('Asset $id does not provide direction $direction.');
+    }
+    return view;
+  }
 
   double depthAt(double x, double y, {double instanceSortBias = 0}) =>
       x + sortAnchorX + y + sortAnchorY + defaultSortBias + instanceSortBias;
 
-  factory EnvironmentObjectAsset.fromJson(Map<String, Object?> json) =>
-      EnvironmentObjectAsset(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        category: json['category'] as String,
-        renderScale: (json['renderScale'] as num? ?? 1).toDouble(),
-        renderBand: json['renderBand'] == null
-            ? EnvironmentRenderBand.forCategory(json['category'] as String)
-            : EnvironmentRenderBand.values.byName(json['renderBand'] as String),
-        sortAnchorX: (json['sortAnchorX'] as num? ?? 0).toDouble(),
-        sortAnchorY: (json['sortAnchorY'] as num? ?? 0).toDouble(),
-        defaultSortBias: (json['defaultSortBias'] as num? ?? 0).toDouble(),
-        geometry: json['geometry'] == null
-            ? EnvironmentAssetGeometry.empty
-            : EnvironmentAssetGeometry.fromJson(
-                json['geometry'] as Map<String, Object?>,
-              ),
-        tags: [
-          for (final value in json['tags'] as List<Object?>? ?? const [])
-            value as String,
-        ],
-        thumbnailPath: json['thumbnail'] as String?,
-        collisionProfile: json['collisionProfile'] as String?,
-        views: {
-          for (final entry in (json['views'] as Map<String, Object?>).entries)
-            entry.key: EnvironmentObjectView.fromJson(
-              entry.value as Map<String, Object?>,
+  factory EnvironmentObjectAsset.fromJson(Map<String, Object?> json) {
+    final categoryPath = [
+      for (final value in json['categoryPath'] as List<Object?>? ?? const [])
+        value as String,
+    ];
+    final category =
+        json['category'] as String? ??
+        (categoryPath.isEmpty ? 'Uncategorized' : categoryPath.last);
+    if (categoryPath.isEmpty) categoryPath.add(category);
+    final views = {
+      for (final entry in (json['views'] as Map<String, Object?>).entries)
+        entry.key: EnvironmentObjectView.fromJson(
+          entry.value as Map<String, Object?>,
+        ),
+    };
+    final partialViews = json['partialViews'] as bool? ?? false;
+    final declaredMode = json['viewMode'] == null
+        ? null
+        : EnvironmentAssetViewMode.values.byName(json['viewMode'] as String);
+    late final EnvironmentAssetViewMode viewMode;
+    if (partialViews) {
+      if (declaredMode == null || views.isEmpty) {
+        throw FormatException(
+          'Partial asset ${json['id']} requires a declared viewMode and views.',
+        );
+      }
+      if (!declaredMode.directions.containsAll(views.keys)) {
+        throw FormatException(
+          'Partial asset ${json['id']} contains views outside '
+          '${declaredMode.name}: ${views.keys.toList()}.',
+        );
+      }
+      viewMode = declaredMode;
+    } else {
+      final inferredMode = EnvironmentAssetViewMode.infer(views.keys);
+      viewMode = declaredMode ?? inferredMode;
+      if (viewMode != inferredMode) {
+        throw FormatException(
+          'Asset ${json['id']} declares ${viewMode.name} but its views are '
+          '${views.keys.toList()}.',
+        );
+      }
+    }
+    return EnvironmentObjectAsset(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      category: category,
+      family: json['family'] as String? ?? '',
+      sourcePack: json['sourcePack'] as String? ?? '',
+      categoryPath: List.unmodifiable(categoryPath),
+      viewMode: viewMode,
+      renderScale: (json['renderScale'] as num? ?? 1).toDouble(),
+      renderBand: json['renderBand'] == null
+          ? EnvironmentRenderBand.forCategory(category)
+          : EnvironmentRenderBand.values.byName(json['renderBand'] as String),
+      sortAnchorX: (json['sortAnchorX'] as num? ?? 0).toDouble(),
+      sortAnchorY: (json['sortAnchorY'] as num? ?? 0).toDouble(),
+      defaultSortBias: (json['defaultSortBias'] as num? ?? 0).toDouble(),
+      geometry: json['geometry'] == null
+          ? EnvironmentAssetGeometry.empty
+          : EnvironmentAssetGeometry.fromJson(
+              json['geometry'] as Map<String, Object?>,
             ),
-        },
-      );
+      tags: [
+        for (final value in json['tags'] as List<Object?>? ?? const [])
+          value as String,
+      ],
+      thumbnailPath: json['thumbnail'] as String?,
+      collisionProfile: json['collisionProfile'] as String?,
+      views: Map.unmodifiable(views),
+    );
+  }
 }
 
 class EnvironmentObjectView {

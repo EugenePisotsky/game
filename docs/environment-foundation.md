@@ -4,6 +4,16 @@ Character asset structure, animation extraction, and the planned player/NPC
 authoring system are documented separately in [characters.md](characters.md).
 The generated environment catalog workflow is documented in
 [`tool/environment_importer/README.md`](../tool/environment_importer/README.md).
+Runtime pathfinding and the Native Assets workflow are documented in
+[native-runtime.md](native-runtime.md).
+The next persistence and simulation foundation is split across the
+[world simulation implementation plan](world-simulation-plan.md),
+[SQLite world/save architecture](world-persistence.md),
+[logical road network](road-network.md), and
+[NPC schedule simulation](npc-simulation.md).
+The plan for expanding that workflow across the remaining Other Worlds visual
+library is documented in
+[asset-catalog-import-plan.md](asset-catalog-import-plan.md).
 Rendering bands, elevation, editor layers, selection, collision authoring, and
 chunked-world streaming are specified in
 [world-editor-improvements.md](world-editor-improvements.md).

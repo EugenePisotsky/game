@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:neura_world/neura_world.dart';
 
 import 'neura_game.dart';
 
-void main(List<String> args) {
+Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initNeuraWorldRust();
   runApp(NeuraApp(debugSceneName: _debugSceneArgument(args)));
 }
 
@@ -188,6 +190,8 @@ class _StreamingHudState extends State<_StreamingHud> {
           'pending ${widget.game.pendingAssetRequests}\n'
           'path ${widget.game.currentPathLength}  '
           'expanded ${widget.game.navigationExpandedNodes}  '
+          'native ${widget.game.lastNavigationMicros} µs  '
+          'pending ${widget.game.pendingNavigationRequests}\n'
           'terrain cache ${widget.game.terrainPictureCount}\n'
           '${widget.game.diagnosticsFps.toStringAsFixed(1)} fps  '
           '${widget.game.diagnosticsFrameMilliseconds.toStringAsFixed(1)} ms frame  '

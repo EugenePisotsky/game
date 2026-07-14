@@ -1,7 +1,27 @@
+import 'dart:typed_data';
+
 import 'package:neura_world/neura_world.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('cached navigation cells avoid authored collision callbacks', () {
+    var sourceQueries = 0;
+    final grid = NavigationGrid(
+      width: 2,
+      height: 2,
+      cellSize: 0.4,
+      isBlocked: (_) {
+        sourceQueries++;
+        return false;
+      },
+      blockedCells: Uint8List(25)..[12] = 1,
+    );
+
+    expect(grid.isCellBlocked(const WorldPoint(1, 1)), isTrue);
+    expect(grid.isCellBlocked(const WorldPoint(0.2, 0.2)), isFalse);
+    expect(sourceQueries, 0);
+  });
+
   test('navigation grid routes around an expanded obstacle', () {
     final grid = NavigationGrid(
       width: 10,
