@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 class EnvironmentGeometryPoint {
@@ -257,30 +258,57 @@ enum EnvironmentAssetViewMode {
 
 class EnvironmentCatalog {
   EnvironmentCatalog({
-    required this.materials,
-    required this.objects,
+    required List<EnvironmentMaterial> materials,
+    required List<EnvironmentObjectAsset> objects,
     Map<String, EnvironmentAssetGeometry>? geometryOverrides,
-  }) : _geometryOverrides = Map.of(geometryOverrides ?? const {});
+  }) : _materials = List.of(materials),
+       _objects = List.of(objects),
+       _geometryOverrides = Map.of(geometryOverrides ?? const {}) {
+    this.materials = UnmodifiableListView(_materials);
+    this.objects = UnmodifiableListView(_objects);
+    for (final material in _materials) {
+      if (_materialsById.containsKey(material.id)) {
+        throw ArgumentError.value(material.id, 'materials', 'Duplicate ID');
+      }
+      _materialsById[material.id] = material;
+    }
+    for (final object in _objects) {
+      if (_objectsById.containsKey(object.id)) {
+        throw ArgumentError.value(object.id, 'objects', 'Duplicate ID');
+      }
+      _objectsById[object.id] = object;
+    }
+  }
 
-  final List<EnvironmentMaterial> materials;
-  final List<EnvironmentObjectAsset> objects;
+  final List<EnvironmentMaterial> _materials;
+  final List<EnvironmentObjectAsset> _objects;
+  late final UnmodifiableListView<EnvironmentMaterial> materials;
+  late final UnmodifiableListView<EnvironmentObjectAsset> objects;
+  final Map<String, EnvironmentMaterial> _materialsById = {};
+  final Map<String, EnvironmentObjectAsset> _objectsById = {};
   final Map<String, EnvironmentAssetGeometry> _geometryOverrides;
 
   Map<String, EnvironmentAssetGeometry> get geometryOverrides =>
       Map.unmodifiable(_geometryOverrides);
 
-  EnvironmentMaterial? materialById(String id) {
-    for (final material in materials) {
-      if (material.id == id) return material;
+  EnvironmentMaterial? materialById(String id) => _materialsById[id];
+
+  EnvironmentObjectAsset? objectById(String id) => _objectsById[id];
+
+  void registerMaterial(EnvironmentMaterial material) {
+    if (_materialsById.containsKey(material.id)) {
+      throw ArgumentError.value(material.id, 'material', 'Duplicate ID');
     }
-    return null;
+    _materials.add(material);
+    _materialsById[material.id] = material;
   }
 
-  EnvironmentObjectAsset? objectById(String id) {
-    for (final object in objects) {
-      if (object.id == id) return object;
+  void registerObject(EnvironmentObjectAsset object) {
+    if (_objectsById.containsKey(object.id)) {
+      throw ArgumentError.value(object.id, 'object', 'Duplicate ID');
     }
-    return null;
+    _objects.add(object);
+    _objectsById[object.id] = object;
   }
 
   EnvironmentAssetGeometry geometryForAsset(EnvironmentObjectAsset asset) =>

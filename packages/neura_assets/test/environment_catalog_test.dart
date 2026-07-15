@@ -4,6 +4,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:neura_assets/neura_assets.dart';
 
 void main() {
+  test('catalog lookups stay indexed and registration is explicit', () {
+    const material = EnvironmentMaterial(
+      id: 'earth',
+      name: 'Earth',
+      texturePath: 'earth.png',
+      decalPath: 'earth_decal.png',
+    );
+    const object = EnvironmentObjectAsset(
+      id: 'tree',
+      name: 'Tree',
+      category: 'Trees',
+      renderScale: 1,
+      views: {'south': EnvironmentObjectView(imagePath: 'tree.png')},
+    );
+    final catalog = EnvironmentCatalog(materials: const [], objects: const [])
+      ..registerMaterial(material)
+      ..registerObject(object);
+
+    expect(catalog.materialById(material.id), same(material));
+    expect(catalog.objectById(object.id), same(object));
+    expect(() => catalog.materials.add(material), throwsUnsupportedError);
+    expect(() => catalog.objects.add(object), throwsUnsupportedError);
+    expect(() => catalog.registerMaterial(material), throwsArgumentError);
+    expect(() => catalog.registerObject(object), throwsArgumentError);
+  });
+
   test('catalog parses semantic render metadata and depth corrections', () {
     final catalog = EnvironmentCatalog.fromJsonString('''
       {

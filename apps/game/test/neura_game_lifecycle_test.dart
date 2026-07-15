@@ -95,7 +95,7 @@ void main() {
     NeuraGame.new,
     (game) async {
       await game.teleportTo(const WorldPoint(100, 100));
-      game.environmentCatalog.materials.add(
+      game.environmentCatalog.registerMaterial(
         const EnvironmentMaterial(
           id: 'test.water',
           name: 'Test water',

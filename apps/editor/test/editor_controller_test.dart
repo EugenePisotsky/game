@@ -74,6 +74,75 @@ void main() {
     controller.dispose();
   });
 
+  test('world edits do not rebuild the asset palette', () {
+    final controller = EditorController(
+      EnvironmentDocument(
+        id: 'test',
+        name: 'Test',
+        width: 20,
+        height: 20,
+        baseMaterialId: earth.id,
+        objects: [
+          PlacedEnvironmentObject(id: 'tree_1', assetId: tree.id, x: 2, y: 2),
+        ],
+      ),
+      catalog: catalog,
+    )..selectObjectIds(['tree_1']);
+    var paletteUpdates = 0;
+    controller.paletteListenable.addListener(() => paletteUpdates++);
+
+    controller
+      ..beginGesture()
+      ..moveSelectionDuringGesture(
+        const WorldPoint(2, 2),
+        const WorldPoint(3, 3),
+      )
+      ..endGesture();
+    expect(paletteUpdates, 0);
+
+    controller.selectMode(EnvironmentEditorMode.select);
+    expect(paletteUpdates, 1);
+    controller.dispose();
+  });
+
+  test('object undo retains untouched world entities', () {
+    final objects = [
+      for (var index = 0; index < 2000; index++)
+        PlacedEnvironmentObject(
+          id: 'tree_$index',
+          assetId: tree.id,
+          x: (index % 20).toDouble(),
+          y: (index ~/ 20).toDouble(),
+        ),
+    ];
+    final controller = EditorController(
+      EnvironmentDocument(
+        id: 'large',
+        name: 'Large',
+        width: 200,
+        height: 200,
+        baseMaterialId: earth.id,
+        objects: objects,
+      ),
+      catalog: catalog,
+    )..selectObjectIds(['tree_0']);
+    final untouched = controller.objectById('tree_1999');
+
+    controller
+      ..beginGesture()
+      ..moveSelectionDuringGesture(
+        const WorldPoint(0, 0),
+        const WorldPoint(1, 1),
+      )
+      ..endGesture()
+      ..undo();
+
+    expect(controller.objectById('tree_0')?.x, 0);
+    expect(controller.objectById('tree_1999'), same(untouched));
+    expect(controller.document.objects, hasLength(2000));
+    controller.dispose();
+  });
+
   test('drag updates canvas continuously and editor controls on release', () {
     final controller = EditorController(
       EnvironmentDocument(

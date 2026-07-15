@@ -13,7 +13,7 @@ import 'package:neura_world/neura_world.dart';
 
 import 'editor_controller.dart';
 
-class EditorGame extends FlameGame with HasPerformanceTracker {
+class EditorGame extends FlameGame {
   EditorGame(
     this.controller, {
     this.loadedChunks,
@@ -33,6 +33,10 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   final Vector2 _panOffset = Vector2.zero();
   final Vector2 _panVelocity = Vector2.zero();
   final Map<String, ui.Image> _loadedImages = {};
+  final Map<String, Sprite> _sprites = {};
+  final Map<String, (int, int)> _sourceImageSizes = {};
+  final Map<String, int> _imageLastUsedFrame = {};
+  final Set<String> _materialImagePaths = {};
   final Set<String> _loadingImages = {};
   final Map<String, ui.Paint> _repeatingPaints = {};
   final Map<String, ui.Paint> _decalPaints = {};
@@ -43,6 +47,27 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   int _seenTerrainRevision = -1;
   int _terrainCacheGeneration = 0;
   final FpsComponent _fpsComponent = FpsComponent(windowSize: 60);
+  final Stopwatch _performanceWatch = Stopwatch();
+  final Map<String, _EditorRenderEntry> _renderEntriesById = {};
+  final Map<EnvironmentRenderBand, List<_EditorRenderEntry>>
+  _renderEntriesByBand = {
+    for (final band in EnvironmentRenderBand.values) band: [],
+  };
+  final Map<(int, int), List<_EditorRenderEntry>> _spatialRenderEntries = {};
+  int _seenSceneRevision = -1;
+  int _imageRevision = 0;
+  int _seenImageRevision = -1;
+  int _updateMicroseconds = 0;
+  int _renderMicroseconds = 0;
+  int _renderCandidateCount = 0;
+  int _visibleSpriteCount = 0;
+  int _lastHitTestCandidateCount = 0;
+  int _lastHitTestMicroseconds = 0;
+  int _renderIndexFullRebuildCount = 0;
+  int _renderIndexIncrementalUpdateCount = 0;
+  int _frameNumber = 0;
+  int _requestedFrames = 3;
+  bool _autoPaused = false;
   bool _isPanning = false;
   ui.Rect? _marqueeScreenRect;
   double zoom = 0.42;
@@ -55,6 +80,9 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
 
   static const double elevationPixelsPerWorldUnit = 64;
   static const int _terrainRasterResolution = 1024;
+  static const double _spatialCellSize = 256;
+  static const int _editorObjectMaximumDimension = 512;
+  static const int _imageCacheBudgetBytes = 160 << 20;
 
   int get decodedImageCount => _loadedImages.length;
   int get decodedImageBytes => _loadedImages.values.fold(
@@ -72,17 +100,50 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
       4;
   int get pendingTerrainBakeCount =>
       _dirtyTerrainChunks.length + (_terrainBakeInFlight == null ? 0 : 1);
+  int get updateTime => _updateMicroseconds ~/ 1000;
+  int get renderTime => _renderMicroseconds ~/ 1000;
+  double get updateMilliseconds => _updateMicroseconds / 1000;
+  double get renderMilliseconds => _renderMicroseconds / 1000;
+  int get renderCandidateCount => _renderCandidateCount;
+  int get visibleSpriteCount => _visibleSpriteCount;
+  int get culledSpriteCount => _renderCandidateCount - _visibleSpriteCount;
+  int get lastHitTestCandidateCount => _lastHitTestCandidateCount;
+  double get lastHitTestMilliseconds => _lastHitTestMicroseconds / 1000;
+  int get renderIndexFullRebuildCount => _renderIndexFullRebuildCount;
+  int get renderIndexIncrementalUpdateCount =>
+      _renderIndexIncrementalUpdateCount;
   double get diagnosticsFps => _fpsComponent.fps;
   double get diagnosticsFrameMilliseconds =>
       diagnosticsFps <= 0 ? 0 : 1000 / diagnosticsFps;
+  bool get isAutoIdle => _autoPaused;
+
+  /// Wakes the Flame loop long enough to paint a stable editor frame.
+  ///
+  /// Unlike a running game, the editor is usually static. Keeping its loop at
+  /// the display refresh rate needlessly competes with Flutter's sidebar and
+  /// pointer handling. Every visual mutation calls this method; animations and
+  /// asynchronous work keep the loop awake until they settle.
+  void requestFrame({int frames = 2}) {
+    if (frames > _requestedFrames) _requestedFrames = frames;
+    if (diagnosticsPaused) return;
+    if (_autoPaused || paused) {
+      _autoPaused = false;
+      resumeEngine();
+    }
+  }
 
   void togglePause() {
     diagnosticsPaused = !diagnosticsPaused;
-    diagnosticsPaused ? pauseEngine() : resumeEngine();
+    if (diagnosticsPaused) {
+      _autoPaused = false;
+      pauseEngine();
+    } else {
+      requestFrame(frames: 3);
+    }
   }
 
   void stepDebug() {
-    if (diagnosticsPaused) update(1 / 60);
+    if (diagnosticsPaused) stepEngine();
   }
 
   final ui.Paint _mapOutlinePaint = ui.Paint()
@@ -183,48 +244,103 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
       for (final stroke in controller.document.terrainStrokes)
         stroke.materialId,
     };
-    final paths = <String>{};
+    final materialPaths = <String>{};
     for (final id in materialIds) {
       final material = controller.catalog.materialById(id);
       if (material != null) {
-        paths
+        materialPaths
           ..add(material.texturePath)
           ..add(material.decalPath);
       }
     }
-    for (final object in controller.document.objects) {
-      final asset = controller.catalog.objectById(object.assetId);
-      if (asset != null) {
-        paths.add(asset.viewFor(object.direction.name).imagePath);
-      }
-    }
-    final pathList = paths.toList();
-    final loaded = await Future.wait([
-      for (final path in pathList) _loadUncachedImage(path),
-    ]);
-    for (var index = 0; index < pathList.length; index++) {
-      _loadedImages[pathList[index]] = loaded[index];
-    }
+    _materialImagePaths.addAll(materialPaths);
+    await Future.wait([for (final path in materialPaths) _loadImage(path)]);
     for (final id in materialIds) {
       _createMaterialPaints(id);
     }
+    final preloadBounds = _visibleProjectedBounds.inflate(1024);
+    final preloadPaths = <String>{};
+    for (final object in controller.document.objects) {
+      final asset = controller.catalog.objectById(object.assetId);
+      if (asset == null) continue;
+      final anchor = projection
+          .worldToScreen(Vector2(object.x, object.y))
+          .toOffset();
+      if (preloadBounds.contains(anchor)) {
+        preloadPaths.add(asset.viewFor(object.direction.name).imagePath);
+      }
+    }
+    await Future.wait([
+      for (final path in preloadPaths)
+        _loadImage(path, maximumDimension: _editorObjectMaximumDimension),
+    ]);
+    requestFrame(frames: 3);
   }
 
-  Future<ui.Image?> _loadImage(String path) async {
+  Future<ui.Image?> _loadImage(String path, {int? maximumDimension}) async {
     final loaded = _loadedImages[path];
-    if (loaded != null) return loaded;
+    if (loaded != null) {
+      _touchImage(path);
+      return loaded;
+    }
     if (!_loadingImages.add(path)) return null;
     try {
-      final image = await _loadUncachedImage(path);
+      final loaded = await _loadUncachedImage(
+        path,
+        maximumDimension: maximumDimension,
+      );
+      final image = loaded.image;
       _loadedImages[path] = image;
+      _sprites[path] = Sprite(image);
+      _sourceImageSizes[path] = (loaded.sourceWidth, loaded.sourceHeight);
+      _touchImage(path);
+      _imageRevision++;
+      requestFrame(frames: 2);
       return image;
     } finally {
       _loadingImages.remove(path);
+      requestFrame();
     }
   }
 
-  Future<ui.Image> _loadUncachedImage(String path) =>
-      loadWorkspaceEnvironmentImage(path);
+  Future<WorkspaceEnvironmentImage> _loadUncachedImage(
+    String path, {
+    int? maximumDimension,
+  }) => loadWorkspaceEnvironmentImageForEditor(
+    path,
+    maximumDimension: maximumDimension,
+  );
+
+  void _touchImage(String path) {
+    _imageLastUsedFrame[path] = _frameNumber;
+  }
+
+  void _evictUnusedImages() {
+    var bytes = decodedImageBytes;
+    if (bytes <= _imageCacheBudgetBytes) return;
+    final candidates =
+        _loadedImages.keys
+            .where((path) => !_materialImagePaths.contains(path))
+            .toList()
+          ..sort(
+            (a, b) => (_imageLastUsedFrame[a] ?? -1).compareTo(
+              _imageLastUsedFrame[b] ?? -1,
+            ),
+          );
+    var changed = false;
+    for (final path in candidates) {
+      if (bytes <= _imageCacheBudgetBytes) break;
+      if ((_imageLastUsedFrame[path] ?? -1) >= _frameNumber - 30) continue;
+      final image = _loadedImages.remove(path);
+      if (image == null) continue;
+      _sprites.remove(path);
+      _imageLastUsedFrame.remove(path);
+      bytes -= image.width * image.height * 4;
+      image.dispose();
+      changed = true;
+    }
+    if (changed) _imageRevision++;
+  }
 
   Future<void> _loadMaterial(String id) async {
     if (_repeatingPaints.containsKey(id) && _decalPaints.containsKey(id)) {
@@ -232,6 +348,9 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     }
     final material = controller.catalog.materialById(id);
     if (material == null) return;
+    _materialImagePaths
+      ..add(material.texturePath)
+      ..add(material.decalPath);
     final texture = await _loadImage(material.texturePath);
     final decal = await _loadImage(material.decalPath);
     if (texture == null || decal == null) return;
@@ -263,7 +382,10 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   Future<void> _loadObjectView(PlacedEnvironmentObject object) async {
     final asset = controller.catalog.objectById(object.assetId);
     if (asset == null) return;
-    await _loadImage(asset.viewFor(object.direction.name).imagePath);
+    await _loadImage(
+      asset.viewFor(object.direction.name).imagePath,
+      maximumDimension: _editorObjectMaximumDimension,
+    );
   }
 
   WorldPoint? worldAtScreen(Vector2 screen) {
@@ -276,44 +398,50 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
 
   List<String> hitTestObjectIds(Vector2 screen) {
     if (!isLoaded) return const [];
+    _ensureRenderIndex();
+    _performanceWatch
+      ..reset()
+      ..start();
     final point = _projectedAtScreen(screen).toOffset();
-    final candidates = <PlacedEnvironmentObject>[];
-    for (final object in controller.document.objects) {
-      if (!controller.isLayerVisible(object.editorLayerId) ||
-          controller.isLayerLocked(object.editorLayerId)) {
-        continue;
-      }
-      final bounds = _objectProjectedBounds(object);
-      if (bounds != null && bounds.contains(point)) candidates.add(object);
-    }
-    candidates.sort(_compareVisualOrder);
-    return [for (final object in candidates.reversed) object.id];
+    final candidates = <_EditorRenderEntry>[
+      for (final entry
+          in _spatialRenderEntries[_spatialCellFor(point)] ?? const [])
+        if (!controller.isLayerLocked(entry.object.editorLayerId) &&
+            entry.projectedBounds.contains(point))
+          entry,
+    ]..sort(_compareRenderEntries);
+    _performanceWatch.stop();
+    _lastHitTestCandidateCount = candidates.length;
+    _lastHitTestMicroseconds = _performanceWatch.elapsedMicroseconds;
+    return [for (final entry in candidates.reversed) entry.object.id];
   }
 
   List<String> objectIdsInMarquee(
     ui.Rect screenRect, {
     bool requireContainment = false,
   }) {
-    final result = <PlacedEnvironmentObject>[];
-    for (final object in controller.document.objects) {
-      if (!controller.isLayerVisible(object.editorLayerId) ||
-          controller.isLayerLocked(object.editorLayerId)) {
-        continue;
-      }
-      final projected = _objectProjectedBounds(object);
-      if (projected == null) continue;
+    _ensureRenderIndex();
+    final projectedRect = _projectedBoundsForScreenRect(screenRect);
+    final entries = _entriesOverlapping(projectedRect);
+    final result = <_EditorRenderEntry>[];
+    for (final entry in entries) {
+      if (controller.isLayerLocked(entry.object.editorLayerId)) continue;
+      final projected = entry.projectedBounds;
       final bounds = _screenBoundsForProjected(projected);
       final included = requireContainment
           ? screenRect.contains(bounds.topLeft) &&
                 screenRect.contains(bounds.bottomRight)
           : screenRect.overlaps(bounds);
-      if (included) result.add(object);
+      if (included) result.add(entry);
     }
-    result.sort(_compareVisualOrder);
-    return [for (final object in result) object.id];
+    result.sort(_compareRenderEntries);
+    return [for (final entry in result) entry.object.id];
   }
 
-  void setSelectionMarquee(ui.Rect? rect) => _marqueeScreenRect = rect;
+  void setSelectionMarquee(ui.Rect? rect) {
+    _marqueeScreenRect = rect;
+    requestFrame();
+  }
 
   EnvironmentObjectBounds visibleWorldBounds() {
     final corners = [
@@ -333,6 +461,7 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   void beginPan() {
     _isPanning = true;
     _panVelocity.setZero();
+    requestFrame(frames: 3);
   }
 
   void panByScreenDelta(Vector2 delta, {required double elapsedSeconds}) {
@@ -342,12 +471,17 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     _panVelocity
       ..scale(0.62)
       ..add(instantaneous * 0.38);
+    requestFrame(frames: 3);
   }
 
-  void endPan() => _isPanning = false;
+  void endPan() {
+    _isPanning = false;
+    requestFrame(frames: 3);
+  }
 
   void zoomBy(double factor) {
     zoom = (zoom * factor).clamp(0.2, 1.4);
+    requestFrame(frames: 3);
   }
 
   void rebaseWorld(WorldPoint shift) {
@@ -356,58 +490,102 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
       _viewCenterWorld = WorldPoint(center.x + shift.x, center.y + shift.y);
     }
     _clearTerrainRasters();
+    requestFrame(frames: 3);
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    requestFrame(frames: 3);
   }
 
   @override
   void update(double dt) {
-    super.update(dt);
-    if (!_isPanning && _panVelocity.length2 > 1) {
-      _panOffset.add(_panVelocity * dt);
-      _panVelocity.scale(math.exp(-6.5 * dt));
-      if (_panVelocity.length < 8) _panVelocity.setZero();
+    _performanceWatch
+      ..reset()
+      ..start();
+    try {
+      super.update(dt);
+      if (!_isPanning && _panVelocity.length2 > 1) {
+        _panOffset.add(_panVelocity * dt);
+        _panVelocity.scale(math.exp(-6.5 * dt));
+        if (_panVelocity.length < 8) _panVelocity.setZero();
+      }
+      if (_frameNumber != 0 && _frameNumber % 60 == 0) {
+        _evictUnusedImages();
+      }
+      final hasContinuousWork =
+          _isPanning ||
+          _panVelocity.length2 > 1 ||
+          _loadingImages.isNotEmpty ||
+          _terrainBakeInFlight != null ||
+          _dirtyTerrainChunks.isNotEmpty;
+      if (hasContinuousWork) {
+        _requestedFrames = math.max(_requestedFrames, 2);
+      } else if (_requestedFrames > 0) {
+        _requestedFrames--;
+      } else if (!diagnosticsPaused && !_autoPaused) {
+        _autoPaused = true;
+        pauseEngine();
+      }
+    } finally {
+      _performanceWatch.stop();
+      _updateMicroseconds = _performanceWatch.elapsedMicroseconds;
     }
   }
 
   @override
   void render(ui.Canvas canvas) {
-    super.render(canvas);
-    if (!isLoaded) return;
-    canvas
-      ..save()
-      ..translate(size.x / 2 + _panOffset.x, size.y / 2 + _panOffset.y)
-      ..scale(zoom)
-      ..translate(-_mapCenterScreen.x, -_mapCenterScreen.y);
+    _performanceWatch
+      ..reset()
+      ..start();
+    try {
+      super.render(canvas);
+      if (!isLoaded) return;
+      _frameNumber++;
+      _ensureRenderIndex();
+      _renderCandidateCount = 0;
+      _visibleSpriteCount = 0;
+      canvas
+        ..save()
+        ..translate(size.x / 2 + _panOffset.x, size.y / 2 + _panOffset.y)
+        ..scale(zoom)
+        ..translate(-_mapCenterScreen.x, -_mapCenterScreen.y);
 
-    _renderBaseGround(canvas);
-    if (loadedChunks == null) {
-      for (final stroke in controller.document.terrainStrokes) {
-        _renderStroke(canvas, stroke);
+      _renderBaseGround(canvas);
+      if (loadedChunks == null) {
+        for (final stroke in controller.document.terrainStrokes) {
+          _renderStroke(canvas, stroke);
+        }
+      } else {
+        _synchronizeTerrainRasters();
+        _renderRasterChunkTerrain(canvas);
+        final activeStroke = controller.activeTerrainStroke;
+        if (activeStroke != null) _renderStroke(canvas, activeStroke);
       }
-    } else {
-      _synchronizeTerrainRasters();
-      _renderRasterChunkTerrain(canvas);
-      final activeStroke = controller.activeTerrainStroke;
-      if (activeStroke != null) _renderStroke(canvas, activeStroke);
+      _renderObjectBand(canvas, EnvironmentRenderBand.groundCover);
+      _renderObjectBand(canvas, EnvironmentRenderBand.depthSorted);
+      _renderObjectBand(canvas, EnvironmentRenderBand.overhead);
+      _renderObjectBand(canvas, EnvironmentRenderBand.effects);
+      _renderPathPreview(canvas);
+      _renderMapOutline(canvas);
+      _renderPlayerSpawn(canvas);
+      if (showRenderDebug) _renderDepthDebug(canvas);
+      if (showChunkDebug) _renderChunkBoundaries(canvas);
+      if (controller.mode == EnvironmentEditorMode.collision ||
+          showGeometryDebug) {
+        _renderGeometry(canvas);
+      }
+      if (showNavigationDebug) _renderNavigationCells(canvas);
+      _renderSelection(canvas);
+      _renderCursor(canvas);
+      canvas.restore();
+      final marquee = _marqueeScreenRect;
+      if (marquee != null) canvas.drawRect(marquee, _marqueePaint);
+    } finally {
+      _performanceWatch.stop();
+      _renderMicroseconds = _performanceWatch.elapsedMicroseconds;
     }
-    _renderObjectBand(canvas, EnvironmentRenderBand.groundCover);
-    _renderObjectBand(canvas, EnvironmentRenderBand.depthSorted);
-    _renderObjectBand(canvas, EnvironmentRenderBand.overhead);
-    _renderObjectBand(canvas, EnvironmentRenderBand.effects);
-    _renderPathPreview(canvas);
-    _renderMapOutline(canvas);
-    _renderPlayerSpawn(canvas);
-    if (showRenderDebug) _renderDepthDebug(canvas);
-    if (showChunkDebug) _renderChunkBoundaries(canvas);
-    if (controller.mode == EnvironmentEditorMode.collision ||
-        showGeometryDebug) {
-      _renderGeometry(canvas);
-    }
-    if (showNavigationDebug) _renderNavigationCells(canvas);
-    _renderSelection(canvas);
-    _renderCursor(canvas);
-    canvas.restore();
-    final marquee = _marqueeScreenRect;
-    if (marquee != null) canvas.drawRect(marquee, _marqueePaint);
   }
 
   void _renderBaseGround(ui.Canvas canvas) {
@@ -437,7 +615,9 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
       );
       return;
     }
+    final visible = _visibleProjectedBounds;
     for (final chunk in chunks) {
+      if (!_chunkProjectedBounds(chunk).overlaps(visible)) continue;
       final minX = chunk.x * chunkSize;
       final minY = chunk.y * chunkSize;
       final maxX = math.min(document.width.toDouble(), minX + chunkSize);
@@ -525,7 +705,9 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
 
   void _renderRasterChunkTerrain(ui.Canvas canvas) {
     final activeStroke = controller.activeTerrainStroke;
+    final visible = _visibleProjectedBounds;
     for (final coordinate in loadedChunks!.call()) {
+      if (!_chunkProjectedBounds(coordinate).overlaps(visible)) continue;
       final needsFallback =
           _dirtyTerrainChunks.contains(coordinate) ||
           _terrainBakeInFlight == coordinate ||
@@ -664,6 +846,7 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
       if (generation == _terrainCacheGeneration) {
         _terrainBakeInFlight = null;
       }
+      requestFrame(frames: 2);
     }
   }
 
@@ -742,36 +925,27 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   }
 
   void _renderObjectBand(ui.Canvas canvas, EnvironmentRenderBand band) {
-    final objects =
-        controller.document.objects.where((object) {
-          return controller.isLayerVisible(object.editorLayerId) &&
-              controller.catalog.objectById(object.assetId)?.renderBand == band;
-        }).toList()..sort((a, b) {
-          final aAsset = controller.catalog.objectById(a.assetId)!;
-          final bAsset = controller.catalog.objectById(b.assetId)!;
-          final depth = aAsset
-              .depthAt(a.x, a.y, instanceSortBias: a.sortBias)
-              .compareTo(
-                bAsset.depthAt(b.x, b.y, instanceSortBias: b.sortBias),
-              );
-          return depth != 0 ? depth : a.x.compareTo(b.x);
-        });
-    for (final object in objects) {
-      final asset = controller.catalog.objectById(object.assetId);
-      if (asset == null) continue;
-      final view = asset.viewFor(object.direction.name);
-      final image = _loadedImages[view.imagePath];
-      if (image == null) {
+    final entries = _renderEntriesByBand[band]!;
+    final visible = _visibleProjectedBounds;
+    _renderCandidateCount += entries.length;
+    for (final entry in entries) {
+      if (!entry.projectedBounds.overlaps(visible)) continue;
+      _visibleSpriteCount++;
+      final object = entry.object;
+      final view = entry.view;
+      final sprite = _sprites[view.imagePath];
+      if (sprite == null) {
         _loadObjectView(object);
         continue;
       }
-      Sprite(image).render(
+      _touchImage(view.imagePath);
+      sprite.render(
         canvas,
         position: projection.worldToScreen(Vector2(object.x, object.y))
           ..y -= object.verticalOffset * elevationPixelsPerWorldUnit,
         size: Vector2(
-          image.width * asset.renderScale,
-          image.height * asset.renderScale,
+          entry.projectedBounds.width,
+          entry.projectedBounds.height,
         ),
         anchor: Anchor(view.pivotX, view.pivotY),
       );
@@ -797,19 +971,24 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
     if (asset == null) return;
     for (final placement in controller.pathPreviewPlacements) {
       final view = asset.viewFor(placement.direction.name);
-      final image = _loadedImages[view.imagePath];
-      if (image == null) {
-        _loadImage(view.imagePath);
+      final sprite = _sprites[view.imagePath];
+      final sourceSize = _sourceImageSizes[view.imagePath];
+      if (sprite == null || sourceSize == null) {
+        _loadImage(
+          view.imagePath,
+          maximumDimension: _editorObjectMaximumDimension,
+        );
         continue;
       }
-      Sprite(image).render(
+      _touchImage(view.imagePath);
+      sprite.render(
         canvas,
         position: projection.worldToScreen(
           Vector2(placement.point.x, placement.point.y),
         ),
         size: Vector2(
-          image.width * asset.renderScale,
-          image.height * asset.renderScale,
+          sourceSize.$1 * asset.renderScale,
+          sourceSize.$2 * asset.renderScale,
         ),
         anchor: Anchor(view.pivotX, view.pivotY),
         overridePaint: _pathPreviewSpritePaint,
@@ -1046,13 +1225,19 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   }
 
   ui.Rect? _objectProjectedBounds(PlacedEnvironmentObject object) {
-    final asset = controller.catalog.objectById(object.assetId);
-    if (asset == null) return null;
-    final view = asset.viewFor(object.direction.name);
-    final image = _loadedImages[view.imagePath];
-    if (image == null) return null;
-    final width = image.width * asset.renderScale;
-    final height = image.height * asset.renderScale;
+    _ensureRenderIndex();
+    return _renderEntriesById[object.id]?.projectedBounds;
+  }
+
+  ui.Rect _objectProjectedBoundsFor(
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+    EnvironmentObjectView view,
+    int sourceWidth,
+    int sourceHeight,
+  ) {
+    final width = sourceWidth * asset.renderScale;
+    final height = sourceHeight * asset.renderScale;
     final anchor = projection.worldToScreen(Vector2(object.x, object.y))
       ..y -= object.verticalOffset * elevationPixelsPerWorldUnit;
     return ui.Rect.fromLTWH(
@@ -1079,26 +1264,188 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
   Vector2 _projectedAtScreen(Vector2 screen) =>
       (screen - size / 2 - _panOffset) / zoom + _mapCenterScreen;
 
-  int _compareVisualOrder(
-    PlacedEnvironmentObject a,
-    PlacedEnvironmentObject b,
-  ) {
-    final aAsset = controller.catalog.objectById(a.assetId)!;
-    final bAsset = controller.catalog.objectById(b.assetId)!;
-    final band = aAsset.renderBand.index.compareTo(bAsset.renderBand.index);
-    if (band != 0) return band;
-    final depth = aAsset
-        .depthAt(a.x, a.y, instanceSortBias: a.sortBias)
-        .compareTo(bAsset.depthAt(b.x, b.y, instanceSortBias: b.sortBias));
-    return depth != 0 ? depth : a.x.compareTo(b.x);
+  ui.Rect get _visibleProjectedBounds =>
+      _projectedBoundsForScreenRect(ui.Rect.fromLTWH(0, 0, size.x, size.y))
+          .inflate(8 / zoom);
+
+  ui.Rect _projectedBoundsForScreenRect(ui.Rect screenRect) {
+    final topLeft = _projectedAtScreen(Vector2(screenRect.left, screenRect.top))
+        .toOffset();
+    final bottomRight = _projectedAtScreen(
+      Vector2(screenRect.right, screenRect.bottom),
+    ).toOffset();
+    return ui.Rect.fromPoints(topLeft, bottomRight);
   }
 
-  PlacedEnvironmentObject? _objectById(String id) {
-    for (final object in controller.document.objects) {
-      if (object.id == id) return object;
+  ui.Rect _chunkProjectedBounds(EnvironmentChunkCoordinate coordinate) =>
+      _chunkPath(coordinate).getBounds();
+
+  (int, int) _spatialCellFor(ui.Offset point) => (
+    (point.dx / _spatialCellSize).floor(),
+    (point.dy / _spatialCellSize).floor(),
+  );
+
+  Iterable<_EditorRenderEntry> _entriesOverlapping(ui.Rect bounds) sync* {
+    final minCell = _spatialCellFor(bounds.topLeft);
+    final maxCell = _spatialCellFor(bounds.bottomRight);
+    final seen = <String>{};
+    for (var y = minCell.$2; y <= maxCell.$2; y++) {
+      for (var x = minCell.$1; x <= maxCell.$1; x++) {
+        for (final entry in _spatialRenderEntries[(x, y)] ?? const []) {
+          if (seen.add(entry.object.id) &&
+              entry.projectedBounds.overlaps(bounds)) {
+            yield entry;
+          }
+        }
+      }
     }
-    return null;
   }
+
+  void _ensureRenderIndex() {
+    if (_seenSceneRevision == controller.sceneRevision &&
+        _seenImageRevision == _imageRevision) {
+      return;
+    }
+    final changedObjectIds = controller.lastSceneChangedObjectIds;
+    final canUpdateObjectsIncrementally =
+        _seenSceneRevision >= 0 &&
+        controller.sceneRevision == _seenSceneRevision + 1 &&
+        _seenImageRevision == _imageRevision &&
+        changedObjectIds != null;
+    if (canUpdateObjectsIncrementally) {
+      for (final id in changedObjectIds) {
+        _refreshRenderEntry(id);
+      }
+      _renderIndexIncrementalUpdateCount++;
+      _seenSceneRevision = controller.sceneRevision;
+      return;
+    }
+    _rebuildRenderIndex();
+  }
+
+  void _rebuildRenderIndex() {
+    _renderIndexFullRebuildCount++;
+    _renderEntriesById.clear();
+    for (final entries in _renderEntriesByBand.values) {
+      entries.clear();
+    }
+    _spatialRenderEntries.clear();
+    for (final object in controller.document.objects) {
+      if (!controller.isLayerVisible(object.editorLayerId)) continue;
+      final asset = controller.catalog.objectById(object.assetId);
+      if (asset == null) continue;
+      final view = asset.viewFor(object.direction.name);
+      final sourceSize = _sourceImageSizes[view.imagePath];
+      if (sourceSize == null) {
+        final anchor = projection
+            .worldToScreen(Vector2(object.x, object.y))
+            .toOffset();
+        if (_visibleProjectedBounds.inflate(2048).contains(anchor)) {
+          unawaited(_loadObjectView(object));
+        }
+        continue;
+      }
+      _addRenderEntry(object, asset, view, sourceSize, keepBandSorted: false);
+    }
+    for (final entries in _renderEntriesByBand.values) {
+      entries.sort(_compareRenderEntries);
+    }
+    _seenSceneRevision = controller.sceneRevision;
+    _seenImageRevision = _imageRevision;
+  }
+
+  void _refreshRenderEntry(String objectId) {
+    _removeRenderEntry(objectId);
+    final object = controller.objectById(objectId);
+    if (object == null || !controller.isLayerVisible(object.editorLayerId)) {
+      return;
+    }
+    final asset = controller.catalog.objectById(object.assetId);
+    if (asset == null) return;
+    final view = asset.viewFor(object.direction.name);
+    final sourceSize = _sourceImageSizes[view.imagePath];
+    if (sourceSize == null) {
+      unawaited(_loadObjectView(object));
+      return;
+    }
+    _addRenderEntry(object, asset, view, sourceSize, keepBandSorted: true);
+  }
+
+  void _addRenderEntry(
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+    EnvironmentObjectView view,
+    (int, int) sourceSize, {
+    required bool keepBandSorted,
+  }) {
+    final bounds = _objectProjectedBoundsFor(
+      object,
+      asset,
+      view,
+      sourceSize.$1,
+      sourceSize.$2,
+    );
+    final entry = _EditorRenderEntry(
+      object: object,
+      asset: asset,
+      view: view,
+      projectedBounds: bounds,
+      depth: asset.depthAt(
+        object.x,
+        object.y,
+        instanceSortBias: object.sortBias,
+      ),
+    );
+    _renderEntriesById[object.id] = entry;
+    final bandEntries = _renderEntriesByBand[asset.renderBand]!;
+    if (keepBandSorted) {
+      var low = 0;
+      var high = bandEntries.length;
+      while (low < high) {
+        final middle = (low + high) >> 1;
+        if (_compareRenderEntries(bandEntries[middle], entry) <= 0) {
+          low = middle + 1;
+        } else {
+          high = middle;
+        }
+      }
+      bandEntries.insert(low, entry);
+    } else {
+      bandEntries.add(entry);
+    }
+    final minCell = _spatialCellFor(bounds.topLeft);
+    final maxCell = _spatialCellFor(bounds.bottomRight);
+    for (var y = minCell.$2; y <= maxCell.$2; y++) {
+      for (var x = minCell.$1; x <= maxCell.$1; x++) {
+        (_spatialRenderEntries[(x, y)] ??= []).add(entry);
+      }
+    }
+  }
+
+  void _removeRenderEntry(String objectId) {
+    final entry = _renderEntriesById.remove(objectId);
+    if (entry == null) return;
+    _renderEntriesByBand[entry.asset.renderBand]!.remove(entry);
+    final minCell = _spatialCellFor(entry.projectedBounds.topLeft);
+    final maxCell = _spatialCellFor(entry.projectedBounds.bottomRight);
+    for (var y = minCell.$2; y <= maxCell.$2; y++) {
+      for (var x = minCell.$1; x <= maxCell.$1; x++) {
+        final cell = (x, y);
+        final entries = _spatialRenderEntries[cell];
+        entries?.remove(entry);
+        if (entries?.isEmpty ?? false) _spatialRenderEntries.remove(cell);
+      }
+    }
+  }
+
+  int _compareRenderEntries(_EditorRenderEntry a, _EditorRenderEntry b) {
+    final band = a.asset.renderBand.index.compareTo(b.asset.renderBand.index);
+    if (band != 0) return band;
+    final depth = a.depth.compareTo(b.depth);
+    return depth != 0 ? depth : a.object.x.compareTo(b.object.x);
+  }
+
+  PlacedEnvironmentObject? _objectById(String id) => controller.objectById(id);
 
   void _renderCursor(ui.Canvas canvas) {
     final point = controller.hoveredPoint;
@@ -1220,6 +1567,15 @@ class EditorGame extends FlameGame with HasPerformanceTracker {
       image.dispose();
     }
     _loadedImages.clear();
+    _sprites.clear();
+    _sourceImageSizes.clear();
+    _imageLastUsedFrame.clear();
+    _materialImagePaths.clear();
+    _renderEntriesById.clear();
+    _spatialRenderEntries.clear();
+    for (final entries in _renderEntriesByBand.values) {
+      entries.clear();
+    }
     super.onRemove();
   }
 
@@ -1255,4 +1611,20 @@ class _TerrainRaster {
   final ui.Paint paint;
 
   void dispose() => image.dispose();
+}
+
+class _EditorRenderEntry {
+  const _EditorRenderEntry({
+    required this.object,
+    required this.asset,
+    required this.view,
+    required this.projectedBounds,
+    required this.depth,
+  });
+
+  final PlacedEnvironmentObject object;
+  final EnvironmentObjectAsset asset;
+  final EnvironmentObjectView view;
+  final ui.Rect projectedBounds;
+  final double depth;
 }

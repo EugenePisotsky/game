@@ -28,15 +28,31 @@ class PathPlacementPreview {
 enum _PathDragHandle { start, end }
 
 class EditorController extends ChangeNotifier {
-  EditorController(this._document, {required this.catalog});
+  EditorController(this._document, {required this.catalog}) {
+    _rebuildIndexes();
+  }
 
   final EnvironmentCatalog catalog;
   final _HoverNotifier _hoverNotifier = _HoverNotifier();
+  final ChangeNotifier _paletteNotifier = ChangeNotifier();
   EnvironmentDocument _document;
+  final Map<String, PlacedEnvironmentObject> _objectsById = {};
+  final Map<String, EditorLayer> _layersById = {};
+  final Map<String, bool> _layerVisibility = {};
+  final Map<String, bool> _layerLocked = {};
+  int _sceneRevision = 0;
+  Set<String>? _lastSceneChangedObjectIds;
 
   Listenable get hoverListenable => _hoverNotifier;
+  Listenable get paletteListenable => _paletteNotifier;
 
   EnvironmentDocument get document => _document;
+  int get sceneRevision => _sceneRevision;
+  Set<String>? get lastSceneChangedObjectIds => _lastSceneChangedObjectIds;
+
+  PlacedEnvironmentObject? objectById(String id) => _objectsById[id];
+
+  EditorLayer? editorLayerById(String id) => _layersById[id];
 
   EnvironmentEditorMode _mode = EnvironmentEditorMode.paint;
   EnvironmentEditorMode get mode => _mode;
@@ -86,18 +102,14 @@ class EditorController extends ChangeNotifier {
   String? get selectedObjectId => _primarySelectedObjectId;
   Set<String> get selectedObjectIds => Set.unmodifiable(_selectedObjectIds);
 
-  List<PlacedEnvironmentObject> get selectedObjects => [
-    for (final object in _document.objects)
-      if (_selectedObjectIds.contains(object.id)) object,
-  ];
+  List<PlacedEnvironmentObject> get selectedObjects => _selectedObjectIds
+      .map((id) => _objectsById[id])
+      .whereType<PlacedEnvironmentObject>()
+      .toList();
 
   PlacedEnvironmentObject? get selectedObject {
     final id = _primarySelectedObjectId;
-    if (id == null) return null;
-    for (final object in _document.objects) {
-      if (object.id == id) return object;
-    }
-    return null;
+    return id == null ? null : _objectsById[id];
   }
 
   String? _hoveredObjectId;
@@ -107,8 +119,7 @@ class EditorController extends ChangeNotifier {
   List<String> get overlapCandidateIds =>
       List.unmodifiable(_overlapCandidateIds);
 
-  EditorLayer get activeLayer =>
-      _document.editorLayerById(_document.activeLayerId)!;
+  EditorLayer get activeLayer => _layersById[_document.activeLayerId]!;
 
   GeometryRole _geometryRole = GeometryRole.blocking;
   GeometryRole get geometryRole => _geometryRole;
@@ -143,9 +154,10 @@ class EditorController extends ChangeNotifier {
     }
   }
 
-  final List<_EditorSnapshot> _undo = [];
-  final List<_EditorSnapshot> _redo = [];
-  _EditorSnapshot? _gestureBefore;
+  final List<_EditorCommand> _undo = [];
+  final List<_EditorCommand> _redo = [];
+  final Map<String, _ObjectRecord> _gestureObjectBefore = {};
+  final Set<String> _gestureObjectIds = {};
   TerrainStroke? _activeStroke;
   int _terrainRevision = 0;
   TerrainStroke? _lastTerrainChangedStroke;
@@ -165,12 +177,14 @@ class EditorController extends ChangeNotifier {
     _selectedMaterialId = material.id;
     _brushRadius = material.defaultRadius;
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void selectObjectAsset(EnvironmentObjectAsset object) {
     _mode = EnvironmentEditorMode.place;
     _selectObjectAsset(object);
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void selectPathObjectAsset(EnvironmentObjectAsset object) {
@@ -178,6 +192,7 @@ class EditorController extends ChangeNotifier {
     _selectObjectAsset(object);
     _pathPieceLength = _suggestedPathPieceLength(object);
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void selectMode(EnvironmentEditorMode mode) {
@@ -188,26 +203,31 @@ class EditorController extends ChangeNotifier {
       if (asset != null) _pathPieceLength = _suggestedPathPieceLength(asset);
     }
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void setPathPieceLength(double value) {
     _pathPieceLength = value.clamp(0.25, 8);
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void setPathGap(double value) {
     _pathGap = value.clamp(-1.5, 6);
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void setPathOpening(double value) {
     _pathOpening = value.clamp(0, 12);
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void rotatePathOrientation() {
     _pathDirectionOffset = (_pathDirectionOffset + 1) % 8;
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void applyPathDraft() {
@@ -218,17 +238,20 @@ class EditorController extends ChangeNotifier {
     }
     final placements = _buildPathPlacements();
     if (placements.isEmpty) return;
-    _recordImmediate(() {
-      _selectedObjectIds.clear();
-      for (final placement in placements) {
-        final object = PlacedEnvironmentObject(
+    final objects = [
+      for (final placement in placements)
+        PlacedEnvironmentObject(
           id: _newPlacedObjectId(),
           assetId: _selectedObjectAssetId,
           x: placement.point.x,
           y: placement.point.y,
           editorLayerId: _document.activeLayerId,
           direction: placement.direction,
-        );
+        ),
+    ];
+    _recordObjectMutation(objects.map((object) => object.id), () {
+      _selectedObjectIds.clear();
+      for (final object in objects) {
         _document.objects.add(object);
         _selectedObjectIds.add(object.id);
         _primarySelectedObjectId = object.id;
@@ -237,6 +260,7 @@ class EditorController extends ChangeNotifier {
       _pathEnd = null;
       _activePathDragHandle = null;
     });
+    _paletteNotifier.notifyListeners();
   }
 
   void cancelPathDraft() {
@@ -245,6 +269,7 @@ class EditorController extends ChangeNotifier {
     _pathEnd = null;
     _activePathDragHandle = null;
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void selectGeometryRole(GeometryRole role) {
@@ -365,7 +390,10 @@ class EditorController extends ChangeNotifier {
         !catalog.geometryOverrides.containsKey(object.assetId)) {
       return;
     }
-    _recordImmediate(() => catalog.removeGeometryOverride(object.assetId));
+    _recordGeometryMutation(
+      object.assetId,
+      () => catalog.removeGeometryOverride(object.assetId),
+    );
     _geometryShapeIndex = 0;
   }
 
@@ -375,16 +403,19 @@ class EditorController extends ChangeNotifier {
   void setBrushRadius(double value) {
     _brushRadius = value.clamp(0.5, 5);
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void setBrushFlow(double value) {
     _brushFlow = value.clamp(0.05, 0.6);
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void setBrushScatter(double value) {
     _brushScatter = value.clamp(0, 0.65);
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void hover(WorldPoint? point) {
@@ -408,6 +439,7 @@ class EditorController extends ChangeNotifier {
   @override
   void dispose() {
     _hoverNotifier.dispose();
+    _paletteNotifier.dispose();
     super.dispose();
   }
 
@@ -471,7 +503,8 @@ class EditorController extends ChangeNotifier {
   }
 
   void beginGesture() {
-    _gestureBefore = _snapshot();
+    _gestureObjectBefore.clear();
+    _gestureObjectIds.clear();
     _gestureChanged = false;
     _placedThisGesture = false;
     _activeStroke = null;
@@ -520,14 +553,33 @@ class EditorController extends ChangeNotifier {
   }
 
   void endGesture() {
-    final before = _gestureBefore;
     final committedTerrainStroke = _gestureChanged ? _activeStroke : null;
-    if (_gestureChanged && before != null) {
-      _undo.add(before);
-      if (_undo.length > 100) _undo.removeAt(0);
-      _redo.clear();
+    if (_gestureChanged) {
+      final commands = <_EditorCommand>[];
+      if (_gestureObjectIds.isNotEmpty) {
+        commands.add(
+          _ObjectDeltaCommand(
+            before: Map.of(_gestureObjectBefore),
+            after: _captureObjects(_gestureObjectIds),
+          ),
+        );
+      }
+      if (committedTerrainStroke != null) {
+        commands.add(
+          _TerrainStrokeCommand(
+            index: _document.terrainStrokes.indexOf(committedTerrainStroke),
+            stroke: _copyTerrainStroke(committedTerrainStroke),
+          ),
+        );
+      }
+      _pushCommand(
+        commands.length == 1
+            ? commands.single
+            : _CompositeEditorCommand(commands),
+      );
     }
-    _gestureBefore = null;
+    _gestureObjectBefore.clear();
+    _gestureObjectIds.clear();
     _activeStroke = null;
     _activePathDragHandle = null;
     _pathGestureStarted = false;
@@ -537,12 +589,15 @@ class EditorController extends ChangeNotifier {
     _gestureChanged = false;
     _placedThisGesture = false;
     notifyListeners();
+    if (_mode == EnvironmentEditorMode.path) {
+      _paletteNotifier.notifyListeners();
+    }
   }
 
   void moveSelectedTo(WorldPoint point) {
     final object = selectedObject;
     if (object == null || !_document.contains(point.x, point.y)) return;
-    _recordImmediate(() {
+    _recordObjectMutation([object.id], () {
       object
         ..x = point.x
         ..y = point.y;
@@ -552,10 +607,12 @@ class EditorController extends ChangeNotifier {
   void moveSelectedDuringGesture(WorldPoint point) {
     final object = selectedObject;
     if (object == null || !_document.contains(point.x, point.y)) return;
+    _rememberGestureObjects([object]);
     object
       ..x = point.x
       ..y = point.y;
     _gestureChanged = true;
+    _markObjectSceneChanged([object.id]);
     _hoveredPoint = point;
     _hoverNotifier.changed();
   }
@@ -570,12 +627,14 @@ class EditorController extends ChangeNotifier {
     )) {
       return;
     }
+    _rememberGestureObjects(selected);
     for (final object in selected) {
       object
         ..x += dx
         ..y += dy;
     }
     _gestureChanged = true;
+    _markObjectSceneChanged(selected.map((object) => object.id));
     _hoveredPoint = to;
     _hoverNotifier.changed();
   }
@@ -583,7 +642,7 @@ class EditorController extends ChangeNotifier {
   void rotateSelected() {
     final selected = selectedObjects;
     if (selected.isEmpty) return;
-    _recordImmediate(() {
+    _recordObjectMutation(selected.map((object) => object.id), () {
       for (final object in selected) {
         final asset = catalog.objectById(object.assetId);
         if (asset == null) continue;
@@ -611,7 +670,7 @@ class EditorController extends ChangeNotifier {
         selected.every((object) => object.direction == direction)) {
       return;
     }
-    _recordImmediate(() {
+    _recordObjectMutation(selected.map((object) => object.id), () {
       for (final object in selected) {
         object.direction = direction;
       }
@@ -622,7 +681,7 @@ class EditorController extends ChangeNotifier {
   void adjustSelectedVerticalOffset(double delta) {
     final selected = selectedObjects;
     if (selected.isEmpty) return;
-    _recordImmediate(() {
+    _recordObjectMutation(selected.map((object) => object.id), () {
       for (final object in selected) {
         object.verticalOffset = (object.verticalOffset + delta).clamp(-10, 10);
       }
@@ -632,7 +691,7 @@ class EditorController extends ChangeNotifier {
   void adjustSelectedSortBias(double delta) {
     final selected = selectedObjects;
     if (selected.isEmpty) return;
-    _recordImmediate(() {
+    _recordObjectMutation(selected.map((object) => object.id), () {
       for (final object in selected) {
         object.sortBias = (object.sortBias + delta).clamp(-5, 5);
         if (object.sortBias.abs() < 0.0001) object.sortBias = 0;
@@ -642,7 +701,8 @@ class EditorController extends ChangeNotifier {
 
   void deleteSelected() {
     if (_selectedObjectIds.isEmpty) return;
-    _recordImmediate(() {
+    final ids = Set<String>.of(_selectedObjectIds);
+    _recordObjectMutation(ids, () {
       _document.objects.removeWhere(
         (object) => _selectedObjectIds.contains(object.id),
       );
@@ -652,8 +712,7 @@ class EditorController extends ChangeNotifier {
   }
 
   void setActiveLayer(String layerId) {
-    if (_document.editorLayerById(layerId) == null ||
-        _document.activeLayerId == layerId) {
+    if (_layersById[layerId] == null || _document.activeLayerId == layerId) {
       return;
     }
     _document.activeLayerId = layerId;
@@ -664,10 +723,10 @@ class EditorController extends ChangeNotifier {
     final parent = parentId ?? _document.activeLayerId;
     var suffix = _document.editorLayers.length + 1;
     var id = 'layer_$suffix';
-    while (_document.editorLayerById(id) != null) {
+    while (_layersById[id] != null) {
       id = 'layer_${++suffix}';
     }
-    _recordImmediate(() {
+    _recordLayerMutation([id], () {
       _document.editorLayers.add(
         EditorLayer(id: id, name: 'Layer $suffix', parentId: parent),
       );
@@ -676,18 +735,18 @@ class EditorController extends ChangeNotifier {
   }
 
   void renameLayer(String layerId, String name) {
-    final layer = _document.editorLayerById(layerId);
+    final layer = _layersById[layerId];
     final trimmed = name.trim();
     if (layer == null || trimmed.isEmpty || layer.name == trimmed) return;
-    _recordImmediate(() => layer.name = trimmed);
+    _recordLayerMutation([layerId], () => layer.name = trimmed);
   }
 
   bool canReparentLayer(String layerId, String parentId) {
     if (layerId == EnvironmentDocument.rootLayerId || layerId == parentId) {
       return false;
     }
-    final layer = _document.editorLayerById(layerId);
-    final parent = _document.editorLayerById(parentId);
+    final layer = _layersById[layerId];
+    final parent = _layersById[parentId];
     if (layer == null || parent == null || layer.parentId == parentId) {
       return false;
     }
@@ -697,7 +756,7 @@ class EditorController extends ChangeNotifier {
       if (ancestor.id == layerId) return false;
       final next = ancestor.parentId;
       if (next == null) break;
-      final resolved = _document.editorLayerById(next);
+      final resolved = _layersById[next];
       if (resolved == null) break;
       ancestor = resolved;
     }
@@ -706,8 +765,8 @@ class EditorController extends ChangeNotifier {
 
   bool reparentLayer(String layerId, String parentId) {
     if (!canReparentLayer(layerId, parentId)) return false;
-    final layer = _document.editorLayerById(layerId)!;
-    _recordImmediate(() => layer.parentId = parentId);
+    final layer = _layersById[layerId]!;
+    _recordLayerMutation([layerId], () => layer.parentId = parentId);
     return true;
   }
 
@@ -717,9 +776,9 @@ class EditorController extends ChangeNotifier {
         _document.editorLayers.any((layer) => layer.parentId == layerId)) {
       return false;
     }
-    final layer = _document.editorLayerById(layerId);
+    final layer = _layersById[layerId];
     if (layer == null) return false;
-    _recordImmediate(() {
+    _recordLayerMutation([layerId], () {
       _document.editorLayers.remove(layer);
       if (_document.activeLayerId == layerId) {
         _document.activeLayerId =
@@ -730,32 +789,31 @@ class EditorController extends ChangeNotifier {
   }
 
   void toggleLayerVisibility(String layerId) {
-    final layer = _document.editorLayerById(layerId);
+    final layer = _layersById[layerId];
     if (layer == null) return;
-    _recordImmediate(() => layer.visible = !layer.visible);
+    _recordLayerMutation([layerId], () => layer.visible = !layer.visible);
     _normalizeSelection();
   }
 
   void toggleLayerLocked(String layerId) {
-    final layer = _document.editorLayerById(layerId);
+    final layer = _layersById[layerId];
     if (layer == null) return;
-    _recordImmediate(() => layer.locked = !layer.locked);
+    _recordLayerMutation([layerId], () => layer.locked = !layer.locked);
     _normalizeSelection();
   }
 
   void toggleLayerExported(String layerId) {
     if (layerId == EnvironmentDocument.rootLayerId) return;
-    final layer = _document.editorLayerById(layerId);
+    final layer = _layersById[layerId];
     if (layer == null) return;
-    _recordImmediate(() => layer.exported = !layer.exported);
+    _recordLayerMutation([layerId], () => layer.exported = !layer.exported);
   }
 
   void moveSelectionToLayer(String layerId) {
-    if (_document.editorLayerById(layerId) == null ||
-        _selectedObjectIds.isEmpty) {
+    if (_layersById[layerId] == null || _selectedObjectIds.isEmpty) {
       return;
     }
-    _recordImmediate(() {
+    _recordObjectMutation(_selectedObjectIds, () {
       for (final object in selectedObjects) {
         object.editorLayerId = layerId;
       }
@@ -763,59 +821,78 @@ class EditorController extends ChangeNotifier {
   }
 
   bool isLayerVisible(String layerId) {
-    var layer = _document.editorLayerById(layerId);
+    final cached = _layerVisibility[layerId];
+    if (cached != null) return cached;
+    var layer = _layersById[layerId];
     final visited = <String>{};
+    var visible = true;
     while (layer != null && visited.add(layer.id)) {
-      if (!layer.visible) return false;
-      layer = layer.parentId == null
-          ? null
-          : _document.editorLayerById(layer.parentId!);
+      if (!layer.visible) {
+        visible = false;
+        break;
+      }
+      layer = layer.parentId == null ? null : _layersById[layer.parentId!];
     }
-    return true;
+    _layerVisibility[layerId] = visible;
+    return visible;
   }
 
   bool isLayerLocked(String layerId) {
-    var layer = _document.editorLayerById(layerId);
+    final cached = _layerLocked[layerId];
+    if (cached != null) return cached;
+    var layer = _layersById[layerId];
     final visited = <String>{};
+    var locked = false;
     while (layer != null && visited.add(layer.id)) {
-      if (layer.locked) return true;
-      layer = layer.parentId == null
-          ? null
-          : _document.editorLayerById(layer.parentId!);
+      if (layer.locked) {
+        locked = true;
+        break;
+      }
+      layer = layer.parentId == null ? null : _layersById[layer.parentId!];
     }
-    return false;
+    _layerLocked[layerId] = locked;
+    return locked;
   }
 
   void undo() {
     if (!canUndo) return;
-    _redo.add(_snapshot());
-    _restore(_undo.removeLast());
-    _markTerrainChanged();
+    final command = _undo.removeLast();
+    command.undo(this);
+    _redo.add(command);
+    _markSceneChanged(objectIds: command.affectedObjectIds);
+    if (command.affectsTerrain) _markTerrainChanged();
     _normalizeSelection();
     notifyListeners();
   }
 
   void redo() {
     if (!canRedo) return;
-    _undo.add(_snapshot());
-    _restore(_redo.removeLast());
-    _markTerrainChanged();
+    final command = _redo.removeLast();
+    command.redo(this);
+    _undo.add(command);
+    _markSceneChanged(objectIds: command.affectedObjectIds);
+    if (command.affectsTerrain) _markTerrainChanged();
     _normalizeSelection();
     notifyListeners();
   }
 
   void replaceDocument(EnvironmentDocument document) {
-    _undo.add(_snapshot());
-    _document = document;
-    _redo.clear();
+    final command = _ReplaceDocumentCommand(
+      before: _copyDocument(_document),
+      after: _copyDocument(document),
+    );
+    _document = _copyDocument(document);
+    _pushCommand(command);
     _selectedObjectIds.clear();
     _primarySelectedObjectId = null;
+    _markSceneChanged();
     _markTerrainChanged();
     notifyListeners();
   }
 
   void replaceDocumentFromStreaming(EnvironmentDocument document) {
     _document = document;
+    _markSceneChanged();
     _normalizeSelection();
     notifyListeners();
   }
@@ -871,7 +948,11 @@ class EditorController extends ChangeNotifier {
       editorLayerId: _document.activeLayerId,
       direction: _placementDirection,
     );
+    _gestureObjectIds.add(object.id);
+    _gestureObjectBefore[object.id] = const _ObjectRecord.absent();
     _document.objects.add(object);
+    _objectsById[object.id] = object;
+    _markObjectSceneChanged([object.id]);
     _selectedObjectIds
       ..clear()
       ..add(object.id);
@@ -1062,7 +1143,10 @@ class EditorController extends ChangeNotifier {
   void _eraseNearest(WorldPoint point) {
     final object = _nearestObject(point, maxDistance: 1.25);
     if (object != null) {
+      _rememberGestureObjects([object]);
       _document.objects.remove(object);
+      _objectsById.remove(object.id);
+      _markObjectSceneChanged([object.id]);
       _selectedObjectIds.remove(object.id);
       if (_primarySelectedObjectId == object.id) {
         _primarySelectedObjectId = _lastOrNull(_selectedObjectIds);
@@ -1091,11 +1175,96 @@ class EditorController extends ChangeNotifier {
     return best;
   }
 
-  void _recordImmediate(VoidCallback mutation) {
-    _undo.add(_snapshot());
+  void _recordObjectMutation(
+    Iterable<String> objectIds,
+    VoidCallback mutation,
+  ) {
+    final ids = Set<String>.of(objectIds);
+    final before = _captureObjects(ids);
     mutation();
-    _redo.clear();
+    final after = _captureObjects(ids);
+    _pushCommand(_ObjectDeltaCommand(before: before, after: after));
+    _markSceneChanged(objectIds: ids);
     notifyListeners();
+  }
+
+  void _recordLayerMutation(Iterable<String> layerIds, VoidCallback mutation) {
+    final ids = Set<String>.of(layerIds);
+    final before = _captureLayers(ids);
+    final activeLayerBefore = _document.activeLayerId;
+    mutation();
+    final after = _captureLayers(ids);
+    _pushCommand(
+      _LayerDeltaCommand(
+        before: before,
+        after: after,
+        activeLayerBefore: activeLayerBefore,
+        activeLayerAfter: _document.activeLayerId,
+      ),
+    );
+    _markSceneChanged();
+    notifyListeners();
+  }
+
+  void _recordGeometryMutation(String assetId, VoidCallback mutation) {
+    final before = catalog.geometryOverrides[assetId];
+    mutation();
+    final after = catalog.geometryOverrides[assetId];
+    _pushCommand(
+      _GeometryDeltaCommand(assetId: assetId, before: before, after: after),
+    );
+    _markSceneChanged();
+    notifyListeners();
+  }
+
+  void _rememberGestureObjects(Iterable<PlacedEnvironmentObject> objects) {
+    for (final object in objects) {
+      if (_gestureObjectIds.add(object.id)) {
+        final index = _document.objects.indexOf(object);
+        _gestureObjectBefore[object.id] = _ObjectRecord(
+          index: index,
+          object: _copyPlacedObject(object),
+        );
+      }
+    }
+  }
+
+  Map<String, _ObjectRecord> _captureObjects(Iterable<String> ids) {
+    final result = <String, _ObjectRecord>{};
+    for (final id in ids) {
+      final index = _document.objects.indexWhere((object) => object.id == id);
+      result[id] = index < 0
+          ? const _ObjectRecord.absent()
+          : _ObjectRecord(
+              index: index,
+              object: _copyPlacedObject(_document.objects[index]),
+            );
+    }
+    return result;
+  }
+
+  Map<String, _LayerRecord> _captureLayers(Iterable<String> ids) {
+    final result = <String, _LayerRecord>{};
+    for (final id in ids) {
+      final index = _document.editorLayers.indexWhere(
+        (layer) => layer.id == id,
+      );
+      result[id] = index < 0
+          ? const _LayerRecord.absent()
+          : _LayerRecord(
+              index: index,
+              layer: EditorLayer.fromJson(
+                _document.editorLayers[index].toJson(),
+              ),
+            );
+    }
+    return result;
+  }
+
+  void _pushCommand(_EditorCommand command) {
+    _undo.add(command);
+    if (_undo.length > 100) _undo.removeAt(0);
+    _redo.clear();
   }
 
   void _mutateSelectedGeometry(
@@ -1107,17 +1276,10 @@ class EditorController extends ChangeNotifier {
     final asset = catalog.objectById(object.assetId);
     if (asset == null) return;
     final updated = mutation(catalog.geometryForAsset(asset));
-    _recordImmediate(() => catalog.setGeometryOverride(asset.id, updated));
-  }
-
-  _EditorSnapshot _snapshot() => _EditorSnapshot(
-    document: _document.toJsonString(pretty: false),
-    geometryOverrides: catalog.geometryOverridesToJsonString(pretty: false),
-  );
-
-  void _restore(_EditorSnapshot snapshot) {
-    _document = EnvironmentDocument.fromJsonString(snapshot.document);
-    catalog.replaceGeometryOverridesFromJsonString(snapshot.geometryOverrides);
+    _recordGeometryMutation(
+      asset.id,
+      () => catalog.setGeometryOverride(asset.id, updated),
+    );
   }
 
   void _normalizeSelection() {
@@ -1128,16 +1290,38 @@ class EditorController extends ChangeNotifier {
   }
 
   bool _isObjectSelectable(String id) {
-    PlacedEnvironmentObject? object;
-    for (final candidate in _document.objects) {
-      if (candidate.id == id) {
-        object = candidate;
-        break;
-      }
-    }
+    final object = _objectsById[id];
     return object != null &&
         isLayerVisible(object.editorLayerId) &&
         !isLayerLocked(object.editorLayerId);
+  }
+
+  void _markSceneChanged({Iterable<String>? objectIds}) {
+    _sceneRevision++;
+    _lastSceneChangedObjectIds = objectIds == null
+        ? null
+        : Set.unmodifiable(Set.of(objectIds));
+    _rebuildIndexes();
+  }
+
+  void _markObjectSceneChanged(Iterable<String> objectIds) {
+    _sceneRevision++;
+    _lastSceneChangedObjectIds = Set.unmodifiable(Set.of(objectIds));
+  }
+
+  void _rebuildIndexes() {
+    _objectsById
+      ..clear()
+      ..addEntries(
+        _document.objects.map((object) => MapEntry(object.id, object)),
+      );
+    _layersById
+      ..clear()
+      ..addEntries(
+        _document.editorLayers.map((layer) => MapEntry(layer.id, layer)),
+      );
+    _layerVisibility.clear();
+    _layerLocked.clear();
   }
 
   static bool _sameStrings(List<String> a, List<String> b) {
@@ -1180,12 +1364,224 @@ String _nextObjectIdNamespace() {
   return '${timestamp}_$sequence';
 }
 
-class _EditorSnapshot {
-  const _EditorSnapshot({
-    required this.document,
-    required this.geometryOverrides,
+abstract class _EditorCommand {
+  const _EditorCommand();
+
+  bool get affectsTerrain => false;
+  Set<String>? get affectedObjectIds => null;
+
+  void undo(EditorController controller);
+
+  void redo(EditorController controller);
+}
+
+class _ObjectRecord {
+  const _ObjectRecord({required this.index, required this.object});
+  const _ObjectRecord.absent() : index = -1, object = null;
+
+  final int index;
+  final PlacedEnvironmentObject? object;
+}
+
+class _ObjectDeltaCommand extends _EditorCommand {
+  const _ObjectDeltaCommand({required this.before, required this.after});
+
+  final Map<String, _ObjectRecord> before;
+  final Map<String, _ObjectRecord> after;
+
+  @override
+  Set<String> get affectedObjectIds => {...before.keys, ...after.keys};
+
+  @override
+  void undo(EditorController controller) => _apply(controller, before);
+
+  @override
+  void redo(EditorController controller) => _apply(controller, after);
+
+  void _apply(EditorController controller, Map<String, _ObjectRecord> records) {
+    controller._document.objects.removeWhere(
+      (object) => records.containsKey(object.id),
+    );
+    final present =
+        records.values.where((record) => record.object != null).toList()
+          ..sort((a, b) => a.index.compareTo(b.index));
+    for (final record in present) {
+      final index = record.index.clamp(0, controller._document.objects.length);
+      controller._document.objects.insert(
+        index,
+        _copyPlacedObject(record.object!),
+      );
+    }
+  }
+}
+
+class _LayerRecord {
+  const _LayerRecord({required this.index, required this.layer});
+  const _LayerRecord.absent() : index = -1, layer = null;
+
+  final int index;
+  final EditorLayer? layer;
+}
+
+class _LayerDeltaCommand extends _EditorCommand {
+  const _LayerDeltaCommand({
+    required this.before,
+    required this.after,
+    required this.activeLayerBefore,
+    required this.activeLayerAfter,
   });
 
-  final String document;
-  final String geometryOverrides;
+  final Map<String, _LayerRecord> before;
+  final Map<String, _LayerRecord> after;
+  final String activeLayerBefore;
+  final String activeLayerAfter;
+
+  @override
+  void undo(EditorController controller) =>
+      _apply(controller, before, activeLayerBefore);
+
+  @override
+  void redo(EditorController controller) =>
+      _apply(controller, after, activeLayerAfter);
+
+  void _apply(
+    EditorController controller,
+    Map<String, _LayerRecord> records,
+    String activeLayerId,
+  ) {
+    controller._document.editorLayers.removeWhere(
+      (layer) => records.containsKey(layer.id),
+    );
+    final present =
+        records.values.where((record) => record.layer != null).toList()
+          ..sort((a, b) => a.index.compareTo(b.index));
+    for (final record in present) {
+      final index = record.index.clamp(
+        0,
+        controller._document.editorLayers.length,
+      );
+      controller._document.editorLayers.insert(
+        index,
+        EditorLayer.fromJson(record.layer!.toJson()),
+      );
+    }
+    controller._document.activeLayerId = activeLayerId;
+  }
 }
+
+class _TerrainStrokeCommand extends _EditorCommand {
+  const _TerrainStrokeCommand({required this.index, required this.stroke});
+
+  final int index;
+  final TerrainStroke stroke;
+
+  @override
+  bool get affectsTerrain => true;
+
+  @override
+  Set<String> get affectedObjectIds => const {};
+
+  @override
+  void undo(EditorController controller) {
+    if (index >= 0 && index < controller._document.terrainStrokes.length) {
+      controller._document.terrainStrokes.removeAt(index);
+    }
+  }
+
+  @override
+  void redo(EditorController controller) {
+    controller._document.terrainStrokes.insert(
+      index.clamp(0, controller._document.terrainStrokes.length),
+      _copyTerrainStroke(stroke),
+    );
+  }
+}
+
+class _GeometryDeltaCommand extends _EditorCommand {
+  const _GeometryDeltaCommand({
+    required this.assetId,
+    required this.before,
+    required this.after,
+  });
+
+  final String assetId;
+  final EnvironmentAssetGeometry? before;
+  final EnvironmentAssetGeometry? after;
+
+  @override
+  void undo(EditorController controller) => _apply(controller, before);
+
+  @override
+  void redo(EditorController controller) => _apply(controller, after);
+
+  void _apply(EditorController controller, EnvironmentAssetGeometry? geometry) {
+    if (geometry == null) {
+      controller.catalog.removeGeometryOverride(assetId);
+    } else {
+      controller.catalog.setGeometryOverride(assetId, geometry);
+    }
+  }
+}
+
+class _ReplaceDocumentCommand extends _EditorCommand {
+  const _ReplaceDocumentCommand({required this.before, required this.after});
+
+  final EnvironmentDocument before;
+  final EnvironmentDocument after;
+
+  @override
+  bool get affectsTerrain => true;
+
+  @override
+  void undo(EditorController controller) {
+    controller._document = _copyDocument(before);
+  }
+
+  @override
+  void redo(EditorController controller) {
+    controller._document = _copyDocument(after);
+  }
+}
+
+class _CompositeEditorCommand extends _EditorCommand {
+  const _CompositeEditorCommand(this.commands);
+
+  final List<_EditorCommand> commands;
+
+  @override
+  bool get affectsTerrain => commands.any((command) => command.affectsTerrain);
+
+  @override
+  Set<String>? get affectedObjectIds {
+    final result = <String>{};
+    for (final command in commands) {
+      final ids = command.affectedObjectIds;
+      if (ids == null) return null;
+      result.addAll(ids);
+    }
+    return result;
+  }
+
+  @override
+  void undo(EditorController controller) {
+    for (final command in commands.reversed) {
+      command.undo(controller);
+    }
+  }
+
+  @override
+  void redo(EditorController controller) {
+    for (final command in commands) {
+      command.redo(controller);
+    }
+  }
+}
+
+PlacedEnvironmentObject _copyPlacedObject(PlacedEnvironmentObject object) =>
+    PlacedEnvironmentObject.fromJson(object.toJson());
+
+TerrainStroke _copyTerrainStroke(TerrainStroke stroke) =>
+    TerrainStroke.fromJson(stroke.toJson());
+
+EnvironmentDocument _copyDocument(EnvironmentDocument document) =>
+    EnvironmentDocument.fromJson(document.toJson());

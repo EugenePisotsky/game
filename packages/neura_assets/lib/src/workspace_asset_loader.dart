@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:neura_world/neura_world.dart';
@@ -135,9 +136,53 @@ Future<void> saveEnvironmentWorldManifest(
 /// Flutter app. Editor previews load it on demand; game export will later copy
 /// only the assets referenced by an exported world.
 Future<ui.Image> loadWorkspaceEnvironmentImage(String imagePath) async {
+  final loaded = await loadWorkspaceEnvironmentImageForEditor(imagePath);
+  return loaded.image;
+}
+
+class WorkspaceEnvironmentImage {
+  const WorkspaceEnvironmentImage({
+    required this.image,
+    required this.sourceWidth,
+    required this.sourceHeight,
+  });
+
+  final ui.Image image;
+  final int sourceWidth;
+  final int sourceHeight;
+}
+
+/// Decodes a workspace image at a bounded editor resolution while retaining
+/// its original logical dimensions for correct world-space rendering.
+Future<WorkspaceEnvironmentImage> loadWorkspaceEnvironmentImageForEditor(
+  String imagePath, {
+  int? maximumDimension,
+}) async {
   final bytes = await workspaceEnvironmentFile(imagePath).readAsBytes();
-  final codec = await ui.instantiateImageCodec(bytes);
-  return (await codec.getNextFrame()).image;
+  final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+  final descriptor = await ui.ImageDescriptor.encoded(buffer);
+  final sourceWidth = descriptor.width;
+  final sourceHeight = descriptor.height;
+  final largestDimension = math.max(sourceWidth, sourceHeight);
+  final targetDimension = maximumDimension == null
+      ? null
+      : math.min(maximumDimension, largestDimension);
+  final codec = await descriptor.instantiateCodec(
+    targetWidth: sourceWidth >= sourceHeight ? targetDimension : null,
+    targetHeight: sourceHeight > sourceWidth ? targetDimension : null,
+  );
+  try {
+    final frame = await codec.getNextFrame();
+    return WorkspaceEnvironmentImage(
+      image: frame.image,
+      sourceWidth: sourceWidth,
+      sourceHeight: sourceHeight,
+    );
+  } finally {
+    codec.dispose();
+    descriptor.dispose();
+    buffer.dispose();
+  }
 }
 
 Future<ui.Image> loadGeneratedEnvironmentImage(String imagePath) =>

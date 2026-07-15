@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flame/game.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_world/neura_world.dart';
@@ -172,6 +173,7 @@ class EditorScreen extends StatefulWidget {
 
 class _EditorScreenState extends State<EditorScreen> {
   final FocusNode _editorFocusNode = FocusNode(debugLabel: 'editor');
+  final _EditorFrameTimings _frameTimings = _EditorFrameTimings();
   late final EnvironmentDocument _starter = EnvironmentDocument.fromJsonString(
     widget.starterSource,
   );
@@ -204,11 +206,17 @@ class _EditorScreenState extends State<EditorScreen> {
   Duration? _lastPanEventTime;
   Timer? _scrollPanEndTimer;
   Timer? _chunkStreamTimer;
+  Offset? _pendingHoverPosition;
+  bool _hoverFrameScheduled = false;
   bool _showAssetPalette = false;
 
   @override
   void initState() {
     super.initState();
+    _frameTimings.start();
+    controller
+      ..addListener(_requestGameFrame)
+      ..hoverListenable.addListener(_requestGameFrame);
     final available = controller.document.objects
         .map((object) => object.id)
         .toSet();
@@ -227,6 +235,10 @@ class _EditorScreenState extends State<EditorScreen> {
     _scrollPanEndTimer?.cancel();
     _chunkStreamTimer?.cancel();
     _editorFocusNode.dispose();
+    _frameTimings.dispose();
+    controller
+      ..removeListener(_requestGameFrame)
+      ..hoverListenable.removeListener(_requestGameFrame);
     if (widget.controllerOverride == null) controller.dispose();
     super.dispose();
   }
@@ -316,8 +328,11 @@ class _EditorScreenState extends State<EditorScreen> {
     } else {
       return KeyEventResult.ignored;
     }
+    game.requestFrame(frames: 3);
     return KeyEventResult.handled;
   }
+
+  void _requestGameFrame() => game.requestFrame();
 
   bool get _isEditingText {
     final context = FocusManager.instance.primaryFocus?.context;
@@ -328,13 +343,15 @@ class _EditorScreenState extends State<EditorScreen> {
 
   Widget _canvas() => MouseRegion(
     onExit: (_) {
+      _pendingHoverPosition = null;
       controller
         ..hover(null)
         ..hoverObjects(const []);
+      game.requestFrame();
     },
     child: Listener(
       behavior: HitTestBehavior.opaque,
-      onPointerHover: (event) => _hoverAt(event.localPosition),
+      onPointerHover: (event) => _scheduleHoverAt(event.localPosition),
       onPointerDown: (event) {
         if (event.buttons & kPrimaryButton == 0) return;
         _editorFocusNode.requestFocus();
@@ -365,8 +382,11 @@ class _EditorScreenState extends State<EditorScreen> {
         }
       },
       onPointerMove: (event) {
-        _hoverAt(event.localPosition);
-        if (!_gesturing) return;
+        if (!_gesturing) {
+          _scheduleHoverAt(event.localPosition);
+          return;
+        }
+        controller.hover(_worldAt(event.localPosition));
         if (controller.isObjectSelectionMode && _marqueeSelecting) {
           game.setSelectionMarquee(
             Rect.fromPoints(_gestureScreenStart!, event.localPosition),
@@ -429,6 +449,7 @@ class _EditorScreenState extends State<EditorScreen> {
               game: game,
               controller: controller,
               session: widget.chunkSession,
+              frameTimings: _frameTimings,
             ),
           ),
           Positioned(
@@ -474,12 +495,25 @@ class _EditorScreenState extends State<EditorScreen> {
     }
   }
 
+  void _scheduleHoverAt(Offset position) {
+    _pendingHoverPosition = position;
+    if (_hoverFrameScheduled) return;
+    _hoverFrameScheduled = true;
+    SchedulerBinding.instance.scheduleFrameCallback((_) {
+      _hoverFrameScheduled = false;
+      final pending = _pendingHoverPosition;
+      _pendingHoverPosition = null;
+      if (mounted && pending != null) _hoverAt(pending);
+    });
+  }
+
   void _applyAt(Offset position) {
     final point = _worldAt(position);
     if (point == null) return;
     final session = widget.chunkSession;
     if (controller.mode == EnvironmentEditorMode.spawn && session != null) {
       session.setPlayerSpawn(point);
+      game.requestFrame(frames: 3);
       _gesturing = false;
       controller.endGesture();
       controller.selectMode(EnvironmentEditorMode.select);
@@ -991,8 +1025,15 @@ class _Palette extends StatefulWidget {
 class _PaletteState extends State<_Palette> {
   final TextEditingController _search = TextEditingController();
   String _selectedObjectCategory = _allObjectCategories;
+  late final _AssetPaletteIndex _index;
 
   EditorController get controller => widget.controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = _AssetPaletteIndex(controller.catalog);
+  }
 
   @override
   void dispose() {
@@ -1003,47 +1044,19 @@ class _PaletteState extends State<_Palette> {
   @override
   Widget build(BuildContext context) {
     final query = _search.text.trim().toLowerCase();
-    final materials = controller.catalog.materials
-        .where(
-          (material) =>
-              query.isEmpty ||
-              material.name.toLowerCase().contains(query) ||
-              material.tags.any((tag) => tag.toLowerCase().contains(query)),
-        )
-        .toList();
-    final categoryPaths = <String>{};
-    for (final object in controller.catalog.objects) {
-      final segments = object.categoryPath.isEmpty
-          ? [object.category]
-          : object.categoryPath;
-      for (var length = 1; length <= segments.length; length++) {
-        categoryPaths.add(segments.take(length).join(' / '));
-      }
-    }
-    final categories = categoryPaths.toList()..sort();
-    final objects = controller.catalog.objects
-        .where(
-          (object) =>
-              (_selectedObjectCategory == _allObjectCategories ||
-                  object.categoryBreadcrumb == _selectedObjectCategory ||
-                  object.categoryBreadcrumb.startsWith(
-                    '$_selectedObjectCategory /',
-                  )) &&
-              (query.isEmpty ||
-                  object.id.toLowerCase().contains(query) ||
-                  object.name.toLowerCase().contains(query) ||
-                  object.family.toLowerCase().contains(query) ||
-                  object.categoryBreadcrumb.toLowerCase().contains(query) ||
-                  object.tags.any((tag) => tag.toLowerCase().contains(query))),
-        )
-        .toList();
+    final materials = _index.materialsMatching(query);
+    final categories = _index.categories;
+    final objects = _index.objectsMatching(
+      query,
+      category: _selectedObjectCategory,
+    );
 
     return SizedBox(
       width: 300,
       child: DefaultTabController(
         length: 2,
         child: ListenableBuilder(
-          listenable: controller,
+          listenable: controller.paletteListenable,
           builder: (context, _) => Column(
             children: [
               Padding(
@@ -1225,7 +1238,7 @@ class _PaletteState extends State<_Palette> {
                                   value: category,
                                   child: Text(
                                     '${_categoryLabel(category)} '
-                                    '(${_categoryCount(controller.catalog.objects, category)})',
+                                    '(${_index.categoryCounts[category]})',
                                   ),
                                 ),
                             ],
@@ -1391,14 +1404,72 @@ String _categoryLabel(String category) {
 
 const _allObjectCategories = '__all__';
 
-int _categoryCount(Iterable<EnvironmentObjectAsset> objects, String category) =>
-    objects
-        .where(
-          (object) =>
-              object.categoryBreadcrumb == category ||
-              object.categoryBreadcrumb.startsWith('$category /'),
-        )
-        .length;
+class _AssetPaletteIndex {
+  _AssetPaletteIndex(EnvironmentCatalog catalog)
+    : _materials = List.of(catalog.materials),
+      _objects = List.of(catalog.objects) {
+    for (final material in _materials) {
+      _materialSearch[material.id] = [
+        material.name,
+        ...material.tags,
+      ].join('\n').toLowerCase();
+    }
+    for (final object in _objects) {
+      _objectSearch[object.id] = [
+        object.id,
+        object.name,
+        object.family,
+        object.categoryBreadcrumb,
+        ...object.tags,
+      ].join('\n').toLowerCase();
+      final segments = object.categoryPath.isEmpty
+          ? [object.category]
+          : object.categoryPath;
+      for (var length = 1; length <= segments.length; length++) {
+        final category = segments.take(length).join(' / ');
+        categoryCounts[category] = (categoryCounts[category] ?? 0) + 1;
+      }
+    }
+    categories = categoryCounts.keys.toList()..sort();
+  }
+
+  final List<EnvironmentMaterial> _materials;
+  final List<EnvironmentObjectAsset> _objects;
+  final Map<String, String> _materialSearch = {};
+  final Map<String, String> _objectSearch = {};
+  final Map<String, int> categoryCounts = {};
+  late final List<String> categories;
+
+  List<EnvironmentMaterial> materialsMatching(String query) {
+    final terms = _terms(query);
+    if (terms.isEmpty) return _materials;
+    return [
+      for (final material in _materials)
+        if (_matches(_materialSearch[material.id]!, terms)) material,
+    ];
+  }
+
+  List<EnvironmentObjectAsset> objectsMatching(
+    String query, {
+    required String category,
+  }) {
+    final terms = _terms(query);
+    return [
+      for (final object in _objects)
+        if ((category == _allObjectCategories ||
+                object.categoryBreadcrumb == category ||
+                object.categoryBreadcrumb.startsWith('$category /')) &&
+            _matches(_objectSearch[object.id]!, terms))
+          object,
+    ];
+  }
+
+  static List<String> _terms(String query) =>
+      query.split(RegExp(r'\s+')).where((term) => term.isNotEmpty).toList();
+
+  static bool _matches(String source, List<String> terms) =>
+      terms.every(source.contains);
+}
 
 class _AssetGrid extends StatelessWidget {
   const _AssetGrid({required this.itemCount, required this.itemBuilder});
@@ -1546,11 +1617,13 @@ class _EditorDiagnosticsHud extends StatefulWidget {
     required this.game,
     required this.controller,
     required this.session,
+    required this.frameTimings,
   });
 
   final EditorGame game;
   final EditorController controller;
   final EditorChunkSession? session;
+  final _EditorFrameTimings frameTimings;
 
   @override
   State<_EditorDiagnosticsHud> createState() => _EditorDiagnosticsHudState();
@@ -1576,26 +1649,16 @@ class _EditorDiagnosticsHudState extends State<_EditorDiagnosticsHud> {
   @override
   Widget build(BuildContext context) {
     if (!widget.game.showDiagnostics) return const SizedBox.shrink();
-    PlacedEnvironmentObject? hovered;
     final hoveredId = widget.controller.hoveredObjectId;
-    for (final object in widget.controller.document.objects) {
-      if (object.id == hoveredId) {
-        hovered = object;
-        break;
-      }
-    }
+    final hovered = hoveredId == null
+        ? null
+        : widget.controller.objectById(hoveredId);
     final asset = hovered == null
         ? null
         : widget.controller.catalog.objectById(hovered.assetId);
-    EditorLayer? layer;
-    if (hovered != null) {
-      for (final candidate in widget.controller.document.editorLayers) {
-        if (candidate.id == hovered.editorLayerId) {
-          layer = candidate;
-          break;
-        }
-      }
-    }
+    final layer = hovered == null
+        ? null
+        : widget.controller.editorLayerById(hovered.editorLayerId);
     final session = widget.session;
     final streamer = session?.streamer;
     return IgnorePointer(
@@ -1624,14 +1687,54 @@ class _EditorDiagnosticsHudState extends State<_EditorDiagnosticsHud> {
             'rasters ${widget.game.terrainRasterCount}  '
             '${(widget.game.terrainRasterBytes / (1 << 20)).toStringAsFixed(1)} MiB  '
             'baking ${widget.game.pendingTerrainBakeCount}\n'
-            '${widget.game.diagnosticsFps.toStringAsFixed(1)} fps  '
-            '${widget.game.diagnosticsFrameMilliseconds.toStringAsFixed(1)} ms frame  '
-            '${widget.game.updateTime} ms update  ${widget.game.renderTime} ms render',
+            '${widget.game.isAutoIdle ? 'idle' : '${widget.game.diagnosticsFps.toStringAsFixed(1)} fps'}  '
+            '${widget.game.isAutoIdle ? '-' : widget.game.diagnosticsFrameMilliseconds.toStringAsFixed(1)} ms frame  '
+            '${widget.game.updateMilliseconds.toStringAsFixed(2)} ms update  '
+            '${widget.game.renderMilliseconds.toStringAsFixed(2)} ms canvas\n'
+            '${widget.frameTimings.buildMilliseconds.toStringAsFixed(2)} ms build  '
+            '${widget.frameTimings.rasterMilliseconds.toStringAsFixed(2)} ms raster  '
+            '${widget.game.visibleSpriteCount}/${widget.game.renderCandidateCount} sprites  '
+            '${widget.game.culledSpriteCount} culled  '
+            'index ${widget.game.renderIndexFullRebuildCount} full/'
+            '${widget.game.renderIndexIncrementalUpdateCount} delta\n'
+            'hit ${widget.game.lastHitTestCandidateCount} candidates  '
+            '${widget.game.lastHitTestMilliseconds.toStringAsFixed(3)} ms',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
       ),
     );
+  }
+}
+
+class _EditorFrameTimings {
+  double buildMilliseconds = 0;
+  double rasterMilliseconds = 0;
+  bool _started = false;
+
+  void start() {
+    if (_started) return;
+    _started = true;
+    WidgetsBinding.instance.addTimingsCallback(_record);
+  }
+
+  void _record(List<FrameTiming> timings) {
+    for (final timing in timings) {
+      final build = timing.buildDuration.inMicroseconds / 1000;
+      final raster = timing.rasterDuration.inMicroseconds / 1000;
+      buildMilliseconds = buildMilliseconds == 0
+          ? build
+          : buildMilliseconds * 0.8 + build * 0.2;
+      rasterMilliseconds = rasterMilliseconds == 0
+          ? raster
+          : rasterMilliseconds * 0.8 + raster * 0.2;
+    }
+  }
+
+  void dispose() {
+    if (!_started) return;
+    WidgetsBinding.instance.removeTimingsCallback(_record);
+    _started = false;
   }
 }
 
@@ -1700,9 +1803,18 @@ class _InspectorState extends State<_Inspector> {
       listenable: controller,
       builder: (context, _) {
         final object = controller.selectedObject;
+        final selectedObjects = controller.selectedObjects;
         final asset = object == null
             ? null
             : controller.catalog.objectById(object.assetId);
+        final selectedByLayer = <String, List<PlacedEnvironmentObject>>{};
+        if (selectedObjects.length > 1) {
+          for (final selected in selectedObjects.take(100)) {
+            selectedByLayer
+                .putIfAbsent(selected.editorLayerId, () => [])
+                .add(selected);
+          }
+        }
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -1762,9 +1874,9 @@ class _InspectorState extends State<_Inspector> {
               const Text('Choose Select, click an object, or drag a marquee.'),
             ] else ...[
               Text(
-                controller.selectedObjects.length == 1
+                selectedObjects.length == 1
                     ? asset?.name ?? object.assetId
-                    : '${controller.selectedObjects.length} objects selected',
+                    : '${selectedObjects.length} objects selected',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -1792,19 +1904,16 @@ class _InspectorState extends State<_Inspector> {
                   if (id != null) controller.moveSelectionToLayer(id);
                 },
               ),
-              if (controller.selectedObjects.length > 1) ...[
+              if (selectedObjects.length > 1) ...[
                 const SizedBox(height: 12),
                 for (final layer in controller.document.editorLayers)
-                  if (controller.selectedObjects.any(
-                    (selected) => selected.editorLayerId == layer.id,
-                  )) ...[
+                  if (selectedByLayer[layer.id]
+                      case final selectedInLayer?) ...[
                     Text(
-                      layer.name,
+                      '${layer.name} (${selectedInLayer.length}${selectedObjects.length > 100 ? '+' : ''})',
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
-                    for (final selected in controller.selectedObjects.where(
-                      (selected) => selected.editorLayerId == layer.id,
-                    ))
+                    for (final selected in selectedInLayer)
                       Padding(
                         padding: const EdgeInsets.only(left: 8, top: 2),
                         child: Text(
@@ -1816,6 +1925,13 @@ class _InspectorState extends State<_Inspector> {
                         ),
                       ),
                   ],
+                if (selectedObjects.length > 100) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Showing the first 100 selected objects.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ],
               const SizedBox(height: 12),
               _NumberStepper(

@@ -1,7 +1,7 @@
 {
   "chunkCount": 64,
-  "imageBytes": 12994360,
-  "imageCount": 68,
+  "imageBytes": 20207028,
+  "imageCount": 103,
   "images": [
     {
       "bytes": 555416,
@@ -14,6 +14,18 @@
       "releasePath": "images/bc97418109bf5fc09c0e.png",
       "sha256": "a01a9c288df00f281517ec2c047a4a9eb60565dfb4e8bdeef8e8429b71058efb",
       "sourceLogicalPath": "environment_generated/materials/007_tile.png"
+    },
+    {
+      "bytes": 347405,
+      "releasePath": "images/9b792515c23cfb4b2888.png",
+      "sha256": "4c7ecd2653be3bfb7f938a1e7732f3a5d60d0c264277f432bbd16a5396de2c80",
+      "sourceLogicalPath": "environment_generated/materials/014_decal.png"
+    },
+    {
+      "bytes": 316448,
+      "releasePath": "images/f706c365b8d91382e300.png",
+      "sha256": "05c391747889f1a7541c6c13a06a2e951e7f47f427440a48cbd3eaaa86542f92",
+      "sourceLogicalPath": "environment_generated/materials/014_tile.png"
     },
     {
       "bytes": 933854,
@@ -34,6 +46,18 @@
       "sourceLogicalPath": "environment_generated/objects/ow1/building/041_6.png"
     },
     {
+      "bytes": 641358,
+      "releasePath": "images/04e49744f94fc8f8bdce.png",
+      "sha256": "ebca743c6dc178ddfdb5d455cd8f2b33457daaac6a7e312071d329ee663ec1e6",
+      "sourceLogicalPath": "environment_generated/objects/ow1/building/043_7.png"
+    },
+    {
+      "bytes": 1909716,
+      "releasePath": "images/e8387b726a99a693a6cd.png",
+      "sha256": "e634950e132333c3835f0eeafec4e7861395233730bcbea614dbbb2d657dc7f5",
+      "sourceLogicalPath": "environment_generated/objects/ow1/building/058_5.png"
+    },
+    {
       "bytes": 64526,
       "releasePath": "images/90d0522bdf45bd718899.png",
       "sha256": "de5f0a2d87463115b5f69535832929c764a29839e5c1fbaccb6c868d67cf2f98",
@@ -46,10 +70,34 @@
       "sourceLogicalPath": "environment_generated/objects/ow2/castleWell/001_4.png"
     },
     {
+      "bytes": 203408,
+      "releasePath": "images/f8e4e00269c79c9dace1.png",
+      "sha256": "50aaa44e62fb620420fdf9ed8e92db6f842ffd223eec33a583b8225e3cfa5c60",
+      "sourceLogicalPath": "environment_generated/objects/ow3/barn/002_6.png"
+    },
+    {
       "bytes": 211607,
       "releasePath": "images/2d0d067fc3ae6119d908.png",
       "sha256": "8dd9ed794d5e30fe9185c109de88a51adead9a39a88dcffd8498d9af14c0b0bb",
       "sourceLogicalPath": "environment_generated/objects/ow3/barn/002_8.png"
+    },
+    {
+      "bytes": 18064,
+      "releasePath": "images/237228adf2e38d864c92.png",
+      "sha256": "808f8faf1bb306b1577081737b023e41a19955c33742ae49167140b2d0ec100b",
+      "sourceLogicalPath": "environment_generated/objects/ow3/barrel/002_1.png"
+    },
+    {
+      "bytes": 17731,
+      "releasePath": "images/e39e753ee32ea9b4014f.png",
+      "sha256": "0b381a5eec4319c168cd930beb69b171649f4f43c87b31861cf29b52f5e47a49",
+      "sourceLogicalPath": "environment_generated/objects/ow3/barrel/003_v1_1.png"
+    },
+    {
+      "bytes": 17769,
+      "releasePath": "images/30e63428343d94b0775f.png",
+      "sha256": "77e13a8a4e7997a73d6ceaa6d4c0c8b064700ca5fd7d8d876f4c0669a16a4c80",
+      "sourceLogicalPath": "environment_generated/objects/ow3/barrel/003_v3_1.png"
     },
     {
       "bytes": 11734,
@@ -100,6 +148,12 @@
       "sourceLogicalPath": "environment_generated/objects/ow3/bush/023_1.png"
     },
     {
+      "bytes": 58451,
+      "releasePath": "images/b41fb4f282d1550bb14c.png",
+      "sha256": "c33a0bb9423bbfff022893025583ad00d119a47a746bdf3b8689e6ec97892359",
+      "sourceLogicalPath": "environment_generated/objects/ow3/cart/005_1.png"
+    },
+    {
       "bytes": 44340,
       "releasePath": "images/a36b0bfc5e587d80e688.png",
       "sha256": "2195c840f07aa91554bd9a2a59b1c5c77bd483161fd0275bfc6260dd92f86301",
@@ -124,6 +178,24 @@
       "sourceLogicalPath": "environment_generated/objects/ow3/crate/004_1.png"
     },
     {
+      "bytes": 16277,
+      "releasePath": "images/18186e95665f66f59f78.png",
+      "sha256": "0a69e1ce74a6781304669bb41492442fa16f6ba14a5d4bf33e29e0f92cca9147",
+      "sourceLogicalPath": "environment_generated/objects/ow3/crate/012_1.png"
+    },
+    {
+      "bytes": 15725,
+      "releasePath": "images/05cc0f5967a8f014f64b.png",
+      "sha256": "8e4e4b75a3b4ce28c7ff586f7bbdda00792078683f6e2098c16cf65aaa46f84c",
+      "sourceLogicalPath": "environment_generated/objects/ow3/crate/013_1.png"
+    },
+    {
+      "bytes": 16572,
+      "releasePath": "images/562e391266dc134338aa.png",
+      "sha256": "20b74fcf14141a21e918fbc878376b629a44e8f46c7695e0f15b828f864ec4c4",
+      "sourceLogicalPath": "environment_generated/objects/ow3/crate/014_1.png"
+    },
+    {
       "bytes": 38720,
       "releasePath": "images/9735eec70fe53369e504.png",
       "sha256": "f801097356915bbf23f01a6d194fbef8ef32ce7156edba2f5605230c4f3b2cf4",
@@ -134,6 +206,12 @@
       "releasePath": "images/18ce9aec0bd4185d59b6.png",
       "sha256": "5e1f04aa84d9cf50a19608777c46a2cd3fa04edd976b93162e59386fbc3035ea",
       "sourceLogicalPath": "environment_generated/objects/ow3/crop/002_4.png"
+    },
+    {
+      "bytes": 377494,
+      "releasePath": "images/e81dbccc563b66a7e16c.png",
+      "sha256": "d2344569c8cb00463768fc443302f2ac5b20e7d0ed2b9100e502da3bc1dd7be8",
+      "sourceLogicalPath": "environment_generated/objects/ow3/deadTree/001_5.png"
     },
     {
       "bytes": 18899,
@@ -176,6 +254,24 @@
       "releasePath": "images/9492c36644f8c289b94f.png",
       "sha256": "40e19ba3aecaa05fdfb52b7966ea19b951392edac3d678279f90b091a24533f4",
       "sourceLogicalPath": "environment_generated/objects/ow3/fence/003_4.png"
+    },
+    {
+      "bytes": 49983,
+      "releasePath": "images/e67bf8fbe0a3659dec36.png",
+      "sha256": "4ae87dbcb4d908eb84eb7f76958f69d0e8cb0d4d957a01c8f959bf74b9565302",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/004_3.png"
+    },
+    {
+      "bytes": 54374,
+      "releasePath": "images/5ddaad62168ee6f1d0e2.png",
+      "sha256": "22986b31cd04db7189a092de6c9cf2f6ffbdb58e0a762d884952bc5d095f1c50",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/006_3.png"
+    },
+    {
+      "bytes": 55724,
+      "releasePath": "images/1dac8a067a81e80673f1.png",
+      "sha256": "17a823ed66dc40af968272444e52ceaac6ce71c54f107b40d5d6e66dbeb9654e",
+      "sourceLogicalPath": "environment_generated/objects/ow3/fence/006_4.png"
     },
     {
       "bytes": 10908,
@@ -238,6 +334,18 @@
       "sourceLogicalPath": "environment_generated/objects/ow3/grainBag/001_1.png"
     },
     {
+      "bytes": 264456,
+      "releasePath": "images/67202dd8d0074c266385.png",
+      "sha256": "a348bf8023966eaf59d69f9827c4c739d301193bf026acd0a926bf31dbf1f505",
+      "sourceLogicalPath": "environment_generated/objects/ow3/grass/020_1.png"
+    },
+    {
+      "bytes": 264851,
+      "releasePath": "images/02d30ba00351ff38e9b2.png",
+      "sha256": "d1dba217c6457c66127ab421b8ec97c6911c021575bd7f27701890b531fa143f",
+      "sourceLogicalPath": "environment_generated/objects/ow3/grass/020_2.png"
+    },
+    {
       "bytes": 183879,
       "releasePath": "images/4dbcade3e97565d552a9.png",
       "sha256": "1c1955df1d55418b144e008190890dcbfab2866d7b4d35523ab4681f01589094",
@@ -274,6 +382,12 @@
       "sourceLogicalPath": "environment_generated/objects/ow3/hedge/001_4.png"
     },
     {
+      "bytes": 10704,
+      "releasePath": "images/7d72bbfb38b2722194c9.png",
+      "sha256": "c2fd1905becc4aba2beb3c41859427d05bfaedc8c8d16c0cda1dba08df4a6209",
+      "sourceLogicalPath": "environment_generated/objects/ow3/mushroom/011_1.png"
+    },
+    {
       "bytes": 44841,
       "releasePath": "images/4d3769dbf6a51588d744.png",
       "sha256": "cb15625a1562ace5bf5834b526da7e6ae4fdd24664d22a0b505f9384e03ae896",
@@ -284,6 +398,12 @@
       "releasePath": "images/f7c2540d968766c70bef.png",
       "sha256": "25fb7ab62fad22f8002a3f98b63a2fe45e057f83b59f3832db20f26f6d22ecad",
       "sourceLogicalPath": "environment_generated/objects/ow3/outhouse/001_8.png"
+    },
+    {
+      "bytes": 159595,
+      "releasePath": "images/83851a66af0276840fc1.png",
+      "sha256": "096a4952322a3feb2c5d1174531af6312ef59147234c1b7a628a506a1336c4b4",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/002_1.png"
     },
     {
       "bytes": 293334,
@@ -304,10 +424,22 @@
       "sourceLogicalPath": "environment_generated/objects/ow3/tree/006_1.png"
     },
     {
+      "bytes": 345796,
+      "releasePath": "images/031a0f26ac295499fbc8.png",
+      "sha256": "c86f0bb5e294df2f34a2049afbd193b52b7d0e79cf36adc7548d6e87785bcfbb",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/006_2.png"
+    },
+    {
       "bytes": 374265,
       "releasePath": "images/99e184893a5bb2ae3050.png",
       "sha256": "4d899bc3ab0ae85b24c527e1a3eac772e0d6d3bab8136cf571ee10eb38982a29",
       "sourceLogicalPath": "environment_generated/objects/ow3/tree/006_6.png"
+    },
+    {
+      "bytes": 153592,
+      "releasePath": "images/0b7518ac79d8ba5c86ef.png",
+      "sha256": "329e028fdf9545c515b357068fa7e6e6b8a63fa2aedaca28bedd1036ffff67e2",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/009_5.png"
     },
     {
       "bytes": 329669,
@@ -316,10 +448,40 @@
       "sourceLogicalPath": "environment_generated/objects/ow3/tree/010_1.png"
     },
     {
+      "bytes": 308769,
+      "releasePath": "images/a69603dfcda048fabce0.png",
+      "sha256": "df51dd10dc46fc5a96804eee875be8b2123d40a79bacff07a169ec1d180fa8db",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/010_5.png"
+    },
+    {
       "bytes": 277089,
       "releasePath": "images/a0d02be26803f072350b.png",
       "sha256": "9b43bd9da23ed06bd62ca2827e0f5aaf2c5a945017efce2e2446e35954c013a8",
       "sourceLogicalPath": "environment_generated/objects/ow3/tree/012_1.png"
+    },
+    {
+      "bytes": 280058,
+      "releasePath": "images/859aa9e7aa8f1c5de811.png",
+      "sha256": "306b87a553dc0e36be1563833fdee5e8016433c65a9c61182eb5736eed7ee619",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/012_5.png"
+    },
+    {
+      "bytes": 164633,
+      "releasePath": "images/01736915595cba708f0e.png",
+      "sha256": "c8328b4a82ceae276591c118cfddc72f9020f83d7e3dd08c0bd2387434cc731b",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/013_1.png"
+    },
+    {
+      "bytes": 119079,
+      "releasePath": "images/8ce98b9bc99861e86a6e.png",
+      "sha256": "73cc3dd3d317f6304cd85734897e5db8bb7d207c2c03c255e86f6e3cebba50d0",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/014_1.png"
+    },
+    {
+      "bytes": 49565,
+      "releasePath": "images/6c1ee8f418d36eee187a.png",
+      "sha256": "5264e338d732374d95dc4591934736b08c8024f068c85351c6586317a4921a2e",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/015_1.png"
     },
     {
       "bytes": 127285,
@@ -328,10 +490,22 @@
       "sourceLogicalPath": "environment_generated/objects/ow3/tree/016_1.png"
     },
     {
+      "bytes": 60768,
+      "releasePath": "images/10d0e73724281c608983.png",
+      "sha256": "e35964019b215042cc0f941cbfcafd3249636baba2180a446d36c9913839784d",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/017_1.png"
+    },
+    {
       "bytes": 795642,
       "releasePath": "images/8c1f880354fc5f0350ae.png",
       "sha256": "1e480e9be8c86f5fbe9512bad65da306e9ee554fbcc9de350594659a7c487e32",
       "sourceLogicalPath": "environment_generated/objects/ow3/tree/018_1.png"
+    },
+    {
+      "bytes": 619701,
+      "releasePath": "images/f2d401f03f1b7b497546.png",
+      "sha256": "d5093dbbc5d9a97980c9cdafaf0e5b5292706b3a5424f6cebee869444fba6827",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/020_1.png"
     },
     {
       "bytes": 596395,
@@ -344,6 +518,12 @@
       "releasePath": "images/54a8cd204916ce568ae2.png",
       "sha256": "fdc46079d01a25d97eb571a66b848deeb1a98cfacba578fbe5e7a031378bfd54",
       "sourceLogicalPath": "environment_generated/objects/ow3/tree/033_1.png"
+    },
+    {
+      "bytes": 125677,
+      "releasePath": "images/6e17d49070e1eb18ee7a.png",
+      "sha256": "d808137a99f70d137e346c1e9b29c4796ff8bf75d7baa0e28c20eccf5d857f02",
+      "sourceLogicalPath": "environment_generated/objects/ow3/tree/033_5.png"
     },
     {
       "bytes": 232005,
@@ -374,6 +554,36 @@
       "releasePath": "images/3b5668d1b33f691cf747.png",
       "sha256": "497711cec8a8b02d42215c3417e2fb4aa62ab84ce124a3505e67aade3a21248f",
       "sourceLogicalPath": "environment_generated/objects/ow3/vine/002_1.png"
+    },
+    {
+      "bytes": 37134,
+      "releasePath": "images/f1e33a133b1742851489.png",
+      "sha256": "b5ee6c516be9dee3a1f20782024cc3283e9e705220cc99f27fb08b612816d999",
+      "sourceLogicalPath": "environment_generated/objects/ow3/vine/003_1.png"
+    },
+    {
+      "bytes": 47237,
+      "releasePath": "images/25e5f4c86cb237569379.png",
+      "sha256": "b2ed3c4f6e01499ee92f826e6ae22a91bf1e29ffa2159d9529c973984ac3433d",
+      "sourceLogicalPath": "environment_generated/objects/ow3/vine/004_1.png"
+    },
+    {
+      "bytes": 46268,
+      "releasePath": "images/f2226f2e29f1e9e4f79a.png",
+      "sha256": "c29d2255e165b2f4da98c5341e4ad964452cfea866a426faeb529c16b8124e1a",
+      "sourceLogicalPath": "environment_generated/objects/ow3/vine/006_1.png"
+    },
+    {
+      "bytes": 26540,
+      "releasePath": "images/68209bdbf44bb227ff49.png",
+      "sha256": "ee551dc7a80620d46e26023f1dd07ae0004c0f23050ba7f4b5776c883d97d2e3",
+      "sourceLogicalPath": "environment_generated/objects/ow3/vine/006_2.png"
+    },
+    {
+      "bytes": 11746,
+      "releasePath": "images/7d760d884b3928c7197a.png",
+      "sha256": "ac80ea17399e5541647fada099b599830e797408515d1d21d8aeb1851e13dde4",
+      "sourceLogicalPath": "environment_generated/objects/ow3/vine/007_1.png"
     },
     {
       "bytes": 13938,
@@ -412,10 +622,10 @@
       "sourceLogicalPath": "environment_v2/objects/Tree30_1.png"
     }
   ],
-  "materialCount": 2,
-  "metadataBytes": 267471,
-  "objectAssetCount": 50,
-  "payloadBytes": 13261831,
+  "materialCount": 3,
+  "metadataBytes": 418655,
+  "objectAssetCount": 74,
+  "payloadBytes": 20625683,
   "schemaVersion": 1,
   "sizeLimitBytes": 67108864,
   "worldId": "environment_starter"

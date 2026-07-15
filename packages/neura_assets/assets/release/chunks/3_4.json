@@ -4,8 +4,783 @@
     "x": 3,
     "y": 4
   },
-  "objects": [],
-  "overlapObjectIds": [],
+  "objects": [
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 128.04714965820312,
+          "y": 130.85504150390625
+        },
+        "min": {
+          "x": 127.04714965820312,
+          "y": 129.85504150390625
+        }
+      },
+      "direction": "west",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_338",
+      "localPosition": {
+        "x": 31.547149658203125,
+        "y": 2.35504150390625
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.006",
+      "bounds": {
+        "max": {
+          "x": 126.83355285644532,
+          "y": 131.28857360839845
+        },
+        "min": {
+          "x": 125.79355285644532,
+          "y": 130.56857360839842
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_361",
+      "localPosition": {
+        "x": 30.313552856445312,
+        "y": 2.9285736083984375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.014",
+      "bounds": {
+        "max": {
+          "x": 120.76862670898436,
+          "y": 133.50329528808595
+        },
+        "min": {
+          "x": 119.72862670898438,
+          "y": 132.78329528808592
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_374",
+      "localPosition": {
+        "x": 24.248626708984375,
+        "y": 5.1432952880859375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.017",
+      "bounds": {
+        "max": {
+          "x": 114.14574005126951,
+          "y": 128.8220361328125
+        },
+        "min": {
+          "x": 113.10574005126954,
+          "y": 128.1020361328125
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_377",
+      "localPosition": {
+        "x": 17.62574005126953,
+        "y": 0.4620361328125
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.015",
+      "bounds": {
+        "max": {
+          "x": 114.30577423095704,
+          "y": 136.91706787109376
+        },
+        "min": {
+          "x": 113.26577423095704,
+          "y": 136.19706787109374
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_378",
+      "localPosition": {
+        "x": 17.78577423095703,
+        "y": 8.55706787109375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.013",
+      "bounds": {
+        "max": {
+          "x": 107.70313598632812,
+          "y": 129.4872430419922
+        },
+        "min": {
+          "x": 106.66313598632811,
+          "y": 128.76724304199217
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_379",
+      "localPosition": {
+        "x": 11.183135986328123,
+        "y": 1.1272430419921875
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.014",
+      "bounds": {
+        "max": {
+          "x": 110.37330200195312,
+          "y": 136.66169677734376
+        },
+        "min": {
+          "x": 109.33330200195311,
+          "y": 135.94169677734374
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_380",
+      "localPosition": {
+        "x": 13.853302001953123,
+        "y": 8.30169677734375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.010",
+      "bounds": {
+        "max": {
+          "x": 111.20511962890625,
+          "y": 129.71375213623048
+        },
+        "min": {
+          "x": 110.16511962890624,
+          "y": 128.99375213623046
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_381",
+      "localPosition": {
+        "x": 14.68511962890625,
+        "y": 1.3537521362304688
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.010",
+      "bounds": {
+        "max": {
+          "x": 116.88721068990976,
+          "y": 136.01988586080822
+        },
+        "min": {
+          "x": 115.995784915559,
+          "y": 135.1284600864574
+        }
+      },
+      "direction": "southWest",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_382",
+      "localPosition": {
+        "x": 20.441497802734375,
+        "y": 7.5741729736328125
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.009",
+      "bounds": {
+        "max": {
+          "x": 103.48462279928476,
+          "y": 129.6712988246754
+        },
+        "min": {
+          "x": 102.593197024934,
+          "y": 128.7798730503246
+        }
+      },
+      "direction": "southWest",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_383",
+      "localPosition": {
+        "x": 7.038909912109375,
+        "y": 1.2255859375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.deadTree.001",
+      "bounds": {
+        "max": {
+          "x": 123.21459197998048,
+          "y": 131.28020477294922
+        },
+        "min": {
+          "x": 122.21459197998048,
+          "y": 130.28020477294922
+        }
+      },
+      "direction": "southWest",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_386",
+      "localPosition": {
+        "x": 26.71459197998047,
+        "y": 2.7802047729492188
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.006",
+      "bounds": {
+        "max": {
+          "x": 125.73642303466796,
+          "y": 134.828994140625
+        },
+        "min": {
+          "x": 124.69642303466796,
+          "y": 134.108994140625
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_387",
+      "localPosition": {
+        "x": 29.21642303466797,
+        "y": 6.468994140625
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.010",
+      "bounds": {
+        "max": {
+          "x": 117.52069427490234,
+          "y": 133.22827087402345
+        },
+        "min": {
+          "x": 116.48069427490236,
+          "y": 132.50827087402342
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_388",
+      "localPosition": {
+        "x": 21.000694274902344,
+        "y": 4.8682708740234375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.033",
+      "bounds": {
+        "max": {
+          "x": 110.51697875976562,
+          "y": 132.79537902832033
+        },
+        "min": {
+          "x": 109.47697875976564,
+          "y": 132.0753790283203
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_392",
+      "localPosition": {
+        "x": 13.996978759765623,
+        "y": 4.4353790283203125
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.tree.033",
+      "bounds": {
+        "max": {
+          "x": 116.18980010641368,
+          "y": 129.86903747213634
+        },
+        "min": {
+          "x": 115.29837433206288,
+          "y": 128.97761169778553
+        }
+      },
+      "direction": "southWest",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_394",
+      "localPosition": {
+        "x": 19.74408721923828,
+        "y": 1.4233245849609375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.vine.001",
+      "bounds": {
+        "max": {
+          "x": 117.4323501586914,
+          "y": 130.0055694580078
+        },
+        "min": {
+          "x": 116.4323501586914,
+          "y": 129.0055694580078
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_398",
+      "localPosition": {
+        "x": 20.932350158691406,
+        "y": 1.5055694580078125
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.vine.007",
+      "bounds": {
+        "max": {
+          "x": 109.9605712890625,
+          "y": 130.59083557128906
+        },
+        "min": {
+          "x": 108.9605712890625,
+          "y": 129.59083557128906
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_400",
+      "localPosition": {
+        "x": 13.4605712890625,
+        "y": 2.0908355712890625
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.vine.006",
+      "bounds": {
+        "max": {
+          "x": 105.55764770507812,
+          "y": 130.4897918701172
+        },
+        "min": {
+          "x": 104.55764770507812,
+          "y": 129.4897918701172
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_401",
+      "localPosition": {
+        "x": 9.057647705078123,
+        "y": 1.9897918701171875
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.vine.006",
+      "bounds": {
+        "max": {
+          "x": 118.87801361083984,
+          "y": 134.2550048828125
+        },
+        "min": {
+          "x": 117.87801361083984,
+          "y": 133.2550048828125
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_402",
+      "localPosition": {
+        "x": 22.378013610839844,
+        "y": 5.7550048828125
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.020",
+      "bounds": {
+        "max": {
+          "x": 116.1827621459961,
+          "y": 128.54501342773438
+        },
+        "min": {
+          "x": 115.1827621459961,
+          "y": 127.54501342773438
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_405",
+      "localPosition": {
+        "x": 19.682762145996097,
+        "y": 0.045013427734375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.020",
+      "bounds": {
+        "max": {
+          "x": 106.40673828125,
+          "y": 129.53561401367188
+        },
+        "min": {
+          "x": 105.40673828125,
+          "y": 128.53561401367188
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_408",
+      "localPosition": {
+        "x": 9.90673828125,
+        "y": 1.035614013671875
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.020",
+      "bounds": {
+        "max": {
+          "x": 110.34052276611328,
+          "y": 133.9918212890625
+        },
+        "min": {
+          "x": 109.34052276611328,
+          "y": 132.9918212890625
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_410",
+      "localPosition": {
+        "x": 13.84052276611328,
+        "y": 5.4918212890625
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.020",
+      "bounds": {
+        "max": {
+          "x": 115.73660278320312,
+          "y": 134.574951171875
+        },
+        "min": {
+          "x": 114.73660278320312,
+          "y": 133.574951171875
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_411",
+      "localPosition": {
+        "x": 19.236602783203125,
+        "y": 6.074951171875
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.020",
+      "bounds": {
+        "max": {
+          "x": 121.5748291015625,
+          "y": 131.8313751220703
+        },
+        "min": {
+          "x": 120.5748291015625,
+          "y": 130.8313751220703
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_412",
+      "localPosition": {
+        "x": 25.0748291015625,
+        "y": 3.3313751220703125
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.020",
+      "bounds": {
+        "max": {
+          "x": 121.17252349853516,
+          "y": 135.30091857910156
+        },
+        "min": {
+          "x": 120.17252349853516,
+          "y": 134.30091857910156
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_413",
+      "localPosition": {
+        "x": 24.672523498535156,
+        "y": 6.8009185791015625
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.020",
+      "bounds": {
+        "max": {
+          "x": 126.39356231689452,
+          "y": 133.43878173828125
+        },
+        "min": {
+          "x": 125.39356231689452,
+          "y": 132.43878173828125
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_414",
+      "localPosition": {
+        "x": 29.89356231689453,
+        "y": 4.93878173828125
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 117.81360626220705,
+          "y": 131.55845642089844
+        },
+        "min": {
+          "x": 116.81360626220705,
+          "y": 130.55845642089844
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_417",
+      "localPosition": {
+        "x": 21.31360626220703,
+        "y": 3.0584564208984375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 112.11077117919922,
+          "y": 130.19668579101562
+        },
+        "min": {
+          "x": 111.11077117919922,
+          "y": 129.19668579101562
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_420",
+      "localPosition": {
+        "x": 15.61077117919922,
+        "y": 1.696685791015625
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 106.84020233154295,
+          "y": 131.72117614746094
+        },
+        "min": {
+          "x": 105.84020233154295,
+          "y": 130.72117614746094
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_421",
+      "localPosition": {
+        "x": 10.340202331542969,
+        "y": 3.2211761474609375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 110.61735534667967,
+          "y": 134.0002899169922
+        },
+        "min": {
+          "x": 109.61735534667967,
+          "y": 133.0002899169922
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_422",
+      "localPosition": {
+        "x": 14.117355346679688,
+        "y": 5.5002899169921875
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 113.76199340820312,
+          "y": 137.1376190185547
+        },
+        "min": {
+          "x": 112.76199340820312,
+          "y": 136.1376190185547
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_423",
+      "localPosition": {
+        "x": 17.261993408203125,
+        "y": 8.637619018554688
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 118.72724151611328,
+          "y": 136.107666015625
+        },
+        "min": {
+          "x": 117.72724151611328,
+          "y": 135.107666015625
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_424",
+      "localPosition": {
+        "x": 22.22724151611328,
+        "y": 7.607666015625
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 122.6531982421875,
+          "y": 134.73626708984375
+        },
+        "min": {
+          "x": 121.6531982421875,
+          "y": 133.73626708984375
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_425",
+      "localPosition": {
+        "x": 26.1531982421875,
+        "y": 6.23626708984375
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 118.15010833740234,
+          "y": 138.59024047851562
+        },
+        "min": {
+          "x": 117.15010833740234,
+          "y": 137.59024047851562
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_430",
+      "localPosition": {
+        "x": 21.650108337402344,
+        "y": 10.090240478515623
+      },
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.021",
+      "bounds": {
+        "max": {
+          "x": 124.1109619140625,
+          "y": 136.004638671875
+        },
+        "min": {
+          "x": 123.1109619140625,
+          "y": 135.004638671875
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkdo4qsyjc_0_431",
+      "localPosition": {
+        "x": 27.6109619140625,
+        "y": 7.504638671875
+      },
+      "verticalOffset": 0.0
+    }
+  ],
+  "overlapObjectIds": [
+    "object_hkdo4qsyjc_0_338",
+    "object_hkdo4qsyjc_0_361",
+    "object_hkdo4qsyjc_0_373",
+    "object_hkdo4qsyjc_0_374",
+    "object_hkdo4qsyjc_0_377",
+    "object_hkdo4qsyjc_0_378",
+    "object_hkdo4qsyjc_0_379",
+    "object_hkdo4qsyjc_0_380",
+    "object_hkdo4qsyjc_0_381",
+    "object_hkdo4qsyjc_0_382",
+    "object_hkdo4qsyjc_0_383",
+    "object_hkdo4qsyjc_0_386",
+    "object_hkdo4qsyjc_0_387",
+    "object_hkdo4qsyjc_0_388",
+    "object_hkdo4qsyjc_0_392",
+    "object_hkdo4qsyjc_0_394",
+    "object_hkdo4qsyjc_0_398",
+    "object_hkdo4qsyjc_0_400",
+    "object_hkdo4qsyjc_0_401",
+    "object_hkdo4qsyjc_0_402",
+    "object_hkdo4qsyjc_0_405",
+    "object_hkdo4qsyjc_0_408",
+    "object_hkdo4qsyjc_0_410",
+    "object_hkdo4qsyjc_0_411",
+    "object_hkdo4qsyjc_0_412",
+    "object_hkdo4qsyjc_0_413",
+    "object_hkdo4qsyjc_0_414",
+    "object_hkdo4qsyjc_0_417",
+    "object_hkdo4qsyjc_0_420",
+    "object_hkdo4qsyjc_0_421",
+    "object_hkdo4qsyjc_0_422",
+    "object_hkdo4qsyjc_0_423",
+    "object_hkdo4qsyjc_0_424",
+    "object_hkdo4qsyjc_0_425",
+    "object_hkdo4qsyjc_0_429",
+    "object_hkdo4qsyjc_0_430",
+    "object_hkdo4qsyjc_0_431",
+    "object_hkdo4qsyjc_0_432"
+  ],
   "schemaVersion": 1,
   "size": 32.0,
   "terrainStrokes": [],

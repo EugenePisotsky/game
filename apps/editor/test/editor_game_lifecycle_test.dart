@@ -50,6 +50,88 @@ void main() {
     },
   );
 
+  final largeDocument = EnvironmentDocument(
+    id: 'editor_culling_fixture',
+    name: 'Editor Culling Fixture',
+    width: 1000,
+    height: 1000,
+    baseMaterialId: 'ow3.ground.meadow',
+    objects: [
+      PlacedEnvironmentObject(
+        id: 'near_tree',
+        assetId: 'ow3.tree.006',
+        x: 5,
+        y: 5,
+      ),
+      PlacedEnvironmentObject(
+        id: 'far_tree',
+        assetId: 'ow3.tree.006',
+        x: 900,
+        y: 900,
+      ),
+    ],
+  );
+
+  testWithGame<EditorGame>(
+    'culls off-screen objects and hit-tests only the local spatial bucket',
+    () => EditorGame(
+      EditorController(
+        EnvironmentDocument.fromJson(largeDocument.toJson()),
+        catalog: catalog,
+      ),
+      initialWorldCenter: const WorldPoint(5, 5),
+    ),
+    (game) async {
+      final recorder = ui.PictureRecorder();
+      game.render(ui.Canvas(recorder));
+      recorder.endRecording().dispose();
+
+      expect(game.renderCandidateCount, 2);
+      expect(game.visibleSpriteCount, 1);
+      expect(game.culledSpriteCount, 1);
+      expect(game.hitTestObjectIds(Vector2(400, 280)), contains('near_tree'));
+      expect(game.lastHitTestCandidateCount, 1);
+
+      final fullRebuilds = game.renderIndexFullRebuildCount;
+      game.controller
+        ..selectObjectIds(['near_tree'])
+        ..beginGesture()
+        ..moveSelectionDuringGesture(
+          const WorldPoint(5, 5),
+          const WorldPoint(6, 6),
+        );
+      final movedRecorder = ui.PictureRecorder();
+      game.render(ui.Canvas(movedRecorder));
+      movedRecorder.endRecording().dispose();
+      expect(game.renderIndexFullRebuildCount, fullRebuilds);
+      expect(game.renderIndexIncrementalUpdateCount, 1);
+      game.controller.endGesture();
+      game.controller.dispose();
+    },
+  );
+
+  testWithGame<EditorGame>(
+    'sleeps when static and wakes when a frame is invalidated',
+    () => EditorGame(
+      EditorController(
+        EnvironmentDocument.fromJson(document.toJson()),
+        catalog: catalog,
+      ),
+    ),
+    (game) async {
+      for (var index = 0; index < 6; index++) {
+        game.update(1 / 60);
+      }
+      expect(game.isAutoIdle, isTrue);
+      expect(game.paused, isTrue);
+
+      game.requestFrame();
+      expect(game.isAutoIdle, isFalse);
+      expect(game.paused, isFalse);
+      game.controller.dispose();
+    },
+  );
+
   final streamedDocument = EnvironmentDocument(
     id: 'editor_raster_fixture',
     name: 'Editor Raster Fixture',
