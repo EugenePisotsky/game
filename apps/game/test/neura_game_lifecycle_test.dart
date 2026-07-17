@@ -46,8 +46,8 @@ void main() {
     (game) async {
       expect(game.debugScene?.id, 'grass_below_actor');
       expect(game.debugRandomSeed, 2101);
-      expect(game.playerPosition.x, closeTo(12.8, 0.0001));
-      expect(game.playerPosition.y, closeTo(18.2, 0.0001));
+      expect(game.playerPosition.x, closeTo(92.05, 0.0001));
+      expect(game.playerPosition.y, closeTo(83.85, 0.0001));
       expect(game.diagnosticsPaused, isTrue);
       expect(
         game.chunkStreamer.loadedChunks.keys.toSet(),

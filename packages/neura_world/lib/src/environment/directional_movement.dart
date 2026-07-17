@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:vector_math/vector_math.dart';
 
 import 'environment_document.dart';
+import '../world/isometric_projection.dart';
 
 typedef DirectionSegmentWalkable = bool Function(Vector2 start, Vector2 end);
 
@@ -42,10 +43,9 @@ List<EnvironmentDirection> shortestDirectionTurn(
 /// Callers should pass an axis-aligned or 45-degree world-space vector. Those
 /// eight vectors become the eight isometric screen directions.
 EnvironmentDirection directionForWorldDelta(Vector2 delta) {
-  final screenX = delta.x - delta.y;
-  final screenY = delta.x + delta.y;
+  final screen = const IsometricProjection().worldToScreen(delta);
   final sector =
-      ((math.atan2(screenY, screenX) / (math.pi / 4)).round() + 8) % 8;
+      ((math.atan2(screen.y, screen.x) / (math.pi / 4)).round() + 8) % 8;
   return const [
     EnvironmentDirection.east,
     EnvironmentDirection.southEast,
@@ -254,7 +254,5 @@ int _turnCount(
 }
 
 double _projectedLength(Vector2 delta) {
-  final screenX = delta.x - delta.y;
-  final screenY = delta.x + delta.y;
-  return math.sqrt(screenX * screenX + screenY * screenY);
+  return const IsometricProjection().worldToScreen(delta).length;
 }

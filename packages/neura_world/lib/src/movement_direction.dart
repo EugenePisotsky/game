@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:vector_math/vector_math.dart';
 
+import 'world/isometric_projection.dart';
+
 enum MovementDirection {
   east,
   northEast,
@@ -30,9 +32,8 @@ class IsometricMovementDirections {
   const IsometricMovementDirections._();
 
   static MovementDirection fromWorldMovement(Vector2 movement) {
-    final screenX = (movement.x - movement.y) * 2;
-    final screenY = movement.x + movement.y;
-    var degrees = atan2(-screenY, screenX) * 180 / pi;
+    final screen = const IsometricProjection().worldToScreen(movement);
+    var degrees = atan2(-screen.y, screen.x) * 180 / pi;
     if (degrees < 0) degrees += 360;
     final index = (degrees / 45).round() % MovementDirection.values.length;
     return MovementDirection.values[index];
@@ -40,11 +41,7 @@ class IsometricMovementDirections {
 
   static Vector2 worldVector(MovementDirection direction) {
     final angle = direction.index * pi / 4;
-    final screenX = cos(angle);
-    final screenY = -sin(angle);
-    return Vector2(
-      screenY / 2 + screenX / 4,
-      screenY / 2 - screenX / 4,
-    ).normalized();
+    final screen = Vector2(cos(angle), -sin(angle));
+    return const IsometricProjection().screenToWorld(screen).normalized();
   }
 }

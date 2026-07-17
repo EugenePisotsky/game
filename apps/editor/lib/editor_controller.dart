@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -6,11 +7,15 @@ import 'package:neura_world/neura_world.dart';
 
 enum EnvironmentEditorMode {
   paint,
+  fillGround,
   place,
   path,
   select,
   collision,
   erase,
+  resetGround,
+  clearGroundFill,
+  editGround,
   spawn,
 }
 
@@ -59,6 +64,12 @@ class EditorController extends ChangeNotifier {
   bool get isObjectSelectionMode =>
       _mode == EnvironmentEditorMode.select ||
       _mode == EnvironmentEditorMode.collision;
+  bool get isTerrainAreaMode =>
+      _mode == EnvironmentEditorMode.fillGround ||
+      _mode == EnvironmentEditorMode.resetGround ||
+      _mode == EnvironmentEditorMode.clearGroundFill;
+  bool get isTerrainRegionSelectionMode =>
+      _mode == EnvironmentEditorMode.editGround;
 
   String _selectedMaterialId = 'ow3.ground.earth';
   String get selectedMaterialId => _selectedMaterialId;
@@ -93,6 +104,24 @@ class EditorController extends ChangeNotifier {
   double _brushScatter = 0.28;
   double get brushScatter => _brushScatter;
   int _nextStrokeSeed = 1;
+  int _nextTerrainRegionId = 1;
+  double _newFillTextureScale = 1;
+  String? _selectedTerrainRegionId;
+  TerrainRegion? _terrainRegionScaleBefore;
+
+  String? get selectedTerrainRegionId => _selectedTerrainRegionId;
+
+  TerrainRegion? get selectedTerrainRegion {
+    final id = _selectedTerrainRegionId;
+    if (id == null) return null;
+    return _document.terrainRegions.cast<TerrainRegion?>().firstWhere(
+      (region) => region?.id == id,
+      orElse: () => null,
+    );
+  }
+
+  double get activeFillTextureScale =>
+      selectedTerrainRegion?.textureScale ?? _newFillTextureScale;
 
   WorldPoint? _hoveredPoint;
   WorldPoint? get hoveredPoint => _hoveredPoint;
@@ -165,6 +194,8 @@ class EditorController extends ChangeNotifier {
   bool _placedThisGesture = false;
   final String _objectIdNamespace = _nextObjectIdNamespace();
   int _nextObjectId = 0;
+  String? _lastPasteSource;
+  int _pasteSerial = 0;
 
   bool get canUndo => _undo.isNotEmpty;
   bool get canRedo => _redo.isNotEmpty;
@@ -173,9 +204,13 @@ class EditorController extends ChangeNotifier {
   TerrainStroke? get activeTerrainStroke => _activeStroke;
 
   void selectPaintMaterial(EnvironmentMaterial material) {
-    _mode = EnvironmentEditorMode.paint;
+    if (_mode != EnvironmentEditorMode.fillGround) {
+      _mode = EnvironmentEditorMode.paint;
+    }
     _selectedMaterialId = material.id;
+    _selectedTerrainRegionId = null;
     _brushRadius = material.defaultRadius;
+    _newFillTextureScale = 1;
     notifyListeners();
     _paletteNotifier.notifyListeners();
   }
@@ -449,6 +484,7 @@ class EditorController extends ChangeNotifier {
       if (!additive) clearSelection();
       return;
     }
+    _selectedTerrainRegionId = null;
     var selectedId = candidates.first;
     if (!additive &&
         _sameStrings(_overlapCandidateIds, candidates) &&
@@ -481,6 +517,7 @@ class EditorController extends ChangeNotifier {
     bool toggle = false,
   }) {
     final ids = objectIds.where(_isObjectSelectable).toList();
+    if (ids.isNotEmpty) _selectedTerrainRegionId = null;
     if (!additive && !toggle) _selectedObjectIds.clear();
     for (final id in ids) {
       if (toggle && _selectedObjectIds.contains(id)) {
@@ -496,10 +533,12 @@ class EditorController extends ChangeNotifier {
   }
 
   void clearSelection() {
-    if (_selectedObjectIds.isEmpty) return;
+    if (_selectedObjectIds.isEmpty && _selectedTerrainRegionId == null) return;
     _selectedObjectIds.clear();
     _primarySelectedObjectId = null;
+    _selectedTerrainRegionId = null;
     notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void beginGesture() {
@@ -547,6 +586,12 @@ class EditorController extends ChangeNotifier {
         _selectNearest(point);
       case EnvironmentEditorMode.erase:
         if (!_placedThisGesture) _eraseNearest(point);
+      case EnvironmentEditorMode.fillGround:
+      case EnvironmentEditorMode.resetGround:
+      case EnvironmentEditorMode.clearGroundFill:
+        break;
+      case EnvironmentEditorMode.editGround:
+        selectTerrainRegionAt(point);
       case EnvironmentEditorMode.spawn:
         break;
     }
@@ -639,6 +684,251 @@ class EditorController extends ChangeNotifier {
     _hoverNotifier.changed();
   }
 
+  bool nudgeSelection(double dx, double dy) {
+    final selected = selectedObjects;
+    if (selected.isEmpty ||
+        selected.any(
+          (object) => !_document.contains(object.x + dx, object.y + dy),
+        )) {
+      return false;
+    }
+    _recordObjectMutation(selected.map((object) => object.id), () {
+      for (final object in selected) {
+        object
+          ..x += dx
+          ..y += dy;
+      }
+    });
+    return true;
+  }
+
+  String? copySelectionToJson() {
+    final selected = _selectedObjectIds;
+    if (selected.isEmpty) return null;
+    final source = jsonEncode({
+      'format': 'neura/environment-objects',
+      'version': 1,
+      'objects': [
+        for (final object in _document.objects)
+          if (selected.contains(object.id)) object.toJson(),
+      ],
+    });
+    _lastPasteSource = source;
+    _pasteSerial = 0;
+    return source;
+  }
+
+  bool pasteSelectionFromJson(String source) {
+    Object? decoded;
+    try {
+      decoded = jsonDecode(source);
+    } on FormatException {
+      return false;
+    }
+    if (decoded is! Map<String, Object?> ||
+        decoded['format'] != 'neura/environment-objects' ||
+        decoded['version'] != 1 ||
+        decoded['objects'] is! List<Object?>) {
+      return false;
+    }
+    final templates = <PlacedEnvironmentObject>[];
+    try {
+      for (final value in decoded['objects']! as List<Object?>) {
+        final object = PlacedEnvironmentObject.fromJson(
+          value! as Map<String, Object?>,
+        );
+        if (catalog.objectById(object.assetId) != null) templates.add(object);
+      }
+    } on Object {
+      return false;
+    }
+    if (templates.isEmpty) return false;
+
+    if (_lastPasteSource == source) {
+      _pasteSerial++;
+    } else {
+      _lastPasteSource = source;
+      _pasteSerial = 1;
+    }
+    var dx = 0.5 * _pasteSerial;
+    var dy = 0.5 * _pasteSerial;
+    final minX = templates.map((object) => object.x).reduce(math.min);
+    final minY = templates.map((object) => object.y).reduce(math.min);
+    final maxX = templates.map((object) => object.x).reduce(math.max);
+    final maxY = templates.map((object) => object.y).reduce(math.max);
+    dx = dx.clamp(-minX, _document.width - maxX).toDouble();
+    dy = dy.clamp(-minY, _document.height - maxY).toDouble();
+
+    final pasted = <PlacedEnvironmentObject>[];
+    for (final template in templates) {
+      final originalLayer = _layersById[template.editorLayerId];
+      final layerId =
+          originalLayer != null &&
+              isLayerVisible(originalLayer.id) &&
+              !isLayerLocked(originalLayer.id)
+          ? originalLayer.id
+          : _document.activeLayerId;
+      pasted.add(
+        PlacedEnvironmentObject(
+          id: _newPlacedObjectId(),
+          assetId: template.assetId,
+          x: template.x + dx,
+          y: template.y + dy,
+          verticalOffset: template.verticalOffset,
+          sortBias: template.sortBias,
+          editorLayerId: layerId,
+          direction: template.direction,
+        ),
+      );
+    }
+    final ids = pasted.map((object) => object.id).toSet();
+    _recordObjectMutation(ids, () {
+      _document.objects.addAll(pasted);
+      _selectedObjectIds
+        ..clear()
+        ..addAll(ids);
+      _primarySelectedObjectId = pasted.last.id;
+      _mode = EnvironmentEditorMode.select;
+    });
+    _paletteNotifier.notifyListeners();
+    return true;
+  }
+
+  bool resetGroundInArea(List<WorldPoint> polygon) {
+    if (polygon.length < 3) return false;
+    final stroke = TerrainStroke(
+      materialId: _document.baseMaterialId,
+      radius: 0,
+      opacity: 1,
+      resetsToBase: true,
+      seed: _nextTerrainStrokeSeed(),
+      points: [for (final point in polygon) point],
+    );
+    final index = _document.terrainStrokes.length;
+    _document.terrainStrokes.add(stroke);
+    _pushCommand(
+      _TerrainStrokeCommand(index: index, stroke: _copyTerrainStroke(stroke)),
+    );
+    _markTerrainChanged(stroke);
+    notifyListeners();
+    return true;
+  }
+
+  bool fillGroundInArea(List<WorldPoint> polygon) =>
+      _addTerrainRegion(polygon, resetsToDefault: false);
+
+  bool clearGroundFillInArea(List<WorldPoint> polygon) =>
+      _addTerrainRegion(polygon, resetsToDefault: true);
+
+  bool _addTerrainRegion(
+    List<WorldPoint> polygon, {
+    required bool resetsToDefault,
+  }) {
+    if (polygon.length < 3) return false;
+    final region = TerrainRegion(
+      id: 'region_${_objectIdNamespace}_${_nextTerrainRegionId++}',
+      materialId: _selectedMaterialId,
+      resetsToDefault: resetsToDefault,
+      points: [for (final point in polygon) point],
+      textureScale: resetsToDefault ? 1 : _newFillTextureScale,
+      seed: _nextTerrainStrokeSeed(),
+      order: _document.terrainRegions.length,
+    );
+    final index = _document.terrainRegions.length;
+    _document.terrainRegions.add(region);
+    _selectedTerrainRegionId = region.id;
+    _selectedObjectIds.clear();
+    _primarySelectedObjectId = null;
+    _pushCommand(
+      _TerrainRegionCommand(index: index, region: _copyTerrainRegion(region)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+    return true;
+  }
+
+  bool selectTerrainRegionAt(WorldPoint point) {
+    TerrainRegion? selected;
+    for (final region in _document.terrainRegions.reversed) {
+      if (_pointInPolygon(point, region.points)) {
+        selected = region;
+        break;
+      }
+    }
+    final nextId = selected?.id;
+    if (_selectedTerrainRegionId == nextId && _selectedObjectIds.isEmpty) {
+      return selected != null;
+    }
+    _selectedTerrainRegionId = nextId;
+    _selectedObjectIds.clear();
+    _primarySelectedObjectId = null;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+    return selected != null;
+  }
+
+  void beginTerrainTextureScaleEdit() {
+    final region = selectedTerrainRegion;
+    _terrainRegionScaleBefore = region == null
+        ? null
+        : _copyTerrainRegion(region);
+  }
+
+  void setActiveFillTextureScale(double value) {
+    final scale = value.clamp(0.25, 4).toDouble();
+    final region = selectedTerrainRegion;
+    if (region == null || region.resetsToDefault) {
+      if (_newFillTextureScale == scale) return;
+      _newFillTextureScale = scale;
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
+    if (region.textureScale == scale) return;
+    _newFillTextureScale = scale;
+    final index = _document.terrainRegions.indexOf(region);
+    _document.terrainRegions[index] = region.copyWith(textureScale: scale);
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void endTerrainTextureScaleEdit() {
+    final before = _terrainRegionScaleBefore;
+    _terrainRegionScaleBefore = null;
+    final after = selectedTerrainRegion;
+    if (before == null ||
+        after == null ||
+        before.id != after.id ||
+        before.textureScale == after.textureScale) {
+      return;
+    }
+    _pushCommand(
+      _TerrainRegionReplaceCommand(
+        before: before,
+        after: _copyTerrainRegion(after),
+      ),
+    );
+  }
+
+  void resetActiveFillTextureScale() {
+    beginTerrainTextureScaleEdit();
+    setActiveFillTextureScale(1);
+    endTerrainTextureScaleEdit();
+  }
+
+  bool setDefaultGroundMaterial(EnvironmentMaterial material) {
+    if (_document.baseMaterialId == material.id) return false;
+    final before = _document.baseMaterialId;
+    _document.baseMaterialId = material.id;
+    _pushCommand(_BaseMaterialCommand(before: before, after: material.id));
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+    return true;
+  }
+
   void rotateSelected() {
     final selected = selectedObjects;
     if (selected.isEmpty) return;
@@ -700,6 +990,22 @@ class EditorController extends ChangeNotifier {
   }
 
   void deleteSelected() {
+    final terrainRegion = selectedTerrainRegion;
+    if (_selectedObjectIds.isEmpty && terrainRegion != null) {
+      final index = _document.terrainRegions.indexOf(terrainRegion);
+      _document.terrainRegions.removeAt(index);
+      _selectedTerrainRegionId = null;
+      _pushCommand(
+        _TerrainRegionDeleteCommand(
+          index: index,
+          region: _copyTerrainRegion(terrainRegion),
+        ),
+      );
+      _markTerrainChanged();
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
     if (_selectedObjectIds.isEmpty) return;
     final ids = Set<String>.of(_selectedObjectIds);
     _recordObjectMutation(ids, () {
@@ -860,7 +1166,10 @@ class EditorController extends ChangeNotifier {
     command.undo(this);
     _redo.add(command);
     _markSceneChanged(objectIds: command.affectedObjectIds);
-    if (command.affectsTerrain) _markTerrainChanged();
+    if (command.affectsTerrain) {
+      _markTerrainChanged();
+      _paletteNotifier.notifyListeners();
+    }
     _normalizeSelection();
     notifyListeners();
   }
@@ -871,7 +1180,10 @@ class EditorController extends ChangeNotifier {
     command.redo(this);
     _undo.add(command);
     _markSceneChanged(objectIds: command.affectedObjectIds);
-    if (command.affectsTerrain) _markTerrainChanged();
+    if (command.affectsTerrain) {
+      _markTerrainChanged();
+      _paletteNotifier.notifyListeners();
+    }
     _normalizeSelection();
     notifyListeners();
   }
@@ -885,6 +1197,7 @@ class EditorController extends ChangeNotifier {
     _pushCommand(command);
     _selectedObjectIds.clear();
     _primarySelectedObjectId = null;
+    _selectedTerrainRegionId = null;
     _markSceneChanged();
     _markTerrainChanged();
     notifyListeners();
@@ -1066,8 +1379,9 @@ class EditorController extends ChangeNotifier {
     double dx,
     double dy,
   ) {
-    final screenX = dx - dy;
-    final screenY = dx + dy;
+    const projection = IsometricProjection();
+    final screenX = (dx - dy) * projection.halfWidth;
+    final screenY = (dx + dy) * projection.halfHeight;
     final sector =
         ((math.atan2(screenY, screenX) / (math.pi / 4)).round() + 8) % 8;
     final desired = const [
@@ -1287,6 +1601,12 @@ class EditorController extends ChangeNotifier {
     if (!_selectedObjectIds.contains(_primarySelectedObjectId)) {
       _primarySelectedObjectId = _lastOrNull(_selectedObjectIds);
     }
+    if (_selectedTerrainRegionId != null &&
+        !_document.terrainRegions.any(
+          (region) => region.id == _selectedTerrainRegionId,
+        )) {
+      _selectedTerrainRegionId = null;
+    }
   }
 
   bool _isObjectSelectable(String id) {
@@ -1497,6 +1817,119 @@ class _TerrainStrokeCommand extends _EditorCommand {
   }
 }
 
+class _TerrainRegionCommand extends _EditorCommand {
+  const _TerrainRegionCommand({required this.index, required this.region});
+
+  final int index;
+  final TerrainRegion region;
+
+  @override
+  bool get affectsTerrain => true;
+
+  @override
+  Set<String> get affectedObjectIds => const {};
+
+  @override
+  void undo(EditorController controller) {
+    if (index >= 0 && index < controller._document.terrainRegions.length) {
+      controller._document.terrainRegions.removeAt(index);
+    }
+  }
+
+  @override
+  void redo(EditorController controller) {
+    controller._document.terrainRegions.insert(
+      index.clamp(0, controller._document.terrainRegions.length),
+      _copyTerrainRegion(region),
+    );
+  }
+}
+
+class _TerrainRegionDeleteCommand extends _EditorCommand {
+  const _TerrainRegionDeleteCommand({
+    required this.index,
+    required this.region,
+  });
+
+  final int index;
+  final TerrainRegion region;
+
+  @override
+  bool get affectsTerrain => true;
+
+  @override
+  Set<String> get affectedObjectIds => const {};
+
+  @override
+  void undo(EditorController controller) {
+    controller._document.terrainRegions.insert(
+      index.clamp(0, controller._document.terrainRegions.length),
+      _copyTerrainRegion(region),
+    );
+  }
+
+  @override
+  void redo(EditorController controller) {
+    controller._document.terrainRegions.removeWhere(
+      (candidate) => candidate.id == region.id,
+    );
+  }
+}
+
+class _TerrainRegionReplaceCommand extends _EditorCommand {
+  const _TerrainRegionReplaceCommand({
+    required this.before,
+    required this.after,
+  });
+
+  final TerrainRegion before;
+  final TerrainRegion after;
+
+  @override
+  bool get affectsTerrain => true;
+
+  @override
+  Set<String> get affectedObjectIds => const {};
+
+  @override
+  void undo(EditorController controller) => _replace(controller, before);
+
+  @override
+  void redo(EditorController controller) => _replace(controller, after);
+
+  void _replace(EditorController controller, TerrainRegion region) {
+    final index = controller._document.terrainRegions.indexWhere(
+      (candidate) => candidate.id == region.id,
+    );
+    if (index >= 0) {
+      controller._document.terrainRegions[index] = _copyTerrainRegion(region);
+    }
+  }
+}
+
+class _BaseMaterialCommand extends _EditorCommand {
+  const _BaseMaterialCommand({required this.before, required this.after});
+
+  final String before;
+  final String after;
+
+  @override
+  bool get affectsTerrain => true;
+
+  @override
+  Set<String> get affectedObjectIds => const {};
+
+  @override
+  void undo(EditorController controller) {
+    controller._document.baseMaterialId = before;
+  }
+
+  @override
+  void redo(EditorController controller) {
+    controller._document.baseMaterialId = after;
+  }
+}
+
 class _GeometryDeltaCommand extends _EditorCommand {
   const _GeometryDeltaCommand({
     required this.assetId,
@@ -1582,6 +2015,27 @@ PlacedEnvironmentObject _copyPlacedObject(PlacedEnvironmentObject object) =>
 
 TerrainStroke _copyTerrainStroke(TerrainStroke stroke) =>
     TerrainStroke.fromJson(stroke.toJson());
+
+TerrainRegion _copyTerrainRegion(TerrainRegion region) =>
+    TerrainRegion.fromJson(region.toJson());
+
+bool _pointInPolygon(WorldPoint point, List<WorldPoint> polygon) {
+  if (polygon.length < 3) return false;
+  var inside = false;
+  for (
+    var current = 0, previous = polygon.length - 1;
+    current < polygon.length;
+    previous = current++
+  ) {
+    final a = polygon[current];
+    final b = polygon[previous];
+    final crosses =
+        (a.y > point.y) != (b.y > point.y) &&
+        point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x;
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
 
 EnvironmentDocument _copyDocument(EnvironmentDocument document) =>
     EnvironmentDocument.fromJson(document.toJson());

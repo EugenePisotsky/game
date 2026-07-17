@@ -34,11 +34,32 @@ editor. It must:
 ## Current implementation snapshot
 
 The foundation described here is implemented across the Rust importer, shared
-Dart catalog, and Flutter editor. The current full-pack build produces 59
-materials and 2,382 placeable object families. All 8,234 configured PNG files
-are accounted for: 7,784 are classified into valid visual assets, 437 are
+Dart catalog, and Flutter editor. The current five-pack catalog produces 77
+materials and 2,775 placeable entries (2,771 discovered families plus four
+manual prototype entries). All 11,048 configured PNG files
+are accounted for: 10,598 are classified into valid visual assets, 437 are
 explicitly deferred, and 13 are reviewed superseded/excluded sources. There are
 no invalid or unclassified source files.
+
+The catalog now owns explicit source-pack metadata. Both ground and object
+palettes can filter by pack, search includes pack names, and preview cards show
+a compact pack badge. Generated material paths are pack-scoped, which avoids
+collisions such as three unrelated `Ground 001` sources.
+
+Dark Town art is unusually large (some sprites exceed 3000 x 4000 pixels).
+Editor images remain lazy and use resolution tiers from 512 to 4096 pixels,
+chosen from their current on-screen size and display pixel ratio. A small prop
+therefore stays cheap while a screen-filling cathedral is not rendered from a
+thumbnail. Release export caps Dark Town's longest image dimension at 3072
+pixels while retaining each view's original logical dimensions in the catalog.
+Rendering therefore preserves scale and pivots without paying the full source
+texture-memory cost for the very largest images.
+
+Dark Town uses a consistent `0.75` render scale derived from its ordinary
+props. Large building canvases remain genuinely large in world space; they are
+not normalized to the size of cottages from other packs. Release bitmap
+downscaling is a separate storage/texture-memory concern and never changes
+logical world size.
 
 The review-required files are intentional rather than import failures. Visual
 inspection shows several distinct formats hidden behind similar suffixes:
@@ -65,6 +86,8 @@ The initial source scope is:
 | Other Worlds Core Tiles 1 | 577 | Buildings |
 | Other Worlds Core Tiles 2 | 580 | Castles, interiors, bridges, castle parts |
 | Other Worlds Core Tiles 3 | 7,077 | Environment, structures, furniture, props, small items, character parts |
+| Northfolk Tiles | 2,150 | Nordic buildings, winter environment, boats, furniture, props, small items |
+| Other Worlds Dark Town Tiles | 664 | High-resolution gothic buildings, modular pieces, statues, wagons, props |
 
 Core Tiles 3 contains roughly 1,720 filename families. Its major families
 include `BuildingAddon`, `Wall`, `Tree`, `Chest`, `Flower`, `Shelf`, `Book`,

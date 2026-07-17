@@ -146,6 +146,73 @@ void main() {
     expect(controller.document.objects, isEmpty);
   });
 
+  testWidgets('arrow keys nudge selection and command-P pastes a copy', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final catalog = EnvironmentCatalog(
+      materials: const [
+        EnvironmentMaterial(
+          id: 'earth',
+          name: 'Earth',
+          texturePath: 'earth.png',
+          decalPath: 'earth_decal.png',
+        ),
+      ],
+      objects: const [
+        EnvironmentObjectAsset(
+          id: 'tree',
+          name: 'Tree',
+          category: 'Trees',
+          renderScale: 1,
+          views: {'south': EnvironmentObjectView(imagePath: 'tree.png')},
+        ),
+      ],
+    );
+    final document = EnvironmentDocument(
+      id: 'shortcuts',
+      name: 'Shortcuts',
+      width: 10,
+      height: 10,
+      baseMaterialId: 'earth',
+      objects: [
+        PlacedEnvironmentObject(id: 'tree_1', assetId: 'tree', x: 2, y: 2),
+      ],
+    );
+    final controller = EditorController(document, catalog: catalog)
+      ..selectObjectIds(['tree_1']);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditorScreen(
+          starterSource: document.toJsonString(),
+          catalog: catalog,
+          controllerOverride: controller,
+          renderGame: false,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(controller.document.objects.single.x, 2.25);
+    expect(controller.document.objects.single.y, 1.75);
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyP);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+    await tester.pumpAndSettle();
+    expect(controller.document.objects, hasLength(2));
+    expect(controller.selectedObjectIds, hasLength(1));
+  });
+
   testWidgets('edits selected asset collision geometry', (tester) async {
     tester.view.physicalSize = const Size(1400, 1000);
     tester.view.devicePixelRatio = 1;

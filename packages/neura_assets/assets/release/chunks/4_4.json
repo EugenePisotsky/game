@@ -405,8 +405,9 @@
     "object_hkdo4qsyjc_0_432",
     "object_hkdo4qsyjc_0_435"
   ],
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "size": 32.0,
+  "terrainRegions": [],
   "terrainStrokes": [],
   "worldId": "environment_starter"
 }

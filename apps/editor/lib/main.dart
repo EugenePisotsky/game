@@ -40,21 +40,39 @@ class NeuraEditorApp extends StatelessWidget {
   final String? debugSceneName;
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'Neura Environment Designer',
-    theme: ThemeData(
+  Widget build(BuildContext context) {
+    final colors = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF83B795),
       brightness: Brightness.dark,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF83B795),
+      surface: const Color(0xFF151A17),
+    );
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Neura Environment Designer',
+      theme: ThemeData(
+        useMaterial3: true,
         brightness: Brightness.dark,
-        surface: const Color(0xFF171D19),
+        colorScheme: colors,
+        scaffoldBackgroundColor: colors.surface,
+        dividerTheme: DividerThemeData(color: colors.outlineVariant),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(),
+          filled: true,
+          isDense: true,
+        ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: colors.inverseSurface,
+          contentTextStyle: TextStyle(color: colors.onInverseSurface),
+        ),
+        tooltipTheme: const TooltipThemeData(waitDuration: Duration.zero),
+        iconButtonTheme: const IconButtonThemeData(
+          style: ButtonStyle(visualDensity: VisualDensity.compact),
+        ),
       ),
-      scaffoldBackgroundColor: const Color(0xFF101411),
-      useMaterial3: true,
-    ),
-    home: EditorBootstrap(debugSceneName: debugSceneName),
-  );
+      home: EditorBootstrap(debugSceneName: debugSceneName),
+    );
+  }
 }
 
 class EditorBootstrap extends StatefulWidget {
@@ -209,6 +227,8 @@ class _EditorScreenState extends State<EditorScreen> {
   Offset? _pendingHoverPosition;
   bool _hoverFrameScheduled = false;
   bool _showAssetPalette = false;
+  Future<void>? _pendingClipboardWrite;
+  String? _localObjectClipboard;
 
   @override
   void initState() {
@@ -296,8 +316,39 @@ class _EditorScreenState extends State<EditorScreen> {
       keyboard.isShiftPressed ? controller.redo() : controller.undo();
       return KeyEventResult.handled;
     }
+    if (command && key == LogicalKeyboardKey.keyC) {
+      final operation = _copySelection();
+      _pendingClipboardWrite = operation;
+      unawaited(operation);
+      return KeyEventResult.handled;
+    }
+    if (command && key == LogicalKeyboardKey.keyP) {
+      unawaited(_pasteSelection(preferLocal: true));
+      return KeyEventResult.handled;
+    }
+    if (command && key == LogicalKeyboardKey.keyV) {
+      unawaited(_pasteSelection());
+      return KeyEventResult.handled;
+    }
     if (keyboard.isControlPressed && key == LogicalKeyboardKey.keyY) {
       controller.redo();
+      return KeyEventResult.handled;
+    }
+    if (!command &&
+        {
+          LogicalKeyboardKey.arrowLeft,
+          LogicalKeyboardKey.arrowRight,
+          LogicalKeyboardKey.arrowUp,
+          LogicalKeyboardKey.arrowDown,
+        }.contains(key)) {
+      final amount = keyboard.isShiftPressed ? 1.0 : 0.25;
+      final (dx, dy) = switch (key) {
+        LogicalKeyboardKey.arrowLeft => (-amount, amount),
+        LogicalKeyboardKey.arrowRight => (amount, -amount),
+        LogicalKeyboardKey.arrowUp => (-amount, -amount),
+        _ => (amount, amount),
+      };
+      controller.nudgeSelection(dx, dy);
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.delete ||
@@ -334,6 +385,39 @@ class _EditorScreenState extends State<EditorScreen> {
 
   void _requestGameFrame() => game.requestFrame();
 
+  Future<void> _copySelection() async {
+    final source = controller.copySelectionToJson();
+    if (source == null) return;
+    _localObjectClipboard = source;
+    await Clipboard.setData(ClipboardData(text: source));
+  }
+
+  Future<void> _pasteSelection({bool preferLocal = false}) async {
+    String? systemSource;
+    if (!preferLocal || _localObjectClipboard == null) {
+      await _pendingClipboardWrite;
+      systemSource = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+    }
+    final candidates = preferLocal
+        ? [_localObjectClipboard, systemSource]
+        : [systemSource, _localObjectClipboard];
+    if (!candidates.whereType<String>().any(
+      controller.pasteSelectionFromJson,
+    )) {
+      return;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 900),
+        content: Text(
+          '${controller.selectedObjectIds.length} object'
+          '${controller.selectedObjectIds.length == 1 ? '' : 's'} pasted',
+        ),
+      ),
+    );
+  }
+
   bool get _isEditingText {
     final context = FocusManager.instance.primaryFocus?.context;
     if (context == null) return false;
@@ -359,11 +443,20 @@ class _EditorScreenState extends State<EditorScreen> {
         _gestureScreenStart = event.localPosition;
         _lastGestureWorld = _worldAt(event.localPosition);
         controller.beginGesture();
-        if (controller.isObjectSelectionMode) {
+        if (controller.isTerrainAreaMode) {
+          _marqueeSelecting = true;
+          game.setSelectionMarquee(
+            Rect.fromPoints(event.localPosition, event.localPosition),
+          );
+        } else if (controller.isObjectSelectionMode) {
           final candidates = game.hitTestObjectIds(
             Vector2(event.localPosition.dx, event.localPosition.dy),
           );
-          final additive = HardwareKeyboard.instance.isShiftPressed;
+          final keyboard = HardwareKeyboard.instance;
+          final additive =
+              keyboard.isShiftPressed ||
+              keyboard.isMetaPressed ||
+              keyboard.isControlPressed;
           final hitExistingSelection = candidates.any(
             controller.selectedObjectIds.contains,
           );
@@ -387,7 +480,7 @@ class _EditorScreenState extends State<EditorScreen> {
           return;
         }
         controller.hover(_worldAt(event.localPosition));
-        if (controller.isObjectSelectionMode && _marqueeSelecting) {
+        if (_marqueeSelecting) {
           game.setSelectionMarquee(
             Rect.fromPoints(_gestureScreenStart!, event.localPosition),
           );
@@ -538,15 +631,29 @@ class _EditorScreenState extends State<EditorScreen> {
     }
     if (_marqueeSelecting && position != null) {
       final rect = Rect.fromPoints(_gestureScreenStart!, position);
-      final keyboard = HardwareKeyboard.instance;
-      controller.selectObjectIds(
-        game.objectIdsInMarquee(
-          rect,
-          requireContainment: keyboard.isAltPressed,
-        ),
-        additive: keyboard.isShiftPressed,
-        toggle: keyboard.isMetaPressed || keyboard.isControlPressed,
-      );
+      if (controller.isTerrainAreaMode) {
+        final polygon = game.worldPolygonForScreenRect(rect);
+        switch (controller.mode) {
+          case EnvironmentEditorMode.fillGround:
+            controller.fillGroundInArea(polygon);
+          case EnvironmentEditorMode.resetGround:
+            controller.resetGroundInArea(polygon);
+          case EnvironmentEditorMode.clearGroundFill:
+            controller.clearGroundFillInArea(polygon);
+          default:
+            break;
+        }
+      } else {
+        final keyboard = HardwareKeyboard.instance;
+        controller.selectObjectIds(
+          game.objectIdsInMarquee(
+            rect,
+            requireContainment: keyboard.isAltPressed,
+          ),
+          additive: keyboard.isShiftPressed,
+          toggle: keyboard.isMetaPressed || keyboard.isControlPressed,
+        );
+      }
     }
     _gesturing = false;
     _marqueeSelecting = false;
@@ -941,74 +1048,85 @@ class _Toolbar extends StatelessWidget {
   final VoidCallback? onSaveChunks;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 58,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      children: [
-        const Icon(Icons.landscape_outlined),
-        const SizedBox(width: 10),
-        const Text(
-          'NEURA ENVIRONMENT DESIGNER',
-          style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 1.2),
-        ),
-        const Spacer(),
-        ListenableBuilder(
-          listenable: controller,
-          builder: (context, _) => Row(
-            children: [
-              IconButton(
-                tooltip: 'Undo',
-                onPressed: controller.canUndo ? controller.undo : null,
-                icon: const Icon(Icons.undo),
+  Widget build(BuildContext context) => Material(
+    color: Theme.of(context).colorScheme.surfaceContainer,
+    child: SizedBox(
+      height: 64,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Icon(
+              Icons.landscape_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'NEURA ENVIRONMENT DESIGNER',
+              style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 1.2),
+            ),
+            const Spacer(),
+            ListenableBuilder(
+              listenable: controller,
+              builder: (context, _) => Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Undo',
+                    onPressed: controller.canUndo ? controller.undo : null,
+                    icon: const Icon(Icons.undo),
+                  ),
+                  IconButton(
+                    tooltip: 'Redo',
+                    onPressed: controller.canRedo ? controller.redo : null,
+                    icon: const Icon(Icons.redo),
+                  ),
+                ],
               ),
-              IconButton(
-                tooltip: 'Redo',
-                onPressed: controller.canRedo ? controller.redo : null,
-                icon: const Icon(Icons.redo),
+            ),
+            IconButton(
+              tooltip: 'Zoom out',
+              onPressed: onZoomOut,
+              icon: const Icon(Icons.zoom_out),
+            ),
+            IconButton(
+              tooltip: 'Zoom in',
+              onPressed: onZoomIn,
+              icon: const Icon(Icons.zoom_in),
+            ),
+            IconButton.filledTonal(
+              tooltip: assetPaletteVisible
+                  ? 'Remove asset palette from widget tree'
+                  : 'Add asset palette to widget tree',
+              onPressed: onToggleAssetPalette,
+              icon: Icon(
+                Icons.photo_library_outlined,
+                color: assetPaletteVisible
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
               ),
-            ],
-          ),
+            ),
+            TextButton(onPressed: onImport, child: const Text('Import')),
+            if (onManageWorld != null)
+              TextButton.icon(
+                onPressed: onManageWorld,
+                icon: const Icon(Icons.public, size: 18),
+                label: const Text('World'),
+              ),
+            TextButton(onPressed: onExport, child: const Text('Copy JSON')),
+            if (onBuildRelease != null)
+              FilledButton.tonal(
+                onPressed: onBuildRelease,
+                child: const Text('Build release'),
+              ),
+            if (onSaveChunks != null)
+              TextButton(
+                onPressed: onSaveChunks,
+                child: const Text('Save chunks'),
+              ),
+            TextButton(onPressed: onReset, child: const Text('Reset')),
+          ],
         ),
-        IconButton(
-          tooltip: 'Zoom out',
-          onPressed: onZoomOut,
-          icon: const Icon(Icons.zoom_out),
-        ),
-        IconButton(
-          tooltip: 'Zoom in',
-          onPressed: onZoomIn,
-          icon: const Icon(Icons.zoom_in),
-        ),
-        IconButton(
-          tooltip: assetPaletteVisible
-              ? 'Remove asset palette from widget tree'
-              : 'Add asset palette to widget tree',
-          onPressed: onToggleAssetPalette,
-          icon: Icon(
-            Icons.photo_library_outlined,
-            color: assetPaletteVisible
-                ? Theme.of(context).colorScheme.primary
-                : null,
-          ),
-        ),
-        TextButton(onPressed: onImport, child: const Text('Import')),
-        if (onManageWorld != null)
-          TextButton.icon(
-            onPressed: onManageWorld,
-            icon: const Icon(Icons.public, size: 18),
-            label: const Text('World'),
-          ),
-        TextButton(onPressed: onExport, child: const Text('Copy JSON')),
-        if (onBuildRelease != null)
-          FilledButton.tonal(
-            onPressed: onBuildRelease,
-            child: const Text('Build release'),
-          ),
-        if (onSaveChunks != null)
-          TextButton(onPressed: onSaveChunks, child: const Text('Save chunks')),
-        TextButton(onPressed: onReset, child: const Text('Reset')),
-      ],
+      ),
     ),
   );
 }
@@ -1025,6 +1143,7 @@ class _Palette extends StatefulWidget {
 class _PaletteState extends State<_Palette> {
   final TextEditingController _search = TextEditingController();
   String _selectedObjectCategory = _allObjectCategories;
+  String _selectedSourcePack = _allSourcePacks;
   late final _AssetPaletteIndex _index;
 
   EditorController get controller => widget.controller;
@@ -1044,11 +1163,15 @@ class _PaletteState extends State<_Palette> {
   @override
   Widget build(BuildContext context) {
     final query = _search.text.trim().toLowerCase();
-    final materials = _index.materialsMatching(query);
+    final materials = _index.materialsMatching(
+      query,
+      sourcePack: _selectedSourcePack,
+    );
     final categories = _index.categories;
     final objects = _index.objectsMatching(
       query,
       category: _selectedObjectCategory,
+      sourcePack: _selectedSourcePack,
     );
 
     return SizedBox(
@@ -1072,6 +1195,31 @@ class _PaletteState extends State<_Palette> {
                   ),
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+                child: DropdownButtonFormField<String>(
+                  isExpanded: true,
+                  initialValue: _selectedSourcePack,
+                  decoration: const InputDecoration(
+                    labelText: 'Asset pack',
+                    isDense: true,
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    const DropdownMenuItem(
+                      value: _allSourcePacks,
+                      child: Text('All packs'),
+                    ),
+                    for (final pack in _index.sourcePacks)
+                      DropdownMenuItem(value: pack.id, child: Text(pack.name)),
+                  ],
+                  onChanged: (pack) {
+                    if (pack != null) {
+                      setState(() => _selectedSourcePack = pack);
+                    }
+                  },
+                ),
+              ),
               const TabBar(
                 tabs: [
                   Tab(text: 'GROUND'),
@@ -1087,33 +1235,201 @@ class _PaletteState extends State<_Palette> {
                           padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                           child: Column(
                             children: [
-                              _BrushSlider(
-                                label:
-                                    'Size ${controller.brushRadius.toStringAsFixed(1)}',
-                                value: controller.brushRadius,
-                                min: 0.5,
-                                max: 5,
-                                divisions: 18,
-                                onChanged: controller.setBrushRadius,
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 4,
+                                children: [
+                                  ChoiceChip(
+                                    label: const Text('Brush'),
+                                    selected:
+                                        controller.mode ==
+                                        EnvironmentEditorMode.paint,
+                                    onSelected: (_) => controller.selectMode(
+                                      EnvironmentEditorMode.paint,
+                                    ),
+                                  ),
+                                  ChoiceChip(
+                                    label: const Text('Fill area'),
+                                    selected:
+                                        controller.mode ==
+                                        EnvironmentEditorMode.fillGround,
+                                    onSelected: (_) => controller.selectMode(
+                                      EnvironmentEditorMode.fillGround,
+                                    ),
+                                  ),
+                                  ChoiceChip(
+                                    label: const Text('Reset paint'),
+                                    selected:
+                                        controller.mode ==
+                                        EnvironmentEditorMode.resetGround,
+                                    onSelected: (_) => controller.selectMode(
+                                      EnvironmentEditorMode.resetGround,
+                                    ),
+                                  ),
+                                  ChoiceChip(
+                                    label: const Text('Clear fill'),
+                                    selected:
+                                        controller.mode ==
+                                        EnvironmentEditorMode.clearGroundFill,
+                                    onSelected: (_) => controller.selectMode(
+                                      EnvironmentEditorMode.clearGroundFill,
+                                    ),
+                                  ),
+                                  ChoiceChip(
+                                    label: const Text('Edit fill'),
+                                    selected:
+                                        controller.mode ==
+                                        EnvironmentEditorMode.editGround,
+                                    onSelected: (_) => controller.selectMode(
+                                      EnvironmentEditorMode.editGround,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              _BrushSlider(
-                                label:
-                                    'Flow ${(controller.brushFlow * 100).round()}%',
-                                value: controller.brushFlow,
-                                min: 0.05,
-                                max: 0.6,
-                                divisions: 22,
-                                onChanged: controller.setBrushFlow,
+                              if (controller.mode ==
+                                  EnvironmentEditorMode.paint) ...[
+                                _BrushSlider(
+                                  label:
+                                      'Size ${controller.brushRadius.toStringAsFixed(1)}',
+                                  value: controller.brushRadius,
+                                  min: 0.5,
+                                  max: 5,
+                                  divisions: 18,
+                                  onChanged: controller.setBrushRadius,
+                                ),
+                                _BrushSlider(
+                                  label:
+                                      'Flow ${(controller.brushFlow * 100).round()}%',
+                                  value: controller.brushFlow,
+                                  min: 0.05,
+                                  max: 0.6,
+                                  divisions: 22,
+                                  onChanged: controller.setBrushFlow,
+                                ),
+                                _BrushSlider(
+                                  label:
+                                      'Scatter ${(controller.brushScatter * 100).round()}%',
+                                  value: controller.brushScatter,
+                                  min: 0,
+                                  max: 0.65,
+                                  divisions: 13,
+                                  onChanged: controller.setBrushScatter,
+                                ),
+                              ],
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'Default: ${controller.catalog.materialById(controller.document.baseMaterialId)?.name ?? controller.document.baseMaterialId}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed:
+                                        controller.document.baseMaterialId ==
+                                            controller.selectedMaterialId
+                                        ? null
+                                        : () {
+                                            final material = controller.catalog
+                                                .materialById(
+                                                  controller.selectedMaterialId,
+                                                );
+                                            if (material != null) {
+                                              controller
+                                                  .setDefaultGroundMaterial(
+                                                    material,
+                                                  );
+                                            }
+                                          },
+                                    child: const Text('Use selected'),
+                                  ),
+                                ],
                               ),
-                              _BrushSlider(
-                                label:
-                                    'Scatter ${(controller.brushScatter * 100).round()}%',
-                                value: controller.brushScatter,
-                                min: 0,
-                                max: 0.65,
-                                divisions: 13,
-                                onChanged: controller.setBrushScatter,
-                              ),
+                              if (controller.mode ==
+                                      EnvironmentEditorMode.fillGround ||
+                                  controller.mode ==
+                                      EnvironmentEditorMode.editGround ||
+                                  controller.selectedTerrainRegion != null)
+                                Builder(
+                                  builder: (context) {
+                                    final region =
+                                        controller.selectedTerrainRegion;
+                                    final material = controller.catalog
+                                        .materialById(
+                                          region != null &&
+                                                  !region.resetsToDefault
+                                              ? region.materialId
+                                              : controller.selectedMaterialId,
+                                        );
+                                    if (material == null) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    final scale =
+                                        controller.activeFillTextureScale;
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          'Material repeat ${material.effectiveRepeatWorldWidth.toStringAsFixed(1)} × ${material.effectiveRepeatWorldHeight.toStringAsFixed(1)} world units',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
+                                        if (region?.resetsToDefault ?? false)
+                                          Text(
+                                            'This clear-fill region reveals the default ground and has no texture size.',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
+                                          )
+                                        else ...[
+                                          _BrushSlider(
+                                            label: region == null
+                                                ? 'New size ${(scale * 100).round()}%'
+                                                : 'Fill size ${(scale * 100).round()}%',
+                                            value: scale,
+                                            min: 0.25,
+                                            max: 4,
+                                            divisions: 15,
+                                            onChangeStart: (_) => controller
+                                                .beginTerrainTextureScaleEdit(),
+                                            onChanged: controller
+                                                .setActiveFillTextureScale,
+                                            onChangeEnd: (_) => controller
+                                                .endTerrainTextureScaleEdit(),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  region == null
+                                                      ? 'Used by the next fill. Smaller values create finer detail.'
+                                                      : 'Editing ${material.name}. Changes preview live.',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall,
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: scale == 1
+                                                    ? null
+                                                    : controller
+                                                          .resetActiveFillTextureScale,
+                                                child: const Text('Reset'),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    );
+                                  },
+                                ),
                             ],
                           ),
                         ),
@@ -1124,11 +1440,16 @@ class _PaletteState extends State<_Palette> {
                               final material = materials[index];
                               return _AssetCard(
                                 name: material.name,
+                                badge: _index.packShortName(
+                                  material.sourcePack,
+                                ),
                                 thumbnailPath: material.thumbnailPath,
                                 fallbackIcon: Icons.brush_outlined,
                                 selected:
-                                    controller.mode ==
-                                        EnvironmentEditorMode.paint &&
+                                    (controller.mode ==
+                                            EnvironmentEditorMode.paint ||
+                                        controller.mode ==
+                                            EnvironmentEditorMode.fillGround) &&
                                     controller.selectedMaterialId ==
                                         material.id,
                                 onTap: () =>
@@ -1268,12 +1589,14 @@ class _PaletteState extends State<_Palette> {
                               final object = objects[index];
                               return _AssetCard(
                                 name: object.name,
-                                subtitle: object.categoryBreadcrumb,
-                                badge: switch (object.viewMode) {
-                                  EnvironmentAssetViewMode.fixed => 'FIXED',
-                                  EnvironmentAssetViewMode.fourWay => '4-WAY',
-                                  EnvironmentAssetViewMode.eightWay => '8-WAY',
-                                },
+                                subtitle:
+                                    '${_index.packName(object.sourcePack)} · ${object.categoryBreadcrumb}',
+                                badge:
+                                    '${_index.packShortName(object.sourcePack)} · ${switch (object.viewMode) {
+                                      EnvironmentAssetViewMode.fixed => 'FIXED',
+                                      EnvironmentAssetViewMode.fourWay => '4-WAY',
+                                      EnvironmentAssetViewMode.eightWay => '8-WAY',
+                                    }}',
                                 thumbnailPath: object.thumbnailPath,
                                 fallbackIcon: switch (object.topLevelCategory) {
                                   'Environment' => Icons.park_outlined,
@@ -1368,6 +1691,8 @@ class _BrushSlider extends StatelessWidget {
     required this.max,
     required this.divisions,
     required this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
   });
 
   final String label;
@@ -1376,6 +1701,8 @@ class _BrushSlider extends StatelessWidget {
   final double max;
   final int divisions;
   final ValueChanged<double> onChanged;
+  final ValueChanged<double>? onChangeStart;
+  final ValueChanged<double>? onChangeEnd;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -1390,7 +1717,9 @@ class _BrushSlider extends StatelessWidget {
           min: min,
           max: max,
           divisions: divisions,
+          onChangeStart: onChangeStart,
           onChanged: onChanged,
+          onChangeEnd: onChangeEnd,
         ),
       ),
     ],
@@ -1403,14 +1732,21 @@ String _categoryLabel(String category) {
 }
 
 const _allObjectCategories = '__all__';
+const _allSourcePacks = '__all_packs__';
 
 class _AssetPaletteIndex {
   _AssetPaletteIndex(EnvironmentCatalog catalog)
     : _materials = List.of(catalog.materials),
-      _objects = List.of(catalog.objects) {
+      _objects = List.of(catalog.objects),
+      sourcePacks = List.of(catalog.sourcePacks) {
+    _sourcePackNames.addEntries(
+      sourcePacks.map((pack) => MapEntry(pack.id, pack.name)),
+    );
     for (final material in _materials) {
       _materialSearch[material.id] = [
         material.name,
+        material.sourcePack,
+        packName(material.sourcePack),
         ...material.tags,
       ].join('\n').toLowerCase();
     }
@@ -1420,6 +1756,8 @@ class _AssetPaletteIndex {
         object.name,
         object.family,
         object.categoryBreadcrumb,
+        object.sourcePack,
+        packName(object.sourcePack),
         ...object.tags,
       ].join('\n').toLowerCase();
       final segments = object.categoryPath.isEmpty
@@ -1435,28 +1773,49 @@ class _AssetPaletteIndex {
 
   final List<EnvironmentMaterial> _materials;
   final List<EnvironmentObjectAsset> _objects;
+  final List<EnvironmentSourcePack> sourcePacks;
+  final Map<String, String> _sourcePackNames = {};
   final Map<String, String> _materialSearch = {};
   final Map<String, String> _objectSearch = {};
   final Map<String, int> categoryCounts = {};
   late final List<String> categories;
 
-  List<EnvironmentMaterial> materialsMatching(String query) {
+  String packName(String id) => _sourcePackNames[id] ?? id;
+
+  String packShortName(String id) => switch (id) {
+    'ow1' => 'CORE 1',
+    'ow2' => 'CORE 2',
+    'ow3' => 'CORE 3',
+    'nf' => 'NORTHFOLK',
+    'owdt' => 'DARK TOWN',
+    _ => id.toUpperCase(),
+  };
+
+  List<EnvironmentMaterial> materialsMatching(
+    String query, {
+    required String sourcePack,
+  }) {
     final terms = _terms(query);
-    if (terms.isEmpty) return _materials;
     return [
       for (final material in _materials)
-        if (_matches(_materialSearch[material.id]!, terms)) material,
+        if ((sourcePack == _allSourcePacks ||
+                material.sourcePack == sourcePack) &&
+            _matches(_materialSearch[material.id]!, terms))
+          material,
     ];
   }
 
   List<EnvironmentObjectAsset> objectsMatching(
     String query, {
     required String category,
+    required String sourcePack,
   }) {
     final terms = _terms(query);
     return [
       for (final object in _objects)
-        if ((category == _allObjectCategories ||
+        if ((sourcePack == _allSourcePacks ||
+                object.sourcePack == sourcePack) &&
+            (category == _allObjectCategories ||
                 object.categoryBreadcrumb == category ||
                 object.categoryBreadcrumb.startsWith('$category /')) &&
             _matches(_objectSearch[object.id]!, terms))
@@ -1685,6 +2044,8 @@ class _EditorDiagnosticsHudState extends State<_EditorDiagnosticsHud> {
             'pending ${widget.game.pendingImageCount}  '
             'terrain cache ${widget.game.terrainPictureCount}  '
             'rasters ${widget.game.terrainRasterCount}  '
+            'hi-res ${widget.game.highResolutionTerrainRasterCount}  '
+            '${widget.game.usesDirectTerrainRendering ? 'direct  ' : ''}'
             '${(widget.game.terrainRasterBytes / (1 << 20)).toStringAsFixed(1)} MiB  '
             'baking ${widget.game.pendingTerrainBakeCount}\n'
             '${widget.game.isAutoIdle ? 'idle' : '${widget.game.diagnosticsFps.toStringAsFixed(1)} fps'}  '
@@ -1804,6 +2165,10 @@ class _InspectorState extends State<_Inspector> {
       builder: (context, _) {
         final object = controller.selectedObject;
         final selectedObjects = controller.selectedObjects;
+        final terrainRegion = controller.selectedTerrainRegion;
+        final terrainMaterial = terrainRegion == null
+            ? null
+            : controller.catalog.materialById(terrainRegion.materialId);
         final asset = object == null
             ? null
             : controller.catalog.objectById(object.assetId);
@@ -1830,7 +2195,8 @@ class _InspectorState extends State<_Inspector> {
             ),
             const SizedBox(height: 6),
             Text(
-              '${controller.document.terrainStrokes.length} terrain strokes',
+              '${controller.document.terrainRegions.length} ground fills · '
+              '${controller.document.terrainStrokes.length} paint strokes',
             ),
             Text('${controller.document.objects.length} placed objects'),
             const Divider(height: 32),
@@ -1868,10 +2234,39 @@ class _InspectorState extends State<_Inspector> {
                 }),
               ),
             const Divider(height: 32),
-            if (object == null) ...[
+            if (object == null && terrainRegion == null) ...[
               const Text('No object selected'),
               const SizedBox(height: 8),
-              const Text('Choose Select, click an object, or drag a marquee.'),
+              const Text(
+                'Choose Select for objects or Edit fill for ground regions.',
+              ),
+            ] else if (object == null) ...[
+              Text(
+                terrainRegion!.resetsToDefault
+                    ? 'Clear-fill region'
+                    : terrainMaterial?.name ?? terrainRegion.materialId,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text('${terrainRegion.points.length} polygon points'),
+              if (!terrainRegion.resetsToDefault) ...[
+                Text(
+                  'texture size ${(terrainRegion.textureScale * 100).round()}%',
+                ),
+                Text(
+                  'repeat ${(terrainMaterial!.effectiveRepeatWorldWidth * terrainRegion.textureScale).toStringAsFixed(1)} × ${(terrainMaterial.effectiveRepeatWorldHeight * terrainRegion.textureScale).toStringAsFixed(1)} world units',
+                ),
+              ],
+              const SizedBox(height: 8),
+              const Text(
+                'Adjust texture size in the Ground palette. Click another region with Edit fill.',
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: controller.deleteSelected,
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Delete fill'),
+              ),
             ] else ...[
               Text(
                 selectedObjects.length == 1

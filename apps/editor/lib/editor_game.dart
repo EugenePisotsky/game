@@ -79,9 +79,14 @@ class EditorGame extends FlameGame {
   bool diagnosticsPaused = false;
 
   static const double elevationPixelsPerWorldUnit = 64;
-  static const int _terrainRasterResolution = 1024;
+  static const int _terrainRasterLowResolution = 1024;
+  static const int _terrainRasterHighResolution = 2048;
+  static const double _terrainHighResolutionZoom = 0.3;
+  static const double _terrainHighResolutionMargin = 512;
+  static const double _terrainDirectRenderZoom = 0.7;
   static const double _spatialCellSize = 256;
-  static const int _editorObjectMaximumDimension = 512;
+  static const int _editorObjectBaseDimension = 512;
+  static const int _editorObjectMaximumDimension = 4096;
   static const int _imageCacheBudgetBytes = 160 << 20;
 
   int get decodedImageCount => _loadedImages.length;
@@ -93,11 +98,15 @@ class EditorGame extends FlameGame {
   int get terrainPictureCount =>
       _terrainRasters.length + _emptyTerrainRasters.length;
   int get terrainRasterCount => _terrainRasters.length;
-  int get terrainRasterBytes =>
-      _terrainRasters.length *
-      _terrainRasterResolution *
-      _terrainRasterResolution *
-      4;
+  int get terrainRasterBytes => _terrainRasters.values.fold(
+    0,
+    (bytes, raster) => bytes + raster.image.width * raster.image.height * 4,
+  );
+  int get highResolutionTerrainRasterCount => _terrainRasters.values
+      .where((raster) => raster.resolution == _terrainRasterHighResolution)
+      .length;
+  bool get usesDirectTerrainRendering =>
+      loadedChunks != null && zoom >= _terrainDirectRenderZoom;
   int get pendingTerrainBakeCount =>
       _dirtyTerrainChunks.length + (_terrainBakeInFlight == null ? 0 : 1);
   int get updateTime => _updateMicroseconds ~/ 1000;
@@ -166,6 +175,8 @@ class EditorGame extends FlameGame {
     ..color = const ui.Color(0xAA78C6A3)
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 1.5;
+  final ui.Paint _terrainResetPaint = ui.Paint()
+    ..blendMode = ui.BlendMode.clear;
   final ui.Paint _footprintPaint = ui.Paint()
     ..color = const ui.Color(0xDD4EA8DE)
     ..style = ui.PaintingStyle.stroke
@@ -241,6 +252,8 @@ class EditorGame extends FlameGame {
     final materialIds = <String>{
       controller.document.baseMaterialId,
       controller.selectedMaterialId,
+      for (final region in controller.document.terrainRegions)
+        if (!region.resetsToDefault) region.materialId,
       for (final stroke in controller.document.terrainStrokes)
         stroke.materialId,
     };
@@ -259,29 +272,36 @@ class EditorGame extends FlameGame {
       _createMaterialPaints(id);
     }
     final preloadBounds = _visibleProjectedBounds.inflate(1024);
-    final preloadPaths = <String>{};
+    final preloadRequests = <String, int>{};
     for (final object in controller.document.objects) {
       final asset = controller.catalog.objectById(object.assetId);
       if (asset == null) continue;
+      final view = asset.viewFor(object.direction.name);
       final anchor = projection
           .worldToScreen(Vector2(object.x, object.y))
           .toOffset();
       if (preloadBounds.contains(anchor)) {
-        preloadPaths.add(asset.viewFor(object.direction.name).imagePath);
+        final maximumDimension = _objectDecodeMaximumDimension(asset, view);
+        preloadRequests.update(
+          view.imagePath,
+          (current) => math.max(current, maximumDimension),
+          ifAbsent: () => maximumDimension,
+        );
       }
     }
     await Future.wait([
-      for (final path in preloadPaths)
-        _loadImage(path, maximumDimension: _editorObjectMaximumDimension),
+      for (final request in preloadRequests.entries)
+        _loadImage(request.key, maximumDimension: request.value),
     ]);
     requestFrame(frames: 3);
   }
 
   Future<ui.Image?> _loadImage(String path, {int? maximumDimension}) async {
-    final loaded = _loadedImages[path];
-    if (loaded != null) {
+    final existing = _loadedImages[path];
+    if (existing != null &&
+        _decodedImageMeetsRequest(path, existing, maximumDimension)) {
       _touchImage(path);
-      return loaded;
+      return existing;
     }
     if (!_loadingImages.add(path)) return null;
     try {
@@ -290,11 +310,16 @@ class EditorGame extends FlameGame {
         maximumDimension: maximumDimension,
       );
       final image = loaded.image;
+      final previous = _loadedImages[path];
       _loadedImages[path] = image;
       _sprites[path] = Sprite(image);
       _sourceImageSizes[path] = (loaded.sourceWidth, loaded.sourceHeight);
       _touchImage(path);
-      _imageRevision++;
+      if (previous == null) {
+        _imageRevision++;
+      } else {
+        previous.dispose();
+      }
       requestFrame(frames: 2);
       return image;
     } finally {
@@ -310,6 +335,21 @@ class EditorGame extends FlameGame {
     path,
     maximumDimension: maximumDimension,
   );
+
+  bool _decodedImageMeetsRequest(
+    String path,
+    ui.Image image,
+    int? maximumDimension,
+  ) {
+    final sourceSize = _sourceImageSizes[path];
+    if (sourceSize == null) return maximumDimension != null;
+    final sourceMaximum = math.max(sourceSize.$1, sourceSize.$2);
+    final requestedMaximum = math.min(
+      maximumDimension ?? sourceMaximum,
+      sourceMaximum,
+    );
+    return math.max(image.width, image.height) >= requestedMaximum;
+  }
 
   void _touchImage(String path) {
     _imageLastUsedFrame[path] = _frameNumber;
@@ -382,9 +422,42 @@ class EditorGame extends FlameGame {
   Future<void> _loadObjectView(PlacedEnvironmentObject object) async {
     final asset = controller.catalog.objectById(object.assetId);
     if (asset == null) return;
+    final view = asset.viewFor(object.direction.name);
     await _loadImage(
-      asset.viewFor(object.direction.name).imagePath,
-      maximumDimension: _editorObjectMaximumDimension,
+      view.imagePath,
+      maximumDimension: _objectDecodeMaximumDimension(asset, view),
+    );
+  }
+
+  int _objectDecodeMaximumDimension(
+    EnvironmentObjectAsset asset,
+    EnvironmentObjectView view,
+  ) {
+    final knownSourceSize = _sourceImageSizes[view.imagePath];
+    final sourceWidth = view.logicalWidth > 0
+        ? view.logicalWidth
+        : knownSourceSize?.$1 ?? 0;
+    final sourceHeight = view.logicalHeight > 0
+        ? view.logicalHeight
+        : knownSourceSize?.$2 ?? 0;
+    if (sourceWidth <= 0 || sourceHeight <= 0) {
+      return _editorObjectBaseDimension;
+    }
+    final views = ui.PlatformDispatcher.instance.views;
+    final devicePixelRatio = views.isEmpty ? 1.0 : views.first.devicePixelRatio;
+    final requiredDimension =
+        math.max(sourceWidth, sourceHeight) *
+        asset.renderScale *
+        zoom *
+        devicePixelRatio;
+    for (final tier in const [512, 1024, 2048, 3072, 4096]) {
+      if (requiredDimension <= tier) {
+        return math.min(tier, math.max(sourceWidth, sourceHeight));
+      }
+    }
+    return math.min(
+      _editorObjectMaximumDimension,
+      math.max(sourceWidth, sourceHeight),
     );
   }
 
@@ -394,6 +467,25 @@ class EditorGame extends FlameGame {
     final world = projection.screenToWorld(projected);
     final point = WorldPoint(world.x, world.y);
     return controller.document.contains(point.x, point.y) ? point : null;
+  }
+
+  List<WorldPoint> worldPolygonForScreenRect(ui.Rect screenRect) {
+    final result = <WorldPoint>[];
+    for (final screen in [
+      Vector2(screenRect.left, screenRect.top),
+      Vector2(screenRect.right, screenRect.top),
+      Vector2(screenRect.right, screenRect.bottom),
+      Vector2(screenRect.left, screenRect.bottom),
+    ]) {
+      final world = projection.screenToWorld(_projectedAtScreen(screen));
+      result.add(
+        WorldPoint(
+          world.x.clamp(0, controller.document.width).toDouble(),
+          world.y.clamp(0, controller.document.height).toDouble(),
+        ),
+      );
+    }
+    return result;
   }
 
   List<String> hitTestObjectIds(Vector2 screen) {
@@ -554,12 +646,24 @@ class EditorGame extends FlameGame {
 
       _renderBaseGround(canvas);
       if (loadedChunks == null) {
+        canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
+        for (final region in controller.document.terrainRegions) {
+          _renderTerrainRegion(canvas, region);
+        }
+        canvas.restore();
+        canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
         for (final stroke in controller.document.terrainStrokes) {
           _renderStroke(canvas, stroke);
         }
+        canvas.restore();
       } else {
-        _synchronizeTerrainRasters();
-        _renderRasterChunkTerrain(canvas);
+        if (zoom >= _terrainDirectRenderZoom) {
+          _evictStaleTerrainRasters();
+          _renderDirectChunkTerrain(canvas);
+        } else {
+          _synchronizeTerrainRasters();
+          _renderRasterChunkTerrain(canvas);
+        }
         final activeStroke = controller.activeTerrainStroke;
         if (activeStroke != null) _renderStroke(canvas, activeStroke);
       }
@@ -597,7 +701,9 @@ class EditorGame extends FlameGame {
     }
     final texture = controller.catalog.materialById(document.baseMaterialId)!;
     final image = _loadedImages[texture.texturePath]!;
-    final texelsPerWorldUnit = 64.0;
+    final texelsPerWorldUnitX = image.width / texture.effectiveRepeatWorldWidth;
+    final texelsPerWorldUnitY =
+        image.height / texture.effectiveRepeatWorldHeight;
     final chunks = loadedChunks?.call();
     if (chunks == null) {
       _drawTexturedWorldQuad(
@@ -608,8 +714,8 @@ class EditorGame extends FlameGame {
         ui.Rect.fromLTWH(
           0,
           0,
-          document.width * texelsPerWorldUnit,
-          document.height * texelsPerWorldUnit,
+          document.width * texelsPerWorldUnitX,
+          document.height * texelsPerWorldUnitY,
         ),
         image,
       );
@@ -628,10 +734,10 @@ class EditorGame extends FlameGame {
         WorldPoint(maxX, maxY),
         paint,
         ui.Rect.fromLTWH(
-          minX * texelsPerWorldUnit,
-          minY * texelsPerWorldUnit,
-          (maxX - minX) * texelsPerWorldUnit,
-          (maxY - minY) * texelsPerWorldUnit,
+          minX * texelsPerWorldUnitX,
+          minY * texelsPerWorldUnitY,
+          (maxX - minX) * texelsPerWorldUnitX,
+          (maxY - minY) * texelsPerWorldUnitY,
         ),
         image,
       );
@@ -640,6 +746,10 @@ class EditorGame extends FlameGame {
 
   void _renderStroke(ui.Canvas canvas, TerrainStroke stroke) {
     if (stroke.points.isEmpty) return;
+    if (stroke.resetsToBase) {
+      canvas.drawPath(_worldPolygonPath(stroke.points), _terrainResetPaint);
+      return;
+    }
     final material = controller.catalog.materialById(stroke.materialId);
     final paint = _decalPaints[stroke.materialId];
     if (material == null) return;
@@ -654,7 +764,88 @@ class EditorGame extends FlameGame {
     }
   }
 
+  void _renderTerrainRegion(ui.Canvas canvas, TerrainRegion region) {
+    if (region.points.length < 3) return;
+    final path = _worldPolygonPath(region.points);
+    if (region.resetsToDefault) {
+      canvas.drawPath(path, _terrainResetPaint);
+      return;
+    }
+    final material = controller.catalog.materialById(region.materialId);
+    final paint = _repeatingPaints[region.materialId];
+    if (material == null) return;
+    if (paint == null) {
+      _loadMaterial(region.materialId);
+      return;
+    }
+    final image = _loadedImages[material.texturePath]!;
+    final minX = region.points.map((point) => point.x).reduce(math.min);
+    final minY = region.points.map((point) => point.y).reduce(math.min);
+    final maxX = region.points.map((point) => point.x).reduce(math.max);
+    final maxY = region.points.map((point) => point.y).reduce(math.max);
+    final texelsPerWorldUnitX =
+        image.width /
+        (material.effectiveRepeatWorldWidth * region.textureScale);
+    final texelsPerWorldUnitY =
+        image.height /
+        (material.effectiveRepeatWorldHeight * region.textureScale);
+    canvas.save();
+    canvas.clipPath(path);
+    _drawTexturedWorldQuad(
+      canvas,
+      WorldPoint(minX, minY),
+      WorldPoint(maxX, maxY),
+      paint,
+      ui.Rect.fromLTRB(
+        minX * texelsPerWorldUnitX,
+        minY * texelsPerWorldUnitY,
+        maxX * texelsPerWorldUnitX,
+        maxY * texelsPerWorldUnitY,
+      ),
+      image,
+    );
+    canvas.restore();
+  }
+
   void _synchronizeTerrainRasters() {
+    _evictStaleTerrainRasters();
+    final chunks = loadedChunks!.call();
+
+    final revision = controller.terrainRevision;
+    if (_seenTerrainRevision != revision) {
+      final changedStroke = revision == _seenTerrainRevision + 1
+          ? controller.lastTerrainChangedStroke
+          : null;
+      for (final coordinate in chunks) {
+        if (changedStroke == null ||
+            _strokeAffectsChunk(changedStroke, coordinate)) {
+          _dirtyTerrainChunks.add(coordinate);
+        }
+      }
+      _seenTerrainRevision = revision;
+    }
+
+    for (final coordinate in chunks) {
+      final raster = _terrainRasters[coordinate];
+      final isCached =
+          raster != null || _emptyTerrainRasters.contains(coordinate);
+      final resolutionChanged =
+          raster != null &&
+          raster.resolution != _terrainResolutionForChunk(coordinate);
+      if ((!isCached || resolutionChanged) &&
+          coordinate != _terrainBakeInFlight) {
+        _dirtyTerrainChunks.add(coordinate);
+      }
+    }
+
+    if (_terrainBakeInFlight == null && _dirtyTerrainChunks.isNotEmpty) {
+      final coordinate = _nextTerrainChunkToBake();
+      _dirtyTerrainChunks.remove(coordinate);
+      unawaited(_bakeTerrainChunk(coordinate));
+    }
+  }
+
+  void _evictStaleTerrainRasters() {
     final chunks = loadedChunks!.call();
     final stale = <EnvironmentChunkCoordinate>{
       ..._terrainRasters.keys.where(
@@ -672,39 +863,35 @@ class EditorGame extends FlameGame {
     _dirtyTerrainChunks.removeWhere(
       (coordinate) => !chunks.contains(coordinate),
     );
+  }
 
-    final revision = controller.terrainRevision;
-    if (_seenTerrainRevision != revision) {
-      final changedStroke = revision == _seenTerrainRevision + 1
-          ? controller.lastTerrainChangedStroke
-          : null;
-      for (final coordinate in chunks) {
-        if (changedStroke == null ||
-            _strokeAffectsChunk(changedStroke, coordinate)) {
-          _dirtyTerrainChunks.add(coordinate);
-        }
-      }
-      _seenTerrainRevision = revision;
-    }
-
-    for (final coordinate in chunks) {
-      final isCached =
-          _terrainRasters.containsKey(coordinate) ||
-          _emptyTerrainRasters.contains(coordinate);
-      if (!isCached && coordinate != _terrainBakeInFlight) {
-        _dirtyTerrainChunks.add(coordinate);
+  EnvironmentChunkCoordinate _nextTerrainChunkToBake() {
+    final highResolutionBounds = _visibleProjectedBounds.inflate(
+      _terrainHighResolutionMargin,
+    );
+    for (final coordinate in _dirtyTerrainChunks) {
+      if (_terrainResolutionForChunk(coordinate) ==
+              _terrainRasterHighResolution &&
+          _chunkProjectedBounds(coordinate).overlaps(highResolutionBounds)) {
+        return coordinate;
       }
     }
+    return _dirtyTerrainChunks.first;
+  }
 
-    if (_terrainBakeInFlight == null && _dirtyTerrainChunks.isNotEmpty) {
-      final coordinate = _dirtyTerrainChunks.first;
-      _dirtyTerrainChunks.remove(coordinate);
-      unawaited(_bakeTerrainChunk(coordinate));
+  int _terrainResolutionForChunk(EnvironmentChunkCoordinate coordinate) {
+    if (zoom < _terrainHighResolutionZoom) {
+      return _terrainRasterLowResolution;
     }
+    final highResolutionBounds = _visibleProjectedBounds.inflate(
+      _terrainHighResolutionMargin,
+    );
+    return _chunkProjectedBounds(coordinate).overlaps(highResolutionBounds)
+        ? _terrainRasterHighResolution
+        : _terrainRasterLowResolution;
   }
 
   void _renderRasterChunkTerrain(ui.Canvas canvas) {
-    final activeStroke = controller.activeTerrainStroke;
     final visible = _visibleProjectedBounds;
     for (final coordinate in loadedChunks!.call()) {
       if (!_chunkProjectedBounds(coordinate).overlaps(visible)) continue;
@@ -714,16 +901,7 @@ class EditorGame extends FlameGame {
           (!_terrainRasters.containsKey(coordinate) &&
               !_emptyTerrainRasters.contains(coordinate));
       if (needsFallback) {
-        canvas
-          ..save()
-          ..clipPath(_chunkPath(coordinate));
-        for (final stroke in controller.document.terrainStrokes) {
-          if (!identical(stroke, activeStroke) &&
-              _strokeAffectsChunk(stroke, coordinate)) {
-            _renderStroke(canvas, stroke);
-          }
-        }
-        canvas.restore();
+        _renderDirectTerrainForChunk(canvas, coordinate);
         continue;
       }
 
@@ -747,8 +925,47 @@ class EditorGame extends FlameGame {
     }
   }
 
-  Future<void> _bakeTerrainChunk(EnvironmentChunkCoordinate coordinate) async {
+  void _renderDirectChunkTerrain(ui.Canvas canvas) {
+    final visible = _visibleProjectedBounds;
+    for (final coordinate in loadedChunks!.call()) {
+      if (_chunkProjectedBounds(coordinate).overlaps(visible)) {
+        _renderDirectTerrainForChunk(canvas, coordinate);
+      }
+    }
+  }
+
+  void _renderDirectTerrainForChunk(
+    ui.Canvas canvas,
+    EnvironmentChunkCoordinate coordinate,
+  ) {
+    final bounds = _chunkProjectedBounds(coordinate);
+    canvas.saveLayer(bounds, ui.Paint());
+    canvas.clipPath(_chunkPath(coordinate));
+    for (final region in controller.document.terrainRegions) {
+      if (_regionAffectsChunk(region, coordinate)) {
+        _renderTerrainRegion(canvas, region);
+      }
+    }
+    canvas.restore();
+
     final activeStroke = controller.activeTerrainStroke;
+    canvas.saveLayer(bounds, ui.Paint());
+    canvas.clipPath(_chunkPath(coordinate));
+    for (final stroke in controller.document.terrainStrokes) {
+      if (!identical(stroke, activeStroke) &&
+          _strokeAffectsChunk(stroke, coordinate)) {
+        _renderStroke(canvas, stroke);
+      }
+    }
+    canvas.restore();
+  }
+
+  Future<void> _bakeTerrainChunk(EnvironmentChunkCoordinate coordinate) async {
+    final resolution = _terrainResolutionForChunk(coordinate);
+    final activeStroke = controller.activeTerrainStroke;
+    final regions = controller.document.terrainRegions
+        .where((region) => _regionAffectsChunk(region, coordinate))
+        .toList();
     final strokes = controller.document.terrainStrokes
         .where(
           (stroke) =>
@@ -756,7 +973,18 @@ class EditorGame extends FlameGame {
               _strokeAffectsChunk(stroke, coordinate),
         )
         .toList();
+    for (final region in regions) {
+      if (region.resetsToDefault) continue;
+      final material = controller.catalog.materialById(region.materialId);
+      if (material == null) continue;
+      if (!_loadedImages.containsKey(material.texturePath)) {
+        unawaited(_loadMaterial(region.materialId));
+        _dirtyTerrainChunks.add(coordinate);
+        return;
+      }
+    }
     for (final stroke in strokes) {
+      if (stroke.resetsToBase) continue;
       final material = controller.catalog.materialById(stroke.materialId);
       if (material == null) continue;
       if (!_loadedImages.containsKey(material.decalPath)) {
@@ -768,7 +996,7 @@ class EditorGame extends FlameGame {
 
     final chunks = loadedChunks!.call();
     if (!chunks.contains(coordinate)) return;
-    if (strokes.isEmpty) {
+    if (regions.isEmpty && strokes.isEmpty) {
       _terrainRasters.remove(coordinate)?.dispose();
       _emptyTerrainRasters.add(coordinate);
       return;
@@ -778,10 +1006,39 @@ class EditorGame extends FlameGame {
     final generation = _terrainCacheGeneration;
     final originX = coordinate.x * chunkSize;
     final originY = coordinate.y * chunkSize;
-    final pixelsPerWorldUnit = _terrainRasterResolution / chunkSize;
+    final pixelsPerWorldUnit = resolution / chunkSize;
     final recorder = ui.PictureRecorder();
     final rasterCanvas = ui.Canvas(recorder);
+    final rasterBounds = ui.Rect.fromLTWH(
+      0,
+      0,
+      resolution.toDouble(),
+      resolution.toDouble(),
+    );
+    rasterCanvas.saveLayer(rasterBounds, ui.Paint());
+    for (final region in regions) {
+      _renderRasterTerrainRegion(
+        rasterCanvas,
+        region,
+        originX: originX,
+        originY: originY,
+        pixelsPerWorldUnit: pixelsPerWorldUnit,
+      );
+    }
+    rasterCanvas.restore();
+    rasterCanvas.saveLayer(rasterBounds, ui.Paint());
     for (final stroke in strokes) {
+      if (stroke.resetsToBase) {
+        final path = ui.Path();
+        for (var index = 0; index < stroke.points.length; index++) {
+          final point = stroke.points[index];
+          final x = (point.x - originX) * pixelsPerWorldUnit;
+          final y = (point.y - originY) * pixelsPerWorldUnit;
+          index == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
+        }
+        rasterCanvas.drawPath(path..close(), _terrainResetPaint);
+        continue;
+      }
       final material = controller.catalog.materialById(stroke.materialId);
       if (material == null) continue;
       final image = _loadedImages[material.decalPath];
@@ -811,15 +1068,18 @@ class EditorGame extends FlameGame {
         );
       }
     }
+    rasterCanvas.restore();
     final picture = recorder.endRecording();
     try {
-      final image = await picture.toImage(
-        _terrainRasterResolution,
-        _terrainRasterResolution,
-      );
+      final image = await picture.toImage(resolution, resolution);
       if (generation != _terrainCacheGeneration ||
           !loadedChunks!.call().contains(coordinate)) {
         image.dispose();
+        return;
+      }
+      if (resolution != _terrainResolutionForChunk(coordinate)) {
+        image.dispose();
+        _dirtyTerrainChunks.add(coordinate);
         return;
       }
       final raster = _TerrainRaster(
@@ -870,6 +1130,111 @@ class EditorGame extends FlameGame {
       maxX: maxX,
       maxY: maxY,
     ).overlapsChunk(coordinate, chunkSize);
+  }
+
+  bool _regionAffectsChunk(
+    TerrainRegion region,
+    EnvironmentChunkCoordinate coordinate,
+  ) {
+    if (region.points.length < 3) return false;
+    final minX = region.points.map((point) => point.x).reduce(math.min);
+    final minY = region.points.map((point) => point.y).reduce(math.min);
+    final maxX = region.points.map((point) => point.x).reduce(math.max);
+    final maxY = region.points.map((point) => point.y).reduce(math.max);
+    return EnvironmentObjectBounds(
+      minX: minX,
+      minY: minY,
+      maxX: maxX,
+      maxY: maxY,
+    ).overlapsChunk(coordinate, chunkSize);
+  }
+
+  void _renderRasterTerrainRegion(
+    ui.Canvas canvas,
+    TerrainRegion region, {
+    required double originX,
+    required double originY,
+    required double pixelsPerWorldUnit,
+  }) {
+    final path = ui.Path();
+    for (var index = 0; index < region.points.length; index++) {
+      final point = region.points[index];
+      final x = (point.x - originX) * pixelsPerWorldUnit;
+      final y = (point.y - originY) * pixelsPerWorldUnit;
+      index == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
+    }
+    path.close();
+    if (region.resetsToDefault) {
+      canvas.drawPath(path, _terrainResetPaint);
+      return;
+    }
+    final material = controller.catalog.materialById(region.materialId);
+    if (material == null) return;
+    final image = _loadedImages[material.texturePath];
+    if (image == null) return;
+    final tileWorldWidth =
+        material.effectiveRepeatWorldWidth * region.textureScale;
+    final tileWorldHeight =
+        material.effectiveRepeatWorldHeight * region.textureScale;
+    if (tileWorldWidth <= 0 || tileWorldHeight <= 0) return;
+    final minX = math.max(
+      originX,
+      region.points.map((point) => point.x).reduce(math.min),
+    );
+    final minY = math.max(
+      originY,
+      region.points.map((point) => point.y).reduce(math.min),
+    );
+    final maxX = math.min(
+      originX + chunkSize,
+      region.points.map((point) => point.x).reduce(math.max),
+    );
+    final maxY = math.min(
+      originY + chunkSize,
+      region.points.map((point) => point.y).reduce(math.max),
+    );
+    final firstTileX = (minX / tileWorldWidth).floor();
+    final firstTileY = (minY / tileWorldHeight).floor();
+    final lastTileX = (maxX / tileWorldWidth).ceil();
+    final lastTileY = (maxY / tileWorldHeight).ceil();
+    final source = ui.Rect.fromLTWH(
+      0,
+      0,
+      image.width.toDouble(),
+      image.height.toDouble(),
+    );
+    final paint = ui.Paint()..filterQuality = ui.FilterQuality.low;
+    canvas.save();
+    canvas.clipPath(path);
+    for (var tileY = firstTileY; tileY < lastTileY; tileY++) {
+      for (var tileX = firstTileX; tileX < lastTileX; tileX++) {
+        canvas.drawImageRect(
+          image,
+          source,
+          ui.Rect.fromLTWH(
+            (tileX * tileWorldWidth - originX) * pixelsPerWorldUnit,
+            (tileY * tileWorldHeight - originY) * pixelsPerWorldUnit,
+            tileWorldWidth * pixelsPerWorldUnit,
+            tileWorldHeight * pixelsPerWorldUnit,
+          ),
+          paint,
+        );
+      }
+    }
+    canvas.restore();
+  }
+
+  ui.Path _worldPolygonPath(List<WorldPoint> points) {
+    final path = ui.Path();
+    for (var index = 0; index < points.length; index++) {
+      final projected = projection.worldToScreen(
+        Vector2(points[index].x, points[index].y),
+      );
+      index == 0
+          ? path.moveTo(projected.x, projected.y)
+          : path.lineTo(projected.x, projected.y);
+    }
+    return path..close();
   }
 
   void _drawStamp(
@@ -934,8 +1299,21 @@ class EditorGame extends FlameGame {
       final object = entry.object;
       final view = entry.view;
       final sprite = _sprites[view.imagePath];
+      final requestedDimension = _objectDecodeMaximumDimension(
+        entry.asset,
+        view,
+      );
+      if (sprite == null ||
+          !_decodedImageMeetsRequest(
+            view.imagePath,
+            sprite.image,
+            requestedDimension,
+          )) {
+        unawaited(
+          _loadImage(view.imagePath, maximumDimension: requestedDimension),
+        );
+      }
       if (sprite == null) {
-        _loadObjectView(object);
         continue;
       }
       _touchImage(view.imagePath);
@@ -974,11 +1352,23 @@ class EditorGame extends FlameGame {
       final sprite = _sprites[view.imagePath];
       final sourceSize = _sourceImageSizes[view.imagePath];
       if (sprite == null || sourceSize == null) {
-        _loadImage(
-          view.imagePath,
-          maximumDimension: _editorObjectMaximumDimension,
+        unawaited(
+          _loadImage(
+            view.imagePath,
+            maximumDimension: _objectDecodeMaximumDimension(asset, view),
+          ),
         );
         continue;
+      }
+      final requestedDimension = _objectDecodeMaximumDimension(asset, view);
+      if (!_decodedImageMeetsRequest(
+        view.imagePath,
+        sprite.image,
+        requestedDimension,
+      )) {
+        unawaited(
+          _loadImage(view.imagePath, maximumDimension: requestedDimension),
+        );
       }
       _touchImage(view.imagePath);
       sprite.render(
@@ -1007,6 +1397,10 @@ class EditorGame extends FlameGame {
   }
 
   void _renderSelection(ui.Canvas canvas) {
+    final terrainRegion = controller.selectedTerrainRegion;
+    if (terrainRegion != null) {
+      canvas.drawPath(_worldPolygonPath(terrainRegion.points), _selectionPaint);
+    }
     final hoveredId = controller.hoveredObjectId;
     if (hoveredId != null &&
         !controller.selectedObjectIds.contains(hoveredId)) {
@@ -1609,6 +2003,7 @@ class _TerrainRaster {
 
   final ui.Image image;
   final ui.Paint paint;
+  int get resolution => image.width;
 
   void dispose() => image.dispose();
 }

@@ -8,7 +8,7 @@ void main() {
     'loads a generated environment image from the repository workspace',
     () async {
       final image = await loadGeneratedEnvironmentImage(
-        'environment_generated/objects/tree/002_1.png',
+        'environment_generated/objects/ow3/tree/002_1.png',
       );
       expect(image.width, greaterThan(0));
       expect(image.height, greaterThan(0));
@@ -20,7 +20,7 @@ void main() {
     'editor image proxy bounds decoded pixels but keeps source size',
     () async {
       final loaded = await loadWorkspaceEnvironmentImageForEditor(
-        'environment_generated/objects/tree/002_1.png',
+        'environment_generated/objects/ow3/tree/002_1.png',
         maximumDimension: 64,
       );
       expect(loaded.image.width, lessThanOrEqualTo(64));

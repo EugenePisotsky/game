@@ -131,6 +131,22 @@ class EditorChunkSession {
   }
 
   void capture(EnvironmentDocument document, {bool markDirty = true}) {
+    if (manifest.baseMaterialId != document.baseMaterialId) {
+      _manifest = EnvironmentWorldManifest(
+        id: manifest.id,
+        name: manifest.name,
+        chunkSize: manifest.chunkSize,
+        width: manifest.width,
+        height: manifest.height,
+        baseMaterialId: document.baseMaterialId,
+        chunks: manifest.chunks,
+        playerSpawn: manifest.playerSpawn,
+        travelPoints: manifest.travelPoints,
+        editorLayers: manifest.editorLayers,
+        activeLayerId: manifest.activeLayerId,
+      );
+      _manifestDirty = true;
+    }
     _editorLayers = [
       for (final layer in document.editorLayers)
         EditorLayer.fromJson(layer.toJson()),
@@ -263,6 +279,7 @@ class EditorChunkSession {
         coordinate: previous.coordinate,
         size: previous.size,
         baseMaterialId: previous.baseMaterialId,
+        terrainRegions: previous.terrainRegions,
         terrainStrokes: previous.terrainStrokes,
         objects: objectsByChunk[coordinate],
         overlapObjectIds: {
@@ -409,6 +426,8 @@ class EditorChunkSession {
   }
 
   EnvironmentDocument buildDocument() {
+    final regions = <TerrainRegion>[];
+    final regionIds = <String>{};
     final strokes = <TerrainStroke>[];
     final strokeKeys = <String>{};
     final objects = <PlacedEnvironmentObject>[];
@@ -418,11 +437,30 @@ class EditorChunkSession {
       if (chunk == null) continue;
       final originX = coordinate.x * manifest.chunkSize;
       final originY = coordinate.y * manifest.chunkSize;
+      for (final region in chunk.terrainRegions) {
+        if (!regionIds.add(region.id)) continue;
+        regions.add(
+          TerrainRegion(
+            id: region.id,
+            materialId: region.materialId,
+            resetsToDefault: region.resetsToDefault,
+            edgeBlend: region.edgeBlend,
+            textureScale: region.textureScale,
+            seed: region.seed,
+            order: region.order,
+            points: [
+              for (final point in region.points)
+                WorldPoint(point.x + originX, point.y + originY),
+            ],
+          ),
+        );
+      }
       for (final stroke in chunk.terrainStrokes) {
         final global = TerrainStroke(
           materialId: stroke.materialId,
           radius: stroke.radius,
           opacity: stroke.opacity,
+          resetsToBase: stroke.resetsToBase,
           seed: stroke.seed,
           spacing: stroke.spacing,
           scatter: stroke.scatter,
@@ -438,12 +476,14 @@ class EditorChunkSession {
       }
       objects.addAll(chunk.worldObjects);
     }
+    regions.sort((a, b) => a.order.compareTo(b.order));
     return EnvironmentDocument(
       id: manifest.id,
       name: manifest.name,
       width: manifest.width.ceil(),
       height: manifest.height.ceil(),
       baseMaterialId: manifest.baseMaterialId,
+      terrainRegions: regions,
       terrainStrokes: strokes,
       objects: objects,
       editorLayers: _editorLayers,

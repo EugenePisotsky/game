@@ -84,6 +84,7 @@ class TerrainStroke {
     required this.radius,
     required this.opacity,
     required this.points,
+    this.resetsToBase = false,
     this.seed = 0,
     this.spacing = legacySpacing,
     this.scatter = 0,
@@ -97,18 +98,21 @@ class TerrainStroke {
   final double radius;
   final double opacity;
   final List<WorldPoint> points;
+  final bool resetsToBase;
   final int seed;
   final double spacing;
   final double scatter;
   final double sizeJitter;
   final double opacityJitter;
 
-  double get maximumStampExtent => radius * (1 + scatter + sizeJitter);
+  double get maximumStampExtent =>
+      resetsToBase ? 0 : radius * (1 + scatter + sizeJitter);
 
   Map<String, Object> toJson() => {
     'materialId': materialId,
     'radius': radius,
     'opacity': opacity,
+    if (resetsToBase) 'resetsToBase': true,
     'seed': seed,
     'spacing': spacing,
     'scatter': scatter,
@@ -121,12 +125,85 @@ class TerrainStroke {
     materialId: json['materialId'] as String,
     radius: (json['radius'] as num).toDouble(),
     opacity: (json['opacity'] as num).toDouble(),
+    resetsToBase: json['resetsToBase'] as bool? ?? false,
     seed: (json['seed'] as num?)?.toInt() ?? 0,
     spacing: (json['spacing'] as num? ?? TerrainStroke.legacySpacing)
         .toDouble(),
     scatter: (json['scatter'] as num? ?? 0).toDouble(),
     sizeJitter: (json['sizeJitter'] as num? ?? 0).toDouble(),
     opacityJitter: (json['opacityJitter'] as num? ?? 0).toDouble(),
+    points: [
+      for (final value in json['points'] as List<Object?>)
+        WorldPoint.fromJson(value as Map<String, Object?>),
+    ],
+  );
+}
+
+/// An ordered, opaque material assignment below detail brush strokes.
+///
+/// Regions are intentionally independent from runtime chunks: a single
+/// authored polygon may cross any number of chunks and is clipped only when
+/// serialized or rendered. A reset region clears earlier regional fills and
+/// reveals the document's current default material.
+class TerrainRegion {
+  TerrainRegion({
+    required this.id,
+    required this.materialId,
+    required this.points,
+    this.resetsToDefault = false,
+    this.edgeBlend = 0,
+    this.textureScale = 1,
+    this.seed = 0,
+    this.order = 0,
+  });
+
+  final String id;
+  final String materialId;
+  final List<WorldPoint> points;
+  final bool resetsToDefault;
+  final double edgeBlend;
+  final double textureScale;
+  final int seed;
+  final int order;
+
+  TerrainRegion copyWith({
+    String? materialId,
+    List<WorldPoint>? points,
+    bool? resetsToDefault,
+    double? edgeBlend,
+    double? textureScale,
+    int? seed,
+    int? order,
+  }) => TerrainRegion(
+    id: id,
+    materialId: materialId ?? this.materialId,
+    points: points ?? this.points,
+    resetsToDefault: resetsToDefault ?? this.resetsToDefault,
+    edgeBlend: edgeBlend ?? this.edgeBlend,
+    textureScale: textureScale ?? this.textureScale,
+    seed: seed ?? this.seed,
+    order: order ?? this.order,
+  );
+
+  Map<String, Object> toJson() => {
+    'id': id,
+    'materialId': materialId,
+    if (resetsToDefault) 'resetsToDefault': true,
+    'edgeBlend': edgeBlend,
+    'textureScale': textureScale,
+    'seed': seed,
+    'order': order,
+    'points': [for (final point in points) point.toJson()],
+  };
+
+  factory TerrainRegion.fromJson(Map<String, Object?> json) => TerrainRegion(
+    id: json['id'] as String,
+    materialId: json['materialId'] as String,
+    resetsToDefault: json['resetsToDefault'] as bool? ?? false,
+    edgeBlend: (json['edgeBlend'] as num? ?? 0).toDouble(),
+    textureScale: (json['textureScale'] as num? ?? 1).toDouble(),
+    seed: (json['seed'] as num?)?.toInt() ?? 0,
+    order: (json['order'] as num?)?.toInt() ?? 0,
     points: [
       for (final value in json['points'] as List<Object?>)
         WorldPoint.fromJson(value as Map<String, Object?>),
@@ -149,7 +226,10 @@ class TerrainBrushStamp {
 /// Converts a pointer polyline into stable brush stamps whose density does not
 /// depend on the platform's pointer-event frequency.
 Iterable<TerrainBrushStamp> terrainStrokeStamps(TerrainStroke stroke) sync* {
-  if (stroke.points.isEmpty || stroke.radius <= 0 || stroke.opacity <= 0) {
+  if (stroke.resetsToBase ||
+      stroke.points.isEmpty ||
+      stroke.radius <= 0 ||
+      stroke.opacity <= 0) {
     return;
   }
   final spacing = math.max(0.15, stroke.radius * stroke.spacing);
@@ -214,19 +294,58 @@ double _strokeRandom(int seed, int stampIndex, int channel) {
   return (value & 0xFFFFFFFF) / 0x100000000;
 }
 
-/// Returns the visually dominant painted material at [point]. Later strokes
-/// override earlier strokes, matching the renderer's draw order.
+/// Returns the regional material below detail paint at [point]. Later regions
+/// override earlier regions, matching the renderer's draw order.
+String environmentBaseMaterialAtPoint(
+  EnvironmentDocument document,
+  WorldPoint point,
+) {
+  for (final region in document.terrainRegions.reversed) {
+    if (!_pointInPolygon(point, region.points)) continue;
+    return region.resetsToDefault ? document.baseMaterialId : region.materialId;
+  }
+  return document.baseMaterialId;
+}
+
+/// Returns the visually dominant terrain material at [point]. Detail strokes
+/// sit above regional fills; reset masks reveal that regional layer.
 String environmentMaterialAtPoint(
   EnvironmentDocument document,
   WorldPoint point, {
   double coverage = 0.75,
 }) {
   for (final stroke in document.terrainStrokes.reversed) {
+    if (stroke.resetsToBase) {
+      if (_pointInPolygon(point, stroke.points)) {
+        return environmentBaseMaterialAtPoint(document, point);
+      }
+      continue;
+    }
     if (_terrainStrokeCovers(stroke, point, coverage)) {
       return stroke.materialId;
     }
   }
-  return document.baseMaterialId;
+  return environmentBaseMaterialAtPoint(document, point);
+}
+
+bool _pointInPolygon(WorldPoint point, List<WorldPoint> polygon) {
+  if (polygon.length < 3) return false;
+  var inside = false;
+  for (
+    var current = 0, previous = polygon.length - 1;
+    current < polygon.length;
+    previous = current++
+  ) {
+    final a = polygon[current];
+    final b = polygon[previous];
+    if (_segmentDistanceSquared(point, a, b) < 1e-12) return true;
+    final crosses = (a.y > point.y) != (b.y > point.y);
+    if (crosses &&
+        point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) {
+      inside = !inside;
+    }
+  }
+  return inside;
 }
 
 bool _terrainStrokeCovers(
@@ -340,12 +459,14 @@ class EnvironmentDocument {
     required this.width,
     required this.height,
     required this.baseMaterialId,
+    List<TerrainRegion>? terrainRegions,
     List<TerrainStroke>? terrainStrokes,
     List<PlacedEnvironmentObject>? objects,
     List<EditorLayer>? editorLayers,
     String? activeLayerId,
     this.schemaVersion = currentSchemaVersion,
-  }) : terrainStrokes = List.of(terrainStrokes ?? const []),
+  }) : terrainRegions = List.of(terrainRegions ?? const []),
+       terrainStrokes = List.of(terrainStrokes ?? const []),
        objects = List.of(objects ?? const []),
        editorLayers = List.of(editorLayers ?? defaultEditorLayers()),
        activeLayerId = activeLayerId ?? rootLayerId {
@@ -375,7 +496,7 @@ class EnvironmentDocument {
     }
   }
 
-  static const currentSchemaVersion = 3;
+  static const currentSchemaVersion = 4;
   static const rootLayerId = 'layer_world';
 
   static List<EditorLayer> defaultEditorLayers() => [
@@ -388,6 +509,7 @@ class EnvironmentDocument {
   final int width;
   final int height;
   String baseMaterialId;
+  final List<TerrainRegion> terrainRegions;
   final List<TerrainStroke> terrainStrokes;
   final List<PlacedEnvironmentObject> objects;
   final List<EditorLayer> editorLayers;
@@ -410,6 +532,7 @@ class EnvironmentDocument {
     'width': width,
     'height': height,
     'baseMaterialId': baseMaterialId,
+    'terrainRegions': [for (final region in terrainRegions) region.toJson()],
     'terrainStrokes': [for (final stroke in terrainStrokes) stroke.toJson()],
     'objects': [for (final object in objects) object.toJson()],
     'editorLayers': [for (final layer in editorLayers) layer.toJson()],
@@ -436,6 +559,11 @@ class EnvironmentDocument {
       width: (json['width'] as num).toInt(),
       height: (json['height'] as num).toInt(),
       baseMaterialId: json['baseMaterialId'] as String,
+      terrainRegions: [
+        for (final value
+            in json['terrainRegions'] as List<Object?>? ?? const [])
+          TerrainRegion.fromJson(value as Map<String, Object?>),
+      ],
       terrainStrokes: [
         for (final value
             in json['terrainStrokes'] as List<Object?>? ?? const [])

@@ -148,6 +148,11 @@ void main() {
     );
     final document = await session.initialize();
 
+    document.baseMaterialId = 'mud';
+    session.capture(document);
+    expect(session.manifest.baseMaterialId, 'mud');
+    expect(session.manifestDirty, isTrue);
+
     final result = await session.extendWorld(
       document,
       EnvironmentWorldEdge.left,

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "worldId": "environment_starter",
   "coordinate": {
     "x": 4,
@@ -7,6 +7,7 @@
   },
   "size": 32.0,
   "baseMaterialId": "ow3.ground.meadow",
+  "terrainRegions": [],
   "terrainStrokes": [],
   "objects": [
     {

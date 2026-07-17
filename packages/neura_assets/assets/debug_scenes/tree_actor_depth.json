@@ -1,13 +1,17 @@
 {
   "id": "tree_actor_depth",
   "description": "Actor and tree share the depth-sorted band around the tree contact point.",
-  "camera": {"x": 4.6, "y": 9.8},
-  "player": {"x": 4.6, "y": 9.8},
+  "camera": {"x": 93.7, "y": 89.7},
+  "player": {"x": 93.7, "y": 89.7},
   "facing": "north",
   "viewportWidth": 800,
   "viewportHeight": 600,
   "clockSeconds": 0.2,
   "randomSeed": 2102,
-  "relevantObjectIds": ["object_185"],
-  "expectedLoadedChunks": [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 1}]
+  "relevantObjectIds": ["object_hke4fcwbdq_0_73"],
+  "expectedLoadedChunks": [
+    {"x": 1, "y": 1}, {"x": 2, "y": 1}, {"x": 3, "y": 1},
+    {"x": 1, "y": 2}, {"x": 2, "y": 2}, {"x": 3, "y": 2},
+    {"x": 1, "y": 3}, {"x": 2, "y": 3}, {"x": 3, "y": 3}
+  ]
 }

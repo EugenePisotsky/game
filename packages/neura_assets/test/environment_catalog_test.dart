@@ -59,6 +59,65 @@ void main() {
     );
   });
 
+  test('catalog exposes source packs and logical sprite dimensions', () {
+    final catalog = EnvironmentCatalog.fromJsonString('''
+      {
+        "sourcePacks": [{"id": "owdt", "name": "Dark Town"}],
+        "materials": [
+          {
+            "id": "ground",
+            "name": "Ground",
+            "sourcePack": "owdt",
+            "texture": "ground.png",
+            "decal": "decal.png",
+            "textureLogicalWidth": 2048,
+            "textureLogicalHeight": 2048,
+            "repeatWorldWidth": 6.5,
+            "repeatWorldHeight": 7.5
+          }
+        ],
+        "objects": [
+          {
+            "id": "building",
+            "name": "Building",
+            "category": "Buildings",
+            "sourcePack": "owdt",
+            "renderScale": 0.25,
+            "views": {
+              "south": {
+                "image": "small_release.png",
+                "logicalWidth": 2740,
+                "logicalHeight": 3001
+              }
+            }
+          }
+        ]
+      }
+    ''');
+
+    expect(catalog.sourcePacks.single.name, 'Dark Town');
+    expect(catalog.materials.single.sourcePack, 'owdt');
+    expect(catalog.materials.single.textureLogicalWidth, 2048);
+    expect(catalog.materials.single.effectiveRepeatWorldWidth, 6.5);
+    expect(catalog.materials.single.effectiveRepeatWorldHeight, 7.5);
+    expect(catalog.objects.single.views['south']?.logicalWidth, 2740);
+    expect(catalog.objects.single.views['south']?.logicalHeight, 3001);
+  });
+
+  test('legacy material repeat size follows logical texture dimensions', () {
+    const material = EnvironmentMaterial(
+      id: 'legacy',
+      name: 'Legacy',
+      texturePath: 'ground.png',
+      decalPath: 'decal.png',
+      textureLogicalWidth: 512,
+      textureLogicalHeight: 1024,
+    );
+
+    expect(material.effectiveRepeatWorldWidth, 8);
+    expect(material.effectiveRepeatWorldHeight, 16);
+  });
+
   test('legacy catalogs infer ground cover without changing other props', () {
     const source = '''
       {

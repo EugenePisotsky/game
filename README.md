@@ -35,10 +35,17 @@ cd apps/editor
 flutter run -d macos
 ```
 
+For release-mode editor profiling, use the launcher that avoids the
+memory-intensive Material icon subsetting step:
+
+```sh
+apps/editor/tool/run_macos_release.sh
+```
+
 ## World architecture
 
-- World positions use continuous tile coordinates with a native 128x64
-  isometric footprint.
+- World positions use continuous tile coordinates with a true-isometric
+  128x90.51 footprint calibrated to the source art.
 - `ChunkManager` retains only the chunks near the player.
 - Ground layers, roads, vegetation, characters, and the subtle grid share the
   same projection and depth ordering.

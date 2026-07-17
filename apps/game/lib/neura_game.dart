@@ -93,6 +93,8 @@ class NeuraGame extends FlameGame
   final ui.Paint _navigationPathPaint = ui.Paint()
     ..color = const ui.Color(0xFF71C4FF)
     ..style = ui.PaintingStyle.stroke;
+  final ui.Paint _terrainResetPaint = ui.Paint()
+    ..blendMode = ui.BlendMode.clear;
 
   static final Float64List _identityMatrix = Float64List.fromList([
     1,
@@ -273,6 +275,9 @@ class NeuraGame extends FlameGame
     final usedMaterialIds = <String>{
       worldManifest.baseMaterialId,
       for (final chunk in chunkStreamer.loadedChunks.values)
+        for (final region in chunk.terrainRegions)
+          if (!region.resetsToDefault) region.materialId,
+      for (final chunk in chunkStreamer.loadedChunks.values)
         for (final stroke in chunk.terrainStrokes) stroke.materialId,
     };
     final usedMaterials = <EnvironmentMaterial>[];
@@ -334,40 +339,69 @@ class NeuraGame extends FlameGame
     }
   }
 
-  EnvironmentDocument _documentFromLoadedChunks() => EnvironmentDocument(
-    id: worldManifest.id,
-    name: worldManifest.name,
-    width: worldManifest.width.ceil(),
-    height: worldManifest.height.ceil(),
-    baseMaterialId: worldManifest.baseMaterialId,
-    objects: [
-      for (final chunk in chunkStreamer.loadedChunks.values)
-        ...chunk.worldObjects,
-    ],
-    terrainStrokes: [
-      for (final chunk in chunkStreamer.loadedChunks.values)
-        for (final stroke in chunk.terrainStrokes)
-          TerrainStroke(
-            materialId: stroke.materialId,
-            radius: stroke.radius,
-            opacity: stroke.opacity,
-            seed: stroke.seed,
-            spacing: stroke.spacing,
-            scatter: stroke.scatter,
-            sizeJitter: stroke.sizeJitter,
-            opacityJitter: stroke.opacityJitter,
+  EnvironmentDocument _documentFromLoadedChunks() {
+    final regions = <TerrainRegion>[];
+    final regionIds = <String>{};
+    for (final chunk in chunkStreamer.loadedChunks.values) {
+      final originX = chunk.coordinate.x * chunk.size;
+      final originY = chunk.coordinate.y * chunk.size;
+      for (final region in chunk.terrainRegions) {
+        if (!regionIds.add(region.id)) continue;
+        regions.add(
+          TerrainRegion(
+            id: region.id,
+            materialId: region.materialId,
+            resetsToDefault: region.resetsToDefault,
+            edgeBlend: region.edgeBlend,
+            textureScale: region.textureScale,
+            seed: region.seed,
+            order: region.order,
             points: [
-              for (final point in stroke.points)
-                WorldPoint(
-                  point.x + chunk.coordinate.x * chunk.size,
-                  point.y + chunk.coordinate.y * chunk.size,
-                ),
+              for (final point in region.points)
+                WorldPoint(point.x + originX, point.y + originY),
             ],
           ),
-    ],
-    editorLayers: worldManifest.editorLayers,
-    activeLayerId: worldManifest.activeLayerId,
-  );
+        );
+      }
+    }
+    regions.sort((a, b) => a.order.compareTo(b.order));
+    return EnvironmentDocument(
+      id: worldManifest.id,
+      name: worldManifest.name,
+      width: worldManifest.width.ceil(),
+      height: worldManifest.height.ceil(),
+      baseMaterialId: worldManifest.baseMaterialId,
+      terrainRegions: regions,
+      objects: [
+        for (final chunk in chunkStreamer.loadedChunks.values)
+          ...chunk.worldObjects,
+      ],
+      terrainStrokes: [
+        for (final chunk in chunkStreamer.loadedChunks.values)
+          for (final stroke in chunk.terrainStrokes)
+            TerrainStroke(
+              materialId: stroke.materialId,
+              radius: stroke.radius,
+              opacity: stroke.opacity,
+              resetsToBase: stroke.resetsToBase,
+              seed: stroke.seed,
+              spacing: stroke.spacing,
+              scatter: stroke.scatter,
+              sizeJitter: stroke.sizeJitter,
+              opacityJitter: stroke.opacityJitter,
+              points: [
+                for (final point in stroke.points)
+                  WorldPoint(
+                    point.x + chunk.coordinate.x * chunk.size,
+                    point.y + chunk.coordinate.y * chunk.size,
+                  ),
+              ],
+            ),
+      ],
+      editorLayers: worldManifest.editorLayers,
+      activeLayerId: worldManifest.activeLayerId,
+    );
+  }
 
   Future<void> _streamAroundPlayer() async {
     final position = WorldPoint(playerPosition.x, playerPosition.y);
@@ -422,6 +456,9 @@ class NeuraGame extends FlameGame
     }
     final materialIds = <String>{
       worldManifest.baseMaterialId,
+      for (final chunk in chunkStreamer.loadedChunks.values)
+        for (final region in chunk.terrainRegions)
+          if (!region.resetsToDefault) region.materialId,
       for (final chunk in chunkStreamer.loadedChunks.values)
         for (final stroke in chunk.terrainStrokes) stroke.materialId,
     };
@@ -562,6 +599,37 @@ class NeuraGame extends FlameGame
       clip.lineTo(corner.x, corner.y);
     }
     canvas.clipPath(clip..close());
+    final layerBounds = ui.Rect.fromLTRB(
+      corners.map((corner) => corner.x).reduce(math.min),
+      corners.map((corner) => corner.y).reduce(math.min),
+      corners.map((corner) => corner.x).reduce(math.max),
+      corners.map((corner) => corner.y).reduce(math.max),
+    );
+    if (chunk.terrainRegions.isNotEmpty) {
+      canvas.saveLayer(layerBounds, ui.Paint());
+      for (final region in chunk.terrainRegions) {
+        _renderTerrainRegion(
+          canvas,
+          TerrainRegion(
+            id: region.id,
+            materialId: region.materialId,
+            resetsToDefault: region.resetsToDefault,
+            edgeBlend: region.edgeBlend,
+            textureScale: region.textureScale,
+            seed: region.seed,
+            order: region.order,
+            points: [
+              for (final point in region.points)
+                WorldPoint(point.x + originX, point.y + originY),
+            ],
+          ),
+        );
+      }
+      canvas.restore();
+    }
+    if (chunk.terrainStrokes.isNotEmpty) {
+      canvas.saveLayer(layerBounds, ui.Paint());
+    }
     for (final stroke in chunk.terrainStrokes) {
       _renderStroke(
         canvas,
@@ -569,6 +637,7 @@ class NeuraGame extends FlameGame
           materialId: stroke.materialId,
           radius: stroke.radius,
           opacity: stroke.opacity,
+          resetsToBase: stroke.resetsToBase,
           seed: stroke.seed,
           spacing: stroke.spacing,
           scatter: stroke.scatter,
@@ -581,6 +650,7 @@ class NeuraGame extends FlameGame
         ),
       );
     }
+    if (chunk.terrainStrokes.isNotEmpty) canvas.restore();
     return recorder.endRecording();
   }
 
@@ -818,6 +888,11 @@ class NeuraGame extends FlameGame
     );
     final paint = _repeatingPaints[worldManifest.baseMaterialId];
     if (material == null || paint == null) return;
+    final image = _loadedImages[material.texturePath]!;
+    final texelsPerWorldUnitX =
+        image.width / material.effectiveRepeatWorldWidth;
+    final texelsPerWorldUnitY =
+        image.height / material.effectiveRepeatWorldHeight;
     for (final chunk in chunkStreamer.loadedChunks.values) {
       final originX = chunk.coordinate.x * chunk.size;
       final originY = chunk.coordinate.y * chunk.size;
@@ -829,10 +904,10 @@ class NeuraGame extends FlameGame
         WorldPoint(maxX, maxY),
         paint,
         ui.Rect.fromLTWH(
-          originX * 64,
-          originY * 64,
-          (maxX - originX) * 64,
-          (maxY - originY) * 64,
+          originX * texelsPerWorldUnitX,
+          originY * texelsPerWorldUnitY,
+          (maxX - originX) * texelsPerWorldUnitX,
+          (maxY - originY) * texelsPerWorldUnitY,
         ),
       );
     }
@@ -847,6 +922,18 @@ class NeuraGame extends FlameGame
 
   void _renderStroke(ui.Canvas canvas, TerrainStroke stroke) {
     if (stroke.points.isEmpty) return;
+    if (stroke.resetsToBase) {
+      final path = ui.Path();
+      for (var index = 0; index < stroke.points.length; index++) {
+        final point = stroke.points[index];
+        final projected = projection.worldToScreen(Vector2(point.x, point.y));
+        index == 0
+            ? path.moveTo(projected.x, projected.y)
+            : path.lineTo(projected.x, projected.y);
+      }
+      canvas.drawPath(path..close(), _terrainResetPaint);
+      return;
+    }
     final material = environmentCatalog.materialById(stroke.materialId);
     final paint = _decalPaints[stroke.materialId];
     if (material == null || paint == null) return;
@@ -855,6 +942,53 @@ class NeuraGame extends FlameGame
       paint.color = ui.Color.fromRGBO(255, 255, 255, stamp.opacity);
       _drawStamp(canvas, stamp.center, stamp.radius, paint, image);
     }
+  }
+
+  void _renderTerrainRegion(ui.Canvas canvas, TerrainRegion region) {
+    if (region.points.length < 3) return;
+    final path = ui.Path();
+    for (var index = 0; index < region.points.length; index++) {
+      final point = region.points[index];
+      final projected = projection.worldToScreen(Vector2(point.x, point.y));
+      index == 0
+          ? path.moveTo(projected.x, projected.y)
+          : path.lineTo(projected.x, projected.y);
+    }
+    path.close();
+    if (region.resetsToDefault) {
+      canvas.drawPath(path, _terrainResetPaint);
+      return;
+    }
+    final material = environmentCatalog.materialById(region.materialId);
+    final paint = _repeatingPaints[region.materialId];
+    if (material == null || paint == null) return;
+    final image = _loadedImages[material.texturePath];
+    if (image == null) return;
+    final minX = region.points.map((point) => point.x).reduce(math.min);
+    final minY = region.points.map((point) => point.y).reduce(math.min);
+    final maxX = region.points.map((point) => point.x).reduce(math.max);
+    final maxY = region.points.map((point) => point.y).reduce(math.max);
+    final texelsPerWorldUnitX =
+        image.width /
+        (material.effectiveRepeatWorldWidth * region.textureScale);
+    final texelsPerWorldUnitY =
+        image.height /
+        (material.effectiveRepeatWorldHeight * region.textureScale);
+    canvas.save();
+    canvas.clipPath(path);
+    _drawTexturedWorldQuad(
+      canvas,
+      WorldPoint(minX, minY),
+      WorldPoint(maxX, maxY),
+      paint,
+      ui.Rect.fromLTRB(
+        minX * texelsPerWorldUnitX,
+        minY * texelsPerWorldUnitY,
+        maxX * texelsPerWorldUnitX,
+        maxY * texelsPerWorldUnitY,
+      ),
+    );
+    canvas.restore();
   }
 
   void _drawStamp(
@@ -972,8 +1106,10 @@ class NeuraGame extends FlameGame
       position: projection.worldToScreen(Vector2(object.x, object.y))
         ..y -= object.verticalOffset * elevationPixelsPerWorldUnit,
       size: Vector2(
-        image.width * asset.renderScale,
-        image.height * asset.renderScale,
+        (view.logicalWidth > 0 ? view.logicalWidth : image.width) *
+            asset.renderScale,
+        (view.logicalHeight > 0 ? view.logicalHeight : image.height) *
+            asset.renderScale,
       ),
       anchor: Anchor(view.pivotX, view.pivotY),
     );

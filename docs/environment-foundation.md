@@ -76,7 +76,7 @@ The simulation uses a right-handed logical world:
 - `z` is elevation in world units;
 - actors and objects may have fractional `x` and `y` positions.
 
-The initial screen projection remains 2:1 isometric:
+The screen projection uses the true-isometric ratio found in the source art:
 
 ```text
 screenX = originX + (x - y) * tileWidth / 2
@@ -87,12 +87,16 @@ Initial presentation constants:
 
 ```text
 tileWidth       = 128 px
-tileHeight      = 64 px
+tileHeight      = 128 / sqrt(2) = 90.51 px
 elevationPixels = 64 px
 ```
 
 These constants describe projection, not source-image dimensions. They can be
 changed without changing saved worlds or collision geometry.
+
+The projected ground axes are approximately 35.264 degrees. The earlier 128x64
+2:1 dimetric projection produced 26.565-degree axes and did not align with the
+pack's own isometric floor diamonds or directional environment sprites.
 
 ## Terrain model
 
@@ -117,6 +121,22 @@ continuous world coordinates. A 512px texture covers a configurable number of
 world units instead of restarting once per cell. The calibration scene decides
 the initial texel density; `64 source pixels per world unit` is the first value
 to test, making one texture repeat cover 8x8 world units.
+
+Authored environment terrain has three ordered levels:
+
+1. `baseMaterialId` is the world default used by untouched terrain and new
+   chunks;
+2. `terrainRegions` are opaque, world-space polygons that assign a regional
+   ground material without generating brush stamps;
+3. `terrainStrokes` are blended detail paint and decals above the regional
+   ground.
+
+Regional fills are authored independently from runtime chunks and are clipped
+into each affected chunk during export. A regional clear operation reveals the
+current world default. A detail reset clears only the paint layer, revealing
+the regional fill beneath it. This distinction keeps chunk boundaries out of
+terrain design and allows the world default to change without rewriting every
+fill polygon.
 
 Terrain renders in chunks, initially 16x16 cells. Each visible chunk builds a
 textured quad mesh and is cached until its terrain changes.

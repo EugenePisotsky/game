@@ -18,6 +18,7 @@
   "packs": [
     {
       "id": "ow1",
+      "displayName": "Other Worlds Core Tiles 1",
       "sourceRoot": "content/Other Worlds Core Tiles 1",
       "objects": [
         {
@@ -27,7 +28,7 @@
           "directionlessPattern": "^Building(\\d+)\\.png$",
           "allowedViewCounts": [1, 4, 8],
           "preferDirectional": true,
-          "renderScale": 0.8,
+          "renderScale": 1.0,
           "pivotY": 0.97,
           "tags": ["building", "house"]
         }
@@ -35,6 +36,7 @@
     },
     {
       "id": "ow2",
+      "displayName": "Other Worlds Core Tiles 2",
       "sourceRoot": "content/Other Worlds Core Tiles 2",
       "splitIncompleteKinds": ["interior", "castleDormer", "castleGateDoor"],
       "objects": [
@@ -279,6 +281,7 @@
     },
     {
       "id": "ow3",
+      "displayName": "Other Worlds Core Tiles 3",
       "sourceRoot": "content/Other Worlds Core Tiles 3",
       "splitIncompleteKinds": [
         "barrel", "stool", "table", "shelf", "bottle", "buildingAddon",
@@ -320,7 +323,7 @@
           "categoryPath": ["Environment", "Trees"],
           "pattern": "^Tree(\\d+)_0*([1-8])\\.png$",
           "allowedViewCounts": [8],
-          "renderScale": 0.75,
+          "renderScale": 1.0,
           "pivotY": 0.96,
           "collisionProfile": "treeTrunk",
           "tags": ["tree"]
@@ -330,7 +333,7 @@
           "categoryPath": ["Environment", "Bushes"],
           "pattern": "^Bush(\\d+)_0*([1-8])\\.png$",
           "allowedViewCounts": [4],
-          "renderScale": 1.5,
+          "renderScale": 1.0,
           "tags": ["bush"]
         },
         {
@@ -347,7 +350,7 @@
           "pattern": "^Rock(\\d+)_0*([1-8])\\.png$",
           "directionlessPattern": "^Rock(\\d+)\\.png$",
           "allowedViewCounts": [1, 4],
-          "renderScale": 0.9,
+          "renderScale": 1.0,
           "collisionProfile": "smallRock",
           "tags": ["rock"]
         },
@@ -2022,6 +2025,134 @@
         {"kind":"waterBucket","sourcePrefix":"WaterBucket","displayName":"Water bucket","categoryPath":["Props","Containers"],"allowedViewCounts":[1]},
         {"kind":"well","sourcePrefix":"Well","categoryPath":["Structures","Outdoor Structures"],"allowedViewCounts":[4,8]},
         {"kind":"xbow","singletonPattern":"^Xbow_0*([1-8])\\.png$","displayName":"Crossbow","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[8]}
+      ]
+    },
+    {
+      "id": "nf",
+      "displayName": "Northfolk Tiles",
+      "sourceRoot": "content/Northfolk Tiles",
+      "releaseMaxDimension": 1536,
+      "ground": {
+        "tilePattern": "^Tile_Ground_Northfolk(\\d+)\\.png$",
+        "decalPattern": "^Decal_Ground_Northfolk(\\d+)\\.png$",
+        "waterPattern": "^WaterTile_(\\d+)\\.png$"
+      },
+      "splitIncompleteKinds": ["buildingInterior", "hangingTapestry", "snowCliff"],
+      "objects": [
+        {"kind":"building","categoryPath":["Buildings","Houses"],"pattern":"^Building(\\d+)_0*([1-8])\\.png$","allowedViewCounts":[8],"renderScale":1.0,"pivotY":0.97,"tags":["building","northfolk"]},
+        {"kind":"buildingAlternate","displayName":"Building alternative","categoryPath":["Buildings","Houses"],"pattern":"^Building_(\\d+)_0*([1-8])\\.png$","allowedViewCounts":[8],"renderScale":1.0,"pivotY":0.97,"tags":["building","northfolk"]},
+        {"kind":"buildingInterior","displayName":"Building interior","categoryPath":["Buildings","Interiors"],"pattern":"^Building(\\d+)_Interior_0*([1-8])\\.png$","allowedViewCounts":[8],"renderScale":1.0,"tags":["building","interior","northfolk"]},
+        {"kind":"buildingInterior2","displayName":"Building interior 2","categoryPath":["Buildings","Interiors"],"pattern":"^Building(\\d+)_Interior2_0*([1-8])\\.png$","allowedViewCounts":[8],"renderScale":1.0,"tags":["building","interior","northfolk"]},
+        {"kind":"watchTower","sourcePrefix":"WatchTower","displayName":"Watch tower","categoryPath":["Buildings","Fortifications"],"allowedViewCounts":[8],"renderScale":1.0,"tags":["tower","northfolk"]},
+
+        {"kind":"tree","sourcePrefix":"Tree","categoryPath":["Environment","Trees"],"allowedViewCounts":[8],"collisionProfile":"treeTrunk","tags":["tree","northfolk"]},
+        {"kind":"snowTree","sourcePrefix":"SnowTree","displayName":"Snow tree","categoryPath":["Environment","Trees"],"allowedViewCounts":[8],"collisionProfile":"treeTrunk","tags":["tree","snow","winter","northfolk"]},
+        {"kind":"bush","sourcePrefix":"Bush","categoryPath":["Environment","Bushes"],"allowedViewCounts":[8],"tags":["bush","northfolk"]},
+        {"kind":"snowBush","sourcePrefix":"SnowBush","displayName":"Snow bush","categoryPath":["Environment","Bushes"],"allowedViewCounts":[8],"tags":["bush","snow","winter","northfolk"]},
+        {"kind":"grass","sourcePrefix":"Grass","categoryPath":["Environment","Grass & Ground Cover"],"allowedViewCounts":[8],"renderBand":"groundCover","tags":["grass","northfolk"]},
+        {"kind":"snowGrass","sourcePrefix":"SnowGrass","displayName":"Snow grass","categoryPath":["Environment","Grass & Ground Cover"],"allowedViewCounts":[8],"renderBand":"groundCover","tags":["grass","snow","winter","northfolk"]},
+        {"kind":"plant","sourcePrefix":"Plant","categoryPath":["Environment","Plants & Flowers"],"allowedViewCounts":[8],"renderBand":"groundCover","tags":["plant","northfolk"]},
+        {"kind":"plants","sourcePrefix":"Plants","displayName":"Plant","categoryPath":["Environment","Plants & Flowers"],"allowedViewCounts":[8],"renderBand":"groundCover","tags":["plant","northfolk"]},
+        {"kind":"snowPlant","sourcePrefix":"SnowPlant","displayName":"Snow plant","categoryPath":["Environment","Plants & Flowers"],"allowedViewCounts":[8],"renderBand":"groundCover","tags":["plant","snow","winter","northfolk"]},
+        {"kind":"rock","sourcePrefix":"Rocks","categoryPath":["Environment","Rocks"],"allowedViewCounts":[8],"collisionProfile":"smallRock","tags":["rock","northfolk"]},
+        {"kind":"largeRock","sourcePrefix":"LargeRock","displayName":"Large rock","categoryPath":["Environment","Rocks"],"allowedViewCounts":[8],"tags":["rock","northfolk"]},
+        {"kind":"snowRock","sourcePrefix":"SnowRock","displayName":"Snow rock","categoryPath":["Environment","Rocks"],"allowedViewCounts":[8],"tags":["rock","snow","winter","northfolk"]},
+        {"kind":"snowCliff","sourcePrefix":"SnowCliff","displayName":"Snow cliff","categoryPath":["Terrain Pieces","Cliffs"],"allowedViewCounts":[8],"tags":["cliff","snow","winter","northfolk"]},
+        {"kind":"stump","sourcePrefix":"Stump","categoryPath":["Environment","Trees"],"allowedViewCounts":[8],"tags":["stump","northfolk"]},
+
+        {"kind":"longBoat","sourcePrefix":"LongBoat","displayName":"Long boat","categoryPath":["Vehicles","Boats & Ships"],"allowedViewCounts":[8],"tags":["boat","northfolk"]},
+        {"kind":"smallBoat","sourcePrefix":"SmallBoat","displayName":"Small boat","categoryPath":["Vehicles","Boats & Ships"],"allowedViewCounts":[8],"tags":["boat","northfolk"]},
+        {"kind":"cart","sourcePrefix":"Cart","categoryPath":["Vehicles","Carts & Wagons"],"allowedViewCounts":[8],"tags":["cart","northfolk"]},
+        {"kind":"catapult","sourcePrefix":"Catapult","categoryPath":["Vehicles","Siege Engines"],"allowedViewCounts":[8],"tags":["catapult","northfolk"]},
+        {"kind":"catapultStone","sourcePrefix":"CatapultStone","displayName":"Catapult stone","categoryPath":["Small Items","Ammunition"],"allowedViewCounts":[8],"tags":["catapult","stone","northfolk"]},
+
+        {"kind":"door","sourcePrefix":"Door","categoryPath":["Buildings","Building Parts"],"allowedViewCounts":[8],"tags":["door","northfolk"]},
+        {"kind":"fence","sourcePrefix":"Fence","categoryPath":["Structures","Fences & Gates"],"allowedViewCounts":[8],"collisionProfile":"fenceSegment","tags":["fence","northfolk"]},
+        {"kind":"gate","sourcePrefix":"Gate","categoryPath":["Structures","Fences & Gates"],"allowedViewCounts":[8],"tags":["gate","northfolk"]},
+        {"kind":"barricade","sourcePrefix":"Barricade","categoryPath":["Structures","Fences & Gates"],"allowedViewCounts":[4],"tags":["barricade","northfolk"]},
+        {"kind":"spikeRail","sourcePrefix":"SpikeRail","displayName":"Spike rail","categoryPath":["Structures","Fences & Gates"],"allowedViewCounts":[4],"tags":["spikes","northfolk"]},
+        {"kind":"pier","sourcePrefix":"Pier","categoryPath":["Structures","Bridges & Docks"],"allowedViewCounts":[4,8],"tags":["pier","dock","northfolk"]},
+        {"kind":"platform","sourcePrefix":"Platform","categoryPath":["Structures","Stairs & Platforms"],"allowedViewCounts":[4],"tags":["platform","northfolk"]},
+        {"kind":"ladder","sourcePrefix":"Ladder","categoryPath":["Structures","Stairs & Platforms"],"allowedViewCounts":[4],"tags":["ladder","northfolk"]},
+        {"kind":"well","sourcePrefix":"Well","categoryPath":["Structures","Outdoor Structures"],"allowedViewCounts":[8],"tags":["well","northfolk"]},
+
+        {"kind":"bench","sourcePrefix":"Bench","categoryPath":["Furniture","Seating"],"allowedViewCounts":[4,8],"tags":["bench","northfolk"]},
+        {"kind":"bed","sourcePrefix":"Bed","categoryPath":["Furniture","Beds"],"allowedViewCounts":[8],"tags":["bed","northfolk"]},
+        {"kind":"chair","sourcePrefix":"Chair","categoryPath":["Furniture","Seating"],"allowedViewCounts":[8],"tags":["chair","northfolk"]},
+        {"kind":"stool","sourcePrefix":"Stool","categoryPath":["Furniture","Seating"],"allowedViewCounts":[8],"tags":["stool","northfolk"]},
+        {"kind":"table","sourcePrefix":"Table","categoryPath":["Furniture","Tables"],"allowedViewCounts":[8],"tags":["table","northfolk"]},
+        {"kind":"rug","sourcePrefix":"Rug","categoryPath":["Furniture","Rugs"],"allowedViewCounts":[8],"tags":["rug","northfolk"]},
+        {"kind":"loom","sourcePrefix":"Loom","categoryPath":["Furniture","Workshop"],"allowedViewCounts":[8],"tags":["loom","northfolk"]},
+
+        {"kind":"barrel","sourcePrefix":"Barrel","categoryPath":["Props","Containers"],"allowedViewCounts":[8],"tags":["barrel","northfolk"]},
+        {"kind":"bucket","sourcePrefix":"Bucket","categoryPath":["Props","Containers"],"allowedViewCounts":[8],"tags":["bucket","northfolk"]},
+        {"kind":"casket","sourcePrefix":"Casket","categoryPath":["Props","Containers"],"allowedViewCounts":[8],"tags":["casket","northfolk"]},
+        {"kind":"cauldron","sourcePrefix":"Cauldron","categoryPath":["Props","Cooking"],"allowedViewCounts":[8],"tags":["cauldron","northfolk"]},
+        {"kind":"cookingPit","sourcePrefix":"CookingPit","displayName":"Cooking pit","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[8],"tags":["fire","cooking","northfolk"]},
+        {"kind":"cookingPot","sourcePrefix":"CookingPot","displayName":"Cooking pot","categoryPath":["Props","Cooking"],"allowedViewCounts":[8],"tags":["cooking","northfolk"]},
+        {"kind":"firePit","pattern":"^Fire[Pp]it(\\d+)_0*([1-8])\\.png$","displayName":"Fire pit","categoryPath":["Props","Lighting & Fire"],"allowedViewCounts":[8],"tags":["fire","northfolk"]},
+        {"kind":"fishRack","sourcePrefix":"FishRack","displayName":"Fish rack","categoryPath":["Props","Agricultural"],"allowedViewCounts":[8],"tags":["fish","rack","northfolk"]},
+        {"kind":"hayStack","sourcePrefix":"HayStack","displayName":"Hay stack","categoryPath":["Props","Agricultural"],"allowedViewCounts":[8],"tags":["hay","northfolk"]},
+        {"kind":"logs","sourcePrefix":"Logs","categoryPath":["Props","Wood & Lumber"],"allowedViewCounts":[8],"tags":["logs","northfolk"]},
+        {"kind":"woodPlanks","sourcePrefix":"WoodPlanks","displayName":"Wood planks","categoryPath":["Props","Wood & Lumber"],"allowedViewCounts":[8],"tags":["wood","planks","northfolk"]},
+        {"kind":"woodpile","sourcePrefix":"Woodpile","categoryPath":["Props","Wood & Lumber"],"allowedViewCounts":[4],"tags":["wood","northfolk"]},
+        {"kind":"planks","sourcePrefix":"Planks","categoryPath":["Props","Wood & Lumber"],"allowedViewCounts":[8],"tags":["wood","planks","northfolk"]},
+        {"kind":"axeStump","sourcePrefix":"AxeStump","displayName":"Axe stump","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[8],"tags":["axe","stump","northfolk"]},
+        {"kind":"anvil","sourcePrefix":"Anvil","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[8],"tags":["anvil","northfolk"]},
+        {"kind":"clutter","sourcePrefix":"Clutter","categoryPath":["Props","Miscellaneous"],"allowedViewCounts":[8],"tags":["clutter","northfolk"]},
+        {"kind":"cropBag","sourcePrefix":"CropBag","displayName":"Crop bag","categoryPath":["Props","Agricultural"],"allowedViewCounts":[8],"tags":["crop","bag","northfolk"]},
+        {"kind":"fur","sourcePrefix":"Fur","categoryPath":["Props","Decoration"],"allowedViewCounts":[8],"tags":["fur","northfolk"]},
+        {"kind":"hangingTapestry","pattern":"^HangingTapestery(\\d+)_0*([1-8])\\.png$","displayName":"Hanging tapestry","categoryPath":["Props","Wall Decoration"],"allowedViewCounts":[8],"tags":["tapestry","northfolk"]},
+        {"kind":"hangingTapestryFixed","pattern":"^$","directionlessPattern":"^HangingTapestry10(\\d+)\\.png$","displayName":"Hanging tapestry","categoryPath":["Props","Wall Decoration"],"allowedViewCounts":[1],"tags":["tapestry","northfolk"]},
+        {"kind":"plinth","sourcePrefix":"Plinth","categoryPath":["Props","Decoration"],"allowedViewCounts":[8],"tags":["plinth","northfolk"]},
+        {"kind":"pots","sourcePrefix":"Pots","categoryPath":["Props","Containers"],"allowedViewCounts":[8],"tags":["pots","northfolk"]},
+        {"kind":"pottery","sourcePrefix":"Pottery","categoryPath":["Props","Containers"],"allowedViewCounts":[1,4],"preferDirectional":true,"tags":["pottery","northfolk"]},
+        {"kind":"weaponRack","sourcePrefix":"WeaponRack","displayName":"Weapon rack","categoryPath":["Props","Tools & Workshop"],"allowedViewCounts":[8],"tags":["weapons","rack","northfolk"]},
+
+        {"kind":"bowls","sourcePrefix":"Bowls","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[8],"tags":["bowl","northfolk"]},
+        {"kind":"largeBowl","pattern":"^$","directionlessPattern":"^LargeBowl_(\\d+)\\.png$","displayName":"Large bowl","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1],"tags":["bowl","northfolk"]},
+        {"kind":"smallBowl","pattern":"^$","directionlessPattern":"^SmallBowl_(\\d+)\\.png$","displayName":"Small bowl","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1],"tags":["bowl","northfolk"]},
+        {"kind":"grainBowl","pattern":"^$","directionlessPattern":"^GrainBowl(\\d+)_1\\.png$","displayName":"Grain bowl","categoryPath":["Small Items","Food"],"allowedViewCounts":[1],"tags":["grain","bowl","northfolk"]},
+        {"kind":"food","pattern":"^Food(\\d+)_0*([1-8])\\.png$","categoryPath":["Small Items","Food"],"allowedViewCounts":[8],"tags":["food","northfolk"]},
+        {"kind":"foodAlt","pattern":"^Food_(\\d+)_0*([1-8])\\.png$","displayName":"Food","categoryPath":["Small Items","Food"],"allowedViewCounts":[8],"tags":["food","northfolk"]},
+        {"kind":"horn","sourcePrefix":"Horn","categoryPath":["Small Items","Miscellaneous"],"allowedViewCounts":[8],"tags":["horn","northfolk"]},
+        {"kind":"iron","sourcePrefix":"Iron","categoryPath":["Small Items","Materials"],"allowedViewCounts":[8],"tags":["iron","northfolk"]},
+        {"kind":"jug","sourcePrefix":"Jug","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[8],"tags":["jug","northfolk"]},
+        {"kind":"mug","sourcePrefix":"Mug","categoryPath":["Small Items","Tableware"],"allowedViewCounts":[1],"tags":["mug","northfolk"]},
+        {"kind":"oar","sourcePrefix":"Oar","categoryPath":["Small Items","Tools"],"allowedViewCounts":[8],"tags":["oar","northfolk"]},
+        {"kind":"shield","sourcePrefix":"Shield","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[1],"tags":["shield","northfolk"]},
+        {"kind":"wheel","pattern":"^$","directionlessPattern":"^Wheel(\\d+)_01\\.png$","categoryPath":["Small Items","Vehicle Parts"],"allowedViewCounts":[1],"tags":["wheel","northfolk"]},
+        {"kind":"weaponShield","sourcePrefix":"Weapon_Shield","displayName":"Shield","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[1],"tags":["shield","northfolk"]},
+        {"kind":"weaponAxe","sourcePrefix":"Weapon_Axe","displayName":"Axe","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[8],"tags":["axe","northfolk"]},
+        {"kind":"weaponSpear","sourcePrefix":"Weapon_Spear","displayName":"Spear","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[8],"tags":["spear","northfolk"]},
+        {"kind":"weaponSword","sourcePrefix":"Weapon_Sword","displayName":"Sword","categoryPath":["Small Items","Weapons"],"allowedViewCounts":[8],"tags":["sword","northfolk"]},
+        {"kind":"hammer","sourcePrefix":"Hammer","categoryPath":["Small Items","Tools"],"allowedViewCounts":[8],"tags":["hammer","northfolk"]},
+        {"kind":"knife","sourcePrefix":"Knife","categoryPath":["Small Items","Tools"],"allowedViewCounts":[8],"tags":["knife","northfolk"]},
+        {"kind":"scythe","sourcePrefix":"Scythe","categoryPath":["Small Items","Tools"],"allowedViewCounts":[8],"tags":["scythe","northfolk"]},
+        {"kind":"spit","sourcePrefix":"Spit","categoryPath":["Small Items","Tools"],"allowedViewCounts":[8],"tags":["spit","northfolk"]},
+        {"kind":"tongs","sourcePrefix":"Tongs","categoryPath":["Small Items","Tools"],"allowedViewCounts":[8],"tags":["tongs","northfolk"]},
+        {"kind":"snowMan","sourcePrefix":"SnowMan","displayName":"Snowman","categoryPath":["Props","Decoration"],"allowedViewCounts":[8],"tags":["snow","winter","northfolk"]}
+      ]
+    },
+    {
+      "id": "owdt",
+      "displayName": "Other Worlds Dark Town Tiles",
+      "sourceRoot": "content/Other Worlds Dark Town Tiles",
+      "releaseMaxDimension": 3072,
+      "ground": {
+        "tilePattern": "^Ground_Tile_OtherworldsDarkTown_(\\d+)\\.png$",
+        "decalPattern": "^Ground_Decal_OtherworldsDarkTown_(\\d+)\\.png$",
+        "waterPattern": "^$"
+      },
+      "splitIncompleteKinds": ["wallDecoration"],
+      "objects": [
+        {"kind":"building","sourcePrefix":"Building","categoryPath":["Buildings","Dark Town"],"allowedViewCounts":[8],"renderScale":1.0,"pivotY":0.98,"tags":["building","dark town","gothic"]},
+        {"kind":"buildingPiece","pattern":"^BuildingP[Ii]ece(\\d+)_0*([1-8])\\.png$","displayName":"Building piece","categoryPath":["Buildings","Building Parts"],"allowedViewCounts":[4,8],"renderScale":1.0,"pivotY":0.98,"tags":["building part","dark town","gothic"]},
+        {"kind":"barrel","sourcePrefix":"Barrel","categoryPath":["Props","Containers"],"allowedViewCounts":[8],"renderScale":1.0,"tags":["barrel","dark town"]},
+        {"kind":"statue","sourcePrefix":"Statue","categoryPath":["Props","Decoration"],"allowedViewCounts":[8],"renderScale":1.0,"tags":["statue","dark town","gothic"]},
+        {"kind":"wagon","sourcePrefix":"Wagon","categoryPath":["Vehicles","Carts & Wagons"],"allowedViewCounts":[8],"renderScale":1.0,"tags":["wagon","dark town"]},
+        {"kind":"woodpile","sourcePrefix":"Woodpile","categoryPath":["Props","Wood & Lumber"],"allowedViewCounts":[8],"renderScale":1.0,"tags":["wood","dark town"]},
+        {"kind":"wallDecoration","sourcePrefix":"WallDeco","displayName":"Wall decoration","categoryPath":["Props","Wall Decoration"],"allowedViewCounts":[8],"renderScale":1.0,"tags":["wall decoration","dark town","gothic"]}
       ]
     }
   ]

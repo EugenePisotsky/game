@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'environment_document.dart';
 
@@ -185,21 +186,24 @@ class EnvironmentChunkDocument {
     required this.coordinate,
     required this.size,
     required this.baseMaterialId,
+    List<TerrainRegion>? terrainRegions,
     List<TerrainStroke>? terrainStrokes,
     List<ChunkPlacedEnvironmentObject>? objects,
     Set<String>? overlapObjectIds,
     this.schemaVersion = currentSchemaVersion,
-  }) : terrainStrokes = List.of(terrainStrokes ?? const []),
+  }) : terrainRegions = List.of(terrainRegions ?? const []),
+       terrainStrokes = List.of(terrainStrokes ?? const []),
        objects = List.of(objects ?? const []),
        overlapObjectIds = Set.of(overlapObjectIds ?? const {});
 
-  static const currentSchemaVersion = 1;
+  static const currentSchemaVersion = 2;
 
   final int schemaVersion;
   final String worldId;
   final EnvironmentChunkCoordinate coordinate;
   final double size;
   final String baseMaterialId;
+  final List<TerrainRegion> terrainRegions;
   final List<TerrainStroke> terrainStrokes;
   final List<ChunkPlacedEnvironmentObject> objects;
   final Set<String> overlapObjectIds;
@@ -208,6 +212,8 @@ class EnvironmentChunkDocument {
       objects.map((object) => object.toWorldObject(coordinate, size));
 
   Set<String> get referencedAssetIds => {
+    for (final region in terrainRegions)
+      if (!region.resetsToDefault) region.materialId,
     for (final stroke in terrainStrokes) stroke.materialId,
     for (final object in objects) object.assetId,
   };
@@ -218,6 +224,7 @@ class EnvironmentChunkDocument {
     'coordinate': coordinate.toJson(),
     'size': size,
     'baseMaterialId': baseMaterialId,
+    'terrainRegions': [for (final region in terrainRegions) region.toJson()],
     'terrainStrokes': [for (final stroke in terrainStrokes) stroke.toJson()],
     'objects': [for (final object in objects) object.toJson()],
     'overlapObjectIds': overlapObjectIds.toList()..sort(),
@@ -229,7 +236,7 @@ class EnvironmentChunkDocument {
 
   factory EnvironmentChunkDocument.fromJson(Map<String, Object?> json) {
     final version = (json['schemaVersion'] as num?)?.toInt() ?? 1;
-    if (version != currentSchemaVersion) {
+    if (version < 1 || version > currentSchemaVersion) {
       throw FormatException('Unsupported environment chunk schema $version.');
     }
     return EnvironmentChunkDocument(
@@ -240,6 +247,11 @@ class EnvironmentChunkDocument {
       ),
       size: (json['size'] as num).toDouble(),
       baseMaterialId: json['baseMaterialId'] as String,
+      terrainRegions: [
+        for (final value
+            in json['terrainRegions'] as List<Object?>? ?? const [])
+          TerrainRegion.fromJson(value as Map<String, Object?>),
+      ],
       terrainStrokes: [
         for (final value
             in json['terrainStrokes'] as List<Object?>? ?? const [])
@@ -415,6 +427,9 @@ class EnvironmentChunkedWorld {
       for (var y = 0; y < rows; y++)
         for (var x = 0; x < columns; x++) EnvironmentChunkCoordinate(x, y),
     ];
+    final regions = <EnvironmentChunkCoordinate, List<TerrainRegion>>{
+      for (final coordinate in coordinates) coordinate: [],
+    };
     final strokes = <EnvironmentChunkCoordinate, List<TerrainStroke>>{
       for (final coordinate in coordinates) coordinate: [],
     };
@@ -422,6 +437,49 @@ class EnvironmentChunkedWorld {
         <EnvironmentChunkCoordinate, List<ChunkPlacedEnvironmentObject>>{
           for (final coordinate in coordinates) coordinate: [],
         };
+
+    for (final region in document.terrainRegions) {
+      if (region.points.length < 3) continue;
+      final minX =
+          region.points.map((point) => point.x).reduce(math.min) -
+          region.edgeBlend;
+      final minY =
+          region.points.map((point) => point.y).reduce(math.min) -
+          region.edgeBlend;
+      final maxX =
+          region.points.map((point) => point.x).reduce(math.max) +
+          region.edgeBlend;
+      final maxY =
+          region.points.map((point) => point.y).reduce(math.max) +
+          region.edgeBlend;
+      final bounds = EnvironmentObjectBounds(
+        minX: minX,
+        minY: minY,
+        maxX: maxX,
+        maxY: maxY,
+      );
+      for (final coordinate in coordinates) {
+        if (!bounds.overlapsChunk(coordinate, chunkSize)) continue;
+        regions[coordinate]!.add(
+          TerrainRegion(
+            id: region.id,
+            materialId: region.materialId,
+            resetsToDefault: region.resetsToDefault,
+            edgeBlend: region.edgeBlend,
+            textureScale: region.textureScale,
+            seed: region.seed,
+            order: region.order,
+            points: [
+              for (final point in region.points)
+                WorldPoint(
+                  point.x - coordinate.x * chunkSize,
+                  point.y - coordinate.y * chunkSize,
+                ),
+            ],
+          ),
+        );
+      }
+    }
 
     for (final stroke in document.terrainStrokes) {
       if (stroke.points.isEmpty) continue;
@@ -459,6 +517,7 @@ class EnvironmentChunkedWorld {
             materialId: stroke.materialId,
             radius: stroke.radius,
             opacity: stroke.opacity,
+            resetsToBase: stroke.resetsToBase,
             seed: stroke.seed,
             spacing: stroke.spacing,
             scatter: stroke.scatter,
@@ -512,6 +571,7 @@ class EnvironmentChunkedWorld {
           coordinate: coordinate,
           size: chunkSize,
           baseMaterialId: document.baseMaterialId,
+          terrainRegions: regions[coordinate],
           terrainStrokes: strokes[coordinate],
           objects: objects[coordinate],
           overlapObjectIds: {
@@ -594,6 +654,7 @@ EnvironmentChunkedWorld extendEnvironmentChunkedWorld(
       coordinate: coordinate,
       size: source.size,
       baseMaterialId: source.baseMaterialId,
+      terrainRegions: source.terrainRegions,
       terrainStrokes: source.terrainStrokes,
       objects: [
         for (final object in source.objects)
@@ -641,6 +702,7 @@ EnvironmentChunkedWorld extendEnvironmentChunkedWorld(
       coordinate: chunk.coordinate,
       size: chunk.size,
       baseMaterialId: chunk.baseMaterialId,
+      terrainRegions: chunk.terrainRegions,
       terrainStrokes: chunk.terrainStrokes,
       objects: chunk.objects,
       overlapObjectIds: {

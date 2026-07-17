@@ -6,7 +6,7 @@ use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
 use std::error::Error;
 use std::fs;
-use std::io::{BufReader, Read};
+use std::io::{BufReader, Cursor, Read};
 use std::path::{Path, PathBuf};
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
@@ -89,7 +89,10 @@ struct Rules {
 #[serde(rename_all = "camelCase")]
 struct PackRule {
     id: String,
+    display_name: String,
     source_root: PathBuf,
+    #[serde(default)]
+    release_max_dimension: Option<u32>,
     ground: Option<GroundRule>,
     #[serde(default)]
     objects: Vec<ObjectRule>,
@@ -245,6 +248,8 @@ struct MaterialOverride {
     id: Option<String>,
     name: Option<String>,
     default_radius: Option<f64>,
+    repeat_world_width: Option<f64>,
+    repeat_world_height: Option<f64>,
     tags: Option<Vec<String>>,
     texture: Option<String>,
     decal: Option<String>,
@@ -276,8 +281,17 @@ struct ObjectOverride {
 #[serde(rename_all = "camelCase")]
 struct Catalog {
     schema_version: u32,
+    #[serde(default)]
+    source_packs: Vec<CatalogSourcePack>,
     materials: Vec<CatalogMaterial>,
     objects: Vec<CatalogObject>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CatalogSourcePack {
+    id: String,
+    name: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -285,8 +299,22 @@ struct Catalog {
 struct CatalogMaterial {
     id: String,
     name: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    source_pack: String,
     texture: String,
     decal: String,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    texture_logical_width: u32,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    texture_logical_height: u32,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    decal_logical_width: u32,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    decal_logical_height: u32,
+    #[serde(default = "default_repeat_world_size")]
+    repeat_world_width: f64,
+    #[serde(default = "default_repeat_world_size")]
+    repeat_world_height: f64,
     default_radius: f64,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     tags: Vec<String>,
@@ -332,10 +360,18 @@ struct CatalogObject {
 #[serde(rename_all = "camelCase")]
 struct CatalogView {
     image: String,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    logical_width: u32,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    logical_height: u32,
     #[serde(default = "default_pivot_x")]
     pivot_x: f64,
     #[serde(default = "default_pivot_y")]
     pivot_y: f64,
+}
+
+fn is_zero(value: &u32) -> bool {
+    *value == 0
 }
 
 fn default_pivot_x() -> f64 {
@@ -348,6 +384,10 @@ fn default_rule_render_scale() -> f64 {
 
 fn default_render_band() -> String {
     "depthSorted".to_owned()
+}
+
+fn default_repeat_world_size() -> f64 {
+    8.0
 }
 
 fn default_pivot_y() -> f64 {
@@ -852,15 +892,23 @@ fn build(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
     let manual: Catalog = read_json(&root.join(&rules.manual_catalog_path))?;
     let catalog = create_catalog(rules, manifest, &overrides, manual)?;
     let generated_root = root.join(&rules.generated_image_root);
+    fs::create_dir_all(&generated_root)?;
+    let expected_paths = expected_generated_paths(manifest);
+    for path in files_recursively(&generated_root)? {
+        let relative = path.strip_prefix(&generated_root)?.to_path_buf();
+        if !expected_paths.contains(&relative) {
+            fs::remove_file(path)?;
+        }
+    }
+    remove_empty_directories(&generated_root)?;
 
     for material in &manifest.materials {
-        let directory = generated_root.join("materials");
         copy_if_changed(
             root,
             &material.tile,
-            &directory.join(material_file_name(material, "tile")),
+            &generated_root.join(material_image_path(material, "tile")),
         )?;
-        let decal_path = directory.join(material_file_name(material, "decal"));
+        let decal_path = generated_root.join(material_image_path(material, "decal"));
         if let Some(decal) = &material.decal {
             copy_if_changed(root, decal, &decal_path)?;
         } else {
@@ -868,9 +916,7 @@ fn build(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
         }
         make_thumbnail(
             &root.join(&material.tile.source),
-            &generated_root
-                .join("thumbnails/ground")
-                .join(material_thumbnail_name(material)),
+            &generated_root.join(material_thumbnail_path(material)),
             true,
         )?;
     }
@@ -917,26 +963,28 @@ fn check(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
     }
 
     let generated_root = root.join(&rules.generated_image_root);
+    let actual_paths = files_recursively(&generated_root)?
+        .into_iter()
+        .map(|path| Ok(path.strip_prefix(&generated_root)?.to_path_buf()))
+        .collect::<Result<BTreeSet<_>>>()?;
+    let expected_paths = expected_generated_paths(manifest);
+    if actual_paths != expected_paths {
+        return Err(
+            "generated image cache contains missing or stale files; run the importer build".into(),
+        );
+    }
     for material in &manifest.materials {
         verify_copy(
             &material.tile,
-            &generated_root
-                .join("materials")
-                .join(material_file_name(material, "tile")),
+            &generated_root.join(material_image_path(material, "tile")),
         )?;
-        let decal_path = generated_root
-            .join("materials")
-            .join(material_file_name(material, "decal"));
+        let decal_path = generated_root.join(material_image_path(material, "decal"));
         if let Some(decal) = &material.decal {
             verify_copy(decal, &decal_path)?;
         } else {
             verify_soft_decal(&root.join(&material.tile.source), &decal_path)?;
         }
-        require_file(
-            &generated_root
-                .join("thumbnails/ground")
-                .join(material_thumbnail_name(material)),
-        )?;
+        require_file(&generated_root.join(material_thumbnail_path(material)))?;
     }
     for object in &manifest.objects {
         for (view, image) in &object.views {
@@ -948,6 +996,22 @@ fn check(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
         require_file(&generated_root.join(object_thumbnail_path(object)))?;
     }
     Ok(())
+}
+
+fn expected_generated_paths(manifest: &Manifest) -> BTreeSet<PathBuf> {
+    let mut paths = BTreeSet::new();
+    for material in &manifest.materials {
+        paths.insert(material_image_path(material, "tile"));
+        paths.insert(material_image_path(material, "decal"));
+        paths.insert(material_thumbnail_path(material));
+    }
+    for object in &manifest.objects {
+        for view in object.views.keys() {
+            paths.insert(object_image_path(object, *view));
+        }
+        paths.insert(object_thumbnail_path(object));
+    }
+    paths
 }
 
 fn validate_geometry_overrides(root: &Path, rules: &Rules, catalog: &Catalog) -> Result<()> {
@@ -1356,6 +1420,15 @@ struct ReleasePackage {
     files: BTreeMap<String, Vec<u8>>,
 }
 
+struct ReleaseImage {
+    release_path: String,
+    bytes: Vec<u8>,
+    source_width: u32,
+    source_height: u32,
+    output_width: u32,
+    output_height: u32,
+}
+
 fn export_world(root: &Path, rules: &Rules) -> Result<()> {
     let package = generate_release_package(root, rules)?;
     let release_root = root.join(&rules.release_root);
@@ -1642,7 +1715,14 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
         .generated_image_root
         .parent()
         .ok_or("generated image root must have an asset image parent")?;
-    let mut images = BTreeMap::<String, (String, Vec<u8>)>::new();
+    let mut images = BTreeMap::<String, ReleaseImage>::new();
+    let release_max_dimension_for = |source_pack: &str| {
+        rules
+            .packs
+            .iter()
+            .find(|pack| pack.id == source_pack)
+            .and_then(|pack| pack.release_max_dimension)
+    };
 
     let mut release_materials = Vec::new();
     for id in &required_materials {
@@ -1654,12 +1734,20 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
             .cloned()
             .ok_or("catalog material must be an object")?;
         material.remove("thumbnail");
+        let max_dimension = material["sourcePack"]
+            .as_str()
+            .and_then(release_max_dimension_for);
         for key in ["texture", "decal"] {
             let logical = material[key]
                 .as_str()
                 .ok_or_else(|| format!("material {id} has no {key} image"))?;
-            let release_path =
-                register_release_image(root, source_image_root, logical, &mut images)?;
+            let release_path = register_release_image(
+                root,
+                source_image_root,
+                logical,
+                max_dimension,
+                &mut images,
+            )?;
             material.insert(key.to_owned(), Value::String(release_path));
         }
         release_materials.push(Value::Object(material));
@@ -1675,6 +1763,9 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
             .cloned()
             .ok_or("catalog object must be an object")?;
         object.remove("thumbnail");
+        let max_dimension = object["sourcePack"]
+            .as_str()
+            .and_then(release_max_dimension_for);
         let source_views = object["views"]
             .as_object()
             .ok_or_else(|| format!("asset {id} views must be an object"))?;
@@ -1692,8 +1783,13 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
             let logical = release_view["image"]
                 .as_str()
                 .ok_or_else(|| format!("asset {id} view {direction} has no image"))?;
-            let release_path =
-                register_release_image(root, source_image_root, logical, &mut images)?;
+            let release_path = register_release_image(
+                root,
+                source_image_root,
+                logical,
+                max_dimension,
+                &mut images,
+            )?;
             release_view.insert("image".to_owned(), Value::String(release_path));
             release_views.insert(direction.clone(), Value::Object(release_view));
         }
@@ -1704,6 +1800,7 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
 
     let release_catalog = json!({
         "schemaVersion": catalog["schemaVersion"].clone(),
+        "sourcePacks": catalog["sourcePacks"].clone(),
         "materials": release_materials,
         "objects": release_objects
     });
@@ -1754,15 +1851,19 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
 
     let mut image_report = Vec::new();
     let mut image_bytes = 0_u64;
-    for (logical, (release_path, bytes)) in images {
-        image_bytes += bytes.len() as u64;
+    for (logical, image) in images {
+        image_bytes += image.bytes.len() as u64;
         image_report.push(json!({
             "sourceLogicalPath": logical,
-            "releasePath": release_path,
-            "bytes": bytes.len(),
-            "sha256": sha256_bytes(&bytes)
+            "releasePath": image.release_path,
+            "bytes": image.bytes.len(),
+            "sourceWidth": image.source_width,
+            "sourceHeight": image.source_height,
+            "outputWidth": image.output_width,
+            "outputHeight": image.output_height,
+            "sha256": sha256_bytes(&image.bytes)
         }));
-        files.insert(release_path, bytes);
+        files.insert(image.release_path, image.bytes);
     }
     let metadata_bytes = files
         .iter()
@@ -1812,30 +1913,52 @@ fn register_release_image(
     root: &Path,
     source_image_root: &Path,
     logical: &str,
-    images: &mut BTreeMap<String, (String, Vec<u8>)>,
+    maximum_dimension: Option<u32>,
+    images: &mut BTreeMap<String, ReleaseImage>,
 ) -> Result<String> {
     if Path::new(logical).is_absolute() || logical.split('/').any(|component| component == "..") {
         return Err(format!("asset image path is not bundle-relative: {logical}").into());
     }
-    if let Some((release_path, _)) = images.get(logical) {
-        return Ok(release_path.clone());
+    if let Some(image) = images.get(logical) {
+        return Ok(image.release_path.clone());
     }
     let source = root.join(source_image_root).join(logical);
     require_file(&source).map_err(|_| format!("referenced asset image is missing: {logical}"))?;
-    let bytes = fs::read(&source)?;
+    let source_bytes = fs::read(&source)?;
+    let (source_width, source_height) = image::image_dimensions(&source)?;
+    let largest_dimension = source_width.max(source_height);
+    let (bytes, output_width, output_height) = match maximum_dimension
+        .filter(|limit| *limit > 0 && largest_dimension > *limit)
+    {
+        Some(limit) => {
+            let resized =
+                image::load_from_memory(&source_bytes)?.resize(limit, limit, FilterType::Lanczos3);
+            let mut cursor = Cursor::new(Vec::new());
+            resized.write_to(&mut cursor, ImageFormat::Png)?;
+            (cursor.into_inner(), resized.width(), resized.height())
+        }
+        None => (source_bytes, source_width, source_height),
+    };
     let digest = sha256_bytes(logical.as_bytes());
-    let extension = Path::new(logical)
-        .extension()
-        .and_then(|value| value.to_str())
-        .unwrap_or("bin");
+    let extension = "png";
     let release_path = format!("images/{}.{}", &digest[..20], extension);
     if images
         .values()
-        .any(|(existing, _)| existing == &release_path)
+        .any(|image| image.release_path == release_path)
     {
         return Err(format!("release image hash collision for {logical}").into());
     }
-    images.insert(logical.to_owned(), (release_path.clone(), bytes));
+    images.insert(
+        logical.to_owned(),
+        ReleaseImage {
+            release_path: release_path.clone(),
+            bytes,
+            source_width,
+            source_height,
+            output_width,
+            output_height,
+        },
+    );
     Ok(release_path)
 }
 
@@ -2157,22 +2280,39 @@ fn create_catalog(
                 .unwrap_or_else(|| {
                     format!("{} {:03}", title_case(&material.kind), material.number)
                 }),
+            source_pack: material.pack_id.clone(),
             texture: override_value
                 .and_then(|value| value.texture.clone())
                 .unwrap_or_else(|| {
                     format!(
-                        "environment_generated/materials/{}",
-                        material_file_name(material, "tile")
+                        "environment_generated/{}",
+                        material_image_path(material, "tile").display()
                     )
                 }),
             decal: override_value
                 .and_then(|value| value.decal.clone())
                 .unwrap_or_else(|| {
                     format!(
-                        "environment_generated/materials/{}",
-                        material_file_name(material, "decal")
+                        "environment_generated/{}",
+                        material_image_path(material, "decal").display()
                     )
                 }),
+            texture_logical_width: material.tile.width,
+            texture_logical_height: material.tile.height,
+            decal_logical_width: material
+                .decal
+                .as_ref()
+                .map_or(material.tile.width, |image| image.width),
+            decal_logical_height: material
+                .decal
+                .as_ref()
+                .map_or(material.tile.height, |image| image.height),
+            repeat_world_width: override_value
+                .and_then(|value| value.repeat_world_width)
+                .unwrap_or(material.tile.width as f64 / 64.0),
+            repeat_world_height: override_value
+                .and_then(|value| value.repeat_world_height)
+                .unwrap_or(material.tile.height as f64 / 64.0),
             default_radius: override_value
                 .and_then(|value| value.default_radius)
                 .unwrap_or(1.8),
@@ -2186,8 +2326,8 @@ fn create_catalog(
                     }
                 }),
             thumbnail: Some(format!(
-                "environment_generated/thumbnails/ground/{}",
-                material_thumbnail_name(material)
+                "environment_generated/{}",
+                material_thumbnail_path(material).display()
             )),
         });
     }
@@ -2234,6 +2374,8 @@ fn create_catalog(
                             }),
                         pivot_x,
                         pivot_y,
+                        logical_width: object.views[view].width,
+                        logical_height: object.views[view].height,
                     },
                 ))
             })
@@ -2341,7 +2483,15 @@ fn create_catalog(
     }
 
     Ok(Catalog {
-        schema_version: 2,
+        schema_version: 3,
+        source_packs: rules
+            .packs
+            .iter()
+            .map(|pack| CatalogSourcePack {
+                id: pack.id.clone(),
+                name: pack.display_name.clone(),
+            })
+            .collect(),
         materials,
         objects,
     })
@@ -2491,12 +2641,17 @@ fn material_stem(material: &DiscoveredMaterial) -> String {
     }
 }
 
-fn material_file_name(material: &DiscoveredMaterial, role: &str) -> String {
-    format!("{}_{role}.png", material_stem(material))
+fn material_image_path(material: &DiscoveredMaterial, role: &str) -> PathBuf {
+    PathBuf::from("materials")
+        .join(&material.pack_id)
+        .join(format!("{}_{role}.png", material_stem(material)))
 }
 
-fn material_thumbnail_name(material: &DiscoveredMaterial) -> String {
-    format!("{}.png", material_stem(material))
+fn material_thumbnail_path(material: &DiscoveredMaterial) -> PathBuf {
+    PathBuf::from("thumbnails")
+        .join(&material.pack_id)
+        .join("ground")
+        .join(format!("{}.png", material_stem(material)))
 }
 
 fn object_image_path(object: &DiscoveredObject, view: u8) -> PathBuf {
@@ -2785,5 +2940,35 @@ mod tests {
         assert!(soft_decal_alpha(0.8) < 1.0);
         assert!(soft_decal_alpha(0.8) > 0.0);
         assert_eq!(soft_decal_alpha(1.0), 0.0);
+    }
+
+    #[test]
+    fn release_images_are_downscaled_without_losing_source_dimensions() {
+        let root =
+            std::env::temp_dir().join(format!("neura-release-image-test-{}", std::process::id()));
+        let image_root = root.join("images");
+        fs::create_dir_all(&image_root).unwrap();
+        let source = image_root.join("large.png");
+        DynamicImage::ImageRgba8(RgbaImage::new(200, 100))
+            .save_with_format(&source, ImageFormat::Png)
+            .unwrap();
+
+        let mut images = BTreeMap::new();
+        let release_path = register_release_image(
+            &root,
+            Path::new("images"),
+            "large.png",
+            Some(64),
+            &mut images,
+        )
+        .unwrap();
+        let output = &images["large.png"];
+
+        assert_eq!(release_path, output.release_path);
+        assert_eq!((output.source_width, output.source_height), (200, 100));
+        assert_eq!((output.output_width, output.output_height), (64, 32));
+        let decoded = image::load_from_memory(&output.bytes).unwrap();
+        assert_eq!((decoded.width(), decoded.height()), (64, 32));
+        fs::remove_dir_all(root).unwrap();
     }
 }

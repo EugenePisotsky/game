@@ -29,6 +29,8 @@
       "id": "ow3.ground.meadow",
       "name": "Sparse meadow",
       "defaultRadius": 2.2,
+      "repeatWorldWidth": 4.4,
+      "repeatWorldHeight": 4.4,
       "texture": "environment_v2/materials/meadow.png",
       "decal": "environment_v2/materials/meadow_decal.png",
       "tags": ["grass", "meadow"]
@@ -53,7 +55,7 @@
     "ow3.tree.001": {
       "id": "ow3.tree.blossom",
       "name": "Blossoming tree",
-      "renderScale": 0.85,
+      "renderScale": 1.0,
       "viewImages": {
         "south": "environment_v2/objects/Tree1_1.png", "west": "environment_v2/objects/Tree1_2.png",
         "east": "environment_v2/objects/Tree1_3.png", "north": "environment_v2/objects/Tree1_4.png",
@@ -65,7 +67,7 @@
     "ow3.tree.030": {
       "id": "ow3.tree.round_large",
       "name": "Large round tree",
-      "renderScale": 0.65,
+      "renderScale": 1.0,
       "viewImages": {
         "south": "environment_v2/objects/Tree30_1.png", "west": "environment_v2/objects/Tree30_2.png",
         "east": "environment_v2/objects/Tree30_3.png", "north": "environment_v2/objects/Tree30_4.png",
@@ -77,7 +79,7 @@
     "ow3.bush.001": {
       "id": "ow3.bush.small",
       "name": "Small bush",
-      "renderScale": 1.7,
+      "renderScale": 1.0,
       "viewImages": {
         "south": "environment_v2/objects/Bush1_1.png", "west": "environment_v2/objects/Bush1_2.png",
         "east": "environment_v2/objects/Bush1_3.png", "north": "environment_v2/objects/Bush1_4.png"

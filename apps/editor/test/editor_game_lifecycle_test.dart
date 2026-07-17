@@ -177,7 +177,24 @@ void main() {
       }
 
       expect(game.terrainRasterCount, 1);
+      expect(game.terrainRasterBytes, 16 * (1 << 20));
+      expect(game.highResolutionTerrainRasterCount, 1);
+
+      game.zoomBy(0.5);
+      for (
+        var attempt = 0;
+        attempt < 40 && game.terrainRasterBytes != 4 * (1 << 20);
+        attempt++
+      ) {
+        renderFrame();
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
       expect(game.terrainRasterBytes, 4 * (1 << 20));
+      expect(game.highResolutionTerrainRasterCount, 0);
+
+      game.zoomBy(4);
+      expect(game.usesDirectTerrainRendering, isTrue);
+      renderFrame();
 
       loadedChunks.clear();
       renderFrame();

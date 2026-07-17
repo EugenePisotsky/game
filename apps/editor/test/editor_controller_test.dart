@@ -10,6 +10,12 @@ void main() {
     texturePath: 'earth.png',
     decalPath: 'earth_decal.png',
   );
+  const grass = EnvironmentMaterial(
+    id: 'grass',
+    name: 'Grass',
+    texturePath: 'grass.png',
+    decalPath: 'grass_decal.png',
+  );
   const tree = EnvironmentObjectAsset(
     id: 'tree',
     name: 'Tree',
@@ -44,7 +50,7 @@ void main() {
     views: {'south': EnvironmentObjectView(imagePath: 'potion.png')},
   );
   final catalog = EnvironmentCatalog(
-    materials: [earth],
+    materials: [earth, grass],
     objects: [tree, crate, potion],
   );
 
@@ -517,6 +523,210 @@ void main() {
     controller.undo();
     expect(controller.document.objects[0].x, 2);
     expect(controller.document.objects[1].x, 5);
+  });
+
+  test('keyboard nudging moves the complete selection and is undoable', () {
+    final controller = EditorController(
+      EnvironmentDocument(
+        id: 'test',
+        name: 'Test',
+        width: 20,
+        height: 20,
+        baseMaterialId: earth.id,
+        objects: [
+          PlacedEnvironmentObject(id: 'a', assetId: tree.id, x: 2, y: 3),
+          PlacedEnvironmentObject(id: 'b', assetId: tree.id, x: 5, y: 7),
+        ],
+      ),
+      catalog: catalog,
+    )..selectObjectIds(['a', 'b']);
+
+    expect(controller.nudgeSelection(0.25, -0.25), isTrue);
+    expect(
+      (controller.document.objects[0].x, controller.document.objects[0].y),
+      (2.25, 2.75),
+    );
+    expect(
+      (controller.document.objects[1].x, controller.document.objects[1].y),
+      (5.25, 6.75),
+    );
+    controller.undo();
+    expect(
+      (controller.document.objects[0].x, controller.document.objects[0].y),
+      (2, 3),
+    );
+  });
+
+  test(
+    'copied objects paste with new identities and preserve their layout',
+    () {
+      final controller = EditorController(
+        EnvironmentDocument(
+          id: 'test',
+          name: 'Test',
+          width: 20,
+          height: 20,
+          baseMaterialId: earth.id,
+          objects: [
+            PlacedEnvironmentObject(id: 'a', assetId: tree.id, x: 2, y: 3),
+            PlacedEnvironmentObject(id: 'b', assetId: tree.id, x: 5, y: 7),
+          ],
+        ),
+        catalog: catalog,
+      )..selectObjectIds(['a', 'b']);
+
+      final source = controller.copySelectionToJson();
+      expect(source, isNotNull);
+      expect(controller.pasteSelectionFromJson(source!), isTrue);
+      expect(controller.document.objects, hasLength(4));
+      final pasted = controller.selectedObjects;
+      expect(pasted.map((object) => object.id), isNot(contains('a')));
+      expect(pasted.map((object) => object.id), isNot(contains('b')));
+      expect(pasted[1].x - pasted[0].x, 3);
+      expect(pasted[1].y - pasted[0].y, 4);
+      expect(pasted[0].x, 2.5);
+      controller.undo();
+      expect(controller.document.objects, hasLength(2));
+    },
+  );
+
+  test('ground reset records an overlay-clearing polygon and is undoable', () {
+    final controller = EditorController(
+      EnvironmentDocument(
+        id: 'test',
+        name: 'Test',
+        width: 20,
+        height: 20,
+        baseMaterialId: earth.id,
+        terrainStrokes: [
+          TerrainStroke(
+            materialId: grass.id,
+            radius: 3,
+            opacity: 1,
+            points: const [WorldPoint(10, 10)],
+          ),
+        ],
+      ),
+      catalog: catalog,
+    );
+    expect(
+      environmentMaterialAtPoint(controller.document, const WorldPoint(10, 10)),
+      grass.id,
+    );
+
+    expect(
+      controller.resetGroundInArea(const [
+        WorldPoint(8, 8),
+        WorldPoint(12, 8),
+        WorldPoint(12, 12),
+        WorldPoint(8, 12),
+      ]),
+      isTrue,
+    );
+    expect(
+      environmentMaterialAtPoint(controller.document, const WorldPoint(10, 10)),
+      earth.id,
+    );
+    final reset = controller.document.terrainStrokes.last;
+    expect(reset.resetsToBase, isTrue);
+    expect(reset.radius, 0);
+    expect(terrainStrokeStamps(reset), isEmpty);
+    controller.undo();
+    expect(
+      environmentMaterialAtPoint(controller.document, const WorldPoint(10, 10)),
+      grass.id,
+    );
+  });
+
+  test(
+    'ground fill, detail reset, clear fill, and default are independent',
+    () {
+      const polygon = [
+        WorldPoint(4, 4),
+        WorldPoint(12, 4),
+        WorldPoint(12, 12),
+        WorldPoint(4, 12),
+      ];
+      final controller = EditorController(world(), catalog: catalog)
+        ..selectMode(EnvironmentEditorMode.fillGround)
+        ..selectPaintMaterial(grass);
+
+      expect(controller.fillGroundInArea(polygon), isTrue);
+      expect(controller.document.terrainRegions, hasLength(1));
+      expect(
+        environmentMaterialAtPoint(controller.document, const WorldPoint(8, 8)),
+        grass.id,
+      );
+
+      controller.document.terrainStrokes.add(
+        TerrainStroke(
+          materialId: earth.id,
+          radius: 2,
+          opacity: 1,
+          points: const [WorldPoint(8, 8)],
+        ),
+      );
+      expect(controller.resetGroundInArea(polygon), isTrue);
+      expect(
+        environmentMaterialAtPoint(controller.document, const WorldPoint(8, 8)),
+        grass.id,
+      );
+
+      expect(controller.clearGroundFillInArea(polygon), isTrue);
+      expect(
+        environmentMaterialAtPoint(controller.document, const WorldPoint(8, 8)),
+        earth.id,
+      );
+      controller.undo();
+      expect(
+        environmentMaterialAtPoint(controller.document, const WorldPoint(8, 8)),
+        grass.id,
+      );
+
+      expect(controller.setDefaultGroundMaterial(grass), isTrue);
+      expect(controller.document.baseMaterialId, grass.id);
+      controller.undo();
+      expect(controller.document.baseMaterialId, earth.id);
+    },
+  );
+
+  test('ground fills can be selected, rescaled, deleted, and undone', () {
+    const polygon = [
+      WorldPoint(4, 4),
+      WorldPoint(12, 4),
+      WorldPoint(12, 12),
+      WorldPoint(4, 12),
+    ];
+    final controller = EditorController(world(), catalog: catalog)
+      ..selectMode(EnvironmentEditorMode.fillGround)
+      ..selectPaintMaterial(grass);
+
+    expect(controller.fillGroundInArea(polygon), isTrue);
+    expect(controller.selectedTerrainRegion?.materialId, grass.id);
+    expect(controller.activeFillTextureScale, 1);
+
+    controller
+      ..beginTerrainTextureScaleEdit()
+      ..setActiveFillTextureScale(0.5)
+      ..endTerrainTextureScaleEdit();
+    expect(controller.selectedTerrainRegion?.textureScale, 0.5);
+    controller.undo();
+    expect(controller.selectedTerrainRegion?.textureScale, 1);
+    controller.redo();
+    expect(controller.selectedTerrainRegion?.textureScale, 0.5);
+
+    controller
+      ..clearSelection()
+      ..selectMode(EnvironmentEditorMode.editGround)
+      ..beginGesture()
+      ..applyAt(const WorldPoint(8, 8))
+      ..endGesture();
+    expect(controller.selectedTerrainRegion, isNotNull);
+
+    controller.deleteSelected();
+    expect(controller.document.terrainRegions, isEmpty);
+    controller.undo();
+    expect(controller.document.terrainRegions, hasLength(1));
   });
 
   test(

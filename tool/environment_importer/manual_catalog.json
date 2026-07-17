@@ -4,9 +4,10 @@
   "objects": [
     {
       "id": "ow3.fence.wood",
+      "sourcePack": "ow3",
       "name": "Wooden fence",
       "category": "Structures",
-      "renderScale": 1.5,
+      "renderScale": 1.0,
       "renderBand": "depthSorted",
       "collisionProfile": "fence",
       "tags": ["fence", "wood"],
@@ -19,9 +20,10 @@
     },
     {
       "id": "ow3.dock.short",
+      "sourcePack": "ow3",
       "name": "Short dock",
       "category": "Structures",
-      "renderScale": 0.8,
+      "renderScale": 1.0,
       "renderBand": "depthSorted",
       "collisionProfile": "bridge",
       "tags": ["dock", "bridge", "wood"],
@@ -34,9 +36,10 @@
     },
     {
       "id": "ow1.building.cottage_wide",
+      "sourcePack": "ow1",
       "name": "Wide cottage",
       "category": "Buildings",
-      "renderScale": 0.8,
+      "renderScale": 1.0,
       "renderBand": "depthSorted",
       "collisionProfile": "building",
       "tags": ["building", "cottage"],
@@ -53,9 +56,10 @@
     },
     {
       "id": "ow1.building.manor",
+      "sourcePack": "ow1",
       "name": "Village manor",
       "category": "Buildings",
-      "renderScale": 0.8,
+      "renderScale": 1.0,
       "renderBand": "depthSorted",
       "collisionProfile": "building",
       "tags": ["building", "manor"],

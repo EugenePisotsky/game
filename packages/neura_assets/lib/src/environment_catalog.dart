@@ -260,9 +260,11 @@ class EnvironmentCatalog {
   EnvironmentCatalog({
     required List<EnvironmentMaterial> materials,
     required List<EnvironmentObjectAsset> objects,
+    List<EnvironmentSourcePack> sourcePacks = const [],
     Map<String, EnvironmentAssetGeometry>? geometryOverrides,
   }) : _materials = List.of(materials),
        _objects = List.of(objects),
+       sourcePacks = List.unmodifiable(sourcePacks),
        _geometryOverrides = Map.of(geometryOverrides ?? const {}) {
     this.materials = UnmodifiableListView(_materials);
     this.objects = UnmodifiableListView(_objects);
@@ -282,6 +284,7 @@ class EnvironmentCatalog {
 
   final List<EnvironmentMaterial> _materials;
   final List<EnvironmentObjectAsset> _objects;
+  final List<EnvironmentSourcePack> sourcePacks;
   late final UnmodifiableListView<EnvironmentMaterial> materials;
   late final UnmodifiableListView<EnvironmentObjectAsset> objects;
   final Map<String, EnvironmentMaterial> _materialsById = {};
@@ -369,6 +372,10 @@ class EnvironmentCatalog {
   factory EnvironmentCatalog.fromJsonString(String source) {
     final json = jsonDecode(source) as Map<String, Object?>;
     return EnvironmentCatalog(
+      sourcePacks: [
+        for (final value in json['sourcePacks'] as List<Object?>? ?? const [])
+          EnvironmentSourcePack.fromJson(value as Map<String, Object?>),
+      ],
       materials: [
         for (final value in json['materials'] as List<Object?>)
           EnvironmentMaterial.fromJson(value as Map<String, Object?>),
@@ -381,12 +388,32 @@ class EnvironmentCatalog {
   }
 }
 
+class EnvironmentSourcePack {
+  const EnvironmentSourcePack({required this.id, required this.name});
+
+  final String id;
+  final String name;
+
+  factory EnvironmentSourcePack.fromJson(Map<String, Object?> json) =>
+      EnvironmentSourcePack(
+        id: json['id'] as String,
+        name: json['name'] as String,
+      );
+}
+
 class EnvironmentMaterial {
   const EnvironmentMaterial({
     required this.id,
     required this.name,
     required this.texturePath,
     required this.decalPath,
+    this.sourcePack = '',
+    this.textureLogicalWidth = 0,
+    this.textureLogicalHeight = 0,
+    this.decalLogicalWidth = 0,
+    this.decalLogicalHeight = 0,
+    this.repeatWorldWidth = 0,
+    this.repeatWorldHeight = 0,
     this.defaultRadius = 1.5,
     this.tags = const [],
     this.thumbnailPath,
@@ -396,11 +423,31 @@ class EnvironmentMaterial {
   final String name;
   final String texturePath;
   final String decalPath;
+  final String sourcePack;
+  final int textureLogicalWidth;
+  final int textureLogicalHeight;
+  final int decalLogicalWidth;
+  final int decalLogicalHeight;
+  final double repeatWorldWidth;
+  final double repeatWorldHeight;
   final double defaultRadius;
   final List<String> tags;
   final String? thumbnailPath;
 
   bool get blocksMovement => tags.contains('non-walkable');
+
+  /// World-space size occupied by one complete repeating texture image.
+  ///
+  /// Older catalogs used the historical 64 texels-per-world-unit convention.
+  /// Keeping that fallback here makes the physical scale explicit without
+  /// changing existing material rendering.
+  double get effectiveRepeatWorldWidth => repeatWorldWidth > 0
+      ? repeatWorldWidth
+      : (textureLogicalWidth > 0 ? textureLogicalWidth / 64 : 8);
+
+  double get effectiveRepeatWorldHeight => repeatWorldHeight > 0
+      ? repeatWorldHeight
+      : (textureLogicalHeight > 0 ? textureLogicalHeight / 64 : 8);
 
   factory EnvironmentMaterial.fromJson(Map<String, Object?> json) =>
       EnvironmentMaterial(
@@ -408,6 +455,14 @@ class EnvironmentMaterial {
         name: json['name'] as String,
         texturePath: json['texture'] as String,
         decalPath: json['decal'] as String,
+        sourcePack: json['sourcePack'] as String? ?? '',
+        textureLogicalWidth: (json['textureLogicalWidth'] as num? ?? 0).toInt(),
+        textureLogicalHeight: (json['textureLogicalHeight'] as num? ?? 0)
+            .toInt(),
+        decalLogicalWidth: (json['decalLogicalWidth'] as num? ?? 0).toInt(),
+        decalLogicalHeight: (json['decalLogicalHeight'] as num? ?? 0).toInt(),
+        repeatWorldWidth: (json['repeatWorldWidth'] as num? ?? 0).toDouble(),
+        repeatWorldHeight: (json['repeatWorldHeight'] as num? ?? 0).toDouble(),
         defaultRadius: (json['defaultRadius'] as num? ?? 1.5).toDouble(),
         tags: [
           for (final value in json['tags'] as List<Object?>? ?? const [])
@@ -552,17 +607,23 @@ class EnvironmentObjectAsset {
 class EnvironmentObjectView {
   const EnvironmentObjectView({
     required this.imagePath,
+    this.logicalWidth = 0,
+    this.logicalHeight = 0,
     this.pivotX = 0.5,
     this.pivotY = 1,
   });
 
   final String imagePath;
+  final int logicalWidth;
+  final int logicalHeight;
   final double pivotX;
   final double pivotY;
 
   factory EnvironmentObjectView.fromJson(Map<String, Object?> json) =>
       EnvironmentObjectView(
         imagePath: json['image'] as String,
+        logicalWidth: (json['logicalWidth'] as num? ?? 0).toInt(),
+        logicalHeight: (json['logicalHeight'] as num? ?? 0).toInt(),
         pivotX: (json['pivotX'] as num? ?? 0.5).toDouble(),
         pivotY: (json['pivotY'] as num? ?? 1).toDouble(),
       );

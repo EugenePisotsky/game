@@ -72,6 +72,82 @@ void main() {
     },
   );
 
+  test('split world preserves reset-to-base polygons across chunk seams', () {
+    final world = EnvironmentChunkedWorld.fromDocument(
+      EnvironmentDocument(
+        id: 'world',
+        name: 'World',
+        width: 64,
+        height: 32,
+        baseMaterialId: 'ground',
+        terrainStrokes: [
+          TerrainStroke(
+            materialId: 'ground',
+            radius: 0,
+            opacity: 1,
+            resetsToBase: true,
+            points: const [
+              WorldPoint(30, 8),
+              WorldPoint(34, 8),
+              WorldPoint(34, 12),
+              WorldPoint(30, 12),
+            ],
+          ),
+        ],
+      ),
+      chunkSize: 32,
+    );
+
+    final left = world.chunks[const EnvironmentChunkCoordinate(0, 0)]!;
+    final right = world.chunks[const EnvironmentChunkCoordinate(1, 0)]!;
+    expect(left.terrainStrokes.single.resetsToBase, isTrue);
+    expect(right.terrainStrokes.single.resetsToBase, isTrue);
+    expect(right.terrainStrokes.single.points.first.x, -2);
+  });
+
+  test('split world preserves ordered terrain regions across chunk seams', () {
+    final world = EnvironmentChunkedWorld.fromDocument(
+      EnvironmentDocument(
+        id: 'world',
+        name: 'World',
+        width: 64,
+        height: 32,
+        baseMaterialId: 'ground',
+        terrainRegions: [
+          TerrainRegion(
+            id: 'river',
+            materialId: 'water',
+            order: 4,
+            points: const [
+              WorldPoint(30, 8),
+              WorldPoint(34, 8),
+              WorldPoint(34, 12),
+              WorldPoint(30, 12),
+            ],
+          ),
+        ],
+      ),
+      chunkSize: 32,
+    );
+
+    final left = world.chunks[const EnvironmentChunkCoordinate(0, 0)]!;
+    final right = world.chunks[const EnvironmentChunkCoordinate(1, 0)]!;
+    expect(left.terrainRegions.single.id, 'river');
+    expect(right.terrainRegions.single.id, 'river');
+    expect(right.terrainRegions.single.points.first.x, -2);
+    expect(right.terrainRegions.single.order, 4);
+    expect(right.referencedAssetIds, contains('water'));
+
+    final restored = EnvironmentChunkDocument.fromJsonString(
+      right.toJsonString(),
+    );
+    expect(
+      restored.schemaVersion,
+      EnvironmentChunkDocument.currentSchemaVersion,
+    );
+    expect(restored.terrainRegions.single.materialId, 'water');
+  });
+
   test(
     'streamer loads 3x3, tracks references, and unloads with hysteresis',
     () async {

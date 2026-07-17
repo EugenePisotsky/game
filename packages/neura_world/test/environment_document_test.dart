@@ -9,6 +9,19 @@ void main() {
       width: 12,
       height: 9,
       baseMaterialId: 'ground.meadow',
+      terrainRegions: [
+        TerrainRegion(
+          id: 'field_1',
+          materialId: 'ground.earth',
+          order: 3,
+          points: const [
+            WorldPoint(1, 1),
+            WorldPoint(6, 1),
+            WorldPoint(6, 6),
+            WorldPoint(1, 6),
+          ],
+        ),
+      ],
       terrainStrokes: [
         TerrainStroke(
           materialId: 'ground.earth',
@@ -47,6 +60,9 @@ void main() {
     final restored = EnvironmentDocument.fromJsonString(source.toJsonString());
 
     expect(restored.width, 12);
+    expect(restored.terrainRegions.single.id, 'field_1');
+    expect(restored.terrainRegions.single.order, 3);
+    expect(restored.terrainRegions.single.points.last.y, 6);
     expect(restored.terrainStrokes.single.points.last.y, 5.5);
     expect(restored.terrainStrokes.single.seed, 42);
     expect(restored.terrainStrokes.single.spacing, 0.72);
@@ -83,7 +99,7 @@ void main() {
       }
     ''');
 
-    expect(restored.schemaVersion, 3);
+    expect(restored.schemaVersion, EnvironmentDocument.currentSchemaVersion);
     expect(restored.objects.single.id, 'tree_7');
     expect(restored.objects.single.x, 3.5);
     expect(restored.objects.single.y, 4.25);
@@ -200,6 +216,124 @@ void main() {
     expect(
       environmentMaterialAtPoint(document, const WorldPoint(18, 18)),
       'ground.meadow',
+    );
+  });
+
+  test('reset polygons reveal base terrain without producing brush stamps', () {
+    final reset = TerrainStroke(
+      materialId: 'ground.meadow',
+      radius: 0,
+      opacity: 1,
+      resetsToBase: true,
+      points: const [
+        WorldPoint(3, 3),
+        WorldPoint(7, 3),
+        WorldPoint(7, 7),
+        WorldPoint(3, 7),
+      ],
+    );
+    final document = EnvironmentDocument(
+      id: 'reset_test',
+      name: 'Reset test',
+      width: 10,
+      height: 10,
+      baseMaterialId: 'ground.meadow',
+      terrainStrokes: [
+        TerrainStroke(
+          materialId: 'water.blue',
+          radius: 5,
+          opacity: 1,
+          points: const [WorldPoint(5, 5)],
+        ),
+        reset,
+      ],
+    );
+
+    expect(terrainStrokeStamps(reset), isEmpty);
+    expect(
+      environmentMaterialAtPoint(document, const WorldPoint(5, 5)),
+      'ground.meadow',
+    );
+    expect(
+      environmentMaterialAtPoint(document, const WorldPoint(2, 5)),
+      'water.blue',
+    );
+
+    final restored = EnvironmentDocument.fromJsonString(
+      document.toJsonString(),
+    );
+    expect(restored.terrainStrokes.last.resetsToBase, isTrue);
+    expect(restored.terrainStrokes.last.points, hasLength(4));
+  });
+
+  test('regional fills sit below detail resets and can reveal the default', () {
+    final document = EnvironmentDocument(
+      id: 'regions',
+      name: 'Regions',
+      width: 20,
+      height: 20,
+      baseMaterialId: 'meadow',
+      terrainRegions: [
+        TerrainRegion(
+          id: 'earth',
+          materialId: 'earth',
+          points: const [
+            WorldPoint(2, 2),
+            WorldPoint(12, 2),
+            WorldPoint(12, 12),
+            WorldPoint(2, 12),
+          ],
+        ),
+        TerrainRegion(
+          id: 'clear',
+          materialId: 'earth',
+          resetsToDefault: true,
+          order: 1,
+          points: const [
+            WorldPoint(8, 8),
+            WorldPoint(14, 8),
+            WorldPoint(14, 14),
+            WorldPoint(8, 14),
+          ],
+        ),
+      ],
+      terrainStrokes: [
+        TerrainStroke(
+          materialId: 'water',
+          radius: 3,
+          opacity: 1,
+          points: const [WorldPoint(5, 5)],
+        ),
+        TerrainStroke(
+          materialId: 'meadow',
+          radius: 0,
+          opacity: 1,
+          resetsToBase: true,
+          points: const [
+            WorldPoint(3, 3),
+            WorldPoint(7, 3),
+            WorldPoint(7, 7),
+            WorldPoint(3, 7),
+          ],
+        ),
+      ],
+    );
+
+    expect(
+      environmentBaseMaterialAtPoint(document, const WorldPoint(5, 5)),
+      'earth',
+    );
+    expect(
+      environmentMaterialAtPoint(document, const WorldPoint(5, 5)),
+      'earth',
+    );
+    expect(
+      environmentMaterialAtPoint(document, const WorldPoint(10, 10)),
+      'meadow',
+    );
+    expect(
+      environmentMaterialAtPoint(document, const WorldPoint(16, 16)),
+      'meadow',
     );
   });
 }

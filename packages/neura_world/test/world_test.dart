@@ -11,8 +11,12 @@ void main() {
 
     expect(restored.x, closeTo(world.x, 0.0001));
     expect(restored.y, closeTo(world.y, 0.0001));
-    expect(projection.tileWidth, 128);
-    expect(projection.tileHeight, 64);
+    expect(projection.tileWidth, IsometricProjection.defaultTileWidth);
+    expect(projection.tileHeight, IsometricProjection.defaultTileHeight);
+    expect(
+      projection.tileHeight / projection.tileWidth,
+      closeTo(IsometricProjection.trueIsometricRatio, 1e-12),
+    );
   });
 
   test('chunk manager loads a square and handles negative coordinates', () {

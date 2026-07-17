@@ -1,13 +1,22 @@
 {
   "id": "overlapping_selection",
-  "description": "Grass, rock, and tree overlap for topmost selection and overlap cycling.",
-  "camera": {"x": 2.3, "y": 14.4},
-  "player": {"x": 2.3, "y": 14.4},
+  "description": "A dense barrel and crate cluster exercises topmost selection and overlap cycling.",
+  "camera": {"x": 85.8, "y": 113.9},
+  "player": {"x": 85.8, "y": 113.9},
   "facing": "southWest",
   "viewportWidth": 800,
   "viewportHeight": 600,
   "clockSeconds": 0.0,
   "randomSeed": 2103,
-  "relevantObjectIds": ["object_177", "object_188"],
-  "expectedLoadedChunks": [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 0, "y": 1}, {"x": 1, "y": 1}]
+  "relevantObjectIds": [
+    "object_hke4fcwbdq_0_38",
+    "object_hke4fcwbdq_0_39",
+    "object_hke4fcwbdq_0_40",
+    "object_hke4fcwbdq_0_48"
+  ],
+  "expectedLoadedChunks": [
+    {"x": 1, "y": 2}, {"x": 2, "y": 2}, {"x": 3, "y": 2},
+    {"x": 1, "y": 3}, {"x": 2, "y": 3}, {"x": 3, "y": 3},
+    {"x": 1, "y": 4}, {"x": 2, "y": 4}, {"x": 3, "y": 4}
+  ]
 }

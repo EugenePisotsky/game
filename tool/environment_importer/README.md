@@ -2,8 +2,9 @@
 
 This Rust CLI converts purchased Other Worlds source files into deterministic,
 runtime-ready Neura assets. Its reviewed registry covers Core Tiles 1, 2, and
-3: ground, water, vegetation, buildings, structures, furniture, props, small
-items, and dungeon art. Opaque `WaterTile` sources receive deterministic
+3, Northfolk Tiles, and Other Worlds Dark Town Tiles: ground, water,
+vegetation, buildings, structures, vehicles, furniture, props, small items,
+and dungeon art. Opaque `WaterTile` sources receive deterministic
 soft-edged brush decals during `build`; their original images remain the
 repeating textures.
 
@@ -22,8 +23,9 @@ cargo run --manifest-path tool/environment_importer/Cargo.toml -- check
 - `scan` inventories every source PNG, validates source families, and writes
   `environment_discovered.json`. Each source is classified, deferred,
   excluded, invalid, or unclassified.
-- `build` also copies runtime PNGs, generates 192 x 192 thumbnails, merges
-  overrides and manual entries, and writes `environment_catalog.json`.
+- `build` also copies runtime PNGs into pack-scoped paths, deletes stale cache
+  files, generates 192 x 192 thumbnails, merges overrides and manual entries,
+  and writes `environment_catalog.json`.
 - `check-assets` verifies only source discovery, the generated visual catalog,
   copied images, and thumbnails. It never checks or writes authored worlds,
   chunks, or release exports.
@@ -40,7 +42,10 @@ cargo run --manifest-path tool/environment_importer/Cargo.toml -- check
   are the source of truth after bootstrap.
 - `export-world` follows the generated chunks, filters non-exported layers,
   resolves only referenced material and directional object images, rewrites
-  them to bundle-local paths, and emits an asset-size report. Duplicate placed
+  them to bundle-local paths, downsizes images according to the owning pack's
+  `releaseMaxDimension`, and emits an asset-size and dimension report. Catalog
+  views retain their original logical width and height, so release downscaling
+  reduces texture memory without changing world-space sprite size. Duplicate placed
   object IDs are reported with both owning chunks, assets, and world positions;
   the editor's **Build release** flow can repair legacy collisions and continue.
 - `check` is read-only and fails when the source manifest, catalog, copied
@@ -56,7 +61,9 @@ cargo run --manifest-path tool/environment_importer/Cargo.toml -- check
   exceptions.
 - `overrides.json` contains small human-reviewed corrections keyed by the
   generated stable ID. It may replace the final ID/name, tune scale/pivot,
-  attach tags, change collision profile, or exclude an asset.
+  attach tags, change collision profile, or exclude an asset. Material
+  overrides may set `repeatWorldWidth` and `repeatWorldHeight` when the
+  source artwork's physical texture scale differs from its pack default.
 - `manual_catalog.json` retains assets not covered by the current automatic
   rules, such as the prototype buildings, fence, and dock.
 - `environment_discovered.json` records source paths, dimensions, and SHA-256
@@ -66,7 +73,7 @@ Never hand-edit `environment_catalog.json` or files below
 `assets/images/environment_generated`; rebuild them through this tool.
 
 Full generated PNGs and thumbnails are an editor-side source cache loaded from
-the workspace on demand. Pack-wide `ow1`, `ow2`, and `ow3` cache directories
+the workspace on demand. Pack-wide `ow1`, `ow2`, `ow3`, `nf`, and `owdt` cache directories
 are reproducible from the ignored purchased sources and are therefore ignored
 by Git. The generated catalog and discovery manifest remain versioned. The
 release export under
@@ -92,6 +99,8 @@ ow3.grass.022
 ow3.rock.004
 ow3.barrel.012
 ow2.castleTower.003
+nf.snowTree.012
+owdt.buildingPiece.026
 ```
 
 Directional suffixes follow the vendor order: south, west, east, north,
