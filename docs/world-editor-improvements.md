@@ -126,9 +126,19 @@ ground. It is distinct from the image pivot: the pivot aligns pixels while the
 sort anchor describes spatial ordering.
 
 For most props, correct anchors are sufficient. Buildings and other large
-objects additionally need a ground footprint. A later footprint-aware sorter
-may establish ordering constraints between overlapping objects. Until then,
-an asset default and small per-instance `sortBias` provide an escape hatch.
+objects additionally need a ground footprint. The runtime projects each
+footprint into horizontal (`x - y`) and depth (`x + y`) coordinates. At the
+horizontal position where two entities overlap, it compares the local
+back/front slice rather than one global extreme.
+
+These comparisons become draw-before constraints in one stable ordering graph
+shared by the player, future NPCs, buildings, and ordinary props. Entities
+without footprints participate as ground-contact points, so a fish rack can
+still be ordered against a long angled wall. When no local constraint exists,
+or malformed overlaps create a cycle, the graph falls back deterministically
+to scalar anchors. An asset default and small per-instance `sortBias` remain
+an exceptional escape hatch. Selected sprite slices may still be needed later
+for roofs and multi-level interiors.
 
 Manual bias must remain exceptional. The editor should display a warning when
 an instance uses a non-zero bias so visual corrections do not become invisible
@@ -291,7 +301,8 @@ instance. It must not be inferred directly from sprite dimensions or opacity.
 
 An asset may define several independent geometry sets:
 
-- `footprint`: occupied ground region used for selection and sorting;
+- `footprints`: one or more disconnected ground extents used for front/behind
+  depth ordering;
 - `blocking`: shapes an actor cannot enter;
 - `walkable`: surfaces an actor may stand on, such as a bridge deck;
 - `interaction`: door, harvest, dialogue, or use regions;
@@ -321,9 +332,16 @@ Examples:
 | Building | Polygon around walls, with door openings |
 | Bridge | Walkable deck plus optional blocking rails |
 
-### Collision editor
+The roles share one shape vocabulary and one editor, but they do not share
+semantics. A solid building may use one continuous depth polygon, while an open
+shelter can use separate circles for pillars and a capsule for its wall. This
+keeps the opening between supports free of an artificial depth surface. Its
+blockers may use similar shapes with a walkable door gap, but remain independent.
+The editor may copy all footprints into blockers as a starting point.
 
-The asset collision editor should:
+### Geometry editor
+
+The asset geometry editor should:
 
 - display the sprite over an isometric measurement grid;
 - edit canonical local-space shapes around the asset's base;
@@ -334,6 +352,19 @@ The asset collision editor should:
 - allow per-direction overrides only when required;
 - save edits in importer overrides or a dedicated geometry catalog;
 - immediately preview character clearance with a standard actor-radius circle.
+
+The current editor exposes every role in the same Geometry mode. Polygon
+vertices have draggable canvas handles, and derivation actions can append or
+replace blockers from the footprint list or append a selected blocker to that
+list. Each drag is one undoable edit; derived shapes are copies, not live
+links. Geometry has a shared fallback plus complete per-direction overrides.
+Editing a multi-view asset creates an override only for the sprite direction
+currently previewed, so asymmetric four-way and eight-way art may use different
+shape positions and extents. An individual view can be reset to the shared
+fallback without discarding geometry authored for the other directions. Canvas
+handles directly move and resize circles, ellipses, rectangles, and capsules;
+rectangles also expose rotation handles, while capsule endpoints and thickness
+are independently draggable. Numeric controls remain available for precision.
 
 Trees therefore block only around their roots, not around the canopy or cast
 shadow.
@@ -538,11 +569,13 @@ needs to:
   "pivot": {"x": 0.5, "y": 0.96},
   "sortAnchor": {"x": 0.0, "y": 0.0},
   "defaultSortBias": 0.0,
-  "footprint": {
-    "type": "ellipse",
-    "center": {"x": 0.0, "y": 0.0},
-    "radius": {"x": 0.45, "y": 0.32}
-  },
+  "footprints": [
+    {
+      "type": "ellipse",
+      "center": {"x": 0.0, "y": 0.0},
+      "radius": {"x": 0.45, "y": 0.32}
+    }
+  ],
   "collision": {
     "blocking": [
       {
@@ -626,7 +659,14 @@ Migration must preserve current object IDs and world positions.
   author footprints, blockers, walkable surfaces, and selection geometry; and
   preview every asset direction over a measurement grid with distinct pivot,
   sort-anchor, footprint, blocker, walkable, selection, and actor-clearance
-  overlays. The game uses an actor-radius-expanded A* navigation grid.
+  overlays. Polygon points can be dragged directly, and footprint/blocker
+  derivation remains undoable while preserving independent roles. Shared
+  geometry acts as a fallback, while asymmetric assets persist independent
+  geometry for each rendered direction. The game
+  uses an actor-radius-expanded A* navigation grid and one multi-footprint-aware
+  ordering graph for actors and objects. Native path smoothing and final
+  targets retain exact expanded polygons in addition to the cached grid, so a
+  click cannot leak through an open cell along a collider edge.
 - Phase 4 is implemented for the finite 256 x 256 prototype: deterministic
   32-unit chunk manifests, stable local coordinates, seam-indexed paint,
   cross-boundary object indices, async player/viewport streaming, hysteresis,
@@ -960,7 +1000,8 @@ These should be resolved through small prototypes and measurements:
 - Navigation cell size after testing character movement near small props.
 - How roof hiding and multi-level interiors interact with overhead render bands.
 - Whether large-building footprint sorting is sufficient or requires explicit
-  sprite slicing.
+  sprite slicing or a general ordering graph once multiple actors and large
+  overlapping structures are active.
 
 The recommended starting point is Phase 1. It fixes the observed grass issue
 while establishing concepts used by every later system, without committing the

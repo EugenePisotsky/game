@@ -1055,9 +1055,9 @@
     }
   ],
   "materialCount": 4,
-  "metadataBytes": 453694,
+  "metadataBytes": 496603,
   "objectAssetCount": 74,
-  "payloadBytes": 21993130,
+  "payloadBytes": 22036039,
   "schemaVersion": 1,
   "sizeLimitBytes": 67108864,
   "worldId": "environment_starter"

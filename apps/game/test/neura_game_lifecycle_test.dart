@@ -6,6 +6,7 @@ import 'package:flame_test/flame_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_game/neura_game.dart';
+import 'package:neura_rendering/neura_rendering.dart';
 import 'package:neura_world/neura_world.dart';
 
 void main() {
@@ -32,9 +33,24 @@ void main() {
       expect(game.decodedImageCount, greaterThan(0));
       expect(game.pendingAssetRequests, 0);
       expect(game.debugRenderOrder, contains('player'));
+      final initialDepthCacheBuilds = game.sceneDepthCacheBuildCount;
+      expect(initialDepthCacheBuilds, 1);
+      game.debugRenderOrder;
+      final recorder = ui.PictureRecorder();
+      game.render(ui.Canvas(recorder));
+      recorder.endRecording().dispose();
+      expect(
+        game.sceneDepthCacheBuildCount,
+        initialDepthCacheBuilds,
+        reason: 'rendering must reuse static object geometry and depth order',
+      );
 
       await game.teleportTo(const WorldPoint(140, 20));
       expect(game.currentChunk, const EnvironmentChunkCoordinate(4, 0));
+      expect(
+        game.sceneDepthCacheBuildCount,
+        greaterThan(initialDepthCacheBuilds),
+      );
       await game.teleportTo(const WorldPoint(16, 16));
       expect(game.currentChunk, const EnvironmentChunkCoordinate(0, 0));
     },
@@ -52,6 +68,62 @@ void main() {
       expect(
         game.chunkStreamer.loadedChunks.keys.toSet(),
         game.debugScene!.expectedLoadedChunks.toSet(),
+      );
+    },
+  );
+
+  testWithGame<NeuraGame>(
+    'building footprint orders the actor across its full ground contact',
+    () => NeuraGame(debugSceneName: 'tree_actor_depth'),
+    (game) async {
+      final objectId = game.debugScene!.relevantObjectIds.single;
+      final object = game.document.objects.firstWhere(
+        (candidate) => candidate.id == objectId,
+      );
+      final asset = game.environmentCatalog.objectById(object.assetId)!;
+      final footprint = game.environmentCatalog
+          .geometryForAsset(asset, direction: object.direction.name)
+          .footprints
+          .first;
+      final outline = environmentShapeOutline(footprint, object);
+      final inside = WorldPoint(
+        outline.map((point) => point.x).reduce((a, b) => a + b) /
+            outline.length,
+        outline.map((point) => point.y).reduce((a, b) => a + b) /
+            outline.length,
+      );
+
+      await game.teleportTo(inside);
+
+      expect(
+        game.debugRenderOrder.indexOf('player'),
+        lessThan(game.debugRenderOrder.indexOf(objectId)),
+        reason: 'an actor inside the footprint is occluded by the asset',
+      );
+
+      final horizontal = inside.x - inside.y;
+      final frontDepth =
+          outline
+              .map((point) => point.x + point.y)
+              .reduce((a, b) => math.max(a, b)) +
+          1;
+      await game.teleportTo(
+        WorldPoint(
+          (frontDepth + horizontal) / 2,
+          (frontDepth - horizontal) / 2,
+        ),
+      );
+      expect(
+        game.debugRenderOrder.indexOf(objectId),
+        lessThan(game.debugRenderOrder.indexOf('player')),
+        reason: 'an actor in front of the footprint draws above the asset',
+      );
+
+      await game.teleportTo(const WorldPoint(92, 88));
+      expect(
+        game.debugRenderOrder.indexOf('player'),
+        lessThan(game.debugRenderOrder.indexOf(objectId)),
+        reason: 'an actor behind the footprint draws below the asset',
       );
     },
   );

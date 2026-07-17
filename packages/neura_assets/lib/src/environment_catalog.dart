@@ -142,45 +142,90 @@ class EnvironmentCapsule extends EnvironmentGeometryShape {
 
 class EnvironmentAssetGeometry {
   const EnvironmentAssetGeometry({
-    this.footprint,
+    this.footprints = const [],
     this.blocking = const [],
     this.walkable = const [],
     this.selection = const [],
     this.reviewed = false,
+    this.directions = const {},
   });
 
   static const empty = EnvironmentAssetGeometry();
 
-  final EnvironmentGeometryShape? footprint;
+  final List<EnvironmentGeometryShape> footprints;
   final List<EnvironmentGeometryShape> blocking;
   final List<EnvironmentGeometryShape> walkable;
   final List<EnvironmentGeometryShape> selection;
   final bool reviewed;
 
+  /// Optional geometry authored for individual rendered sprite views.
+  ///
+  /// The top-level shapes remain the shared fallback. Direction entries are
+  /// complete replacements, which lets asymmetric sprites move their pivot,
+  /// footprint, and blockers independently for every view.
+  final Map<String, EnvironmentAssetGeometry> directions;
+
+  EnvironmentAssetGeometry forDirection(String direction) =>
+      directions[direction] ?? this;
+
+  bool hasDirection(String direction) => directions.containsKey(direction);
+
+  EnvironmentAssetGeometry withoutDirections() => EnvironmentAssetGeometry(
+    footprints: footprints,
+    blocking: blocking,
+    walkable: walkable,
+    selection: selection,
+    reviewed: reviewed,
+  );
+
   Map<String, Object> toJson() => {
-    if (footprint != null) 'footprint': footprint!.toJson(),
+    if (footprints.isNotEmpty)
+      'footprints': [for (final shape in footprints) shape.toJson()],
     'blocking': [for (final shape in blocking) shape.toJson()],
     if (walkable.isNotEmpty)
       'walkable': [for (final shape in walkable) shape.toJson()],
     if (selection.isNotEmpty)
       'selection': [for (final shape in selection) shape.toJson()],
     'reviewed': reviewed,
+    if (directions.isNotEmpty)
+      'directions': {
+        for (final entry in directions.entries)
+          entry.key: entry.value.withoutDirections().toJson(),
+      },
   };
 
   EnvironmentAssetGeometry copyWith({
-    EnvironmentGeometryShape? footprint,
-    bool clearFootprint = false,
+    List<EnvironmentGeometryShape>? footprints,
     List<EnvironmentGeometryShape>? blocking,
     List<EnvironmentGeometryShape>? walkable,
     List<EnvironmentGeometryShape>? selection,
     bool? reviewed,
+    Map<String, EnvironmentAssetGeometry>? directions,
   }) => EnvironmentAssetGeometry(
-    footprint: clearFootprint ? null : footprint ?? this.footprint,
+    footprints: footprints ?? this.footprints,
     blocking: blocking ?? this.blocking,
     walkable: walkable ?? this.walkable,
     selection: selection ?? this.selection,
     reviewed: reviewed ?? this.reviewed,
+    directions: directions ?? this.directions,
   );
+
+  EnvironmentAssetGeometry withDirection(
+    String direction,
+    EnvironmentAssetGeometry geometry,
+  ) => copyWith(
+    directions: Map.unmodifiable({
+      ...directions,
+      direction: geometry.withoutDirections(),
+    }),
+  );
+
+  EnvironmentAssetGeometry withoutDirection(String direction) {
+    if (!directions.containsKey(direction)) return this;
+    final updated = Map<String, EnvironmentAssetGeometry>.of(directions)
+      ..remove(direction);
+    return copyWith(directions: Map.unmodifiable(updated));
+  }
 
   factory EnvironmentAssetGeometry.fromJson(Map<String, Object?> json) {
     List<EnvironmentGeometryShape> shapes(String key) => [
@@ -188,15 +233,26 @@ class EnvironmentAssetGeometry {
         EnvironmentGeometryShape.fromJson(value as Map<String, Object?>),
     ];
     return EnvironmentAssetGeometry(
-      footprint: json['footprint'] == null
-          ? null
-          : EnvironmentGeometryShape.fromJson(
-              json['footprint'] as Map<String, Object?>,
-            ),
+      footprints: json['footprints'] == null
+          ? [
+              if (json['footprint'] != null)
+                EnvironmentGeometryShape.fromJson(
+                  json['footprint'] as Map<String, Object?>,
+                ),
+            ]
+          : shapes('footprints'),
       blocking: shapes('blocking'),
       walkable: shapes('walkable'),
       selection: shapes('selection'),
       reviewed: json['reviewed'] as bool? ?? false,
+      directions: Map.unmodifiable({
+        for (final entry
+            in (json['directions'] as Map<String, Object?>? ?? const {})
+                .entries)
+          entry.key: EnvironmentAssetGeometry.fromJson(
+            entry.value as Map<String, Object?>,
+          ).withoutDirections(),
+      }),
     );
   }
 }
@@ -314,8 +370,13 @@ class EnvironmentCatalog {
     _objectsById[object.id] = object;
   }
 
-  EnvironmentAssetGeometry geometryForAsset(EnvironmentObjectAsset asset) =>
-      _geometryOverrides[asset.id] ?? asset.geometry;
+  EnvironmentAssetGeometry geometryForAsset(
+    EnvironmentObjectAsset asset, {
+    String? direction,
+  }) {
+    final geometry = _geometryOverrides[asset.id] ?? asset.geometry;
+    return direction == null ? geometry : geometry.forDirection(direction);
+  }
 
   EnvironmentAssetGeometry? geometryForObjectId(String id) {
     final asset = objectById(id);
@@ -331,6 +392,36 @@ class EnvironmentCatalog {
       );
     }
     _geometryOverrides[assetId] = geometry;
+  }
+
+  void setGeometryOverrideForDirection(
+    String assetId,
+    String direction,
+    EnvironmentAssetGeometry geometry,
+  ) {
+    final asset = objectById(assetId);
+    if (asset == null) {
+      throw ArgumentError.value(
+        assetId,
+        'assetId',
+        'Unknown environment asset',
+      );
+    }
+    if (!asset.supportsDirection(direction)) {
+      throw ArgumentError.value(
+        direction,
+        'direction',
+        'Asset $assetId does not provide this view',
+      );
+    }
+    final root = _geometryOverrides[assetId] ?? asset.geometry;
+    _geometryOverrides[assetId] = root.withDirection(direction, geometry);
+  }
+
+  void removeGeometryOverrideForDirection(String assetId, String direction) {
+    final root = _geometryOverrides[assetId];
+    if (root == null || !root.hasDirection(direction)) return;
+    _geometryOverrides[assetId] = root.withoutDirection(direction);
   }
 
   void removeGeometryOverride(String assetId) =>
@@ -358,7 +449,7 @@ class EnvironmentCatalog {
 
   String geometryOverridesToJsonString({bool pretty = true}) {
     final value = <String, Object>{
-      'schemaVersion': 1,
+      'schemaVersion': 2,
       'objects': {
         for (final entry in _geometryOverrides.entries)
           entry.key: entry.value.toJson(),

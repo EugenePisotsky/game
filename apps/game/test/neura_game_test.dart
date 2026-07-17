@@ -29,10 +29,12 @@ void main() {
   test('navigation passes under a tree canopy but routes around its trunk', () {
     final tree = _asset(
       const EnvironmentAssetGeometry(
-        footprint: EnvironmentEllipse(
-          center: EnvironmentGeometryPoint(0, 0),
-          radius: EnvironmentGeometryPoint(1.8, 1.4),
-        ),
+        footprints: [
+          EnvironmentEllipse(
+            center: EnvironmentGeometryPoint(0, 0),
+            radius: EnvironmentGeometryPoint(1.8, 1.4),
+          ),
+        ],
         blocking: [
           EnvironmentEllipse(
             center: EnvironmentGeometryPoint(0, 0),

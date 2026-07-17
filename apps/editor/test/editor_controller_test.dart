@@ -791,20 +791,355 @@ void main() {
           ..selectMode(EnvironmentEditorMode.collision)
           ..addGeometryShape(GeometryShapeType.ellipse);
 
-    final edited = catalog.geometryForObjectId(tree.id)!;
+    final edited = catalog.geometryForAsset(tree, direction: 'south');
     expect(edited.blocking.single, isA<EnvironmentEllipse>());
     expect(catalog.geometryOverrides, contains(tree.id));
 
     controller.undo();
     expect(catalog.geometryOverrides, isNot(contains(tree.id)));
     controller.redo();
-    expect(catalog.geometryForObjectId(tree.id)?.blocking, hasLength(1));
+    expect(
+      catalog.geometryForAsset(tree, direction: 'south').blocking,
+      hasLength(1),
+    );
 
     controller
       ..selectGeometryRole(GeometryRole.selection)
       ..addGeometryShape(GeometryShapeType.polygon);
-    expect(catalog.geometryForObjectId(tree.id)?.selection, hasLength(1));
+    expect(
+      catalog.geometryForAsset(tree, direction: 'south').selection,
+      hasLength(1),
+    );
     controller.undo();
-    expect(catalog.geometryForObjectId(tree.id)?.selection, isEmpty);
+    expect(
+      catalog.geometryForAsset(tree, direction: 'south').selection,
+      isEmpty,
+    );
+  });
+
+  test('multi-view asset geometry is edited independently per direction', () {
+    const fence = EnvironmentObjectAsset(
+      id: 'directional_fence',
+      name: 'Directional Fence',
+      category: 'Fences',
+      viewMode: EnvironmentAssetViewMode.fourWay,
+      renderScale: 1,
+      views: {
+        'south': EnvironmentObjectView(imagePath: 'fence_s.png'),
+        'west': EnvironmentObjectView(imagePath: 'fence_w.png'),
+        'east': EnvironmentObjectView(imagePath: 'fence_e.png'),
+        'north': EnvironmentObjectView(imagePath: 'fence_n.png'),
+      },
+    );
+    final localCatalog = EnvironmentCatalog(
+      materials: [earth],
+      objects: [fence],
+    );
+    final controller = EditorController(
+      EnvironmentDocument(
+        id: 'geometry-directions',
+        name: 'Geometry directions',
+        width: 20,
+        height: 20,
+        baseMaterialId: earth.id,
+        objects: [
+          PlacedEnvironmentObject(id: 'fence_1', assetId: fence.id, x: 5, y: 5),
+        ],
+      ),
+      catalog: localCatalog,
+    )..selectObjectIds(['fence_1']);
+
+    controller.addGeometryShape(GeometryShapeType.capsule);
+    expect(controller.selectedGeometryHasViewOverride, isTrue);
+    expect(
+      localCatalog.geometryForAsset(fence, direction: 'south').blocking,
+      hasLength(1),
+    );
+    expect(
+      localCatalog.geometryForAsset(fence, direction: 'west').blocking,
+      isEmpty,
+    );
+
+    controller
+      ..setSelectedDirection(EnvironmentDirection.west)
+      ..addGeometryShape(GeometryShapeType.rectangle);
+    expect(
+      localCatalog.geometryForAsset(fence, direction: 'south').blocking.single,
+      isA<EnvironmentCapsule>(),
+    );
+    expect(
+      localCatalog.geometryForAsset(fence, direction: 'west').blocking.single,
+      isA<EnvironmentRectangle>(),
+    );
+
+    controller.resetSelectedGeometryViewOverride();
+    expect(
+      localCatalog.geometryForAsset(fence, direction: 'west').blocking,
+      isEmpty,
+    );
+    expect(
+      localCatalog.geometryForAsset(fence, direction: 'south').blocking,
+      hasLength(1),
+    );
+  });
+
+  test('multiple footprints can seed independent blockers with undo', () {
+    const building = EnvironmentObjectAsset(
+      id: 'building',
+      name: 'Building',
+      category: 'Buildings',
+      renderScale: 1,
+      views: {'south': EnvironmentObjectView(imagePath: 'building.png')},
+      geometry: EnvironmentAssetGeometry(
+        footprints: [
+          EnvironmentRectangle(
+            center: EnvironmentGeometryPoint(0, 0),
+            size: EnvironmentGeometryPoint(4, 2),
+          ),
+        ],
+      ),
+    );
+    final localCatalog = EnvironmentCatalog(
+      materials: [earth],
+      objects: [building],
+    );
+    final controller = EditorController(
+      EnvironmentDocument(
+        id: 'geometry',
+        name: 'Geometry',
+        width: 20,
+        height: 20,
+        baseMaterialId: earth.id,
+        objects: [
+          PlacedEnvironmentObject(
+            id: 'building_1',
+            assetId: building.id,
+            x: 5,
+            y: 5,
+          ),
+        ],
+      ),
+      catalog: localCatalog,
+    )..selectObjectIds(['building_1']);
+
+    controller
+      ..selectGeometryRole(GeometryRole.footprint)
+      ..addGeometryShape(GeometryShapeType.circle)
+      ..replaceBlockingWithFootprint();
+
+    final edited = localCatalog.geometryForObjectId(building.id)!;
+    expect(edited.footprints, hasLength(2));
+    expect(edited.footprints.first, isA<EnvironmentRectangle>());
+    expect(edited.footprints.last, isA<EnvironmentCircle>());
+    expect(edited.blocking, hasLength(2));
+    expect(edited.blocking, orderedEquals(edited.footprints));
+
+    controller.undo();
+    expect(localCatalog.geometryForObjectId(building.id)?.blocking, isEmpty);
+    expect(
+      localCatalog.geometryForObjectId(building.id)?.footprints.first,
+      isA<EnvironmentRectangle>(),
+    );
+    expect(
+      localCatalog.geometryForObjectId(building.id)?.footprints,
+      hasLength(2),
+    );
+    controller.redo();
+    expect(
+      localCatalog.geometryForObjectId(building.id)?.blocking,
+      hasLength(2),
+    );
+  });
+
+  test('polygon vertex drag is one undoable geometry gesture', () {
+    const building = EnvironmentObjectAsset(
+      id: 'polygon_building',
+      name: 'Polygon building',
+      category: 'Buildings',
+      renderScale: 1,
+      views: {'south': EnvironmentObjectView(imagePath: 'building.png')},
+      geometry: EnvironmentAssetGeometry(
+        footprints: [
+          EnvironmentPolygon(
+            points: [
+              EnvironmentGeometryPoint(-1, -1),
+              EnvironmentGeometryPoint(1, -1),
+              EnvironmentGeometryPoint(0, 1),
+            ],
+          ),
+        ],
+      ),
+    );
+    final localCatalog = EnvironmentCatalog(
+      materials: [earth],
+      objects: [building],
+    );
+    final controller =
+        EditorController(
+            EnvironmentDocument(
+              id: 'geometry',
+              name: 'Geometry',
+              width: 20,
+              height: 20,
+              baseMaterialId: earth.id,
+              objects: [
+                PlacedEnvironmentObject(
+                  id: 'building_1',
+                  assetId: building.id,
+                  x: 5,
+                  y: 6,
+                ),
+              ],
+            ),
+            catalog: localCatalog,
+          )
+          ..selectObjectIds(['building_1'])
+          ..selectMode(EnvironmentEditorMode.collision)
+          ..selectGeometryRole(GeometryRole.footprint)
+          ..beginGesture();
+
+    expect(controller.beginSelectedPolygonVertexGesture(), isTrue);
+    controller
+      ..moveSelectedPolygonVertexDuringGesture(0, const WorldPoint(4.25, 5.5))
+      ..endGesture();
+
+    final edited = localCatalog
+        .geometryForObjectId(building.id)!
+        .footprints
+        .single;
+    expect(edited, isA<EnvironmentPolygon>());
+    expect(
+      (edited as EnvironmentPolygon).points.first.x,
+      closeTo(-0.75, 0.0001),
+    );
+    expect(edited.points.first.y, closeTo(-0.5, 0.0001));
+
+    controller.undo();
+    final restored =
+        localCatalog.geometryForObjectId(building.id)!.footprints.single
+            as EnvironmentPolygon;
+    expect(restored.points.first.x, -1);
+    expect(restored.points.first.y, -1);
+  });
+
+  test('direct handles move and resize primitive geometry', () {
+    const asset = EnvironmentObjectAsset(
+      id: 'primitive_geometry',
+      name: 'Primitive geometry',
+      category: 'Test',
+      renderScale: 1,
+      views: {'south': EnvironmentObjectView(imagePath: 'test.png')},
+      geometry: EnvironmentAssetGeometry(
+        blocking: [
+          EnvironmentCircle(
+            center: EnvironmentGeometryPoint(0, 0),
+            radius: 0.2,
+          ),
+          EnvironmentEllipse(
+            center: EnvironmentGeometryPoint(0, 0),
+            radius: EnvironmentGeometryPoint(0.3, 0.2),
+          ),
+          EnvironmentRectangle(
+            center: EnvironmentGeometryPoint(0, 0),
+            size: EnvironmentGeometryPoint(1, 0.5),
+          ),
+          EnvironmentCapsule(
+            start: EnvironmentGeometryPoint(-0.5, 0),
+            end: EnvironmentGeometryPoint(0.5, 0),
+            radius: 0.1,
+          ),
+        ],
+      ),
+    );
+    final localCatalog = EnvironmentCatalog(
+      materials: [earth],
+      objects: [asset],
+    );
+    final controller =
+        EditorController(
+            EnvironmentDocument(
+              id: 'primitive-handles',
+              name: 'Primitive handles',
+              width: 20,
+              height: 20,
+              baseMaterialId: earth.id,
+              objects: [
+                PlacedEnvironmentObject(
+                  id: 'primitive_1',
+                  assetId: asset.id,
+                  x: 5,
+                  y: 5,
+                ),
+              ],
+            ),
+            catalog: localCatalog,
+          )
+          ..selectObjectIds(['primitive_1'])
+          ..selectMode(EnvironmentEditorMode.collision);
+
+    void drag(EnvironmentGeometryHandle handle, WorldPoint point) {
+      controller.beginGesture();
+      expect(controller.beginSelectedGeometryHandleGesture(handle), isTrue);
+      controller
+        ..moveSelectedGeometryHandleDuringGesture(handle, point)
+        ..endGesture();
+    }
+
+    drag(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.center),
+      const WorldPoint(5.25, 5.1),
+    );
+    drag(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.radius),
+      const WorldPoint(5.75, 5.1),
+    );
+    var geometry = localCatalog.geometryForObjectId(asset.id)!;
+    final circle = geometry.blocking[0] as EnvironmentCircle;
+    expect(circle.center.x, closeTo(0.25, 0.0001));
+    expect(circle.radius, closeTo(0.5, 0.0001));
+
+    controller.selectGeometryShapeIndex(1);
+    drag(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.radiusX),
+      const WorldPoint(5.8, 5),
+    );
+    geometry = localCatalog.geometryForObjectId(asset.id)!;
+    expect(
+      (geometry.blocking[1] as EnvironmentEllipse).radius.x,
+      closeTo(0.8, 0.0001),
+    );
+
+    controller.selectGeometryShapeIndex(2);
+    drag(
+      const EnvironmentGeometryHandle(
+        EnvironmentGeometryHandleType.rectangleCorner,
+      ),
+      const WorldPoint(5.75, 5.5),
+    );
+    drag(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.rotation),
+      const WorldPoint(6, 5),
+    );
+    geometry = localCatalog.geometryForObjectId(asset.id)!;
+    final rectangle = geometry.blocking[2] as EnvironmentRectangle;
+    expect(rectangle.size.x, closeTo(1.5, 0.0001));
+    expect(rectangle.size.y, closeTo(1, 0.0001));
+    expect(rectangle.rotationDegrees, closeTo(90, 0.0001));
+
+    controller.selectGeometryShapeIndex(3);
+    drag(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.capsuleEnd),
+      const WorldPoint(6, 5),
+    );
+    drag(
+      const EnvironmentGeometryHandle(
+        EnvironmentGeometryHandleType.capsuleRadius,
+      ),
+      const WorldPoint(5, 5.3),
+    );
+    geometry = localCatalog.geometryForObjectId(asset.id)!;
+    final capsule = geometry.blocking[3] as EnvironmentCapsule;
+    expect(capsule.end.x, closeTo(1, 0.0001));
+    expect(capsule.radius, closeTo(0.3, 0.0001));
   });
 }

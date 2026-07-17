@@ -8714,18 +8714,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -13885,17 +13887,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -13993,17 +13997,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -14101,17 +14107,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -14209,17 +14217,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -18776,17 +18786,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -18886,17 +18898,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -18996,17 +19010,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19106,17 +19122,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19216,17 +19234,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19326,17 +19346,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19436,17 +19458,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19546,17 +19570,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19656,17 +19682,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19766,17 +19794,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19876,17 +19906,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -19986,17 +20018,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20096,17 +20130,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20206,17 +20242,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20316,17 +20354,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20426,17 +20466,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20536,17 +20578,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20646,17 +20690,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20756,17 +20802,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20866,17 +20914,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -20976,17 +21026,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -21938,17 +21990,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22046,17 +22100,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22154,17 +22210,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22262,17 +22320,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22370,17 +22430,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22478,17 +22540,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22586,17 +22650,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22694,17 +22760,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22802,17 +22870,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -22910,17 +22980,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -23018,17 +23090,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -23126,17 +23200,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -23234,17 +23310,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -23342,17 +23420,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -23450,17 +23530,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -23558,17 +23640,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -23666,17 +23750,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -23774,17 +23860,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -31488,18 +31576,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -86591,18 +86681,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -86673,18 +86765,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -86755,18 +86849,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -86837,18 +86933,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -86919,18 +87017,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -87001,18 +87101,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -87083,18 +87185,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -87166,18 +87270,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fenceSegment",
@@ -104700,17 +104806,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -104780,17 +104888,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -104859,17 +104969,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -104938,17 +105050,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105017,17 +105131,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105096,17 +105212,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105175,17 +105293,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105254,17 +105374,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105333,17 +105455,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105412,17 +105536,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105491,17 +105617,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105570,17 +105698,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105649,17 +105779,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105728,17 +105860,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105807,17 +105941,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105886,17 +106022,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -105965,17 +106103,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -106044,17 +106184,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -106123,17 +106265,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -106202,17 +106346,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -106281,17 +106427,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -106360,17 +106508,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -106439,17 +106589,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -106518,17 +106670,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.44,
-            "y": 0.3
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.44,
+              "y": 0.3
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "smallRock",
@@ -117667,17 +117821,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -117775,17 +117931,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -117882,17 +118040,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -117989,17 +118149,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118096,17 +118258,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118203,17 +118367,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118310,17 +118476,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118417,17 +118585,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118524,17 +118694,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118631,17 +118803,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118738,17 +118912,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118845,17 +119021,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -118952,17 +119130,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119059,17 +119239,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119166,17 +119348,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119273,17 +119457,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119380,17 +119566,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119487,17 +119675,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119594,17 +119784,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119701,17 +119893,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119808,17 +120002,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -119915,17 +120111,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120022,17 +120220,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120129,17 +120329,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120236,17 +120438,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120343,17 +120547,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120450,17 +120656,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120557,17 +120765,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120664,17 +120874,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120771,17 +120983,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120880,17 +121094,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -120987,17 +121203,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -121094,17 +121312,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -121201,17 +121421,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -121308,17 +121530,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -121415,17 +121639,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -121522,17 +121748,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -121629,17 +121857,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -121736,17 +121966,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -121843,17 +122075,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "treeTrunk",
@@ -142301,18 +142535,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 0.8,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -0.8,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 0.8,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -0.8,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "fence",
@@ -142384,18 +142620,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotationDegrees": 0.0,
-          "size": {
-            "x": 2.2,
-            "y": 1.0
-          },
-          "type": "rectangle"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "rotationDegrees": 0.0,
+            "size": {
+              "x": 2.2,
+              "y": 1.0
+            },
+            "type": "rectangle"
+          }
+        ],
         "reviewed": false,
         "walkable": [
           {
@@ -142470,18 +142708,20 @@
             "type": "rectangle"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": -0.3
-          },
-          "rotationDegrees": 0.0,
-          "size": {
-            "x": 2.4,
-            "y": 1.6
-          },
-          "type": "rectangle"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.3
+            },
+            "rotationDegrees": 0.0,
+            "size": {
+              "x": 2.4,
+              "y": 1.6
+            },
+            "type": "rectangle"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "building",
@@ -142561,18 +142801,20 @@
             "type": "rectangle"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": -0.3
-          },
-          "rotationDegrees": 0.0,
-          "size": {
-            "x": 2.4,
-            "y": 1.6
-          },
-          "type": "rectangle"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": -0.3
+            },
+            "rotationDegrees": 0.0,
+            "size": {
+              "x": 2.4,
+              "y": 1.6
+            },
+            "type": "rectangle"
+          }
+        ],
         "reviewed": false
       },
       "collisionProfile": "building",

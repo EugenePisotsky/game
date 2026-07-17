@@ -219,6 +219,7 @@ class _EditorScreenState extends State<EditorScreen> {
   bool _gesturing = false;
   bool _marqueeSelecting = false;
   bool _movingSelection = false;
+  EnvironmentGeometryHandle? _movingGeometryHandle;
   Offset? _gestureScreenStart;
   WorldPoint? _lastGestureWorld;
   Duration? _lastPanEventTime;
@@ -443,6 +444,18 @@ class _EditorScreenState extends State<EditorScreen> {
         _gestureScreenStart = event.localPosition;
         _lastGestureWorld = _worldAt(event.localPosition);
         controller.beginGesture();
+        if (controller.mode == EnvironmentEditorMode.collision) {
+          final handle = game.hitTestSelectedGeometryHandle(
+            Vector2(event.localPosition.dx, event.localPosition.dy),
+          );
+          if (handle != null &&
+              controller.beginSelectedGeometryHandleGesture(handle)) {
+            _movingGeometryHandle = handle;
+            _movingSelection = false;
+            _marqueeSelecting = false;
+            return;
+          }
+        }
         if (controller.isTerrainAreaMode) {
           _marqueeSelecting = true;
           game.setSelectionMarquee(
@@ -488,6 +501,14 @@ class _EditorScreenState extends State<EditorScreen> {
         }
         final point = _worldAt(event.localPosition);
         if (point == null) return;
+        final geometryHandle = _movingGeometryHandle;
+        if (geometryHandle != null) {
+          controller.moveSelectedGeometryHandleDuringGesture(
+            geometryHandle,
+            point,
+          );
+          return;
+        }
         if (controller.isObjectSelectionMode && _movingSelection) {
           final previous = _lastGestureWorld;
           if (previous != null) {
@@ -658,6 +679,7 @@ class _EditorScreenState extends State<EditorScreen> {
     _gesturing = false;
     _marqueeSelecting = false;
     _movingSelection = false;
+    _movingGeometryHandle = null;
     _gestureScreenStart = null;
     _lastGestureWorld = null;
     game.setSelectionMarquee(null);
@@ -867,6 +889,7 @@ class _EditorScreenState extends State<EditorScreen> {
         ),
       );
     }
+    await controller.saveGeometryOverrides();
     await session.saveDirty(controller.document);
     if (mounted) setState(() {});
     final root = repositoryRootForNeuraAssets();
@@ -1653,8 +1676,8 @@ class _PaletteState extends State<_Palette> {
                     ),
                     Expanded(
                       child: _PaletteButton(
-                        label: 'Collision',
-                        icon: Icons.border_outer,
+                        label: 'Geometry',
+                        icon: Icons.polyline_outlined,
                         selected:
                             controller.mode == EnvironmentEditorMode.collision,
                         onTap: () => controller.selectMode(
@@ -2616,11 +2639,12 @@ class _GeometryEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     final object = controller.selectedObject!;
     final asset = controller.catalog.objectById(object.assetId)!;
-    final geometry = controller.catalog.geometryForAsset(asset);
+    final geometry = controller.catalog.geometryForAsset(
+      asset,
+      direction: object.direction.name,
+    );
     final shapes = switch (controller.geometryRole) {
-      GeometryRole.footprint => [
-        if (geometry.footprint != null) geometry.footprint!,
-      ],
+      GeometryRole.footprint => geometry.footprints,
       GeometryRole.blocking => geometry.blocking,
       GeometryRole.walkable => geometry.walkable,
       GeometryRole.selection => geometry.selection,
@@ -2632,8 +2656,18 @@ class _GeometryEditor extends StatelessWidget {
         Text('ASSET GEOMETRY', style: Theme.of(context).textTheme.labelMedium),
         Text('profile ${asset.collisionProfile ?? 'none'}'),
         Text(
+          asset.views.length == 1
+              ? 'Geometry: shared fixed view'
+              : controller.selectedGeometryHasViewOverride
+              ? 'Geometry: ${object.direction.name} view override'
+              : 'Geometry: shared fallback for ${object.direction.name}',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        Text(
           'Purple cross pivot · yellow ring sort anchor\n'
-          'Blue footprint · red blocker · green walkable · purple selection',
+          'Blue sort footprint · red independent blocker\n'
+          'Green walkable · purple selection\n'
+          'Polygon vertices can be dragged directly on the canvas.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
@@ -2688,8 +2722,7 @@ class _GeometryEditor extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            if (controller.geometryRole != GeometryRole.footprint &&
-                shapes.isNotEmpty)
+            if (shapes.isNotEmpty)
               Expanded(
                 child: DropdownButtonFormField<int>(
                   isExpanded: true,
@@ -2720,9 +2753,7 @@ class _GeometryEditor extends StatelessWidget {
                   },
                 ),
               ),
-            if (controller.geometryRole != GeometryRole.footprint &&
-                shapes.isNotEmpty)
-              const SizedBox(width: 6),
+            if (shapes.isNotEmpty) const SizedBox(width: 6),
             PopupMenuButton<GeometryShapeType>(
               tooltip: 'Add geometry shape',
               onSelected: controller.addGeometryShape,
@@ -2760,16 +2791,37 @@ class _GeometryEditor extends StatelessWidget {
           spacing: 6,
           runSpacing: 6,
           children: [
+            if (geometry.footprints.isNotEmpty)
+              OutlinedButton(
+                onPressed: controller.addFootprintToBlocking,
+                child: const Text('Add footprint blockers'),
+              ),
+            if (geometry.footprints.isNotEmpty)
+              OutlinedButton(
+                onPressed: controller.replaceBlockingWithFootprint,
+                child: const Text('Replace blockers'),
+              ),
+            if (controller.geometryRole == GeometryRole.blocking &&
+                shape != null)
+              OutlinedButton(
+                onPressed: controller.copySelectedBlockingToFootprint,
+                child: const Text('Blocker → footprint'),
+              ),
             FilledButton.tonal(
               onPressed: controller.markSelectedGeometryReviewed,
               child: const Text('Mark reviewed'),
             ),
+            if (controller.selectedGeometryHasViewOverride)
+              OutlinedButton(
+                onPressed: controller.resetSelectedGeometryViewOverride,
+                child: Text('Reset ${object.direction.name} view'),
+              ),
             OutlinedButton(
               onPressed:
                   controller.catalog.geometryOverrides.containsKey(asset.id)
                   ? controller.resetSelectedGeometryOverride
                   : null,
-              child: const Text('Reset'),
+              child: const Text('Reset all geometry'),
             ),
             FilledButton(
               onPressed: () async {

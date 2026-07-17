@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:neura_assets/neura_assets.dart';
@@ -27,6 +28,491 @@ WorldPoint transformEnvironmentGeometryPoint(
     object.y + point.x * sine + point.y * cosine,
   );
 }
+
+EnvironmentGeometryPoint inverseTransformEnvironmentGeometryPoint(
+  WorldPoint point,
+  PlacedEnvironmentObject object,
+) => _inversePoint(point, object);
+
+enum EnvironmentPointFootprintPosition {
+  noFootprint,
+  behind,
+  inside,
+  lateral,
+  inFront,
+}
+
+class EnvironmentDepthSpan {
+  const EnvironmentDepthSpan({required this.back, required this.front});
+
+  final double back;
+  final double front;
+}
+
+class EnvironmentDepthEntity<T> {
+  EnvironmentDepthEntity({
+    required this.id,
+    required this.value,
+    required this.contact,
+    required this.depth,
+    this.tieBreaker = 0,
+    List<List<WorldPoint>> footprintOutlines = const [],
+    this.footprintDepthBias = 0,
+  }) {
+    this.footprintOutlines = _immutableNonEmptyOutlines(footprintOutlines);
+    footprintHorizontalRanges = this.footprintOutlines.isEmpty
+        ? const []
+        : List.unmodifiable([
+            for (final outline in this.footprintOutlines)
+              _footprintHorizontalRange(outline),
+          ]);
+    if (footprintHorizontalRanges.isEmpty) {
+      footprintHorizontalMin = footprintHorizontalMax = _horizontalCoordinate(
+        contact,
+      );
+    } else {
+      var horizontalMin = footprintHorizontalRanges.first.$1;
+      var horizontalMax = footprintHorizontalRanges.first.$2;
+      for (final range in footprintHorizontalRanges.skip(1)) {
+        horizontalMin = math.min(horizontalMin, range.$1);
+        horizontalMax = math.max(horizontalMax, range.$2);
+      }
+      footprintHorizontalMin = horizontalMin;
+      footprintHorizontalMax = horizontalMax;
+    }
+  }
+
+  final String id;
+  final T value;
+  final WorldPoint contact;
+  final double depth;
+  final double tieBreaker;
+  late final List<List<WorldPoint>> footprintOutlines;
+  late final List<(double, double)> footprintHorizontalRanges;
+  final double footprintDepthBias;
+  late final double footprintHorizontalMin;
+  late final double footprintHorizontalMax;
+
+  bool get hasFootprint => footprintOutlines.isNotEmpty;
+}
+
+List<List<WorldPoint>> _immutableNonEmptyOutlines(
+  Iterable<List<WorldPoint>> outlines,
+) {
+  if (outlines.isEmpty) return const [];
+  return List.unmodifiable(
+    outlines
+        .where((outline) => outline.isNotEmpty)
+        .map(List<WorldPoint>.unmodifiable),
+  );
+}
+
+/// Sorts actors and objects together while preserving stable scalar depth as
+/// the fallback. Footprints add local front/behind constraints only where
+/// their horizontal ground projections overlap.
+List<EnvironmentDepthEntity<T>> sortEnvironmentDepthEntities<T>(
+  Iterable<EnvironmentDepthEntity<T>> entities,
+) {
+  final base = [...entities]
+    ..sort((a, b) {
+      final depth = a.depth.compareTo(b.depth);
+      if (depth != 0) return depth;
+      final tie = a.tieBreaker.compareTo(b.tieBreaker);
+      return tie != 0 ? tie : a.id.compareTo(b.id);
+    });
+  if (base.length < 2) return base;
+
+  final outgoing = [for (var index = 0; index < base.length; index++) <int>{}];
+  final incoming = List<int>.filled(base.length, 0);
+  for (var a = 0; a < base.length - 1; a++) {
+    for (var b = a + 1; b < base.length; b++) {
+      if (!_depthEntitiesMayConstrain(base[a], base[b])) continue;
+      final order = environmentDepthConstraint(base[a], base[b]);
+      if (order == null || order == 0) continue;
+      final before = order < 0 ? a : b;
+      final after = order < 0 ? b : a;
+      if (outgoing[before].add(after)) incoming[after]++;
+    }
+  }
+
+  final remaining = SplayTreeSet<int>.of([
+    for (var index = 0; index < base.length; index++) index,
+  ]);
+  final ready = SplayTreeSet<int>.of([
+    for (var index = 0; index < base.length; index++)
+      if (incoming[index] == 0) index,
+  ]);
+  final result = <EnvironmentDepthEntity<T>>[];
+  while (remaining.isNotEmpty) {
+    // Conflicting overlap constraints can form a cycle. Break it with the
+    // stable scalar order instead of allowing the draw order to flicker.
+    final next = ready.isEmpty ? remaining.first : ready.first;
+    ready.remove(next);
+    remaining.remove(next);
+    result.add(base[next]);
+    for (final target in outgoing[next]) {
+      incoming[target]--;
+      if (incoming[target] == 0 && remaining.contains(target)) {
+        ready.add(target);
+      }
+    }
+  }
+  return result;
+}
+
+/// Finds where a dynamic entity belongs in an already sorted static scene.
+///
+/// Static object geometry and object-to-object constraints can therefore be
+/// cached. A moving actor only needs one linear pass over that cached order.
+int environmentDepthInsertionIndex<T>(
+  List<EnvironmentDepthEntity<T>> staticOrder,
+  EnvironmentDepthEntity<T> dynamicEntity,
+) {
+  var scalarIndex = staticOrder.length;
+  var minimumIndex = 0;
+  var maximumIndex = staticOrder.length;
+  var foundScalarIndex = false;
+
+  for (var index = 0; index < staticOrder.length; index++) {
+    final entity = staticOrder[index];
+    if (!foundScalarIndex && _compareDepth(dynamicEntity, entity) < 0) {
+      scalarIndex = index;
+      foundScalarIndex = true;
+    }
+    if (!_depthEntitiesMayConstrain(dynamicEntity, entity)) continue;
+    final constraint = environmentDepthConstraint(dynamicEntity, entity);
+    if (constraint == null || constraint == 0) continue;
+    if (constraint < 0) {
+      maximumIndex = math.min(maximumIndex, index);
+    } else {
+      minimumIndex = math.max(minimumIndex, index + 1);
+    }
+  }
+
+  // Inconsistent authored shapes can create a cycle around the dynamic
+  // entity. Preserve stable scalar order in that exceptional case.
+  if (minimumIndex > maximumIndex) return scalarIndex;
+  return scalarIndex.clamp(minimumIndex, maximumIndex);
+}
+
+int _compareDepth<T>(EnvironmentDepthEntity<T> a, EnvironmentDepthEntity<T> b) {
+  final depth = a.depth.compareTo(b.depth);
+  if (depth != 0) return depth;
+  final tie = a.tieBreaker.compareTo(b.tieBreaker);
+  return tie != 0 ? tie : a.id.compareTo(b.id);
+}
+
+bool _depthEntitiesMayConstrain<T>(
+  EnvironmentDepthEntity<T> a,
+  EnvironmentDepthEntity<T> b,
+) {
+  if (!a.hasFootprint && !b.hasFootprint) return false;
+  if (b.hasFootprint && _horizontalWithin(a.contact, b, epsilon: 1e-7)) {
+    return true;
+  }
+  if (a.hasFootprint && _horizontalWithin(b.contact, a, epsilon: 1e-7)) {
+    return true;
+  }
+  return a.hasFootprint &&
+      b.hasFootprint &&
+      a.footprintHorizontalMin <= b.footprintHorizontalMax &&
+      b.footprintHorizontalMin <= a.footprintHorizontalMax;
+}
+
+/// Returns a negative value when [a] must draw before [b], a positive value
+/// when [b] must draw before [a], and null when scalar depth should decide.
+int? environmentDepthConstraint<T>(
+  EnvironmentDepthEntity<T> a,
+  EnvironmentDepthEntity<T> b,
+) {
+  if (!a.hasFootprint && !b.hasFootprint) return null;
+  int? vote;
+
+  if (b.hasFootprint && _horizontalWithin(a.contact, b, epsilon: 1e-7)) {
+    final relation = _pointRelativeToEntityFootprints(a.contact, b);
+    switch (relation) {
+      case EnvironmentPointFootprintPosition.behind:
+      case EnvironmentPointFootprintPosition.inside:
+        vote = -1;
+      case EnvironmentPointFootprintPosition.inFront:
+        vote = 1;
+      case EnvironmentPointFootprintPosition.lateral:
+      case EnvironmentPointFootprintPosition.noFootprint:
+        break;
+    }
+  }
+
+  if (a.hasFootprint && _horizontalWithin(b.contact, a, epsilon: 1e-7)) {
+    final relation = _pointRelativeToEntityFootprints(b.contact, a);
+    switch (relation) {
+      case EnvironmentPointFootprintPosition.behind:
+      case EnvironmentPointFootprintPosition.inside:
+        if (vote == -1) return null;
+        vote = 1;
+      case EnvironmentPointFootprintPosition.inFront:
+        if (vote == 1) return null;
+        vote = -1;
+      case EnvironmentPointFootprintPosition.lateral:
+      case EnvironmentPointFootprintPosition.noFootprint:
+        break;
+    }
+  }
+
+  if (vote == null && a.hasFootprint && b.hasFootprint) {
+    for (var aIndex = 0; aIndex < a.footprintOutlines.length; aIndex++) {
+      final aOutline = a.footprintOutlines[aIndex];
+      final aRange = a.footprintHorizontalRanges[aIndex];
+      for (var bIndex = 0; bIndex < b.footprintOutlines.length; bIndex++) {
+        final bOutline = b.footprintOutlines[bIndex];
+        final bRange = b.footprintHorizontalRanges[bIndex];
+        final overlapMin = math.max(aRange.$1, bRange.$1);
+        final overlapMax = math.min(aRange.$2, bRange.$2);
+        if (overlapMin <= overlapMax) {
+          final horizontal = (overlapMin + overlapMax) / 2;
+          final aSlice = environmentFootprintDepthSliceAt(
+            aOutline,
+            horizontal,
+            depthBias: a.footprintDepthBias,
+          );
+          final bSlice = environmentFootprintDepthSliceAt(
+            bOutline,
+            horizontal,
+            depthBias: b.footprintDepthBias,
+          );
+          if (aSlice != null && bSlice != null) {
+            int? shapeVote;
+            if (aSlice.front <= bSlice.back) {
+              shapeVote = -1;
+            } else if (bSlice.front <= aSlice.back) {
+              shapeVote = 1;
+            }
+            if (shapeVote != null) {
+              if (vote != null && vote != shapeVote) return null;
+              vote = shapeVote;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return vote;
+}
+
+EnvironmentPointFootprintPosition _pointRelativeToEntityFootprints<T>(
+  WorldPoint point,
+  EnvironmentDepthEntity<T> entity,
+) => _pointRelativeToFootprintOutlines(
+  point,
+  entity.footprintOutlines,
+  depthBias: entity.footprintDepthBias,
+);
+
+EnvironmentPointFootprintPosition _pointRelativeToFootprintOutlines(
+  WorldPoint point,
+  Iterable<List<WorldPoint>> outlines, {
+  required double depthBias,
+  double epsilon = 1e-7,
+}) {
+  EnvironmentPointFootprintPosition? nearest;
+  var nearestDistance = double.infinity;
+  final horizontal = _horizontalCoordinate(point);
+  final depth = _depthCoordinate(point);
+  for (final outline in outlines) {
+    final slice = environmentFootprintDepthSliceAt(
+      outline,
+      horizontal,
+      depthBias: depthBias,
+      epsilon: epsilon,
+    );
+    if (slice == null) continue;
+    final relation = environmentPointRelativeToFootprintOutline(
+      point,
+      outline,
+      depthBias: depthBias,
+      epsilon: epsilon,
+    );
+    if (relation == EnvironmentPointFootprintPosition.inside) return relation;
+    final distance = depth < slice.back
+        ? slice.back - depth
+        : depth > slice.front
+        ? depth - slice.front
+        : 0.0;
+    if (distance < nearestDistance) {
+      nearest = relation;
+      nearestDistance = distance;
+    }
+  }
+  return nearest ?? EnvironmentPointFootprintPosition.lateral;
+}
+
+(double, double) _footprintHorizontalRange(List<WorldPoint> outline) {
+  final horizontal = outline.map(_horizontalCoordinate);
+  return (horizontal.reduce(math.min), horizontal.reduce(math.max));
+}
+
+EnvironmentDepthSpan? environmentFootprintDepthSliceAt(
+  List<WorldPoint> outline,
+  double horizontal, {
+  double depthBias = 0,
+  double epsilon = 1e-7,
+}) {
+  if (outline.length < 2) return null;
+  var back = double.infinity;
+  var front = double.negativeInfinity;
+  for (var index = 0; index < outline.length; index++) {
+    final a = outline[index];
+    final b = outline[(index + 1) % outline.length];
+    final aHorizontal = _horizontalCoordinate(a);
+    final bHorizontal = _horizontalCoordinate(b);
+    final delta = bHorizontal - aHorizontal;
+    if (delta.abs() <= epsilon) {
+      if ((horizontal - aHorizontal).abs() <= epsilon) {
+        final aDepth = _depthCoordinate(a) + depthBias;
+        final bDepth = _depthCoordinate(b) + depthBias;
+        back = math.min(back, math.min(aDepth, bDepth));
+        front = math.max(front, math.max(aDepth, bDepth));
+      }
+      continue;
+    }
+    final t = (horizontal - aHorizontal) / delta;
+    if (t < -epsilon || t > 1 + epsilon) continue;
+    final depth =
+        _depthCoordinate(a) +
+        (_depthCoordinate(b) - _depthCoordinate(a)) * t.clamp(0, 1) +
+        depthBias;
+    back = math.min(back, depth);
+    front = math.max(front, depth);
+  }
+  return back.isFinite ? EnvironmentDepthSpan(back: back, front: front) : null;
+}
+
+EnvironmentPointFootprintPosition environmentPointRelativeToFootprintOutline(
+  WorldPoint point,
+  List<WorldPoint> outline, {
+  double depthBias = 0,
+  double epsilon = 1e-7,
+}) {
+  if (outline.length < 2) {
+    return EnvironmentPointFootprintPosition.noFootprint;
+  }
+  final slice = environmentFootprintDepthSliceAt(
+    outline,
+    _horizontalCoordinate(point),
+    depthBias: depthBias,
+    epsilon: epsilon,
+  );
+  if (slice == null) return EnvironmentPointFootprintPosition.lateral;
+  final depth = _depthCoordinate(point);
+  if (depth >= slice.front - epsilon) {
+    return EnvironmentPointFootprintPosition.inFront;
+  }
+  if (depth <= slice.back + epsilon) {
+    return EnvironmentPointFootprintPosition.behind;
+  }
+
+  final intersections = _footprintDepthIntersections(
+    outline,
+    _horizontalCoordinate(point),
+    depthBias: depthBias,
+    epsilon: epsilon,
+  );
+  for (var index = 0; index + 1 < intersections.length; index += 2) {
+    if (depth >= intersections[index] - epsilon &&
+        depth <= intersections[index + 1] + epsilon) {
+      return EnvironmentPointFootprintPosition.inside;
+    }
+  }
+  return EnvironmentPointFootprintPosition.lateral;
+}
+
+EnvironmentDepthSpan? environmentObjectFootprintDepthSpan(
+  EnvironmentObjectAsset asset,
+  PlacedEnvironmentObject object, {
+  EnvironmentAssetGeometry? geometry,
+}) {
+  final footprints = (geometry ?? asset.geometry).footprints;
+  final outlines = [
+    for (final footprint in footprints)
+      environmentShapeOutline(footprint, object),
+  ].where((outline) => outline.isNotEmpty);
+  if (outlines.isEmpty) return null;
+  final bias = asset.defaultSortBias + object.sortBias;
+  var back = double.infinity;
+  var front = double.negativeInfinity;
+  for (final outline in outlines) {
+    for (final point in outline) {
+      final depth = point.x + point.y + bias;
+      back = math.min(back, depth);
+      front = math.max(front, depth);
+    }
+  }
+  return EnvironmentDepthSpan(back: back, front: front);
+}
+
+EnvironmentPointFootprintPosition environmentPointRelativeToObjectFootprint(
+  WorldPoint point,
+  EnvironmentObjectAsset asset,
+  PlacedEnvironmentObject object, {
+  EnvironmentAssetGeometry? geometry,
+  double epsilon = 1e-6,
+}) {
+  final resolvedGeometry = geometry ?? asset.geometry;
+  if (resolvedGeometry.footprints.isEmpty) {
+    return EnvironmentPointFootprintPosition.noFootprint;
+  }
+  return _pointRelativeToFootprintOutlines(
+    point,
+    [
+      for (final footprint in resolvedGeometry.footprints)
+        environmentShapeOutline(footprint, object),
+    ],
+    depthBias: asset.defaultSortBias + object.sortBias,
+    epsilon: epsilon,
+  );
+}
+
+List<double> _footprintDepthIntersections(
+  List<WorldPoint> outline,
+  double horizontal, {
+  required double depthBias,
+  required double epsilon,
+}) {
+  final intersections = <double>[];
+  for (var index = 0; index < outline.length; index++) {
+    final a = outline[index];
+    final b = outline[(index + 1) % outline.length];
+    final aHorizontal = _horizontalCoordinate(a);
+    final bHorizontal = _horizontalCoordinate(b);
+    if ((aHorizontal - bHorizontal).abs() <= epsilon) continue;
+    final crosses =
+        (aHorizontal <= horizontal && horizontal < bHorizontal) ||
+        (bHorizontal <= horizontal && horizontal < aHorizontal);
+    if (!crosses) continue;
+    final t = (horizontal - aHorizontal) / (bHorizontal - aHorizontal);
+    intersections.add(
+      _depthCoordinate(a) +
+          (_depthCoordinate(b) - _depthCoordinate(a)) * t +
+          depthBias,
+    );
+  }
+  intersections.sort();
+  return intersections;
+}
+
+bool _horizontalWithin<T>(
+  WorldPoint point,
+  EnvironmentDepthEntity<T> entity, {
+  required double epsilon,
+}) {
+  final horizontal = _horizontalCoordinate(point);
+  return horizontal >= entity.footprintHorizontalMin - epsilon &&
+      horizontal <= entity.footprintHorizontalMax + epsilon;
+}
+
+double _horizontalCoordinate(WorldPoint point) => point.x - point.y;
+
+double _depthCoordinate(WorldPoint point) => point.x + point.y;
 
 bool environmentShapeContainsPoint(
   EnvironmentGeometryShape shape,

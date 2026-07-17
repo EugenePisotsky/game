@@ -1046,18 +1046,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.fence.001",
@@ -1114,18 +1116,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.fence.002",
@@ -1182,18 +1186,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.fence.003",
@@ -1250,18 +1256,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.fence.004",
@@ -1311,18 +1319,20 @@
             "type": "capsule"
           }
         ],
-        "footprint": {
-          "end": {
-            "x": 1.6,
-            "y": 0.0
-          },
-          "radius": 0.14,
-          "start": {
-            "x": -1.6,
-            "y": 0.0
-          },
-          "type": "capsule"
-        },
+        "footprints": [
+          {
+            "end": {
+              "x": 1.6,
+              "y": 0.0
+            },
+            "radius": 0.14,
+            "start": {
+              "x": -1.6,
+              "y": 0.0
+            },
+            "type": "capsule"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.fence.006",
@@ -1797,17 +1807,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.002",
@@ -1855,17 +1867,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.003",
@@ -1913,17 +1927,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.004",
@@ -1971,17 +1987,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.006",
@@ -2043,17 +2061,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.009",
@@ -2101,17 +2121,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.010",
@@ -2166,17 +2188,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.012",
@@ -2231,17 +2255,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.013",
@@ -2289,17 +2315,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.014",
@@ -2347,17 +2375,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.015",
@@ -2405,17 +2435,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.016",
@@ -2463,17 +2495,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.017",
@@ -2521,17 +2555,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.018",
@@ -2579,17 +2615,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.020",
@@ -2644,17 +2682,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.033",
@@ -2709,17 +2749,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.036",
@@ -2774,17 +2816,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.039",
@@ -2832,17 +2876,19 @@
             "type": "ellipse"
           }
         ],
-        "footprint": {
-          "center": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "radius": {
-            "x": 0.52,
-            "y": 0.36
-          },
-          "type": "ellipse"
-        },
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.52,
+              "y": 0.36
+            },
+            "type": "ellipse"
+          }
+        ],
         "reviewed": false
       },
       "id": "ow3.tree.round_large",

@@ -508,6 +508,35 @@ class EditorGame extends FlameGame {
     return [for (final entry in candidates.reversed) entry.object.id];
   }
 
+  EnvironmentGeometryHandle? hitTestSelectedGeometryHandle(
+    Vector2 screen, {
+    double radius = 12,
+  }) {
+    if (!isLoaded) return null;
+    final object = controller.selectedObject;
+    final shape = controller.selectedGeometryShape;
+    if (object == null || shape == null) return null;
+    EnvironmentGeometryHandle? nearest;
+    var nearestDistanceSquared = radius * radius;
+    for (final candidate in _geometryHandlePoints(shape)) {
+      final world = transformEnvironmentGeometryPoint(candidate.local, object);
+      final vertexScreen = _screenForWorldPoint(world);
+      final distanceSquared = vertexScreen.distanceToSquared(screen);
+      if (distanceSquared <= nearestDistanceSquared) {
+        nearest = candidate.handle;
+        nearestDistanceSquared = distanceSquared;
+      }
+    }
+    return nearest;
+  }
+
+  int? hitTestSelectedGeometryVertex(Vector2 screen, {double radius = 12}) {
+    final handle = hitTestSelectedGeometryHandle(screen, radius: radius);
+    return handle?.type == EnvironmentGeometryHandleType.polygonVertex
+        ? handle!.index
+        : null;
+  }
+
   List<String> objectIdsInMarquee(
     ui.Rect screenRect, {
     bool requireContainment = false,
@@ -1421,9 +1450,11 @@ class EditorGame extends FlameGame {
       if (!controller.isLayerVisible(object.editorLayerId)) continue;
       final asset = controller.catalog.objectById(object.assetId);
       if (asset == null) continue;
-      final geometry = controller.catalog.geometryForAsset(asset);
-      final footprint = geometry.footprint;
-      if (footprint != null) {
+      final geometry = controller.catalog.geometryForAsset(
+        asset,
+        direction: object.direction.name,
+      );
+      for (final footprint in geometry.footprints) {
         _drawGeometryShape(canvas, footprint, object, _footprintPaint);
       }
       for (final shape in geometry.blocking) {
@@ -1437,6 +1468,7 @@ class EditorGame extends FlameGame {
       }
       if (object.id == selected?.id) {
         _renderGeometryAnchors(canvas, object, asset);
+        _renderSelectedGeometryHandles(canvas, object);
       }
     }
     final cursor = controller.hoveredPoint;
@@ -1523,6 +1555,50 @@ class EditorGame extends FlameGame {
     );
   }
 
+  void _renderSelectedGeometryHandles(
+    ui.Canvas canvas,
+    PlacedEnvironmentObject object,
+  ) {
+    final shape = controller.selectedGeometryShape;
+    if (shape == null) return;
+    final fill = ui.Paint()
+      ..color = const ui.Color(0xFFF7D774)
+      ..style = ui.PaintingStyle.fill;
+    final outline = ui.Paint()
+      ..color = const ui.Color(0xFF181A1B)
+      ..style = ui.PaintingStyle.stroke
+      ..strokeWidth = 2 / zoom;
+    for (final candidate in _geometryHandlePoints(shape)) {
+      final world = transformEnvironmentGeometryPoint(candidate.local, object);
+      final projected = projection.worldToScreen(Vector2(world.x, world.y));
+      final center = projected.toOffset();
+      if (candidate.handle.type == EnvironmentGeometryHandleType.center) {
+        final extent = 5 / zoom;
+        canvas
+          ..drawRect(
+            ui.Rect.fromCenter(
+              center: center,
+              width: extent * 2,
+              height: extent * 2,
+            ),
+            fill,
+          )
+          ..drawRect(
+            ui.Rect.fromCenter(
+              center: center,
+              width: extent * 2,
+              height: extent * 2,
+            ),
+            outline,
+          );
+      } else {
+        canvas
+          ..drawCircle(center, 6 / zoom, fill)
+          ..drawCircle(center, 6 / zoom, outline);
+      }
+    }
+  }
+
   void _drawWorldLine(
     ui.Canvas canvas,
     WorldPoint start,
@@ -1547,8 +1623,24 @@ class EditorGame extends FlameGame {
       final builder = ui.ParagraphBuilder(
         ui.ParagraphStyle(fontSize: 10 / zoom),
       )..pushStyle(ui.TextStyle(color: const ui.Color(0xFFE9C46A)));
+      final depth = asset.depthAt(
+        object.x,
+        object.y,
+        instanceSortBias: object.sortBias,
+      );
+      final span = environmentObjectFootprintDepthSpan(
+        asset,
+        object,
+        geometry: controller.catalog.geometryForAsset(
+          asset,
+          direction: object.direction.name,
+        ),
+      );
       builder.addText(
-        '${asset.renderBand.name} ${asset.depthAt(object.x, object.y, instanceSortBias: object.sortBias).toStringAsFixed(2)}',
+        span == null
+            ? '${asset.renderBand.name} ${depth.toStringAsFixed(2)}'
+            : '${asset.renderBand.name} ${depth.toStringAsFixed(2)} '
+                  '[${span.back.toStringAsFixed(2)}..${span.front.toStringAsFixed(2)}]',
       );
       final paragraph = builder.build()
         ..layout(ui.ParagraphConstraints(width: 170 / zoom));
@@ -1594,7 +1686,10 @@ class EditorGame extends FlameGame {
             object,
             point,
             actorRadius: actorRadius,
-            geometry: controller.catalog.geometryForAsset(asset),
+            geometry: controller.catalog.geometryForAsset(
+              asset,
+              direction: object.direction.name,
+            ),
           );
     });
   }
@@ -1657,6 +1752,12 @@ class EditorGame extends FlameGame {
 
   Vector2 _projectedAtScreen(Vector2 screen) =>
       (screen - size / 2 - _panOffset) / zoom + _mapCenterScreen;
+
+  Vector2 _screenForWorldPoint(WorldPoint point) =>
+      (projection.worldToScreen(Vector2(point.x, point.y)) - _mapCenterScreen) *
+          zoom +
+      size / 2 +
+      _panOffset;
 
   ui.Rect get _visibleProjectedBounds =>
       _projectedBoundsForScreenRect(ui.Rect.fromLTWH(0, 0, size.x, size.y))
@@ -1996,6 +2097,135 @@ class EditorGame extends FlameGame {
           : Vector2(center.x, center.y),
     );
   }
+}
+
+List<_GeometryHandlePoint> _geometryHandlePoints(
+  EnvironmentGeometryShape shape,
+) => switch (shape) {
+  EnvironmentCircle() => [
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.center),
+      shape.center,
+    ),
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.radius),
+      EnvironmentGeometryPoint(shape.center.x + shape.radius, shape.center.y),
+    ),
+  ],
+  EnvironmentEllipse() => [
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.center),
+      shape.center,
+    ),
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.radiusX),
+      EnvironmentGeometryPoint(shape.center.x + shape.radius.x, shape.center.y),
+    ),
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.radiusY),
+      EnvironmentGeometryPoint(shape.center.x, shape.center.y + shape.radius.y),
+    ),
+  ],
+  EnvironmentRectangle() => [
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.center),
+      shape.center,
+    ),
+    for (var index = 0; index < 4; index++)
+      _GeometryHandlePoint(
+        EnvironmentGeometryHandle(
+          EnvironmentGeometryHandleType.rectangleCorner,
+          index: index,
+        ),
+        _rotatedGeometryOffset(
+          shape.center,
+          index == 0 || index == 3 ? -shape.size.x / 2 : shape.size.x / 2,
+          index < 2 ? -shape.size.y / 2 : shape.size.y / 2,
+          shape.rotationDegrees,
+        ),
+      ),
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.rotation),
+      _rotatedGeometryOffset(
+        shape.center,
+        0,
+        -shape.size.y / 2 - 0.35,
+        shape.rotationDegrees,
+      ),
+    ),
+  ],
+  EnvironmentCapsule() => [
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.center),
+      EnvironmentGeometryPoint(
+        (shape.start.x + shape.end.x) / 2,
+        (shape.start.y + shape.end.y) / 2,
+      ),
+    ),
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(
+        EnvironmentGeometryHandleType.capsuleStart,
+      ),
+      shape.start,
+    ),
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(EnvironmentGeometryHandleType.capsuleEnd),
+      shape.end,
+    ),
+    _GeometryHandlePoint(
+      const EnvironmentGeometryHandle(
+        EnvironmentGeometryHandleType.capsuleRadius,
+      ),
+      _capsuleRadiusHandle(shape),
+    ),
+  ],
+  EnvironmentPolygon() => [
+    for (var index = 0; index < shape.points.length; index++)
+      _GeometryHandlePoint(
+        EnvironmentGeometryHandle(
+          EnvironmentGeometryHandleType.polygonVertex,
+          index: index,
+        ),
+        shape.points[index],
+      ),
+  ],
+};
+
+EnvironmentGeometryPoint _rotatedGeometryOffset(
+  EnvironmentGeometryPoint center,
+  double x,
+  double y,
+  double rotationDegrees,
+) {
+  final angle = rotationDegrees * math.pi / 180;
+  return EnvironmentGeometryPoint(
+    center.x + x * math.cos(angle) - y * math.sin(angle),
+    center.y + x * math.sin(angle) + y * math.cos(angle),
+  );
+}
+
+EnvironmentGeometryPoint _capsuleRadiusHandle(EnvironmentCapsule capsule) {
+  final center = EnvironmentGeometryPoint(
+    (capsule.start.x + capsule.end.x) / 2,
+    (capsule.start.y + capsule.end.y) / 2,
+  );
+  final dx = capsule.end.x - capsule.start.x;
+  final dy = capsule.end.y - capsule.start.y;
+  final length = math.sqrt(dx * dx + dy * dy);
+  if (length < 0.0001) {
+    return EnvironmentGeometryPoint(center.x, center.y - capsule.radius);
+  }
+  return EnvironmentGeometryPoint(
+    center.x - dy / length * capsule.radius,
+    center.y + dx / length * capsule.radius,
+  );
+}
+
+class _GeometryHandlePoint {
+  const _GeometryHandlePoint(this.handle, this.local);
+
+  final EnvironmentGeometryHandle handle;
+  final EnvironmentGeometryPoint local;
 }
 
 class _TerrainRaster {

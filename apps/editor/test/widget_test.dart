@@ -213,7 +213,7 @@ void main() {
     expect(controller.selectedObjectIds, hasLength(1));
   });
 
-  testWidgets('edits selected asset collision geometry', (tester) async {
+  testWidgets('edits selected asset geometry', (tester) async {
     tester.view.physicalSize = const Size(1400, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -259,6 +259,8 @@ void main() {
       of: find.text('Radius X'),
       matching: find.byType(Row),
     );
+    await tester.ensureVisible(row.first);
+    await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(of: row.first, matching: find.byIcon(Icons.add)),
     );

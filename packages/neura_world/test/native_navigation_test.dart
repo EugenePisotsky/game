@@ -38,5 +38,16 @@ void main() {
     expect(result.points.last.x, closeTo(8, 0.0001));
     expect(result.points.last.y, closeTo(5, 0.0001));
     expect(result.expandedNodes, greaterThan(0));
+
+    final edgeResult = await world.findPath(
+      start: const NativeNavigationPoint(x: 2, y: 5),
+      destination: const NativeNavigationPoint(x: 3.9, y: 5),
+    );
+    expect(edgeResult.points, isNotEmpty);
+    expect(
+      edgeResult.points.last.x,
+      lessThan(3.9),
+      reason: 'the exact target overlaps the expanded polygon edge',
+    );
   });
 }

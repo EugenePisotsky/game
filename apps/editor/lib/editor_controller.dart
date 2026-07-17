@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:neura_assets/neura_assets.dart';
+import 'package:neura_rendering/neura_rendering.dart';
 import 'package:neura_world/neura_world.dart';
 
 enum EnvironmentEditorMode {
@@ -22,6 +23,26 @@ enum EnvironmentEditorMode {
 enum GeometryRole { footprint, blocking, walkable, selection }
 
 enum GeometryShapeType { circle, ellipse, rectangle, capsule, polygon }
+
+enum EnvironmentGeometryHandleType {
+  center,
+  radius,
+  radiusX,
+  radiusY,
+  rectangleCorner,
+  rotation,
+  capsuleStart,
+  capsuleEnd,
+  capsuleRadius,
+  polygonVertex,
+}
+
+class EnvironmentGeometryHandle {
+  const EnvironmentGeometryHandle(this.type, {this.index = 0});
+
+  final EnvironmentGeometryHandleType type;
+  final int index;
+}
 
 class PathPlacementPreview {
   const PathPlacementPreview({required this.point, required this.direction});
@@ -159,7 +180,18 @@ class EditorController extends ChangeNotifier {
     final object = selectedObject;
     if (object == null) return null;
     final asset = catalog.objectById(object.assetId);
-    return asset == null ? null : catalog.geometryForAsset(asset);
+    return asset == null
+        ? null
+        : catalog.geometryForAsset(asset, direction: object.direction.name);
+  }
+
+  bool get selectedGeometryHasViewOverride {
+    final object = selectedObject;
+    if (object == null) return false;
+    return catalog.geometryOverrides[object.assetId]?.hasDirection(
+          object.direction.name,
+        ) ??
+        false;
   }
 
   EnvironmentGeometryShape? get selectedGeometryShape {
@@ -167,7 +199,9 @@ class EditorController extends ChangeNotifier {
     if (geometry == null) return null;
     switch (_geometryRole) {
       case GeometryRole.footprint:
-        return geometry.footprint;
+        return _geometryShapeIndex < geometry.footprints.length
+            ? geometry.footprints[_geometryShapeIndex]
+            : null;
       case GeometryRole.blocking:
         return _geometryShapeIndex < geometry.blocking.length
             ? geometry.blocking[_geometryShapeIndex]
@@ -187,6 +221,9 @@ class EditorController extends ChangeNotifier {
   final List<_EditorCommand> _redo = [];
   final Map<String, _ObjectRecord> _gestureObjectBefore = {};
   final Set<String> _gestureObjectIds = {};
+  String? _geometryGestureAssetId;
+  EnvironmentAssetGeometry? _geometryGestureBefore;
+  bool _geometryGestureChanged = false;
   TerrainStroke? _activeStroke;
   int _terrainRevision = 0;
   TerrainStroke? _lastTerrainChangedStroke;
@@ -324,7 +361,10 @@ class EditorController extends ChangeNotifier {
     _mutateSelectedGeometry((geometry) {
       switch (_geometryRole) {
         case GeometryRole.footprint:
-          return geometry.copyWith(footprint: shape, reviewed: false);
+          final shapes = [...geometry.footprints];
+          if (_geometryShapeIndex >= shapes.length) return geometry;
+          shapes[_geometryShapeIndex] = shape;
+          return geometry.copyWith(footprints: shapes, reviewed: false);
         case GeometryRole.blocking:
           final shapes = [...geometry.blocking];
           if (_geometryShapeIndex >= shapes.length) return geometry;
@@ -375,8 +415,9 @@ class EditorController extends ChangeNotifier {
     _mutateSelectedGeometry((geometry) {
       switch (_geometryRole) {
         case GeometryRole.footprint:
-          _geometryShapeIndex = 0;
-          return geometry.copyWith(footprint: shape, reviewed: false);
+          final shapes = [...geometry.footprints, shape];
+          _geometryShapeIndex = shapes.length - 1;
+          return geometry.copyWith(footprints: shapes, reviewed: false);
         case GeometryRole.blocking:
           final shapes = [...geometry.blocking, shape];
           _geometryShapeIndex = shapes.length - 1;
@@ -398,7 +439,10 @@ class EditorController extends ChangeNotifier {
     _mutateSelectedGeometry((geometry) {
       switch (_geometryRole) {
         case GeometryRole.footprint:
-          return geometry.copyWith(clearFootprint: true, reviewed: false);
+          final shapes = [...geometry.footprints]
+            ..removeAt(_geometryShapeIndex);
+          _geometryShapeIndex = math.max(0, _geometryShapeIndex - 1);
+          return geometry.copyWith(footprints: shapes, reviewed: false);
         case GeometryRole.blocking:
           final shapes = [...geometry.blocking]..removeAt(_geometryShapeIndex);
           _geometryShapeIndex = math.max(0, _geometryShapeIndex - 1);
@@ -415,6 +459,40 @@ class EditorController extends ChangeNotifier {
     });
   }
 
+  void addFootprintToBlocking() {
+    _mutateSelectedGeometry((geometry) {
+      if (geometry.footprints.isEmpty) return geometry;
+      _geometryRole = GeometryRole.blocking;
+      final shapes = [...geometry.blocking, ...geometry.footprints];
+      _geometryShapeIndex = shapes.length - 1;
+      return geometry.copyWith(blocking: shapes, reviewed: false);
+    });
+  }
+
+  void replaceBlockingWithFootprint() {
+    _mutateSelectedGeometry((geometry) {
+      if (geometry.footprints.isEmpty) return geometry;
+      _geometryRole = GeometryRole.blocking;
+      _geometryShapeIndex = 0;
+      return geometry.copyWith(
+        blocking: [...geometry.footprints],
+        reviewed: false,
+      );
+    });
+  }
+
+  void copySelectedBlockingToFootprint() {
+    if (_geometryRole != GeometryRole.blocking) return;
+    final shape = selectedGeometryShape;
+    if (shape == null) return;
+    _mutateSelectedGeometry((geometry) {
+      _geometryRole = GeometryRole.footprint;
+      final shapes = [...geometry.footprints, shape];
+      _geometryShapeIndex = shapes.length - 1;
+      return geometry.copyWith(footprints: shapes, reviewed: false);
+    });
+  }
+
   void markSelectedGeometryReviewed() {
     _mutateSelectedGeometry((geometry) => geometry.copyWith(reviewed: true));
   }
@@ -428,6 +506,19 @@ class EditorController extends ChangeNotifier {
     _recordGeometryMutation(
       object.assetId,
       () => catalog.removeGeometryOverride(object.assetId),
+    );
+    _geometryShapeIndex = 0;
+  }
+
+  void resetSelectedGeometryViewOverride() {
+    final object = selectedObject;
+    if (object == null || !selectedGeometryHasViewOverride) return;
+    _recordGeometryMutation(
+      object.assetId,
+      () => catalog.removeGeometryOverrideForDirection(
+        object.assetId,
+        object.direction.name,
+      ),
     );
     _geometryShapeIndex = 0;
   }
@@ -549,6 +640,74 @@ class EditorController extends ChangeNotifier {
     _activeStroke = null;
     _activePathDragHandle = null;
     _pathGestureStarted = false;
+    _geometryGestureAssetId = null;
+    _geometryGestureBefore = null;
+    _geometryGestureChanged = false;
+  }
+
+  bool beginSelectedPolygonVertexGesture() {
+    if (_mode != EnvironmentEditorMode.collision ||
+        selectedGeometryShape is! EnvironmentPolygon) {
+      return false;
+    }
+    final object = selectedObject;
+    if (object == null) return false;
+    _geometryGestureAssetId = object.assetId;
+    _geometryGestureBefore = catalog.geometryOverrides[object.assetId];
+    return true;
+  }
+
+  bool beginSelectedGeometryHandleGesture(EnvironmentGeometryHandle handle) {
+    if (_mode != EnvironmentEditorMode.collision ||
+        !_geometryHandleSupportsShape(handle, selectedGeometryShape)) {
+      return false;
+    }
+    final object = selectedObject;
+    if (object == null) return false;
+    _geometryGestureAssetId = object.assetId;
+    _geometryGestureBefore = catalog.geometryOverrides[object.assetId];
+    return true;
+  }
+
+  void moveSelectedPolygonVertexDuringGesture(
+    int vertexIndex,
+    WorldPoint worldPoint,
+  ) => moveSelectedGeometryHandleDuringGesture(
+    EnvironmentGeometryHandle(
+      EnvironmentGeometryHandleType.polygonVertex,
+      index: vertexIndex,
+    ),
+    worldPoint,
+  );
+
+  void moveSelectedGeometryHandleDuringGesture(
+    EnvironmentGeometryHandle handle,
+    WorldPoint worldPoint,
+  ) {
+    final object = selectedObject;
+    final assetId = _geometryGestureAssetId;
+    final shape = selectedGeometryShape;
+    if (object == null ||
+        assetId == null ||
+        object.assetId != assetId ||
+        !_geometryHandleSupportsShape(handle, shape)) {
+      return;
+    }
+    final local = inverseTransformEnvironmentGeometryPoint(worldPoint, object);
+    final updatedShape = _moveGeometryHandle(shape!, handle, local);
+    final asset = catalog.objectById(assetId);
+    if (asset == null) return;
+    final geometry = catalog.geometryForAsset(
+      asset,
+      direction: object.direction.name,
+    );
+    final updated = _replaceSelectedGeometryShapeWithoutHistory(
+      geometry,
+      updatedShape,
+    );
+    _setGeometryForObjectView(asset, object, updated);
+    _geometryGestureChanged = true;
+    _hoverNotifier.changed();
   }
 
   void applyAt(WorldPoint point) {
@@ -623,11 +782,23 @@ class EditorController extends ChangeNotifier {
             : _CompositeEditorCommand(commands),
       );
     }
+    if (_geometryGestureChanged && _geometryGestureAssetId != null) {
+      _pushCommand(
+        _GeometryDeltaCommand(
+          assetId: _geometryGestureAssetId!,
+          before: _geometryGestureBefore,
+          after: catalog.geometryOverrides[_geometryGestureAssetId!],
+        ),
+      );
+    }
     _gestureObjectBefore.clear();
     _gestureObjectIds.clear();
     _activeStroke = null;
     _activePathDragHandle = null;
     _pathGestureStarted = false;
+    _geometryGestureAssetId = null;
+    _geometryGestureBefore = null;
+    _geometryGestureChanged = false;
     if (committedTerrainStroke != null) {
       _markTerrainChanged(committedTerrainStroke);
     }
@@ -945,6 +1116,7 @@ class EditorController extends ChangeNotifier {
       }
       _rememberPlacementDirection(selected);
     });
+    _geometryShapeIndex = 0;
   }
 
   void setSelectedDirection(EnvironmentDirection direction) {
@@ -966,6 +1138,7 @@ class EditorController extends ChangeNotifier {
       }
       _rememberPlacementDirection(selected);
     });
+    _geometryShapeIndex = 0;
   }
 
   void adjustSelectedVerticalOffset(double delta) {
@@ -1415,25 +1588,29 @@ class EditorController extends ChangeNotifier {
     if (!asset.geometry.reviewed) {
       return (3.2 * asset.renderScale).clamp(0.25, 8).toDouble();
     }
-    final footprint = asset.geometry.footprint;
-    final length = switch (footprint) {
-      EnvironmentCapsule() =>
-        math.sqrt(
-              math.pow(footprint.end.x - footprint.start.x, 2) +
-                  math.pow(footprint.end.y - footprint.start.y, 2),
-            ) +
-            footprint.radius * 2,
-      EnvironmentRectangle() => math.max(
-        footprint.size.x.abs(),
-        footprint.size.y.abs(),
-      ),
-      EnvironmentEllipse() =>
-        math.max(footprint.radius.x.abs(), footprint.radius.y.abs()) * 2,
-      EnvironmentCircle() => footprint.radius * 2,
-      EnvironmentPolygon() when footprint.points.isNotEmpty =>
-        _polygonPathLength(footprint),
-      _ => 3.2 * asset.renderScale,
-    };
+    final lengths = asset.geometry.footprints.map(
+      (footprint) => switch (footprint) {
+        EnvironmentCapsule() =>
+          math.sqrt(
+                math.pow(footprint.end.x - footprint.start.x, 2) +
+                    math.pow(footprint.end.y - footprint.start.y, 2),
+              ) +
+              footprint.radius * 2,
+        EnvironmentRectangle() => math.max(
+          footprint.size.x.abs(),
+          footprint.size.y.abs(),
+        ),
+        EnvironmentEllipse() =>
+          math.max(footprint.radius.x.abs(), footprint.radius.y.abs()) * 2,
+        EnvironmentCircle() => footprint.radius * 2,
+        EnvironmentPolygon() when footprint.points.isNotEmpty =>
+          _polygonPathLength(footprint),
+        _ => 3.2 * asset.renderScale,
+      },
+    );
+    final length = lengths.isEmpty
+        ? 3.2 * asset.renderScale
+        : lengths.reduce(math.max);
     return length.clamp(0.25, 8).toDouble();
   }
 
@@ -1589,11 +1766,57 @@ class EditorController extends ChangeNotifier {
     if (object == null) return;
     final asset = catalog.objectById(object.assetId);
     if (asset == null) return;
-    final updated = mutation(catalog.geometryForAsset(asset));
+    final updated = mutation(
+      catalog.geometryForAsset(asset, direction: object.direction.name),
+    );
     _recordGeometryMutation(
       asset.id,
-      () => catalog.setGeometryOverride(asset.id, updated),
+      () => _setGeometryForObjectView(asset, object, updated),
     );
+  }
+
+  void _setGeometryForObjectView(
+    EnvironmentObjectAsset asset,
+    PlacedEnvironmentObject object,
+    EnvironmentAssetGeometry geometry,
+  ) {
+    if (asset.views.length == 1) {
+      catalog.setGeometryOverride(asset.id, geometry.withoutDirections());
+      return;
+    }
+    catalog.setGeometryOverrideForDirection(
+      asset.id,
+      object.direction.name,
+      geometry,
+    );
+  }
+
+  EnvironmentAssetGeometry _replaceSelectedGeometryShapeWithoutHistory(
+    EnvironmentAssetGeometry geometry,
+    EnvironmentGeometryShape shape,
+  ) {
+    switch (_geometryRole) {
+      case GeometryRole.footprint:
+        final shapes = [...geometry.footprints];
+        if (_geometryShapeIndex >= shapes.length) return geometry;
+        shapes[_geometryShapeIndex] = shape;
+        return geometry.copyWith(footprints: shapes, reviewed: false);
+      case GeometryRole.blocking:
+        final shapes = [...geometry.blocking];
+        if (_geometryShapeIndex >= shapes.length) return geometry;
+        shapes[_geometryShapeIndex] = shape;
+        return geometry.copyWith(blocking: shapes, reviewed: false);
+      case GeometryRole.walkable:
+        final shapes = [...geometry.walkable];
+        if (_geometryShapeIndex >= shapes.length) return geometry;
+        shapes[_geometryShapeIndex] = shape;
+        return geometry.copyWith(walkable: shapes, reviewed: false);
+      case GeometryRole.selection:
+        final shapes = [...geometry.selection];
+        if (_geometryShapeIndex >= shapes.length) return geometry;
+        shapes[_geometryShapeIndex] = shape;
+        return geometry.copyWith(selection: shapes, reviewed: false);
+    }
   }
 
   void _normalizeSelection() {
@@ -1659,6 +1882,179 @@ class EditorController extends ChangeNotifier {
     }
     return result;
   }
+}
+
+bool _geometryHandleSupportsShape(
+  EnvironmentGeometryHandle handle,
+  EnvironmentGeometryShape? shape,
+) => switch ((shape, handle.type)) {
+  (EnvironmentCircle(), EnvironmentGeometryHandleType.center) => true,
+  (EnvironmentCircle(), EnvironmentGeometryHandleType.radius) => true,
+  (EnvironmentEllipse(), EnvironmentGeometryHandleType.center) => true,
+  (EnvironmentEllipse(), EnvironmentGeometryHandleType.radiusX) => true,
+  (EnvironmentEllipse(), EnvironmentGeometryHandleType.radiusY) => true,
+  (EnvironmentRectangle(), EnvironmentGeometryHandleType.center) => true,
+  (EnvironmentRectangle(), EnvironmentGeometryHandleType.rectangleCorner) =>
+    handle.index >= 0 && handle.index < 4,
+  (EnvironmentRectangle(), EnvironmentGeometryHandleType.rotation) => true,
+  (EnvironmentCapsule(), EnvironmentGeometryHandleType.center) => true,
+  (EnvironmentCapsule(), EnvironmentGeometryHandleType.capsuleStart) => true,
+  (EnvironmentCapsule(), EnvironmentGeometryHandleType.capsuleEnd) => true,
+  (EnvironmentCapsule(), EnvironmentGeometryHandleType.capsuleRadius) => true,
+  (
+    EnvironmentPolygon(points: final points),
+    EnvironmentGeometryHandleType.polygonVertex,
+  ) =>
+    handle.index >= 0 && handle.index < points.length,
+  _ => false,
+};
+
+EnvironmentGeometryShape _moveGeometryHandle(
+  EnvironmentGeometryShape shape,
+  EnvironmentGeometryHandle handle,
+  EnvironmentGeometryPoint point,
+) {
+  switch (shape) {
+    case EnvironmentCircle():
+      return switch (handle.type) {
+        EnvironmentGeometryHandleType.center => EnvironmentCircle(
+          center: point,
+          radius: shape.radius,
+        ),
+        EnvironmentGeometryHandleType.radius => EnvironmentCircle(
+          center: shape.center,
+          radius: math.max(0.02, _geometryDistance(shape.center, point)),
+        ),
+        _ => shape,
+      };
+    case EnvironmentEllipse():
+      return switch (handle.type) {
+        EnvironmentGeometryHandleType.center => EnvironmentEllipse(
+          center: point,
+          radius: shape.radius,
+        ),
+        EnvironmentGeometryHandleType.radiusX => EnvironmentEllipse(
+          center: shape.center,
+          radius: EnvironmentGeometryPoint(
+            math.max(0.02, (point.x - shape.center.x).abs()),
+            shape.radius.y,
+          ),
+        ),
+        EnvironmentGeometryHandleType.radiusY => EnvironmentEllipse(
+          center: shape.center,
+          radius: EnvironmentGeometryPoint(
+            shape.radius.x,
+            math.max(0.02, (point.y - shape.center.y).abs()),
+          ),
+        ),
+        _ => shape,
+      };
+    case EnvironmentRectangle():
+      if (handle.type == EnvironmentGeometryHandleType.center) {
+        return EnvironmentRectangle(
+          center: point,
+          size: shape.size,
+          rotationDegrees: shape.rotationDegrees,
+        );
+      }
+      if (handle.type == EnvironmentGeometryHandleType.rotation) {
+        final angle = math.atan2(
+          point.y - shape.center.y,
+          point.x - shape.center.x,
+        );
+        return EnvironmentRectangle(
+          center: shape.center,
+          size: shape.size,
+          rotationDegrees: angle * 180 / math.pi + 90,
+        );
+      }
+      if (handle.type == EnvironmentGeometryHandleType.rectangleCorner) {
+        final angle = shape.rotationDegrees * math.pi / 180;
+        final dx = point.x - shape.center.x;
+        final dy = point.y - shape.center.y;
+        final localX = dx * math.cos(angle) + dy * math.sin(angle);
+        final localY = -dx * math.sin(angle) + dy * math.cos(angle);
+        return EnvironmentRectangle(
+          center: shape.center,
+          size: EnvironmentGeometryPoint(
+            math.max(0.02, localX.abs() * 2),
+            math.max(0.02, localY.abs() * 2),
+          ),
+          rotationDegrees: shape.rotationDegrees,
+        );
+      }
+      return shape;
+    case EnvironmentCapsule():
+      return switch (handle.type) {
+        EnvironmentGeometryHandleType.center => () {
+          final center = EnvironmentGeometryPoint(
+            (shape.start.x + shape.end.x) / 2,
+            (shape.start.y + shape.end.y) / 2,
+          );
+          final dx = point.x - center.x;
+          final dy = point.y - center.y;
+          return EnvironmentCapsule(
+            start: EnvironmentGeometryPoint(
+              shape.start.x + dx,
+              shape.start.y + dy,
+            ),
+            end: EnvironmentGeometryPoint(shape.end.x + dx, shape.end.y + dy),
+            radius: shape.radius,
+          );
+        }(),
+        EnvironmentGeometryHandleType.capsuleStart => EnvironmentCapsule(
+          start: point,
+          end: shape.end,
+          radius: shape.radius,
+        ),
+        EnvironmentGeometryHandleType.capsuleEnd => EnvironmentCapsule(
+          start: shape.start,
+          end: point,
+          radius: shape.radius,
+        ),
+        EnvironmentGeometryHandleType.capsuleRadius => EnvironmentCapsule(
+          start: shape.start,
+          end: shape.end,
+          radius: math.max(
+            0.02,
+            _distanceFromGeometrySegment(point, shape.start, shape.end),
+          ),
+        ),
+        _ => shape,
+      };
+    case EnvironmentPolygon():
+      if (handle.type != EnvironmentGeometryHandleType.polygonVertex ||
+          handle.index < 0 ||
+          handle.index >= shape.points.length) {
+        return shape;
+      }
+      final points = [...shape.points];
+      points[handle.index] = point;
+      return EnvironmentPolygon(points: points);
+  }
+}
+
+double _geometryDistance(
+  EnvironmentGeometryPoint a,
+  EnvironmentGeometryPoint b,
+) => math.sqrt(math.pow(a.x - b.x, 2) + math.pow(a.y - b.y, 2));
+
+double _distanceFromGeometrySegment(
+  EnvironmentGeometryPoint point,
+  EnvironmentGeometryPoint start,
+  EnvironmentGeometryPoint end,
+) {
+  final dx = end.x - start.x;
+  final dy = end.y - start.y;
+  final lengthSquared = dx * dx + dy * dy;
+  final t = lengthSquared == 0
+      ? 0.0
+      : (((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared)
+            .clamp(0.0, 1.0);
+  return _geometryDistance(
+    point,
+    EnvironmentGeometryPoint(start.x + dx * t, start.y + dy * t),
+  );
 }
 
 class _HoverNotifier extends ChangeNotifier {

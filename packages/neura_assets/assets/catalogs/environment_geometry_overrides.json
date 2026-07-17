@@ -1,4 +1,1862 @@
 {
-  "schemaVersion": 1,
-  "objects": {}
+  "schemaVersion": 2,
+  "objects": {
+    "ow1.building.058": {
+      "footprints": [
+        {
+          "type": "polygon",
+          "points": [
+            {
+              "x": -5.098757145453916,
+              "y": -3.5847074770273686
+            },
+            {
+              "x": 0.6525492030757415,
+              "y": 1.9844921171555716
+            },
+            {
+              "x": -3.362355539974567,
+              "y": 6.0794016939232
+            },
+            {
+              "x": -9.533592856579487,
+              "y": 0.5026385948938881
+            }
+          ]
+        }
+      ],
+      "blocking": [
+        {
+          "type": "polygon",
+          "points": [
+            {
+              "x": -5.098757145453916,
+              "y": -3.5847074770273686
+            },
+            {
+              "x": 0.6525492030757415,
+              "y": 1.9844921171555716
+            },
+            {
+              "x": -3.362355539974567,
+              "y": 6.0794016939232
+            },
+            {
+              "x": -9.533592856579487,
+              "y": 0.5026385948938881
+            }
+          ]
+        }
+      ],
+      "reviewed": false
+    },
+    "ow3.fence.002": {
+      "footprints": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -0.49999999999999917,
+            "y": 0.5499999999999999
+          },
+          "end": {
+            "x": 1.9000000000000004,
+            "y": 0.49999999999999994
+          },
+          "radius": 0.14
+        }
+      ],
+      "blocking": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -0.49999999999999917,
+            "y": 0.5499999999999999
+          },
+          "end": {
+            "x": 1.8500000000000003,
+            "y": 0.49999999999999994
+          },
+          "radius": 0.11
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "east": {
+          "footprints": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.604216252724072,
+                "y": -0.7392545235756671
+              },
+              "end": {
+                "x": 1.8466046701274905,
+                "y": -0.7740521920326985
+              },
+              "radius": 0.14
+            }
+          ],
+          "blocking": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.5345980276264157,
+                "y": -0.7532544625405109
+              },
+              "end": {
+                "x": 1.837342585166553,
+                "y": -0.7751126778725422
+              },
+              "radius": 0.11
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.fence.001": {
+      "footprints": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -0.4499999999999992,
+            "y": 0.6
+          },
+          "end": {
+            "x": 1.9000000000000004,
+            "y": 0.6
+          },
+          "radius": 0.14
+        }
+      ],
+      "blocking": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -0.4499999999999992,
+            "y": 0.6
+          },
+          "end": {
+            "x": 1.9500000000000004,
+            "y": 0.6
+          },
+          "radius": 0.11
+        }
+      ],
+      "reviewed": true,
+      "directions": {
+        "east": {
+          "footprints": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.5397969501325147,
+                "y": -0.7271795301896304
+              },
+              "end": {
+                "x": 1.8102030498674848,
+                "y": -0.7271795301896304
+              },
+              "radius": 0.14
+            }
+          ],
+          "blocking": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.5886845844098586,
+                "y": -0.7288885145646304
+              },
+              "end": {
+                "x": 1.811315415590141,
+                "y": -0.7288885145646304
+              },
+              "radius": 0.11
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.036": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.97259521484375,
+                "y": -0.1029815673828125
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.933258056640625,
+                "y": -0.0969390869140625
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        },
+        "west": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.1924972534179688,
+                "y": 0.7384109497070312
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.2319869995117188,
+                "y": 0.7630386352539062
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.039": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.4437789916992188,
+                "y": -0.6079330444335938
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.4409713745117188,
+                "y": -0.6018295288085938
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow2.castleWell.001": {
+      "blocking": [],
+      "reviewed": false,
+      "directions": {
+        "north": {
+          "footprints": [
+            {
+              "type": "circle",
+              "center": {
+                "x": 0.7754364013671874,
+                "y": 0.5923309326171876
+              },
+              "radius": 0.8792107643990907
+            }
+          ],
+          "blocking": [
+            {
+              "type": "circle",
+              "center": {
+                "x": 0.7754364013671874,
+                "y": 0.5923309326171876
+              },
+              "radius": 0.8792107643990907
+            }
+          ],
+          "reviewed": false
+        },
+        "south": {
+          "footprints": [
+            {
+              "type": "circle",
+              "center": {
+                "x": -0.7482528686523438,
+                "y": -0.49600982666015625
+              },
+              "radius": 0.9010519400722815
+            }
+          ],
+          "blocking": [
+            {
+              "type": "circle",
+              "center": {
+                "x": -0.7482528686523438,
+                "y": -0.49600982666015625
+              },
+              "radius": 0.9010519400722815
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.010": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.10308837890625,
+                "y": -0.7010269165039062
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.0952301025390625,
+                "y": -0.7111740112304688
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        },
+        "southWest": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.9983394813480968,
+                "y": 0.05709852731383058
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.0292570607165363,
+                "y": 0.05743839950022245
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.012": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.1258468627929688,
+                "y": -0.11737060546875
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.1037063598632812,
+                "y": -0.10105133056640625
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.006": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "northWest": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": 1.1667002939340783,
+                "y": 1.0768121928283483
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": 1.1636252598667234,
+                "y": 1.0431055036128518
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        },
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -2.0051193237304688,
+                "y": -0.7594757080078125
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.9975509643554688,
+                "y": -0.776397705078125
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        },
+        "west": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.6092758178710939,
+                "y": 1.12078857421875
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.6278991699218751,
+                "y": 1.10223388671875
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.outhouse.001": {
+      "blocking": [],
+      "reviewed": false,
+      "directions": {
+        "northWest": {
+          "footprints": [
+            {
+              "type": "polygon",
+              "points": [
+                {
+                  "x": -0.5510353152767665,
+                  "y": 0.6462966338054534
+                },
+                {
+                  "x": 0.052944533924597,
+                  "y": 0.001337909559129824
+                },
+                {
+                  "x": 0.8368570344390931,
+                  "y": 0.6818968966308474
+                },
+                {
+                  "x": 0.14818966806345557,
+                  "y": 1.3705858421929222
+                }
+              ]
+            }
+          ],
+          "blocking": [
+            {
+              "type": "polygon",
+              "points": [
+                {
+                  "x": -0.5510353152767665,
+                  "y": 0.6462966338054534
+                },
+                {
+                  "x": 0.052944533924597,
+                  "y": 0.001337909559129824
+                },
+                {
+                  "x": 0.8368570344390931,
+                  "y": 0.6818968966308474
+                },
+                {
+                  "x": 0.14818966806345557,
+                  "y": 1.3705858421929222
+                }
+              ]
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.016": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.7318572998046875,
+                "y": -0.21274566650390625
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.6831893920898438,
+                "y": -0.17984771728515625
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.018": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.3209457397460938,
+                "y": -0.607757568359375
+              },
+              "radius": {
+                "x": 0.7648773193359375,
+                "y": 0.5609283447265625
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.3292465209960938,
+                "y": -0.580810546875
+              },
+              "radius": {
+                "x": 0.5842666625976562,
+                "y": 0.5333709716796875
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.barn.002": {
+      "blocking": [],
+      "reviewed": false,
+      "directions": {
+        "northEast": {
+          "footprints": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": 0.01397522061663481,
+                "y": -0.480366177092004
+              },
+              "end": {
+                "x": 2.5112670320798913,
+                "y": 2.0346475412331113
+              },
+              "radius": 0.25784196248005736
+            },
+            {
+              "type": "circle",
+              "center": {
+                "x": 1.8231930933312872,
+                "y": -2.277467336621955
+              },
+              "radius": 0.25
+            }
+          ],
+          "blocking": [
+            {
+              "type": "circle",
+              "center": {
+                "x": 1.844227405311316,
+                "y": -2.2913913066708025
+              },
+              "radius": 0.25
+            },
+            {
+              "type": "circle",
+              "center": {
+                "x": 4.11662902791705,
+                "y": -0.17844908224554934
+              },
+              "radius": 0.25
+            },
+            {
+              "type": "capsule",
+              "start": {
+                "x": 0.05027410960294673,
+                "y": -0.4389584157165971
+              },
+              "end": {
+                "x": 2.487999274303573,
+                "y": 2.0078839552539054
+              },
+              "radius": 0.20146205258164948
+            }
+          ],
+          "reviewed": false
+        },
+        "northWest": {
+          "footprints": [
+            {
+              "type": "circle",
+              "center": {
+                "x": -0.07422161175204865,
+                "y": 0.1007424318838317
+              },
+              "radius": 0.25
+            },
+            {
+              "type": "circle",
+              "center": {
+                "x": 1.133446767633771,
+                "y": 1.2538802071418924
+              },
+              "radius": 0.25
+            },
+            {
+              "type": "circle",
+              "center": {
+                "x": 2.353474626051713,
+                "y": 2.488786914608545
+              },
+              "radius": 0.25
+            }
+          ],
+          "blocking": [
+            {
+              "type": "circle",
+              "center": {
+                "x": -0.06753206395639956,
+                "y": 0.08773018246197231
+              },
+              "radius": 0.25
+            },
+            {
+              "type": "circle",
+              "center": {
+                "x": 1.1369372010400491,
+                "y": 1.2524937444132782
+              },
+              "radius": 0.25
+            },
+            {
+              "type": "circle",
+              "center": {
+                "x": 2.3466070499679543,
+                "y": 2.4786824605591486
+              },
+              "radius": 0.25
+            },
+            {
+              "type": "capsule",
+              "start": {
+                "x": -2.016229705608639,
+                "y": 1.9261689710114094
+              },
+              "end": {
+                "x": 0.6364996831627928,
+                "y": 4.600045962491666
+              },
+              "radius": 0.16719091303843145
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.round_large": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.671173095703125,
+                "y": -0.8328094482421875
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.4560394287109375
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.655120849609375,
+                "y": -0.8254241943359375
+              },
+              "radius": {
+                "x": 0.48616790771484375,
+                "y": 0.44261932373046875
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.fence.003": {
+      "footprints": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -1.6,
+            "y": 0.0
+          },
+          "end": {
+            "x": 1.6,
+            "y": 0.0
+          },
+          "radius": 0.14
+        }
+      ],
+      "blocking": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -1.55,
+            "y": 0.0
+          },
+          "end": {
+            "x": 1.55,
+            "y": 0.0
+          },
+          "radius": 0.11
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "north": {
+          "footprints": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.3857650756835938,
+                "y": 0.6657333374023438
+              },
+              "end": {
+                "x": 1.9237152099609376,
+                "y": 0.5769500732421875
+              },
+              "radius": 0.14
+            }
+          ],
+          "blocking": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.41047668457031256,
+                "y": 0.6666107177734375
+              },
+              "end": {
+                "x": 1.9326217651367186,
+                "y": 0.56109619140625
+              },
+              "radius": 0.11
+            }
+          ],
+          "reviewed": false
+        },
+        "east": {
+          "footprints": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.31542968750000006,
+                "y": -0.9185333251953125
+              },
+              "end": {
+                "x": 1.9946517944335938,
+                "y": -0.9075469970703126
+              },
+              "radius": 0.14
+            }
+          ],
+          "blocking": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.34341430664062506,
+                "y": -0.9174118041992188
+              },
+              "end": {
+                "x": 1.9307327270507812,
+                "y": -0.8930664062500001
+              },
+              "radius": 0.11
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.003": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.532196044921875,
+                "y": -0.4447174072265625
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.5415420532226562,
+                "y": -0.43990325927734375
+              },
+              "radius": {
+                "x": 0.42891693115234375,
+                "y": 0.331634521484375
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.014": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.6448745727539062,
+                "y": -0.33530426025390625
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.6327133178710938,
+                "y": -0.30060577392578125
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.004": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -2.07958984375,
+                "y": -0.90045166015625
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -2.0795974731445312,
+                "y": -0.8968048095703125
+              },
+              "radius": {
+                "x": 0.36199951171875,
+                "y": 0.27428436279296875
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.002": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.5076522827148438,
+                "y": -0.432769775390625
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.5133514404296875,
+                "y": -0.42591094970703125
+              },
+              "radius": {
+                "x": 0.395416259765625,
+                "y": 0.28070068359375
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.fence.006": {
+      "footprints": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -1.6,
+            "y": 0.0
+          },
+          "end": {
+            "x": 1.6,
+            "y": 0.0
+          },
+          "radius": 0.14
+        }
+      ],
+      "blocking": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -1.55,
+            "y": 0.0
+          },
+          "end": {
+            "x": 1.55,
+            "y": 0.0
+          },
+          "radius": 0.11
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "east": {
+          "footprints": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.60797119140625,
+                "y": -0.8759841918945312
+              },
+              "end": {
+                "x": 2.1346450805664063,
+                "y": -0.9008026123046875
+              },
+              "radius": 0.14
+            }
+          ],
+          "blocking": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.6294372558593749,
+                "y": -0.8727951049804689
+              },
+              "end": {
+                "x": 2.13568115234375,
+                "y": -0.8839645385742189
+              },
+              "radius": 0.11
+            }
+          ],
+          "reviewed": false
+        },
+        "north": {
+          "footprints": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.3868026733398438,
+                "y": 0.64886474609375
+              },
+              "end": {
+                "x": 2.2284942626953126,
+                "y": 0.6806259155273439
+              },
+              "radius": 0.14
+            }
+          ],
+          "blocking": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.35354614257812506,
+                "y": 0.6626052856445312
+              },
+              "end": {
+                "x": 2.1981552124023436,
+                "y": 0.6724472045898439
+              },
+              "radius": 0.11
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.fence.004": {
+      "footprints": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -1.6,
+            "y": 0.0
+          },
+          "end": {
+            "x": 1.6,
+            "y": 0.0
+          },
+          "radius": 0.14
+        }
+      ],
+      "blocking": [
+        {
+          "type": "capsule",
+          "start": {
+            "x": -1.55,
+            "y": 0.0
+          },
+          "end": {
+            "x": 1.55,
+            "y": 0.0
+          },
+          "radius": 0.11
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "east": {
+          "footprints": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.4132019042968751,
+                "y": -0.8110961914062501
+              },
+              "end": {
+                "x": 2.1175079345703125,
+                "y": -0.8332366943359376
+              },
+              "radius": 0.14
+            }
+          ],
+          "blocking": [
+            {
+              "type": "capsule",
+              "start": {
+                "x": -0.3860290527343748,
+                "y": -0.8392333984375001
+              },
+              "end": {
+                "x": 2.127532958984375,
+                "y": -0.8313903808593751
+              },
+              "radius": 0.11
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.013": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.1819610595703125,
+                "y": -0.0743408203125
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.16265869140625,
+                "y": -0.0653533935546875
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.015": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.5348739624023438,
+                "y": -0.148193359375
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.5157470703125,
+                "y": -0.1573944091796875
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.033": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.7387924194335938,
+                "y": -0.70037841796875
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.7194061279296875,
+                "y": -0.6727752685546875
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.009": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "southWest": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.5686223522233924,
+                "y": 0.2662979502329281
+              },
+              "radius": {
+                "x": 0.52,
+                "y": 0.36
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -0.5239048831281219,
+                "y": 0.26663782241931994
+              },
+              "radius": {
+                "x": 0.24,
+                "y": 0.18
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.tree.020": {
+      "footprints": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "radius": {
+            "x": 0.52,
+            "y": 0.36
+          }
+        }
+      ],
+      "blocking": [
+        {
+          "type": "ellipse",
+          "center": {
+            "x": 0.0,
+            "y": -0.03
+          },
+          "radius": {
+            "x": 0.24,
+            "y": 0.18
+          }
+        }
+      ],
+      "reviewed": false,
+      "directions": {
+        "south": {
+          "footprints": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.9337921142578125,
+                "y": -1.2485198974609375
+              },
+              "radius": {
+                "x": 0.665283203125,
+                "y": 0.482635498046875
+              }
+            }
+          ],
+          "blocking": [
+            {
+              "type": "ellipse",
+              "center": {
+                "x": -1.8849639892578125,
+                "y": -1.2741546630859375
+              },
+              "radius": {
+                "x": 0.48961639404296875,
+                "y": 0.32775115966796875
+              }
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    },
+    "ow3.cart.009": {
+      "blocking": [],
+      "reviewed": false,
+      "directions": {
+        "northWest": {
+          "footprints": [
+            {
+              "type": "polygon",
+              "points": [
+                {
+                  "x": -1.1437939875305896,
+                  "y": 1.517491548663342
+                },
+                {
+                  "x": 0.35958477320257676,
+                  "y": -0.07575373398911664
+                },
+                {
+                  "x": 1.1505482728855512,
+                  "y": 0.7971567261905596
+                },
+                {
+                  "x": -0.36946264579437815,
+                  "y": 2.3635305269316245
+                }
+              ]
+            }
+          ],
+          "blocking": [
+            {
+              "type": "polygon",
+              "points": [
+                {
+                  "x": -1.1437939875305896,
+                  "y": 1.517491548663342
+                },
+                {
+                  "x": 0.35958477320257676,
+                  "y": -0.07575373398911664
+                },
+                {
+                  "x": 1.1505482728855512,
+                  "y": 0.7971567261905596
+                },
+                {
+                  "x": -0.36946264579437815,
+                  "y": 2.3635305269316245
+                }
+              ]
+            }
+          ],
+          "reviewed": false
+        }
+      }
+    }
+  }
 }

@@ -192,7 +192,9 @@ class _StreamingHudState extends State<_StreamingHud> {
           'expanded ${widget.game.navigationExpandedNodes}  '
           'native ${widget.game.lastNavigationMicros} µs  '
           'pending ${widget.game.pendingNavigationRequests}\n'
-          'terrain cache ${widget.game.terrainPictureCount}\n'
+          'terrain cache ${widget.game.terrainPictureCount}  '
+          'depth static ${widget.game.depthSortedObjectCount}  '
+          'rebuild ${widget.game.sceneDepthCacheBuildCount}\n'
           '${widget.game.diagnosticsFps.toStringAsFixed(1)} fps  '
           '${widget.game.diagnosticsFrameMilliseconds.toStringAsFixed(1)} ms frame  '
           '${widget.game.updateTime} ms update  ${widget.game.renderTime} ms render',

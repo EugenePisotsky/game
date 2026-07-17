@@ -140,7 +140,8 @@ class NavigationGrid {
       if (point.x < 0 || point.y < 0 || point.x > width || point.y > height) {
         return false;
       }
-      if (isCellBlocked(point)) return false;
+      if (isBlocked(point)) return false;
+      if (_blockedCells != null && isCellBlocked(point)) return false;
     }
     return true;
   }

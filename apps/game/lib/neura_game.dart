@@ -36,6 +36,9 @@ class NeuraGame extends FlameGame
   final Map<String, ui.Paint> _decalPaints = {};
   final Map<String, _CharacterImages> _characterImages = {};
   final Map<EnvironmentChunkCoordinate, ui.Picture> _terrainPictures = {};
+  final Map<EnvironmentRenderBand, List<PlacedEnvironmentObject>>
+  _objectsByRenderBand = {};
+  List<EnvironmentDepthEntity<_SceneEntry>> _staticDepthOrder = const [];
   final FpsComponent _fpsComponent = FpsComponent(windowSize: 60);
 
   late EnvironmentDocument document;
@@ -70,6 +73,7 @@ class NeuraGame extends FlameGame
   int _navigationRequestSerial = 0;
   int _pendingNavigationRequests = 0;
   int _lastNavigationMicros = 0;
+  int _sceneDepthCacheBuildCount = 0;
   Future<void>? _navigationRefresh;
 
   static const double playerSpeedPixelsPerSecond = 210;
@@ -152,6 +156,8 @@ class NeuraGame extends FlameGame
   int get pendingNavigationRequests => _pendingNavigationRequests;
   int get lastNavigationMicros => _lastNavigationMicros;
   int get terrainPictureCount => _terrainPictures.length;
+  int get sceneDepthCacheBuildCount => _sceneDepthCacheBuildCount;
+  int get depthSortedObjectCount => _staticDepthOrder.length;
   int? get debugRandomSeed => debugScene?.randomSeed;
   double get diagnosticsFps => _fpsComponent.fps;
   double get diagnosticsFrameMilliseconds =>
@@ -266,6 +272,7 @@ class NeuraGame extends FlameGame
     environmentCatalog.applyGeometryOverridesFromJsonString(
       await rootBundle.loadString(environmentReleaseGeometryOverridesAsset),
     );
+    _rebuildSceneDepthCache();
     characterCatalog = CharacterCatalog.fromJsonString(
       await rootBundle.loadString(
         'packages/neura_assets/assets/catalogs/character_catalog.json',
@@ -412,6 +419,7 @@ class NeuraGame extends FlameGame
     if (!changed) return;
     _navigationRequestSerial++;
     document = _documentFromLoadedChunks();
+    _rebuildSceneDepthCache();
     final refresh = _refreshNavigationAfterStreaming();
     _navigationRefresh = refresh;
     try {
@@ -729,10 +737,7 @@ class NeuraGame extends FlameGame
           [for (final point in route) Vector2(point.x, point.y)],
           initialFacing: _facing,
           turnRandom: _movementRandom,
-          isWalkable: (start, end) => navigationGrid.isSegmentWalkable(
-            WorldPoint(start.x, start.y),
-            WorldPoint(end.x, end.y),
-          ),
+          isWalkable: _isPlayerSegmentWalkable,
         ),
       );
     if (_movementWaypoints.isEmpty) {
@@ -791,7 +796,6 @@ class NeuraGame extends FlameGame
       environmentMaterialAtPoint(document, point),
     );
     if (material?.blocksMovement ?? false) return true;
-    const playerRadius = 0.18;
     for (final object in document.objects) {
       final asset = environmentCatalog.objectById(object.assetId);
       if (asset != null &&
@@ -799,13 +803,30 @@ class NeuraGame extends FlameGame
             asset,
             object,
             point,
-            actorRadius: playerRadius,
-            geometry: environmentCatalog.geometryForAsset(asset),
+            actorRadius: playerNavigationRadius,
+            geometry: environmentCatalog.geometryForAsset(
+              asset,
+              direction: object.direction.name,
+            ),
           )) {
         return true;
       }
     }
     return false;
+  }
+
+  bool _isPlayerSegmentWalkable(Vector2 start, Vector2 end) {
+    final delta = end - start;
+    final steps = math.max(1, (delta.length / (navigationCellSize / 3)).ceil());
+    for (var step = 0; step <= steps; step++) {
+      final t = step / steps;
+      if (_isPlayerBlocked(
+        WorldPoint(start.x + delta.x * t, start.y + delta.y * t),
+      )) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
@@ -1042,11 +1063,11 @@ class NeuraGame extends FlameGame
   void _renderScene(ui.Canvas canvas) {
     _renderObjectBand(canvas, EnvironmentRenderBand.groundCover);
 
-    for (final entry in _depthSortedSceneEntries()) {
-      if (entry.object case final object?) {
-        _renderObject(canvas, object);
-      } else {
-        _renderPlayer(canvas);
+    final playerIndex = _playerDepthInsertionIndex();
+    for (var index = 0; index <= _staticDepthOrder.length; index++) {
+      if (index == playerIndex) _renderPlayer(canvas);
+      if (index < _staticDepthOrder.length) {
+        _renderObject(canvas, _staticDepthOrder[index].value.object!);
       }
     }
 
@@ -1061,10 +1082,19 @@ class NeuraGame extends FlameGame
   }
 
   List<PlacedEnvironmentObject> _objectsInBand(EnvironmentRenderBand band) =>
-      document.objects.where((object) {
-        return environmentCatalog.objectById(object.assetId)?.renderBand ==
-            band;
-      }).toList()..sort((a, b) {
+      _objectsByRenderBand[band] ?? const [];
+
+  void _rebuildSceneDepthCache() {
+    final objectsByBand =
+        <EnvironmentRenderBand, List<PlacedEnvironmentObject>>{
+          for (final band in EnvironmentRenderBand.values) band: [],
+        };
+    for (final object in document.objects) {
+      final asset = environmentCatalog.objectById(object.assetId);
+      if (asset != null) objectsByBand[asset.renderBand]!.add(object);
+    }
+    for (final entry in objectsByBand.entries) {
+      entry.value.sort((a, b) {
         final aAsset = environmentCatalog.objectById(a.assetId)!;
         final bAsset = environmentCatalog.objectById(b.assetId)!;
         final depth = aAsset
@@ -1072,28 +1102,73 @@ class NeuraGame extends FlameGame
             .compareTo(bAsset.depthAt(b.x, b.y, instanceSortBias: b.sortBias));
         return depth != 0 ? depth : a.x.compareTo(b.x);
       });
+    }
+    _objectsByRenderBand
+      ..clear()
+      ..addEntries(
+        objectsByBand.entries.map(
+          (entry) => MapEntry(entry.key, List.unmodifiable(entry.value)),
+        ),
+      );
 
-  List<_SceneEntry> _depthSortedSceneEntries() =>
-      <_SceneEntry>[
-        for (final object in document.objects)
-          if (environmentCatalog.objectById(object.assetId)?.renderBand ==
-              EnvironmentRenderBand.depthSorted)
-            _SceneEntry.object(
-              object,
-              environmentCatalog
-                  .objectById(object.assetId)!
-                  .depthAt(
-                    object.x,
-                    object.y,
-                    instanceSortBias: object.sortBias,
-                  ),
-            ),
-        _SceneEntry.player(playerPosition.x + playerPosition.y),
-      ]..sort((a, b) {
-        final depth = a.depth.compareTo(b.depth);
-        if (depth != 0) return depth;
-        return a.x.compareTo(b.x);
-      });
+    final entities = <EnvironmentDepthEntity<_SceneEntry>>[];
+    for (final object in _objectsInBand(EnvironmentRenderBand.depthSorted)) {
+      final asset = environmentCatalog.objectById(object.assetId)!;
+      final geometry = environmentCatalog.geometryForAsset(
+        asset,
+        direction: object.direction.name,
+      );
+      entities.add(
+        EnvironmentDepthEntity(
+          id: object.id,
+          value: _SceneEntry.object(object),
+          contact: WorldPoint(
+            object.x + asset.sortAnchorX,
+            object.y + asset.sortAnchorY,
+          ),
+          depth: asset.depthAt(
+            object.x,
+            object.y,
+            instanceSortBias: object.sortBias,
+          ),
+          tieBreaker: object.x,
+          footprintOutlines: [
+            for (final footprint in geometry.footprints)
+              environmentShapeOutline(footprint, object),
+          ],
+          footprintDepthBias: asset.defaultSortBias + object.sortBias,
+        ),
+      );
+    }
+    _staticDepthOrder = List.unmodifiable(
+      sortEnvironmentDepthEntities(entities),
+    );
+    _sceneDepthCacheBuildCount++;
+  }
+
+  EnvironmentDepthEntity<_SceneEntry> _playerDepthEntity() {
+    final actor = WorldPoint(playerPosition.x, playerPosition.y);
+    return EnvironmentDepthEntity(
+      id: 'player',
+      value: const _SceneEntry.player(),
+      contact: actor,
+      depth: actor.x + actor.y,
+      tieBreaker: double.infinity,
+    );
+  }
+
+  int _playerDepthInsertionIndex() =>
+      environmentDepthInsertionIndex(_staticDepthOrder, _playerDepthEntity());
+
+  List<_SceneEntry> _depthSortedSceneEntries() {
+    final playerIndex = _playerDepthInsertionIndex();
+    return [
+      for (var index = 0; index <= _staticDepthOrder.length; index++) ...[
+        if (index == playerIndex) const _SceneEntry.player(),
+        if (index < _staticDepthOrder.length) _staticDepthOrder[index].value,
+      ],
+    ];
+  }
 
   void _renderObject(ui.Canvas canvas, PlacedEnvironmentObject object) {
     final asset = environmentCatalog.objectById(object.assetId);
@@ -1231,7 +1306,7 @@ class NeuraGame extends FlameGame
       canvas.drawCircle(anchor.toOffset(), 4 / zoom, anchorPaint);
       _drawDebugLabel(
         canvas,
-        '${asset.renderBand.name} ${(asset.depthAt(object.x, object.y, instanceSortBias: object.sortBias)).toStringAsFixed(2)}',
+        _depthDebugLabel(asset, object),
         anchor.toOffset() + ui.Offset(7 / zoom, -7 / zoom),
         const ui.Color(0xFFE9C46A),
       );
@@ -1248,6 +1323,29 @@ class NeuraGame extends FlameGame
       player.toOffset() + ui.Offset(8 / zoom, -8 / zoom),
       const ui.Color(0xFF71C4FF),
     );
+  }
+
+  String _depthDebugLabel(
+    EnvironmentObjectAsset asset,
+    PlacedEnvironmentObject object,
+  ) {
+    final depth = asset.depthAt(
+      object.x,
+      object.y,
+      instanceSortBias: object.sortBias,
+    );
+    final span = environmentObjectFootprintDepthSpan(
+      asset,
+      object,
+      geometry: environmentCatalog.geometryForAsset(
+        asset,
+        direction: object.direction.name,
+      ),
+    );
+    return span == null
+        ? '${asset.renderBand.name} ${depth.toStringAsFixed(2)}'
+        : '${asset.renderBand.name} ${depth.toStringAsFixed(2)} '
+              '[${span.back.toStringAsFixed(2)}..${span.front.toStringAsFixed(2)}]';
   }
 
   void _renderGeometryDebug(ui.Canvas canvas) {
@@ -1270,8 +1368,11 @@ class NeuraGame extends FlameGame
     for (final object in document.objects) {
       final asset = environmentCatalog.objectById(object.assetId);
       if (asset == null) continue;
-      final geometry = environmentCatalog.geometryForAsset(asset);
-      if (geometry.footprint case final footprint?) {
+      final geometry = environmentCatalog.geometryForAsset(
+        asset,
+        direction: object.direction.name,
+      );
+      for (final footprint in geometry.footprints) {
         _drawWorldShape(canvas, footprint, object, footprintPaint);
       }
       for (final shape in geometry.blocking) {
@@ -1382,15 +1483,12 @@ class _CharacterImages {
 }
 
 class _SceneEntry {
-  const _SceneEntry._({required this.depth, required this.x, this.object});
+  const _SceneEntry._({this.object});
 
-  factory _SceneEntry.object(PlacedEnvironmentObject object, double depth) =>
-      _SceneEntry._(depth: depth, x: object.x, object: object);
+  factory _SceneEntry.object(PlacedEnvironmentObject object) =>
+      _SceneEntry._(object: object);
 
-  factory _SceneEntry.player(double depth) =>
-      _SceneEntry._(depth: depth, x: double.infinity);
+  const factory _SceneEntry.player() = _SceneEntry._;
 
-  final double depth;
-  final double x;
   final PlacedEnvironmentObject? object;
 }

@@ -81,4 +81,30 @@ void main() {
     expect(path, [destination]);
     expect(grid.isSegmentWalkable(start, destination), isTrue);
   });
+
+  test(
+    'segment validation checks exact geometry inside an open cached cell',
+    () {
+      var exactQueries = 0;
+      final grid = NavigationGrid(
+        width: 2,
+        height: 2,
+        cellSize: 0.4,
+        isBlocked: (point) {
+          exactQueries++;
+          return point.x >= 0.35 && point.x <= 0.45;
+        },
+        blockedCells: Uint8List(25),
+      );
+
+      expect(
+        grid.isSegmentWalkable(
+          const WorldPoint(0.1, 0.2),
+          const WorldPoint(0.6, 0.2),
+        ),
+        isFalse,
+      );
+      expect(exactQueries, greaterThan(0));
+    },
+  );
 }

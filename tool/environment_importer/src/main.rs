@@ -1016,8 +1016,8 @@ fn expected_generated_paths(manifest: &Manifest) -> BTreeSet<PathBuf> {
 
 fn validate_geometry_overrides(root: &Path, rules: &Rules, catalog: &Catalog) -> Result<()> {
     let value: serde_json::Value = read_json(&root.join(&rules.geometry_overrides_catalog_path))?;
-    if value["schemaVersion"].as_u64() != Some(1) {
-        return Err("geometry override catalog must use schemaVersion 1".into());
+    if !matches!(value["schemaVersion"].as_u64(), Some(1 | 2)) {
+        return Err("geometry override catalog must use schemaVersion 1 or 2".into());
     }
     let objects = value["objects"]
         .as_object()
@@ -1025,28 +1025,76 @@ fn validate_geometry_overrides(root: &Path, rules: &Rules, catalog: &Catalog) ->
     let known = catalog
         .objects
         .iter()
-        .map(|object| object.id.as_str())
-        .collect::<BTreeSet<_>>();
+        .map(|object| {
+            (
+                object.id.as_str(),
+                object
+                    .views
+                    .keys()
+                    .map(String::as_str)
+                    .collect::<BTreeSet<_>>(),
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
     for (asset_id, geometry) in objects {
-        if !known.contains(asset_id.as_str()) {
-            return Err(format!("geometry override references unknown asset {asset_id}").into());
-        }
+        let supported_directions = known
+            .get(asset_id.as_str())
+            .ok_or_else(|| format!("geometry override references unknown asset {asset_id}"))?;
         let geometry = geometry
             .as_object()
             .ok_or_else(|| format!("geometry override for {asset_id} must be an object"))?;
-        if let Some(footprint) = geometry.get("footprint") {
-            validate_geometry_shape(asset_id, "footprint", footprint)?;
-        }
-        for role in ["blocking", "walkable", "selection"] {
-            let Some(shapes) = geometry.get(role) else {
-                continue;
-            };
-            for shape in shapes
-                .as_array()
-                .ok_or_else(|| format!("{asset_id} {role} must be an array"))?
-            {
-                validate_geometry_shape(asset_id, role, shape)?;
+        validate_geometry_roles(asset_id, geometry)?;
+        if let Some(directions) = geometry.get("directions") {
+            let directions = directions
+                .as_object()
+                .ok_or_else(|| format!("{asset_id} directions must be an object"))?;
+            for (direction, view_geometry) in directions {
+                if !supported_directions.contains(direction.as_str()) {
+                    return Err(format!(
+                        "geometry override for {asset_id} references unsupported direction {direction}"
+                    )
+                    .into());
+                }
+                let view_geometry = view_geometry.as_object().ok_or_else(|| {
+                    format!("geometry override for {asset_id} {direction} must be an object")
+                })?;
+                if view_geometry.contains_key("directions") {
+                    return Err(format!(
+                        "geometry override for {asset_id} {direction} cannot nest directions"
+                    )
+                    .into());
+                }
+                validate_geometry_roles(&format!("{asset_id} {direction}"), view_geometry)?;
             }
+        }
+    }
+    Ok(())
+}
+
+fn validate_geometry_roles(
+    asset_id: &str,
+    geometry: &serde_json::Map<String, serde_json::Value>,
+) -> Result<()> {
+    if let Some(footprint) = geometry.get("footprint") {
+        validate_geometry_shape(asset_id, "footprint", footprint)?;
+    }
+    if let Some(footprints) = geometry.get("footprints") {
+        for footprint in footprints
+            .as_array()
+            .ok_or_else(|| format!("{asset_id} footprints must be an array"))?
+        {
+            validate_geometry_shape(asset_id, "footprints", footprint)?;
+        }
+    }
+    for role in ["blocking", "walkable", "selection"] {
+        let Some(shapes) = geometry.get(role) else {
+            continue;
+        };
+        for shape in shapes
+            .as_array()
+            .ok_or_else(|| format!("{asset_id} {role} must be an array"))?
+        {
+            validate_geometry_shape(asset_id, role, shape)?;
         }
     }
     Ok(())
@@ -1808,7 +1856,7 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
         .as_object()
         .ok_or("geometry overrides objects must be an object")?;
     let release_overrides = json!({
-        "schemaVersion": 1,
+        "schemaVersion": geometry_overrides["schemaVersion"].clone(),
         "objects": override_objects
             .iter()
             .filter(|(id, _)| required_objects.contains_key(*id))
@@ -2109,11 +2157,13 @@ fn generate_world(
         let y = object["y"].as_f64().ok_or("object y must be numeric")?;
         let asset_id = object["assetId"].as_str().ok_or("object has no assetId")?;
         let object_id = object["id"].as_str().ok_or("object has no id")?;
+        let direction = object["direction"].as_str().unwrap_or("south");
         let radius = geometry_by_id
             .get(asset_id)
-            .and_then(|geometry| geometry.get("footprint"))
-            .map(shape_bounding_radius)
+            .map(|geometry| resolve_directional_geometry(geometry, direction))
+            .map(geometry_footprint_bounding_radius)
             .transpose()?
+            .flatten()
             .unwrap_or(0.5);
         let bounds = (x - radius, y - radius, x + radius, y + radius);
         object_bounds.push((object_id.to_owned(), bounds));
@@ -2195,6 +2245,31 @@ fn generate_world(
         "activeLayerId": active_layer_id
     });
     Ok((manifest, chunk_values))
+}
+
+fn resolve_directional_geometry<'a>(
+    geometry: &'a serde_json::Value,
+    direction: &str,
+) -> &'a serde_json::Value {
+    geometry["directions"].get(direction).unwrap_or(geometry)
+}
+
+fn geometry_footprint_bounding_radius(geometry: &serde_json::Value) -> Result<Option<f64>> {
+    if let Some(footprints) = geometry.get("footprints") {
+        let footprints = footprints
+            .as_array()
+            .ok_or("geometry footprints must be an array")?;
+        let mut maximum: Option<f64> = None;
+        for footprint in footprints {
+            let radius = shape_bounding_radius(footprint)?;
+            maximum = Some(maximum.map_or(radius, |value| value.max(radius)));
+        }
+        return Ok(maximum);
+    }
+    geometry
+        .get("footprint")
+        .map(shape_bounding_radius)
+        .transpose()
 }
 
 fn bounds_overlap_chunk(
@@ -2501,32 +2576,32 @@ fn geometry_for_profile(profile: Option<&str>) -> serde_json::Value {
     use serde_json::json;
     match profile {
         Some("treeTrunk") => json!({
-            "footprint": ellipse(0.0, 0.0, 0.52, 0.36),
+            "footprints": [ellipse(0.0, 0.0, 0.52, 0.36)],
             "blocking": [ellipse(0.0, -0.03, 0.24, 0.18)],
             "reviewed": false
         }),
         Some("smallRock") => json!({
-            "footprint": ellipse(0.0, 0.0, 0.44, 0.30),
+            "footprints": [ellipse(0.0, 0.0, 0.44, 0.30)],
             "blocking": [ellipse(0.0, 0.0, 0.34, 0.23)],
             "reviewed": false
         }),
         Some("fence") => json!({
-            "footprint": capsule(-0.8, 0.0, 0.8, 0.0, 0.14),
+            "footprints": [capsule(-0.8, 0.0, 0.8, 0.0, 0.14)],
             "blocking": [capsule(-0.8, 0.0, 0.8, 0.0, 0.11)],
             "reviewed": false
         }),
         Some("fenceSegment") => json!({
-            "footprint": capsule(-1.6, 0.0, 1.6, 0.0, 0.14),
+            "footprints": [capsule(-1.6, 0.0, 1.6, 0.0, 0.14)],
             "blocking": [capsule(-1.55, 0.0, 1.55, 0.0, 0.11)],
             "reviewed": false
         }),
         Some("building") => json!({
-            "footprint": rectangle(0.0, -0.3, 2.4, 1.6),
+            "footprints": [rectangle(0.0, -0.3, 2.4, 1.6)],
             "blocking": [rectangle(0.0, -0.3, 2.2, 1.4)],
             "reviewed": false
         }),
         Some("bridge") => json!({
-            "footprint": rectangle(0.0, 0.0, 2.2, 1.0),
+            "footprints": [rectangle(0.0, 0.0, 2.2, 1.0)],
             "blocking": [
                 capsule(-1.0, -0.45, 1.0, -0.45, 0.08),
                 capsule(-1.0, 0.45, 1.0, 0.45, 0.08)
@@ -2915,11 +2990,11 @@ mod tests {
     #[test]
     fn collision_profiles_keep_canopy_separate_from_tree_trunk() {
         let geometry = geometry_for_profile(Some("treeTrunk"));
-        assert_eq!(geometry["footprint"]["type"], "ellipse");
+        assert_eq!(geometry["footprints"][0]["type"], "ellipse");
         assert_eq!(geometry["blocking"][0]["type"], "ellipse");
         assert!(
             geometry["blocking"][0]["radius"]["x"].as_f64().unwrap()
-                < geometry["footprint"]["radius"]["x"].as_f64().unwrap()
+                < geometry["footprints"][0]["radius"]["x"].as_f64().unwrap()
         );
         assert_eq!(geometry["reviewed"], false);
     }
@@ -2927,9 +3002,9 @@ mod tests {
     #[test]
     fn generated_fence_collision_reaches_neighboring_path_pieces() {
         let geometry = geometry_for_profile(Some("fenceSegment"));
-        assert_eq!(geometry["footprint"]["type"], "capsule");
-        assert_eq!(geometry["footprint"]["start"]["x"], -1.6);
-        assert_eq!(geometry["footprint"]["end"]["x"], 1.6);
+        assert_eq!(geometry["footprints"][0]["type"], "capsule");
+        assert_eq!(geometry["footprints"][0]["start"]["x"], -1.6);
+        assert_eq!(geometry["footprints"][0]["end"]["x"], 1.6);
         assert_eq!(geometry["blocking"][0]["end"]["x"], 1.55);
     }
 

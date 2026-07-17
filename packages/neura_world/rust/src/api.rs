@@ -61,6 +61,8 @@ struct NavigationWorld {
     columns: usize,
     rows: usize,
     blocked: Vec<u8>,
+    actor_radius: f64,
+    object_colliders: Vec<NativeNavigationPolygon>,
 }
 
 static NEXT_HANDLE: AtomicU32 = AtomicU32::new(1);
@@ -141,6 +143,8 @@ impl NavigationWorld {
             columns,
             rows,
             blocked: vec![u8::from(input.base_blocked); columns * rows],
+            actor_radius: input.actor_radius,
+            object_colliders: Vec::new(),
         };
 
         // Terrain is authored in painter's order. Later strokes replace the
@@ -148,9 +152,10 @@ impl NavigationWorld {
         for stroke in input.terrain_strokes {
             world.rasterize_stroke(&stroke);
         }
-        for polygon in input.object_colliders {
+        for polygon in &input.object_colliders {
             world.rasterize_polygon(&polygon.points, input.actor_radius);
         }
+        world.object_colliders = input.object_colliders;
         Ok(world)
     }
 
@@ -400,6 +405,10 @@ impl NavigationWorld {
             return true;
         }
         self.blocked[self.cell_for(point)] != 0
+            || self
+                .object_colliders
+                .iter()
+                .any(|polygon| polygon_contains_or_near(&polygon.points, point, self.actor_radius))
     }
 
     fn nearest_open(&self, requested: usize) -> Option<usize> {
@@ -603,6 +612,35 @@ mod tests {
                 .iter()
                 .any(|point| point.y < 3.0 || point.y > 7.0)
         );
+    }
+
+    #[test]
+    fn precise_polygon_blocks_points_inside_an_open_edge_cell() {
+        let world = NavigationWorld::build(NativeNavigationWorldInput {
+            width: 10.0,
+            height: 10.0,
+            cell_size: 0.4,
+            actor_radius: 0.18,
+            base_blocked: false,
+            terrain_strokes: Vec::new(),
+            object_colliders: vec![NativeNavigationPolygon {
+                points: vec![
+                    NativeNavigationPoint { x: 4.01, y: 3.0 },
+                    NativeNavigationPoint { x: 6.0, y: 3.0 },
+                    NativeNavigationPoint { x: 6.0, y: 7.0 },
+                    NativeNavigationPoint { x: 4.01, y: 7.0 },
+                ],
+            }],
+        })
+        .unwrap();
+
+        // The cell center at x=3.8 is outside the 0.18 expansion, but this
+        // exact point in the same cell still overlaps the actor clearance.
+        assert_eq!(
+            world.blocked[world.cell_for(NativeNavigationPoint { x: 3.9, y: 5.0 })],
+            0
+        );
+        assert!(world.blocked_at_point(NativeNavigationPoint { x: 3.9, y: 5.0 }));
     }
 
     #[test]

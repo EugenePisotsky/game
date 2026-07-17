@@ -499,10 +499,12 @@ class EditorChunkSession {
 
   EnvironmentObjectBounds _boundsForObject(PlacedEnvironmentObject object) {
     final asset = catalog.objectById(object.assetId);
-    final footprint = asset == null
-        ? null
-        : catalog.geometryForAsset(asset).footprint;
-    if (footprint == null) {
+    final footprints = asset == null
+        ? const <EnvironmentGeometryShape>[]
+        : catalog
+              .geometryForAsset(asset, direction: object.direction.name)
+              .footprints;
+    if (footprints.isEmpty) {
       return EnvironmentObjectBounds(
         minX: object.x - 0.5,
         minY: object.y - 0.5,
@@ -510,7 +512,10 @@ class EditorChunkSession {
         maxY: object.y + 0.5,
       );
     }
-    final points = environmentShapeOutline(footprint, object);
+    final points = [
+      for (final footprint in footprints)
+        ...environmentShapeOutline(footprint, object),
+    ];
     return EnvironmentObjectBounds(
       minX: points.map((point) => point.x).reduce((a, b) => a < b ? a : b),
       minY: points.map((point) => point.y).reduce((a, b) => a < b ? a : b),

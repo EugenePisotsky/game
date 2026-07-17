@@ -242,7 +242,7 @@ void main() {
     final fence = catalog.objectById('ow3.fence.wood')!;
     final bridge = catalog.objectById('ow3.dock.short')!;
 
-    expect(tree.geometry.footprint, isA<EnvironmentEllipse>());
+    expect(tree.geometry.footprints.single, isA<EnvironmentEllipse>());
     expect(tree.geometry.blocking.single, isA<EnvironmentEllipse>());
     expect(tree.geometry.reviewed, isFalse);
     expect(grass.geometry.blocking, isEmpty);
@@ -318,4 +318,110 @@ void main() {
       expect((geometry.blocking.single as EnvironmentEllipse).radius.x, 0.2);
     },
   );
+
+  test('direction geometry overrides replace only their sprite view', () {
+    final catalog = EnvironmentCatalog.fromJsonString('''
+      {
+        "materials": [],
+        "objects": [
+          {
+            "id": "fence",
+            "name": "Fence",
+            "category": "Fences",
+            "renderScale": 1.0,
+            "viewMode": "fourWay",
+            "views": {
+              "south": {"image": "fence_s.png"},
+              "west": {"image": "fence_w.png"},
+              "east": {"image": "fence_e.png"},
+              "north": {"image": "fence_n.png"}
+            },
+            "geometry": {
+              "blocking": [
+                {
+                  "type": "circle",
+                  "center": {"x": 0, "y": 0},
+                  "radius": 0.1
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ''');
+    final fence = catalog.objectById('fence')!;
+
+    catalog.setGeometryOverrideForDirection(
+      fence.id,
+      'west',
+      const EnvironmentAssetGeometry(
+        reviewed: true,
+        blocking: [
+          EnvironmentCapsule(
+            start: EnvironmentGeometryPoint(-1, 0.25),
+            end: EnvironmentGeometryPoint(1, 0.25),
+            radius: 0.12,
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      catalog.geometryForAsset(fence, direction: 'south').blocking.single,
+      isA<EnvironmentCircle>(),
+    );
+    final west = catalog.geometryForAsset(fence, direction: 'west');
+    expect(west.reviewed, isTrue);
+    expect(west.blocking.single, isA<EnvironmentCapsule>());
+
+    final serialized = catalog.geometryOverridesToJsonString();
+    final restored = EnvironmentCatalog.fromJsonString('''
+      {
+        "materials": [],
+        "objects": [
+          {
+            "id": "fence",
+            "name": "Fence",
+            "category": "Fences",
+            "renderScale": 1.0,
+            "viewMode": "fourWay",
+            "views": {
+              "south": {"image": "fence_s.png"},
+              "west": {"image": "fence_w.png"},
+              "east": {"image": "fence_e.png"},
+              "north": {"image": "fence_n.png"}
+            }
+          }
+        ]
+      }
+    ''')..applyGeometryOverridesFromJsonString(serialized);
+    final restoredFence = restored.objectById('fence')!;
+    expect(
+      restored
+          .geometryForAsset(restoredFence, direction: 'west')
+          .blocking
+          .single,
+      isA<EnvironmentCapsule>(),
+    );
+    expect(
+      restored.geometryForAsset(restoredFence, direction: 'south').blocking,
+      hasLength(1),
+    );
+  });
+
+  test('legacy footprint loads as one plural depth shape', () {
+    final geometry = EnvironmentAssetGeometry.fromJson({
+      'footprint': {
+        'type': 'circle',
+        'center': {'x': 0, 'y': 0},
+        'radius': 0.2,
+      },
+      'blocking': <Object?>[],
+    });
+
+    expect(geometry.footprints, hasLength(1));
+    expect(geometry.footprints.single, isA<EnvironmentCircle>());
+    expect(geometry.toJson(), contains('footprints'));
+    expect(geometry.toJson(), isNot(contains('footprint')));
+  });
 }

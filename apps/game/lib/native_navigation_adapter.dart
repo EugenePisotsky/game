@@ -39,7 +39,10 @@ NativeNavigationWorldInput buildNativeNavigationWorldInput({
     objectColliders: [
       for (final object in document.objects)
         if (catalog.objectById(object.assetId) case final asset?)
-          for (final shape in catalog.geometryForAsset(asset).blocking)
+          for (final shape
+              in catalog
+                  .geometryForAsset(asset, direction: object.direction.name)
+                  .blocking)
             NativeNavigationPolygon(
               points: [
                 for (final point in environmentShapeOutline(shape, object))
