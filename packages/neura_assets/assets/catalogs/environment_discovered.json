@@ -98120,6 +98120,385 @@
       }
     }
   ],
+  "animals": [
+    {
+      "id": "animals.buck",
+      "name": "Buck",
+      "species": "deer",
+      "behaviorProfileId": "deer_wild",
+      "frameSize": 150,
+      "source": {
+        "source": "content/Animals/Buck/Sprite_1.png",
+        "width": 3000,
+        "height": 3000,
+        "sha256": "d3d5b332cbbc7bd5cb2174e37fe1eb34082a4d136678eb65e1da291013359490"
+      }
+    },
+    {
+      "id": "animals.cat_1",
+      "name": "Cat 1",
+      "species": "cat",
+      "behaviorProfileId": "cat_household",
+      "frameSize": 80,
+      "source": {
+        "source": "content/Animals/Cat_1/Sprite_1.png",
+        "width": 1600,
+        "height": 1600,
+        "sha256": "c32c379c35bb4e37b2f4bacf8078157a36a72a01daf31e688d50d04005ec622c"
+      }
+    },
+    {
+      "id": "animals.cat_2",
+      "name": "Cat 2",
+      "species": "cat",
+      "behaviorProfileId": "cat_household",
+      "frameSize": 80,
+      "source": {
+        "source": "content/Animals/Cat_2/Sprite_1.png",
+        "width": 1600,
+        "height": 1600,
+        "sha256": "787c22a1b899a0cb4a9747a7aa6fa3d2677d5efe8eae2b07066718e743da6506"
+      }
+    },
+    {
+      "id": "animals.cat_3",
+      "name": "Cat 3",
+      "species": "cat",
+      "behaviorProfileId": "cat_household",
+      "frameSize": 80,
+      "source": {
+        "source": "content/Animals/Cat_3/Sprite_1.png",
+        "width": 1600,
+        "height": 1600,
+        "sha256": "93a25c3b17018680bac1c19e7ea74efcc465d5ffb96342003e0a168a81a3d30f"
+      }
+    },
+    {
+      "id": "animals.cat_4",
+      "name": "Cat 4",
+      "species": "cat",
+      "behaviorProfileId": "cat_household",
+      "frameSize": 80,
+      "source": {
+        "source": "content/Animals/Cat_4/Sprite_1.png",
+        "width": 1600,
+        "height": 1600,
+        "sha256": "259dbce819ee8fac479ff850f826f52396724c601afb84406015b02512c152c0"
+      }
+    },
+    {
+      "id": "animals.cat_5",
+      "name": "Cat 5",
+      "species": "cat",
+      "behaviorProfileId": "cat_household",
+      "frameSize": 80,
+      "source": {
+        "source": "content/Animals/Cat_5/Sprite_1.png",
+        "width": 1600,
+        "height": 1600,
+        "sha256": "17b51c6ba64843814c6687f9535c99f06f14481df57613d4d69bf8ce0f16b372"
+      }
+    },
+    {
+      "id": "animals.cat_6",
+      "name": "Cat 6",
+      "species": "cat",
+      "behaviorProfileId": "cat_household",
+      "frameSize": 80,
+      "source": {
+        "source": "content/Animals/Cat_6/Sprite_1.png",
+        "width": 1600,
+        "height": 1600,
+        "sha256": "ba7668d6134aaf1ba65c0502d7df951cd7199939155db8572e108960c2105fac"
+      }
+    },
+    {
+      "id": "animals.chicken_1",
+      "name": "Chicken 1",
+      "species": "poultry",
+      "behaviorProfileId": "poultry_yard",
+      "frameSize": 100,
+      "source": {
+        "source": "content/Animals/Chicken_1/Sprite_1.png",
+        "width": 2000,
+        "height": 2000,
+        "sha256": "9d9fee3a031efc915eec53a138231d19a70a446286f1261d475ae7591b2b9ec9"
+      }
+    },
+    {
+      "id": "animals.doe",
+      "name": "Doe",
+      "species": "deer",
+      "behaviorProfileId": "deer_wild",
+      "frameSize": 128,
+      "source": {
+        "source": "content/Animals/Doe/Sprite_1.png",
+        "width": 2560,
+        "height": 2560,
+        "sha256": "dbcb9499390aaf55e1e0ebc5373d2136a982fd124af843852d6cd62c6b58a6dd"
+      }
+    },
+    {
+      "id": "animals.dog_1",
+      "name": "Dog 1",
+      "species": "dog",
+      "behaviorProfileId": "dog_household",
+      "frameSize": 120,
+      "source": {
+        "source": "content/Animals/Dog_1/Sprite_1.png",
+        "width": 2400,
+        "height": 2400,
+        "sha256": "cca4ed73a6bacdb59cedb8363907c302c860c9f810c19f0bc8b371765e3028a6"
+      }
+    },
+    {
+      "id": "animals.dog_2",
+      "name": "Dog 2",
+      "species": "dog",
+      "behaviorProfileId": "dog_household",
+      "frameSize": 120,
+      "source": {
+        "source": "content/Animals/Dog_2/Sprite_1.png",
+        "width": 2400,
+        "height": 2400,
+        "sha256": "26a97db68a3baf159b1d864cced8f5459be373c8749c85dc993ea13c7e6f8f02"
+      }
+    },
+    {
+      "id": "animals.dog_3",
+      "name": "Dog 3",
+      "species": "dog",
+      "behaviorProfileId": "dog_household",
+      "frameSize": 120,
+      "source": {
+        "source": "content/Animals/Dog_3/Sprite_1.png",
+        "width": 2400,
+        "height": 2400,
+        "sha256": "9a7b2fc5deea0def430d5770a95ce07edd2a877e7126237134ed23ed74363f4a"
+      }
+    },
+    {
+      "id": "animals.dog_4",
+      "name": "Dog 4",
+      "species": "dog",
+      "behaviorProfileId": "dog_household",
+      "frameSize": 120,
+      "source": {
+        "source": "content/Animals/Dog_4/Sprite_1.png",
+        "width": 2400,
+        "height": 2400,
+        "sha256": "1063f757f0c8b6fc6083f4dc1bb97aa1f5ecd860722966de53c04e16646c54f2"
+      }
+    },
+    {
+      "id": "animals.dog_5",
+      "name": "Dog 5",
+      "species": "dog",
+      "behaviorProfileId": "dog_household",
+      "frameSize": 120,
+      "source": {
+        "source": "content/Animals/Dog_5/Sprite_1.png",
+        "width": 2400,
+        "height": 2400,
+        "sha256": "8f8304820e9d5a16e97e84884f888174130928fa25c4351fbd265e3df9b75e86"
+      }
+    },
+    {
+      "id": "animals.dog_6",
+      "name": "Dog 6",
+      "species": "dog",
+      "behaviorProfileId": "dog_household",
+      "frameSize": 120,
+      "source": {
+        "source": "content/Animals/Dog_6/Sprite_1.png",
+        "width": 2400,
+        "height": 2400,
+        "sha256": "94221b4aa624b530f037fbecc995a796e7f2918860b407df5f38522be28fe7d3"
+      }
+    },
+    {
+      "id": "animals.donkey_1",
+      "name": "Donkey 1",
+      "species": "donkey",
+      "behaviorProfileId": "donkey_paddock",
+      "frameSize": 160,
+      "source": {
+        "source": "content/Animals/Donkey_1/Sprite_1.png",
+        "width": 3200,
+        "height": 3200,
+        "sha256": "d97bd97874c291875fa6c982067f794ba235774df8f2af3bc216fab7602d31eb"
+      }
+    },
+    {
+      "id": "animals.donkey_2",
+      "name": "Donkey 2",
+      "species": "donkey",
+      "behaviorProfileId": "donkey_paddock",
+      "frameSize": 160,
+      "source": {
+        "source": "content/Animals/Donkey_2/Sprite_1.png",
+        "width": 3200,
+        "height": 3200,
+        "sha256": "aa7dc747263f4265a26c837aaeccc8c6cee0c51d02473b9c3875e3324a88ca28"
+      }
+    },
+    {
+      "id": "animals.donkey_3",
+      "name": "Donkey 3",
+      "species": "donkey",
+      "behaviorProfileId": "donkey_paddock",
+      "frameSize": 160,
+      "source": {
+        "source": "content/Animals/Donkey_3/Sprite_1.png",
+        "width": 3200,
+        "height": 3200,
+        "sha256": "2a35cab7491cde2ad4475ed943675c7a1d1a4a6a0895e69f75cce66dcc42182f"
+      }
+    },
+    {
+      "id": "animals.donkey_4",
+      "name": "Donkey 4",
+      "species": "donkey",
+      "behaviorProfileId": "donkey_paddock",
+      "frameSize": 160,
+      "source": {
+        "source": "content/Animals/Donkey_4/Sprite_1.png",
+        "width": 3200,
+        "height": 3200,
+        "sha256": "97c0c468de5c7fcaf216020ec3d726895c49bba1e78abbb946a6dd424e92fab3"
+      }
+    },
+    {
+      "id": "animals.horse_1",
+      "name": "Horse 1",
+      "species": "horse",
+      "behaviorProfileId": "horse_stabled",
+      "frameSize": 240,
+      "source": {
+        "source": "content/Animals/Horse_1/Sprite_1.png",
+        "width": 4800,
+        "height": 4800,
+        "sha256": "b6e9a4551c33bca5ac0da7210f1533256db24a25bd6ca406b03483fe2ab96ab5"
+      }
+    },
+    {
+      "id": "animals.horse_2",
+      "name": "Horse 2",
+      "species": "horse",
+      "behaviorProfileId": "horse_stabled",
+      "frameSize": 240,
+      "source": {
+        "source": "content/Animals/Horse_2/Sprite_1.png",
+        "width": 4800,
+        "height": 4800,
+        "sha256": "5d52a0b96c9a12b27ef52abafcfae396aa5b974013e98b2a3e445233acb67da4"
+      }
+    },
+    {
+      "id": "animals.horse_3",
+      "name": "Horse 3",
+      "species": "horse",
+      "behaviorProfileId": "horse_stabled",
+      "frameSize": 240,
+      "source": {
+        "source": "content/Animals/Horse_3/Sprite_1.png",
+        "width": 4800,
+        "height": 4800,
+        "sha256": "6facc5f3b4aa3f9d6237145dde447af176c4047ecad8e482b585bf0c6de3acc3"
+      }
+    },
+    {
+      "id": "animals.horse_4",
+      "name": "Horse 4",
+      "species": "horse",
+      "behaviorProfileId": "horse_stabled",
+      "frameSize": 240,
+      "source": {
+        "source": "content/Animals/Horse_4/Sprite_1.png",
+        "width": 4800,
+        "height": 4800,
+        "sha256": "5611dc5111dadad665d36906439b29b5df499456f9247b15c695031440259120"
+      }
+    },
+    {
+      "id": "animals.horse_5",
+      "name": "Horse 5",
+      "species": "horse",
+      "behaviorProfileId": "horse_stabled",
+      "frameSize": 240,
+      "source": {
+        "source": "content/Animals/Horse_5/Sprite_1.png",
+        "width": 4800,
+        "height": 4800,
+        "sha256": "ee5bd2e30679c2097f9f6d7e5505693aefe637f4551c8cece1b5ec23904f5c49"
+      }
+    },
+    {
+      "id": "animals.horse_6",
+      "name": "Horse 6",
+      "species": "horse",
+      "behaviorProfileId": "horse_stabled",
+      "frameSize": 240,
+      "source": {
+        "source": "content/Animals/Horse_6/Sprite_1.png",
+        "width": 4800,
+        "height": 4800,
+        "sha256": "0d4fdb8feb0279df91ffd3bfc438b53b54833eb34c65479d8b1145724c0ef1f8"
+      }
+    },
+    {
+      "id": "animals.turkey_1",
+      "name": "Turkey 1",
+      "species": "poultry",
+      "behaviorProfileId": "poultry_yard",
+      "frameSize": 100,
+      "source": {
+        "source": "content/Animals/Turkey_1/Sprite_1.png",
+        "width": 2000,
+        "height": 2000,
+        "sha256": "9c9e56c10f80cee67000655e962e650bc3ad20ade68ab9679ba800a2f6bff51c"
+      }
+    },
+    {
+      "id": "animals.wolf_arctic",
+      "name": "Wolf Arctic",
+      "species": "wolf",
+      "behaviorProfileId": "wolf_wild",
+      "frameSize": 128,
+      "source": {
+        "source": "content/Animals/Wolf_Arctic/Sprite_1.png",
+        "width": 2560,
+        "height": 2560,
+        "sha256": "99c46f0e2c2cd656aaf4666835fb44001cd5398a1b7f04e7ed8792f4ba4be02e"
+      }
+    },
+    {
+      "id": "animals.wolf_black",
+      "name": "Wolf Black",
+      "species": "wolf",
+      "behaviorProfileId": "wolf_wild",
+      "frameSize": 128,
+      "source": {
+        "source": "content/Animals/Wolf_Black/Sprite_1.png",
+        "width": 2560,
+        "height": 2560,
+        "sha256": "d32d5dea632990d333899b26a2edc0641efa61c10f1966b9b4e438782afc2032"
+      }
+    },
+    {
+      "id": "animals.wolf_timber",
+      "name": "Wolf Timber",
+      "species": "wolf",
+      "behaviorProfileId": "wolf_wild",
+      "frameSize": 128,
+      "source": {
+        "source": "content/Animals/Wolf_Timber/Sprite_1.png",
+        "width": 2560,
+        "height": 2560,
+        "sha256": "118ff1ec85825b7e1759905b5fe05c6ced8b23cf844e71627dd3ed83245dfb2a"
+      }
+    }
+  ],
   "sources": [
     {
       "source": "content/Northfolk Tiles/Anvil1_01.png",

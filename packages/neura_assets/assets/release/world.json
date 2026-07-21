@@ -1,5 +1,6 @@
 {
   "activeLayerId": "layer_world",
+  "activeSurfaceId": "surface_ground",
   "baseMaterialId": "ow3.ground.meadow",
   "chunkSize": 32.0,
   "chunks": [
@@ -275,15 +276,16 @@
   "name": "Environment Study",
   "playerSpawn": {
     "chunk": {
-      "x": 3,
-      "y": 3
+      "x": 7,
+      "y": 2
     },
     "localPosition": {
-      "x": 13.033035278320312,
-      "y": 18.368194580078125
+      "x": 14.686111450195312,
+      "y": 8.376625061035156
     }
   },
-  "schemaVersion": 1,
+  "playerSpawnSurfaceId": "surface_hkkwpdeoym_0_1",
+  "schemaVersion": 2,
   "travelPoints": [],
   "width": 256.0
 }

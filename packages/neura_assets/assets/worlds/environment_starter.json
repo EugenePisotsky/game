@@ -1,6 +1,6 @@
 {
   "activeLayerId": "layer_world",
-  "baseMaterialId": "ow3.ground.meadow",
+  "activeSurfaceId": "surface_ground",
   "editorLayers": [
     {
       "exported": true,
@@ -13,9 +13,44 @@
   ],
   "height": 256.0,
   "id": "environment_starter",
+  "liquidVolumes": [],
   "name": "Environment Study",
   "objects": [],
-  "schemaVersion": 3,
+  "schemaVersion": 6,
+  "surfaceConnectors": [],
+  "surfaces": [
+    {
+      "height": {
+        "elevation": 0.0,
+        "kind": "flat"
+      },
+      "id": "surface_ground",
+      "kind": "terrain",
+      "materialId": "ow3.ground.meadow",
+      "name": "Ground",
+      "order": 0,
+      "points": [
+        {
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "x": 256.0,
+          "y": 0.0
+        },
+        {
+          "x": 256.0,
+          "y": 256.0
+        },
+        {
+          "x": 0.0,
+          "y": 256.0
+        }
+      ],
+      "walkable": true
+    }
+  ],
+  "terrainRegions": [],
   "terrainStrokes": [],
   "width": 256.0
 }

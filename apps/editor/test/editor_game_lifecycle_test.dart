@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flame/game.dart';
@@ -45,6 +46,106 @@ void main() {
       expect(
         game.objectIdsInMarquee(const ui.Rect.fromLTWH(300, 100, 200, 220)),
         contains('tree'),
+      );
+      game.controller.dispose();
+    },
+  );
+
+  testWithGame<EditorGame>(
+    'pointer projection follows a raised visible surface',
+    () => EditorGame(
+      EditorController(
+        EnvironmentDocument(
+          id: 'raised_surface_fixture',
+          name: 'Raised surface fixture',
+          width: 10,
+          height: 10,
+          baseMaterialId: 'ow3.ground.meadow',
+          surfaces: [
+            EnvironmentSurface(
+              id: environmentBaseSurfaceId,
+              name: 'Ground',
+              materialId: 'ow3.ground.meadow',
+              points: const [
+                WorldPoint(0, 0),
+                WorldPoint(10, 0),
+                WorldPoint(10, 10),
+                WorldPoint(0, 10),
+              ],
+            ),
+            EnvironmentSurface(
+              id: 'platform',
+              name: 'Platform',
+              materialId: 'ow3.ground.earth',
+              height: const EnvironmentSurfaceHeight.flat(1),
+              order: 1,
+              points: const [
+                WorldPoint(2, 2),
+                WorldPoint(8, 2),
+                WorldPoint(8, 8),
+                WorldPoint(2, 8),
+              ],
+            ),
+          ],
+        ),
+        catalog: catalog,
+      ),
+    ),
+    (game) async {
+      final raisedCenter = game.worldAtScreen(Vector2(400, 300 - 64 * 0.42));
+      expect(raisedCenter?.x, closeTo(5, 0.0001));
+      expect(raisedCenter?.y, closeTo(5, 0.0001));
+      game.controller.dispose();
+    },
+  );
+
+  testWithGame<EditorGame>(
+    'soft polygon surface does not reveal its rectangular texture quad',
+    () => EditorGame(
+      EditorController(
+        EnvironmentDocument(
+          id: 'soft_polygon_fixture',
+          name: 'Soft polygon fixture',
+          width: 10,
+          height: 10,
+          baseMaterialId: 'ow3.ground.meadow',
+          terrainRegions: [
+            TerrainRegion(
+              id: 'water',
+              materialId: 'ow3.water.001',
+              opacity: 0.8,
+              edgeBlend: 0.35,
+              points: const [
+                WorldPoint(2, 2),
+                WorldPoint(8, 2),
+                WorldPoint(2, 8),
+              ],
+            ),
+          ],
+        ),
+        catalog: catalog,
+      ),
+    ),
+    (game) async {
+      game.showDiagnostics = false;
+      final withSurface = await _renderGameBytes(game);
+      game.controller.replaceDocument(
+        EnvironmentDocument(
+          id: 'soft_polygon_fixture',
+          name: 'Soft polygon fixture',
+          width: 10,
+          height: 10,
+          baseMaterialId: 'ow3.ground.meadow',
+        ),
+      );
+      final withoutSurface = await _renderGameBytes(game);
+
+      final outside = _screenForWorld(game, const WorldPoint(7, 7));
+      final inside = _screenForWorld(game, const WorldPoint(3, 3));
+      expect(_pixelAt(withSurface, outside), _pixelAt(withoutSurface, outside));
+      expect(
+        _pixelAt(withSurface, inside),
+        isNot(_pixelAt(withoutSurface, inside)),
       );
       game.controller.dispose();
     },
@@ -202,4 +303,27 @@ void main() {
       game.controller.dispose();
     },
   );
+}
+
+Future<Uint8List> _renderGameBytes(EditorGame game) async {
+  final recorder = ui.PictureRecorder();
+  game.render(ui.Canvas(recorder));
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(800, 600);
+  final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  picture.dispose();
+  image.dispose();
+  return data!.buffer.asUint8List();
+}
+
+Vector2 _screenForWorld(EditorGame game, WorldPoint point) {
+  const projection = IsometricProjection();
+  final center = projection.worldToScreen(Vector2(5, 5));
+  final projected = projection.worldToScreen(Vector2(point.x, point.y));
+  return (projected - center) * game.zoom + Vector2(400, 300);
+}
+
+List<int> _pixelAt(Uint8List bytes, Vector2 point) {
+  final offset = (point.y.round() * 800 + point.x.round()) * 4;
+  return bytes.sublist(offset, offset + 4);
 }

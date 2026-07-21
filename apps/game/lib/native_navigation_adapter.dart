@@ -10,45 +10,69 @@ const double playerNavigationRadius = 0.18;
 NativeNavigationWorldInput buildNativeNavigationWorldInput({
   required EnvironmentDocument document,
   required EnvironmentCatalog catalog,
+  String? surfaceId,
 }) {
   bool materialBlocks(String id) =>
       catalog.materialById(id)?.blocksMovement ?? false;
 
+  final activeSurface = document.surfaceById(
+    surfaceId ?? document.activeSurfaceId,
+  )!;
+  final activeSurfaceId = activeSurface.id;
   return NativeNavigationWorldInput(
     width: document.width.toDouble(),
     height: document.height.toDouble(),
     cellSize: navigationCellSize,
     actorRadius: playerNavigationRadius,
-    baseBlocked: materialBlocks(document.baseMaterialId),
+    baseBlocked:
+        !activeSurface.walkable ||
+        activeSurfaceId != environmentBaseSurfaceId ||
+        materialBlocks(activeSurface.materialId),
     terrainStrokes: [
+      if (activeSurfaceId != environmentBaseSurfaceId)
+        ..._nativeConstantPolygonOperations(
+          activeSurface.points,
+          blocked: false,
+        ),
       for (final region in document.terrainRegions)
-        ..._nativeTerrainRegionOperations(
-          region,
-          blocked: region.resetsToDefault
-              ? materialBlocks(document.baseMaterialId)
-              : materialBlocks(region.materialId),
-        ),
+        if (region.surfaceId == activeSurfaceId)
+          ..._nativeTerrainRegionOperations(
+            region,
+            blocked: region.resetsToDefault
+                ? materialBlocks(activeSurface.materialId)
+                : materialBlocks(region.materialId),
+          ),
       for (final stroke in document.terrainStrokes)
-        ..._nativeTerrainOperations(
-          stroke,
-          blocked: materialBlocks(stroke.materialId),
-          baseBlockedAt: (point) =>
-              materialBlocks(environmentBaseMaterialAtPoint(document, point)),
-        ),
+        if (stroke.surfaceId == activeSurfaceId)
+          ..._nativeTerrainOperations(
+            stroke,
+            blocked: materialBlocks(stroke.materialId),
+            baseBlockedAt: (point) => materialBlocks(
+              environmentBaseMaterialAtPoint(
+                document,
+                point,
+                surfaceId: activeSurfaceId,
+              ),
+            ),
+          ),
+      for (final liquid in document.liquidVolumes)
+        if (liquid.bedSurfaceId == activeSurfaceId)
+          ..._nativeConstantPolygonOperations(liquid.points, blocked: true),
     ],
     objectColliders: [
       for (final object in document.objects)
-        if (catalog.objectById(object.assetId) case final asset?)
-          for (final shape
-              in catalog
-                  .geometryForAsset(asset, direction: object.direction.name)
-                  .blocking)
-            NativeNavigationPolygon(
-              points: [
-                for (final point in environmentShapeOutline(shape, object))
-                  NativeNavigationPoint(x: point.x, y: point.y),
-              ],
-            ),
+        if (object.supportSurfaceId == activeSurfaceId)
+          if (catalog.objectById(object.assetId) case final asset?)
+            for (final shape
+                in catalog
+                    .geometryForAsset(asset, direction: object.direction.name)
+                    .blocking)
+              NativeNavigationPolygon(
+                points: [
+                  for (final point in environmentShapeOutline(shape, object))
+                    NativeNavigationPoint(x: point.x, y: point.y),
+                ],
+              ),
     ],
   );
 }

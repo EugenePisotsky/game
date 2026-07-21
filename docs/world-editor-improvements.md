@@ -160,9 +160,11 @@ balconies, stairs, or unusual compositions.
 Elevation must not determine whether a nearby tree is in front of a building.
 That relationship comes from spatial depth and footprint metadata.
 
-Bridges and multi-level interiors require multiple walkable surfaces at the
-same `x, y`, each with a distinct surface ID and elevation. This is a later
-extension of the same model, not a separate ordering hack.
+Bridges and multi-level interiors use multiple walkable surfaces at the same
+`x, y`, each with a distinct surface ID and elevation. This foundation is now
+implemented; see
+[Surfaces, water, and elevation](surfaces-water-and-elevation.md) for the
+authoritative model and editor workflow.
 
 ## Figma-like editor layers
 

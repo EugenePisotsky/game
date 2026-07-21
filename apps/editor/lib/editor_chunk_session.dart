@@ -126,12 +126,65 @@ class EditorChunkSession {
     if (!changed) return null;
     _adoptLoadedChunks();
     final document = buildDocument();
+    _preserveLiveReplicatedAreas(document, current);
     _lastDocumentSnapshot = document.toJsonString(pretty: false);
     return document;
   }
 
+  /// Polygonal environment records are copied into every chunk they overlap.
+  /// A chunk loaded after an edit can therefore contain an older copy of the
+  /// same record. Keep the live editor definition authoritative whenever the
+  /// streamed document still contains that record; the next [capture] writes
+  /// it into every currently loaded replica.
+  void _preserveLiveReplicatedAreas(
+    EnvironmentDocument streamed,
+    EnvironmentDocument live,
+  ) {
+    final liveSurfaces = {for (final value in live.surfaces) value.id: value};
+    for (var index = 0; index < streamed.surfaces.length; index++) {
+      final value = liveSurfaces[streamed.surfaces[index].id];
+      if (value != null) {
+        streamed.surfaces[index] = EnvironmentSurface.fromJson(value.toJson());
+      }
+    }
+
+    final liveLiquids = {
+      for (final value in live.liquidVolumes) value.id: value,
+    };
+    for (var index = 0; index < streamed.liquidVolumes.length; index++) {
+      final value = liveLiquids[streamed.liquidVolumes[index].id];
+      if (value != null) {
+        streamed.liquidVolumes[index] = EnvironmentLiquidVolume.fromJson(
+          value.toJson(),
+        );
+      }
+    }
+
+    final liveConnectors = {
+      for (final value in live.surfaceConnectors) value.id: value,
+    };
+    for (var index = 0; index < streamed.surfaceConnectors.length; index++) {
+      final value = liveConnectors[streamed.surfaceConnectors[index].id];
+      if (value != null) {
+        streamed.surfaceConnectors[index] =
+            EnvironmentSurfaceConnector.fromJson(value.toJson());
+      }
+    }
+
+    final liveRegions = {
+      for (final value in live.terrainRegions) value.id: value,
+    };
+    for (var index = 0; index < streamed.terrainRegions.length; index++) {
+      final value = liveRegions[streamed.terrainRegions[index].id];
+      if (value != null) {
+        streamed.terrainRegions[index] = TerrainRegion.fromJson(value.toJson());
+      }
+    }
+  }
+
   void capture(EnvironmentDocument document, {bool markDirty = true}) {
-    if (manifest.baseMaterialId != document.baseMaterialId) {
+    if (manifest.baseMaterialId != document.baseMaterialId ||
+        manifest.activeSurfaceId != document.activeSurfaceId) {
       _manifest = EnvironmentWorldManifest(
         id: manifest.id,
         name: manifest.name,
@@ -144,6 +197,8 @@ class EditorChunkSession {
         travelPoints: manifest.travelPoints,
         editorLayers: manifest.editorLayers,
         activeLayerId: manifest.activeLayerId,
+        playerSpawnSurfaceId: manifest.playerSpawnSurfaceId,
+        activeSurfaceId: document.activeSurfaceId,
       );
       _manifestDirty = true;
     }
@@ -177,6 +232,7 @@ class EditorChunkSession {
   Future<void> saveDirty(EnvironmentDocument document) async {
     final snapshot = document.toJsonString(pretty: false);
     capture(document, markDirty: snapshot != _lastDocumentSnapshot);
+    await _synchronizeLiveReplicatedAreas(document);
     final dirty = _dirtyChunks.toList()..sort();
     for (final coordinate in dirty) {
       final chunk = _workingChunks[coordinate];
@@ -195,6 +251,8 @@ class EditorChunkSession {
         travelPoints: manifest.travelPoints,
         editorLayers: _editorLayers,
         activeLayerId: _activeLayerId,
+        playerSpawnSurfaceId: manifest.playerSpawnSurfaceId,
+        activeSurfaceId: document.activeSurfaceId,
       ),
     );
     _dirtyChunks.clear();
@@ -203,6 +261,79 @@ class EditorChunkSession {
       (coordinate, _) => !loadedCoordinates.contains(coordinate),
     );
     _lastDocumentSnapshot = snapshot;
+  }
+
+  Future<void> _synchronizeLiveReplicatedAreas(
+    EnvironmentDocument document,
+  ) async {
+    final split = EnvironmentChunkedWorld.fromDocument(
+      document,
+      chunkSize: manifest.chunkSize,
+      worldWidth: manifest.width,
+      worldHeight: manifest.height,
+      playerSpawn: manifest.playerSpawn.toWorld(manifest.chunkSize),
+      objectBounds: _boundsForObject,
+    );
+    final liveSurfaceIds = {for (final value in document.surfaces) value.id};
+    final liveLiquidIds = {
+      for (final value in document.liquidVolumes) value.id,
+    };
+    final liveConnectorIds = {
+      for (final value in document.surfaceConnectors) value.id,
+    };
+    final liveRegionIds = {
+      for (final value in document.terrainRegions) value.id,
+    };
+    final entries = await Future.wait([
+      for (final coordinate in manifest.chunks)
+        _repository
+            .load(coordinate)
+            .then((chunk) => MapEntry(coordinate, chunk)),
+    ]);
+    for (final entry in entries) {
+      final coordinate = entry.key;
+      final previous = entry.value;
+      final desired = split.chunks[coordinate];
+      if (desired == null) continue;
+      final rebuilt = EnvironmentChunkDocument(
+        worldId: previous.worldId,
+        coordinate: coordinate,
+        size: previous.size,
+        baseMaterialId: manifest.baseMaterialId,
+        surfaces: _mergeReplicatedRecords(
+          previous.surfaces,
+          desired.surfaces,
+          liveSurfaceIds,
+          (value) => value.id,
+        ),
+        liquidVolumes: _mergeReplicatedRecords(
+          previous.liquidVolumes,
+          desired.liquidVolumes,
+          liveLiquidIds,
+          (value) => value.id,
+        ),
+        surfaceConnectors: _mergeReplicatedRecords(
+          previous.surfaceConnectors,
+          desired.surfaceConnectors,
+          liveConnectorIds,
+          (value) => value.id,
+        ),
+        terrainRegions: _mergeReplicatedRecords(
+          previous.terrainRegions,
+          desired.terrainRegions,
+          liveRegionIds,
+          (value) => value.id,
+        ),
+        terrainStrokes: previous.terrainStrokes,
+        objects: previous.objects,
+        overlapObjectIds: previous.overlapObjectIds,
+      );
+      _workingChunks[coordinate] = rebuilt;
+      if (rebuilt.toJsonString(pretty: false) !=
+          previous.toJsonString(pretty: false)) {
+        _dirtyChunks.add(coordinate);
+      }
+    }
   }
 
   Future<List<DuplicateObjectIdIssue>> findDuplicateObjectIds(
@@ -279,6 +410,9 @@ class EditorChunkSession {
         coordinate: previous.coordinate,
         size: previous.size,
         baseMaterialId: previous.baseMaterialId,
+        surfaces: previous.surfaces,
+        liquidVolumes: previous.liquidVolumes,
+        surfaceConnectors: previous.surfaceConnectors,
         terrainRegions: previous.terrainRegions,
         terrainStrokes: previous.terrainStrokes,
         objects: objectsByChunk[coordinate],
@@ -329,6 +463,12 @@ class EditorChunkSession {
     sortBias: object.sortBias,
     editorLayerId: object.editorLayerId,
     direction: object.direction,
+    behaviorProfileId: object.behaviorProfileId,
+    liquidInteraction: object.liquidInteraction,
+    liquidDraft: object.liquidDraft,
+    supportSurfaceId: object.supportSurfaceId,
+    crossSurfaceOcclusion: object.crossSurfaceOcclusion,
+    occlusionHeight: object.occlusionHeight,
     bounds: object.bounds,
   );
 
@@ -421,11 +561,19 @@ class EditorChunkSession {
       travelPoints: manifest.travelPoints,
       editorLayers: manifest.editorLayers,
       activeLayerId: manifest.activeLayerId,
+      playerSpawnSurfaceId: manifest.activeSurfaceId,
+      activeSurfaceId: manifest.activeSurfaceId,
     );
     _manifestDirty = true;
   }
 
   EnvironmentDocument buildDocument() {
+    final surfaces = <EnvironmentSurface>[];
+    final surfaceIds = <String>{};
+    final liquids = <EnvironmentLiquidVolume>[];
+    final liquidIds = <String>{};
+    final connectors = <EnvironmentSurfaceConnector>[];
+    final connectorIds = <String>{};
     final regions = <TerrainRegion>[];
     final regionIds = <String>{};
     final strokes = <TerrainStroke>[];
@@ -437,6 +585,76 @@ class EditorChunkSession {
       if (chunk == null) continue;
       final originX = coordinate.x * manifest.chunkSize;
       final originY = coordinate.y * manifest.chunkSize;
+      WorldPoint globalPoint(WorldPoint point) =>
+          WorldPoint(point.x + originX, point.y + originY);
+      for (final surface in chunk.surfaces) {
+        if (!surfaceIds.add(surface.id)) continue;
+        surfaces.add(
+          EnvironmentSurface(
+            id: surface.id,
+            name: surface.name,
+            materialId: surface.materialId,
+            points: [for (final point in surface.points) globalPoint(point)],
+            kind: surface.kind,
+            height: switch (surface.height.kind) {
+              EnvironmentSurfaceHeightKind.flat =>
+                EnvironmentSurfaceHeight.flat(surface.height.elevation),
+              EnvironmentSurfaceHeightKind.linearRamp =>
+                EnvironmentSurfaceHeight.linearRamp(
+                  elevation: surface.height.elevation,
+                  endElevation: surface.height.endElevation,
+                  rampStart: globalPoint(surface.height.rampStart!),
+                  rampEnd: globalPoint(surface.height.rampEnd!),
+                ),
+            },
+            walkable: surface.walkable,
+            drawsBaseMaterial: surface.drawsBaseMaterial,
+            order: surface.order,
+            visibilityGroupId: surface.visibilityGroupId,
+          ),
+        );
+      }
+      for (final liquid in chunk.liquidVolumes) {
+        if (!liquidIds.add(liquid.id)) continue;
+        liquids.add(
+          EnvironmentLiquidVolume(
+            id: liquid.id,
+            name: liquid.name,
+            bedSurfaceId: liquid.bedSurfaceId,
+            materialId: liquid.materialId,
+            points: [for (final point in liquid.points) globalPoint(point)],
+            surfaceElevation: liquid.surfaceElevation,
+            depth: liquid.depth,
+            endDepth: liquid.endDepth,
+            depthRampStart: liquid.depthRampStart == null
+                ? null
+                : globalPoint(liquid.depthRampStart!),
+            depthRampEnd: liquid.depthRampEnd == null
+                ? null
+                : globalPoint(liquid.depthRampEnd!),
+            edgeBlend: liquid.edgeBlend,
+            opacity: liquid.opacity,
+            textureScale: liquid.textureScale,
+            order: liquid.order,
+          ),
+        );
+      }
+      for (final connector in chunk.surfaceConnectors) {
+        if (!connectorIds.add(connector.id)) continue;
+        connectors.add(
+          EnvironmentSurfaceConnector(
+            id: connector.id,
+            fromSurfaceId: connector.fromSurfaceId,
+            toSurfaceId: connector.toSurfaceId,
+            from: globalPoint(connector.from),
+            to: globalPoint(connector.to),
+            kind: connector.kind,
+            width: connector.width,
+            bidirectional: connector.bidirectional,
+            cost: connector.cost,
+          ),
+        );
+      }
       for (final region in chunk.terrainRegions) {
         if (!regionIds.add(region.id)) continue;
         regions.add(
@@ -445,9 +663,11 @@ class EditorChunkSession {
             materialId: region.materialId,
             resetsToDefault: region.resetsToDefault,
             edgeBlend: region.edgeBlend,
+            opacity: region.opacity,
             textureScale: region.textureScale,
             seed: region.seed,
             order: region.order,
+            surfaceId: region.surfaceId,
             points: [
               for (final point in region.points)
                 WorldPoint(point.x + originX, point.y + originY),
@@ -466,6 +686,7 @@ class EditorChunkSession {
           scatter: stroke.scatter,
           sizeJitter: stroke.sizeJitter,
           opacityJitter: stroke.opacityJitter,
+          surfaceId: stroke.surfaceId,
           points: [
             for (final point in stroke.points)
               WorldPoint(point.x + originX, point.y + originY),
@@ -483,11 +704,32 @@ class EditorChunkSession {
       width: manifest.width.ceil(),
       height: manifest.height.ceil(),
       baseMaterialId: manifest.baseMaterialId,
+      surfaces: [
+        EnvironmentSurface(
+          id: environmentBaseSurfaceId,
+          name: 'Ground',
+          materialId: manifest.baseMaterialId,
+          points: [
+            const WorldPoint(0, 0),
+            WorldPoint(manifest.width, 0),
+            WorldPoint(manifest.width, manifest.height),
+            WorldPoint(0, manifest.height),
+          ],
+        ),
+        ...surfaces,
+      ],
+      liquidVolumes: liquids,
+      surfaceConnectors: connectors,
       terrainRegions: regions,
       terrainStrokes: strokes,
       objects: objects,
       editorLayers: _editorLayers,
       activeLayerId: _activeLayerId,
+      activeSurfaceId:
+          surfaceIds.contains(manifest.activeSurfaceId) ||
+              manifest.activeSurfaceId == environmentBaseSurfaceId
+          ? manifest.activeSurfaceId
+          : environmentBaseSurfaceId,
     );
   }
 
@@ -541,3 +783,14 @@ class _EditorChunkRepository implements EnvironmentChunkRepository {
       ? fallback.load(coordinate)
       : Future.value(workingChunks[coordinate]);
 }
+
+List<T> _mergeReplicatedRecords<T>(
+  List<T> existing,
+  List<T> desired,
+  Set<String> liveIds,
+  String Function(T value) idOf,
+) => [
+  for (final value in existing)
+    if (!liveIds.contains(idOf(value))) value,
+  ...desired,
+];

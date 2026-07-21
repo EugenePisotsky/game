@@ -17,6 +17,10 @@ library is documented in
 Rendering bands, elevation, editor layers, selection, collision authoring, and
 chunked-world streaming are specified in
 [world-editor-improvements.md](world-editor-improvements.md).
+The implemented multi-surface, liquid, connector, and elevation contract is
+documented in
+[surfaces-water-and-elevation.md](surfaces-water-and-elevation.md); it
+supersedes the early single-surface assumptions in this proposal.
 
 Status: proposed foundation for the greenfield environment vertical slice.
 

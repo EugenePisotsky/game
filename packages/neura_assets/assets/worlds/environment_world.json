@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "environment_starter",
   "name": "Environment Study",
   "chunkSize": 32.0,
@@ -266,12 +266,12 @@
   ],
   "playerSpawn": {
     "chunk": {
-      "x": 3,
-      "y": 3
+      "x": 7,
+      "y": 2
     },
     "localPosition": {
-      "x": 13.033035278320312,
-      "y": 18.368194580078125
+      "x": 14.686111450195312,
+      "y": 8.376625061035156
     }
   },
   "travelPoints": [],
@@ -285,5 +285,7 @@
       "exported": true
     }
   ],
-  "activeLayerId": "layer_world"
+  "activeLayerId": "layer_world",
+  "playerSpawnSurfaceId": "surface_hkkwpdeoym_0_1",
+  "activeSurfaceId": "surface_ground"
 }

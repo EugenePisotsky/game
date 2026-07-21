@@ -9,6 +9,7 @@ import 'package:neura_world/neura_world.dart';
 enum EnvironmentEditorMode {
   paint,
   fillGround,
+  surfacePolygon,
   place,
   path,
   select,
@@ -17,6 +18,7 @@ enum EnvironmentEditorMode {
   resetGround,
   clearGroundFill,
   editGround,
+  connector,
   spawn,
 }
 
@@ -127,8 +129,28 @@ class EditorController extends ChangeNotifier {
   int _nextStrokeSeed = 1;
   int _nextTerrainRegionId = 1;
   double _newFillTextureScale = 1;
+  double _newFillOpacity = 1;
+  double _newFillEdgeBlend = 0;
+  double _newSurfaceElevation = 0;
+  double get newSurfaceElevation => _newSurfaceElevation;
+  double _newWaterDepth = TerrainStroke.defaultWaterDepth;
+  double get newWaterDepth => _newWaterDepth;
   String? _selectedTerrainRegionId;
+  String? _selectedSurfaceId;
+  String? _selectedLiquidVolumeId;
   TerrainRegion? _terrainRegionScaleBefore;
+  EnvironmentDocument? _environmentAreaBefore;
+  TerrainRegion? _terrainRegionPointBefore;
+  bool _terrainRegionPointChanged = false;
+  EnvironmentDocument? _environmentAreaPointBefore;
+  bool _environmentAreaPointChanged = false;
+  final List<WorldPoint> _surfacePolygonDraft = [];
+  String? _connectorTargetSurfaceId;
+  WorldPoint? _connectorStart;
+  EnvironmentSurfaceConnectorKind _connectorKind =
+      EnvironmentSurfaceConnectorKind.stairs;
+  double _connectorWidth = 1;
+  bool _connectorBidirectional = true;
 
   String? get selectedTerrainRegionId => _selectedTerrainRegionId;
 
@@ -141,8 +163,82 @@ class EditorController extends ChangeNotifier {
     );
   }
 
+  EnvironmentSurface get activeSurface =>
+      _document.surfaceById(_document.activeSurfaceId)!;
+
+  EnvironmentSurface? get selectedSurface {
+    final id = _selectedSurfaceId;
+    return id == null ? null : _document.surfaceById(id);
+  }
+
+  EnvironmentLiquidVolume? get selectedLiquidVolume {
+    final id = _selectedLiquidVolumeId;
+    if (id == null) return null;
+    for (final liquid in _document.liquidVolumes) {
+      if (liquid.id == id) return liquid;
+    }
+    return null;
+  }
+
+  bool get hasSelectedEnvironmentArea =>
+      selectedTerrainRegion != null ||
+      selectedSurface != null ||
+      selectedLiquidVolume != null;
+
+  List<WorldPoint>? get selectedEnvironmentAreaPoints =>
+      selectedLiquidVolume?.points ??
+      selectedTerrainRegion?.points ??
+      selectedSurface?.points;
+
+  double selectedEnvironmentAreaElevationAt(WorldPoint point) {
+    final liquid = selectedLiquidVolume;
+    if (liquid != null) return liquid.surfaceElevation;
+    final surface = selectedSurface;
+    if (surface != null) return surface.elevationAt(point);
+    final region = selectedTerrainRegion;
+    return region == null
+        ? 0
+        : _document.surfaceById(region.surfaceId)?.elevationAt(point) ?? 0;
+  }
+
   double get activeFillTextureScale =>
-      selectedTerrainRegion?.textureScale ?? _newFillTextureScale;
+      selectedLiquidVolume?.textureScale ??
+      selectedTerrainRegion?.textureScale ??
+      _newFillTextureScale;
+  double get activeFillOpacity =>
+      selectedLiquidVolume?.opacity ??
+      selectedTerrainRegion?.opacity ??
+      _newFillOpacity;
+  double get activeFillEdgeBlend =>
+      selectedLiquidVolume?.edgeBlend ??
+      selectedTerrainRegion?.edgeBlend ??
+      _newFillEdgeBlend;
+  List<WorldPoint> get surfacePolygonDraft =>
+      List.unmodifiable(_surfacePolygonDraft);
+  bool get hasSurfacePolygonDraft => _surfacePolygonDraft.isNotEmpty;
+  WorldPoint? get connectorStart => _connectorStart;
+  EnvironmentSurfaceConnectorKind get connectorKind => _connectorKind;
+  double get connectorWidth => _connectorWidth;
+  bool get connectorBidirectional => _connectorBidirectional;
+  EnvironmentSurface? get connectorTargetSurface {
+    final selected = _connectorTargetSurfaceId;
+    if (selected != null && selected != _document.activeSurfaceId) {
+      final surface = _document.surfaceById(selected);
+      if (surface != null) return surface;
+    }
+    for (final surface in _document.surfaces) {
+      if (surface.id != _document.activeSurfaceId) return surface;
+    }
+    return null;
+  }
+
+  bool get selectedMaterialIsWater =>
+      catalog.materialById(_selectedMaterialId)?.tags.contains('water') ??
+      false;
+
+  bool get selectedTerrainRegionIsWater {
+    return selectedLiquidVolume != null;
+  }
 
   WorldPoint? _hoveredPoint;
   WorldPoint? get hoveredPoint => _hoveredPoint;
@@ -241,13 +337,18 @@ class EditorController extends ChangeNotifier {
   TerrainStroke? get activeTerrainStroke => _activeStroke;
 
   void selectPaintMaterial(EnvironmentMaterial material) {
-    if (_mode != EnvironmentEditorMode.fillGround) {
+    if (_mode != EnvironmentEditorMode.fillGround &&
+        _mode != EnvironmentEditorMode.surfacePolygon) {
       _mode = EnvironmentEditorMode.paint;
     }
     _selectedMaterialId = material.id;
     _selectedTerrainRegionId = null;
+    _selectedSurfaceId = null;
+    _selectedLiquidVolumeId = null;
     _brushRadius = material.defaultRadius;
     _newFillTextureScale = 1;
+    _newFillOpacity = material.tags.contains('water') ? 0.88 : 1;
+    _newFillEdgeBlend = material.tags.contains('water') ? 0.35 : 0;
     notifyListeners();
     _paletteNotifier.notifyListeners();
   }
@@ -269,11 +370,75 @@ class EditorController extends ChangeNotifier {
 
   void selectMode(EnvironmentEditorMode mode) {
     if (_mode == mode) return;
+    if (_mode == EnvironmentEditorMode.surfacePolygon &&
+        mode != EnvironmentEditorMode.surfacePolygon) {
+      _surfacePolygonDraft.clear();
+    }
+    if (_mode == EnvironmentEditorMode.connector &&
+        mode != EnvironmentEditorMode.connector) {
+      _connectorStart = null;
+    }
     _mode = mode;
     if (mode == EnvironmentEditorMode.path) {
       final asset = catalog.objectById(_selectedObjectAssetId);
       if (asset != null) _pathPieceLength = _suggestedPathPieceLength(asset);
     }
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void setConnectorTargetSurface(String surfaceId) {
+    if (surfaceId == _document.activeSurfaceId ||
+        _document.surfaceById(surfaceId) == null ||
+        _connectorTargetSurfaceId == surfaceId) {
+      return;
+    }
+    _connectorTargetSurfaceId = surfaceId;
+    _connectorStart = null;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void setConnectorKind(EnvironmentSurfaceConnectorKind kind) {
+    if (_connectorKind == kind) return;
+    _connectorKind = kind;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void setConnectorWidth(double value) {
+    final width = value.clamp(0.25, 8).toDouble();
+    if (_connectorWidth == width) return;
+    _connectorWidth = width;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void setConnectorBidirectional(bool value) {
+    if (_connectorBidirectional == value) return;
+    _connectorBidirectional = value;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void cancelConnectorDraft() {
+    if (_connectorStart == null) return;
+    _connectorStart = null;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void deleteSurfaceConnector(String id) {
+    final index = _document.surfaceConnectors.indexWhere(
+      (connector) => connector.id == id,
+    );
+    if (index < 0) return;
+    final before = _copyDocument(_document);
+    _document.surfaceConnectors.removeAt(index);
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
     notifyListeners();
     _paletteNotifier.notifyListeners();
   }
@@ -319,6 +484,7 @@ class EditorController extends ChangeNotifier {
           y: placement.point.y,
           editorLayerId: _document.activeLayerId,
           direction: placement.direction,
+          supportSurfaceId: _document.activeSurfaceId,
         ),
     ];
     _recordObjectMutation(objects.map((object) => object.id), () {
@@ -576,6 +742,8 @@ class EditorController extends ChangeNotifier {
       return;
     }
     _selectedTerrainRegionId = null;
+    _selectedSurfaceId = null;
+    _selectedLiquidVolumeId = null;
     var selectedId = candidates.first;
     if (!additive &&
         _sameStrings(_overlapCandidateIds, candidates) &&
@@ -608,7 +776,11 @@ class EditorController extends ChangeNotifier {
     bool toggle = false,
   }) {
     final ids = objectIds.where(_isObjectSelectable).toList();
-    if (ids.isNotEmpty) _selectedTerrainRegionId = null;
+    if (ids.isNotEmpty) {
+      _selectedTerrainRegionId = null;
+      _selectedSurfaceId = null;
+      _selectedLiquidVolumeId = null;
+    }
     if (!additive && !toggle) _selectedObjectIds.clear();
     for (final id in ids) {
       if (toggle && _selectedObjectIds.contains(id)) {
@@ -624,10 +796,12 @@ class EditorController extends ChangeNotifier {
   }
 
   void clearSelection() {
-    if (_selectedObjectIds.isEmpty && _selectedTerrainRegionId == null) return;
+    if (_selectedObjectIds.isEmpty && !hasSelectedEnvironmentArea) return;
     _selectedObjectIds.clear();
     _primarySelectedObjectId = null;
     _selectedTerrainRegionId = null;
+    _selectedSurfaceId = null;
+    _selectedLiquidVolumeId = null;
     notifyListeners();
     _paletteNotifier.notifyListeners();
   }
@@ -745,12 +919,24 @@ class EditorController extends ChangeNotifier {
         _selectNearest(point);
       case EnvironmentEditorMode.erase:
         if (!_placedThisGesture) _eraseNearest(point);
+      case EnvironmentEditorMode.surfacePolygon:
+        if (!_placedThisGesture) {
+          _surfacePolygonDraft.add(point);
+          _placedThisGesture = true;
+          notifyListeners();
+          _paletteNotifier.notifyListeners();
+        }
       case EnvironmentEditorMode.fillGround:
       case EnvironmentEditorMode.resetGround:
       case EnvironmentEditorMode.clearGroundFill:
         break;
       case EnvironmentEditorMode.editGround:
         selectTerrainRegionAt(point);
+      case EnvironmentEditorMode.connector:
+        if (!_placedThisGesture) {
+          _placeConnectorPoint(point);
+          _placedThisGesture = true;
+        }
       case EnvironmentEditorMode.spawn:
         break;
     }
@@ -791,6 +977,25 @@ class EditorController extends ChangeNotifier {
         ),
       );
     }
+    if (_terrainRegionPointChanged && _terrainRegionPointBefore != null) {
+      final after = selectedTerrainRegion;
+      if (after != null && after.id == _terrainRegionPointBefore!.id) {
+        _pushCommand(
+          _TerrainRegionReplaceCommand(
+            before: _terrainRegionPointBefore!,
+            after: _copyTerrainRegion(after),
+          ),
+        );
+      }
+    }
+    if (_environmentAreaPointChanged && _environmentAreaPointBefore != null) {
+      _pushCommand(
+        _ReplaceDocumentCommand(
+          before: _environmentAreaPointBefore!,
+          after: _copyDocument(_document),
+        ),
+      );
+    }
     _gestureObjectBefore.clear();
     _gestureObjectIds.clear();
     _activeStroke = null;
@@ -799,6 +1004,10 @@ class EditorController extends ChangeNotifier {
     _geometryGestureAssetId = null;
     _geometryGestureBefore = null;
     _geometryGestureChanged = false;
+    _terrainRegionPointBefore = null;
+    _terrainRegionPointChanged = false;
+    _environmentAreaPointBefore = null;
+    _environmentAreaPointChanged = false;
     if (committedTerrainStroke != null) {
       _markTerrainChanged(committedTerrainStroke);
     }
@@ -949,6 +1158,15 @@ class EditorController extends ChangeNotifier {
           sortBias: template.sortBias,
           editorLayerId: layerId,
           direction: template.direction,
+          behaviorProfileId: template.behaviorProfileId,
+          liquidInteraction: template.liquidInteraction,
+          liquidDraft: template.liquidDraft,
+          supportSurfaceId:
+              _document.surfaceById(template.supportSurfaceId) != null
+              ? template.supportSurfaceId
+              : _document.activeSurfaceId,
+          crossSurfaceOcclusion: template.crossSurfaceOcclusion,
+          occlusionHeight: template.occlusionHeight,
         ),
       );
     }
@@ -968,11 +1186,12 @@ class EditorController extends ChangeNotifier {
   bool resetGroundInArea(List<WorldPoint> polygon) {
     if (polygon.length < 3) return false;
     final stroke = TerrainStroke(
-      materialId: _document.baseMaterialId,
+      materialId: activeSurface.materialId,
       radius: 0,
       opacity: 1,
       resetsToBase: true,
       seed: _nextTerrainStrokeSeed(),
+      surfaceId: _document.activeSurfaceId,
       points: [for (final point in polygon) point],
     );
     final index = _document.terrainStrokes.length;
@@ -985,8 +1204,25 @@ class EditorController extends ChangeNotifier {
     return true;
   }
 
-  bool fillGroundInArea(List<WorldPoint> polygon) =>
-      _addTerrainRegion(polygon, resetsToDefault: false);
+  bool fillGroundInArea(List<WorldPoint> polygon) => selectedMaterialIsWater
+      ? _addLiquidVolume(polygon)
+      : _addTerrainRegion(polygon, resetsToDefault: false);
+
+  bool finishSurfacePolygon() {
+    if (_surfacePolygonDraft.length < 3) return false;
+    final points = [for (final point in _surfacePolygonDraft) point];
+    _surfacePolygonDraft.clear();
+    return selectedMaterialIsWater
+        ? _addLiquidVolume(points)
+        : _addPhysicalSurface(points);
+  }
+
+  void cancelSurfacePolygon() {
+    if (_surfacePolygonDraft.isEmpty) return;
+    _surfacePolygonDraft.clear();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
 
   bool clearGroundFillInArea(List<WorldPoint> polygon) =>
       _addTerrainRegion(polygon, resetsToDefault: true);
@@ -1002,12 +1238,17 @@ class EditorController extends ChangeNotifier {
       resetsToDefault: resetsToDefault,
       points: [for (final point in polygon) point],
       textureScale: resetsToDefault ? 1 : _newFillTextureScale,
+      opacity: resetsToDefault ? 1 : _newFillOpacity,
+      edgeBlend: resetsToDefault ? 0 : _newFillEdgeBlend,
+      surfaceId: _document.activeSurfaceId,
       seed: _nextTerrainStrokeSeed(),
       order: _document.terrainRegions.length,
     );
     final index = _document.terrainRegions.length;
     _document.terrainRegions.add(region);
     _selectedTerrainRegionId = region.id;
+    _selectedSurfaceId = null;
+    _selectedLiquidVolumeId = null;
     _selectedObjectIds.clear();
     _primarySelectedObjectId = null;
     _pushCommand(
@@ -1019,27 +1260,122 @@ class EditorController extends ChangeNotifier {
     return true;
   }
 
+  bool _addPhysicalSurface(List<WorldPoint> polygon) {
+    if (polygon.length < 3) return false;
+    final before = _copyDocument(_document);
+    final id = 'surface_${_objectIdNamespace}_${_nextTerrainRegionId++}';
+    final surface = EnvironmentSurface(
+      id: id,
+      name: 'Surface ${_document.surfaces.length}',
+      materialId: _selectedMaterialId,
+      points: [for (final point in polygon) point],
+      kind: EnvironmentSurfaceKind.platform,
+      height: EnvironmentSurfaceHeight.flat(_newSurfaceElevation),
+      order: _document.surfaces.length,
+    );
+    _document.surfaces.add(surface);
+    _document.activeSurfaceId = surface.id;
+    _selectedSurfaceId = surface.id;
+    _selectedTerrainRegionId = null;
+    _selectedLiquidVolumeId = null;
+    _selectedObjectIds.clear();
+    _primarySelectedObjectId = null;
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+    return true;
+  }
+
+  bool _addLiquidVolume(List<WorldPoint> polygon) {
+    if (polygon.length < 3) return false;
+    final before = _copyDocument(_document);
+    final liquid = EnvironmentLiquidVolume(
+      id: 'liquid_${_objectIdNamespace}_${_nextTerrainRegionId++}',
+      name: 'Liquid ${_document.liquidVolumes.length + 1}',
+      bedSurfaceId: _document.activeSurfaceId,
+      materialId: _selectedMaterialId,
+      points: [for (final point in polygon) point],
+      surfaceElevation: _newSurfaceElevation,
+      depth: _newWaterDepth,
+      textureScale: _newFillTextureScale,
+      opacity: _newFillOpacity,
+      edgeBlend: _newFillEdgeBlend,
+      order: _document.liquidVolumes.length,
+    );
+    _document.liquidVolumes.add(liquid);
+    _selectedLiquidVolumeId = liquid.id;
+    _selectedTerrainRegionId = null;
+    _selectedSurfaceId = null;
+    _selectedObjectIds.clear();
+    _primarySelectedObjectId = null;
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+    return true;
+  }
+
   bool selectTerrainRegionAt(WorldPoint point) {
+    EnvironmentLiquidVolume? selectedLiquid;
+    for (final liquid in _document.liquidVolumes.reversed) {
+      if (_pointInPolygon(point, liquid.points)) {
+        selectedLiquid = liquid;
+        break;
+      }
+    }
     TerrainRegion? selected;
-    for (final region in _document.terrainRegions.reversed) {
+    for (final region in _document.terrainRegions.reversed.where(
+      (region) => region.surfaceId == _document.activeSurfaceId,
+    )) {
       if (_pointInPolygon(point, region.points)) {
         selected = region;
         break;
       }
     }
+    EnvironmentSurface? selectedSurface;
+    for (final surface in _document.surfaces.reversed) {
+      if (surface.id == environmentBaseSurfaceId) continue;
+      if (_pointInPolygon(point, surface.points)) {
+        selectedSurface = surface;
+        break;
+      }
+    }
+    if (selectedLiquid != null) {
+      selected = null;
+      selectedSurface = null;
+    } else if (selected != null) {
+      selectedSurface = null;
+    }
     final nextId = selected?.id;
-    if (_selectedTerrainRegionId == nextId && _selectedObjectIds.isEmpty) {
-      return selected != null;
+    final nextSurfaceId = selectedSurface?.id;
+    final nextLiquidId = selectedLiquid?.id;
+    if (_selectedTerrainRegionId == nextId &&
+        _selectedSurfaceId == nextSurfaceId &&
+        _selectedLiquidVolumeId == nextLiquidId &&
+        _selectedObjectIds.isEmpty) {
+      return selected != null ||
+          selectedSurface != null ||
+          selectedLiquid != null;
     }
     _selectedTerrainRegionId = nextId;
+    _selectedSurfaceId = nextSurfaceId;
+    _selectedLiquidVolumeId = nextLiquidId;
     _selectedObjectIds.clear();
     _primarySelectedObjectId = null;
     notifyListeners();
     _paletteNotifier.notifyListeners();
-    return selected != null;
+    return selected != null ||
+        selectedSurface != null ||
+        selectedLiquid != null;
   }
 
   void beginTerrainTextureScaleEdit() {
+    _environmentAreaBefore = _copyDocument(_document);
     final region = selectedTerrainRegion;
     _terrainRegionScaleBefore = region == null
         ? null
@@ -1048,6 +1384,16 @@ class EditorController extends ChangeNotifier {
 
   void setActiveFillTextureScale(double value) {
     final scale = value.clamp(0.25, 4).toDouble();
+    final liquid = selectedLiquidVolume;
+    if (liquid != null) {
+      if (liquid.textureScale == scale) return;
+      final index = _document.liquidVolumes.indexOf(liquid);
+      _document.liquidVolumes[index] = liquid.copyWith(textureScale: scale);
+      _markTerrainChanged();
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
     final region = selectedTerrainRegion;
     if (region == null || region.resetsToDefault) {
       if (_newFillTextureScale == scale) return;
@@ -1066,13 +1412,25 @@ class EditorController extends ChangeNotifier {
   }
 
   void endTerrainTextureScaleEdit() {
+    final documentBefore = _environmentAreaBefore;
+    _environmentAreaBefore = null;
     final before = _terrainRegionScaleBefore;
     _terrainRegionScaleBefore = null;
     final after = selectedTerrainRegion;
     if (before == null ||
         after == null ||
         before.id != after.id ||
-        before.textureScale == after.textureScale) {
+        before.toJson().toString() == after.toJson().toString()) {
+      if (documentBefore != null &&
+          documentBefore.toJsonString(pretty: false) !=
+              _document.toJsonString(pretty: false)) {
+        _pushCommand(
+          _ReplaceDocumentCommand(
+            before: documentBefore,
+            after: _copyDocument(_document),
+          ),
+        );
+      }
       return;
     }
     _pushCommand(
@@ -1089,15 +1447,454 @@ class EditorController extends ChangeNotifier {
     endTerrainTextureScaleEdit();
   }
 
+  void setActiveFillOpacity(double value) {
+    final opacity = value.clamp(0.05, 1).toDouble();
+    final liquid = selectedLiquidVolume;
+    if (liquid != null) {
+      if (liquid.opacity == opacity) return;
+      final index = _document.liquidVolumes.indexOf(liquid);
+      _document.liquidVolumes[index] = liquid.copyWith(opacity: opacity);
+      _markTerrainChanged();
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
+    final region = selectedTerrainRegion;
+    if (region == null || region.resetsToDefault) {
+      if (_newFillOpacity == opacity) return;
+      _newFillOpacity = opacity;
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
+    if (region.opacity == opacity) return;
+    final index = _document.terrainRegions.indexOf(region);
+    _document.terrainRegions[index] = region.copyWith(opacity: opacity);
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void setActiveFillEdgeBlend(double value) {
+    final edgeBlend = value.clamp(0, 3).toDouble();
+    final liquid = selectedLiquidVolume;
+    if (liquid != null) {
+      if (liquid.edgeBlend == edgeBlend) return;
+      final index = _document.liquidVolumes.indexOf(liquid);
+      _document.liquidVolumes[index] = liquid.copyWith(edgeBlend: edgeBlend);
+      _markTerrainChanged();
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
+    final region = selectedTerrainRegion;
+    if (region == null || region.resetsToDefault) {
+      if (_newFillEdgeBlend == edgeBlend) return;
+      _newFillEdgeBlend = edgeBlend;
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
+    if (region.edgeBlend == edgeBlend) return;
+    final index = _document.terrainRegions.indexOf(region);
+    _document.terrainRegions[index] = region.copyWith(edgeBlend: edgeBlend);
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void adjustSelectedFillOpacity(double delta) {
+    final liquid = selectedLiquidVolume;
+    if (liquid != null) {
+      final before = _copyDocument(_document);
+      final index = _document.liquidVolumes.indexOf(liquid);
+      _document.liquidVolumes[index] = liquid.copyWith(
+        opacity: (liquid.opacity + delta).clamp(0.05, 1).toDouble(),
+      );
+      _pushCommand(
+        _ReplaceDocumentCommand(
+          before: before,
+          after: _copyDocument(_document),
+        ),
+      );
+      _markTerrainChanged();
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
+    final region = selectedTerrainRegion;
+    if (region == null || region.resetsToDefault) return;
+    _replaceTerrainRegionWithHistory(
+      region,
+      region.copyWith(
+        opacity: (region.opacity + delta).clamp(0.05, 1).toDouble(),
+      ),
+    );
+  }
+
+  void adjustSelectedFillEdgeBlend(double delta) {
+    final liquid = selectedLiquidVolume;
+    if (liquid != null) {
+      final before = _copyDocument(_document);
+      final index = _document.liquidVolumes.indexOf(liquid);
+      _document.liquidVolumes[index] = liquid.copyWith(
+        edgeBlend: (liquid.edgeBlend + delta).clamp(0, 3).toDouble(),
+      );
+      _pushCommand(
+        _ReplaceDocumentCommand(
+          before: before,
+          after: _copyDocument(_document),
+        ),
+      );
+      _markTerrainChanged();
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
+    final region = selectedTerrainRegion;
+    if (region == null || region.resetsToDefault) return;
+    _replaceTerrainRegionWithHistory(
+      region,
+      region.copyWith(
+        edgeBlend: (region.edgeBlend + delta).clamp(0, 3).toDouble(),
+      ),
+    );
+  }
+
+  bool beginSelectedTerrainPointGesture(int pointIndex) {
+    final points = selectedEnvironmentAreaPoints;
+    if (_mode != EnvironmentEditorMode.editGround ||
+        points == null ||
+        pointIndex < 0 ||
+        pointIndex >= points.length) {
+      return false;
+    }
+    if (selectedTerrainRegion case final region?) {
+      _terrainRegionPointBefore = _copyTerrainRegion(region);
+      _terrainRegionPointChanged = false;
+    } else {
+      _environmentAreaPointBefore = _copyDocument(_document);
+      _environmentAreaPointChanged = false;
+    }
+    return true;
+  }
+
+  void moveSelectedTerrainPointDuringGesture(int pointIndex, WorldPoint point) {
+    final region = selectedTerrainRegion;
+    final surface = selectedSurface;
+    final liquid = selectedLiquidVolume;
+    final pointsSource = selectedEnvironmentAreaPoints;
+    if ((_terrainRegionPointBefore == null &&
+            _environmentAreaPointBefore == null) ||
+        pointsSource == null ||
+        pointIndex < 0 ||
+        pointIndex >= pointsSource.length ||
+        !_document.contains(point.x, point.y)) {
+      return;
+    }
+    final points = [for (final value in pointsSource) value];
+    points[pointIndex] = point;
+    if (region != null) {
+      final index = _document.terrainRegions.indexOf(region);
+      _document.terrainRegions[index] = region.copyWith(points: points);
+      _terrainRegionPointChanged = true;
+    } else if (surface != null) {
+      final index = _document.surfaces.indexOf(surface);
+      _document.surfaces[index] = surface.copyWith(points: points);
+      _environmentAreaPointChanged = true;
+    } else if (liquid != null) {
+      final index = _document.liquidVolumes.indexOf(liquid);
+      _document.liquidVolumes[index] = liquid.copyWith(points: points);
+      _environmentAreaPointChanged = true;
+    }
+    _markTerrainChanged();
+    notifyListeners();
+  }
+
+  void setNewSurfaceElevation(double value) {
+    final elevation = value.clamp(-8, 8).toDouble();
+    if (_newSurfaceElevation == elevation) return;
+    _newSurfaceElevation = elevation;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void setNewWaterDepth(double value) {
+    final depth = value.clamp(0.05, 8).toDouble();
+    if (_newWaterDepth == depth) return;
+    _newWaterDepth = depth;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void adjustSelectedTerrainElevation(double delta) {
+    final surface = selectedSurface;
+    final liquid = selectedLiquidVolume;
+    if (surface == null && liquid == null) return;
+    final before = _copyDocument(_document);
+    if (surface != null) {
+      final current = surface.height.elevation;
+      final index = _document.surfaces.indexOf(surface);
+      _document.surfaces[index] = surface.copyWith(
+        height: EnvironmentSurfaceHeight.flat(
+          (current + delta).clamp(-8, 8).toDouble(),
+        ),
+      );
+    } else {
+      final index = _document.liquidVolumes.indexOf(liquid!);
+      _document.liquidVolumes[index] = liquid.copyWith(
+        surfaceElevation: (liquid.surfaceElevation + delta)
+            .clamp(-8, 8)
+            .toDouble(),
+      );
+    }
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void adjustSelectedWaterDepth(double delta) {
+    final liquid = selectedLiquidVolume;
+    if (liquid == null) return;
+    final before = _copyDocument(_document);
+    final index = _document.liquidVolumes.indexOf(liquid);
+    _document.liquidVolumes[index] = liquid.copyWith(
+      depth: (liquid.depth + delta).clamp(0.05, 8).toDouble(),
+    );
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void setSelectedVariableWaterDepth(bool enabled) {
+    final liquid = selectedLiquidVolume;
+    if (liquid == null || liquid.hasDepthRamp == enabled) return;
+    final before = _copyDocument(_document);
+    final index = _document.liquidVolumes.indexOf(liquid);
+    if (enabled) {
+      final endpoints = _defaultLiquidDepthRamp(liquid.points);
+      _document.liquidVolumes[index] = liquid.copyWith(
+        endDepth: math.max(0.05, liquid.depth * 0.15),
+        depthRampStart: endpoints.$1,
+        depthRampEnd: endpoints.$2,
+      );
+    } else {
+      _document.liquidVolumes[index] = liquid.copyWith(clearDepthRamp: true);
+    }
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void adjustSelectedWaterEndDepth(double delta) {
+    final liquid = selectedLiquidVolume;
+    if (liquid == null || !liquid.hasDepthRamp) return;
+    final before = _copyDocument(_document);
+    final index = _document.liquidVolumes.indexOf(liquid);
+    _document.liquidVolumes[index] = liquid.copyWith(
+      endDepth: (liquid.endDepth! + delta).clamp(0.05, 8).toDouble(),
+    );
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void swapSelectedWaterDepthRamp() {
+    final liquid = selectedLiquidVolume;
+    if (liquid == null || !liquid.hasDepthRamp) return;
+    final before = _copyDocument(_document);
+    final index = _document.liquidVolumes.indexOf(liquid);
+    _document.liquidVolumes[index] = liquid.copyWith(
+      depth: liquid.endDepth,
+      endDepth: liquid.depth,
+      depthRampStart: liquid.depthRampEnd,
+      depthRampEnd: liquid.depthRampStart,
+    );
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  bool beginSelectedLiquidDepthHandleGesture(int handleIndex) {
+    final liquid = selectedLiquidVolume;
+    if (_mode != EnvironmentEditorMode.editGround ||
+        liquid == null ||
+        !liquid.hasDepthRamp ||
+        (handleIndex != 0 && handleIndex != 1)) {
+      return false;
+    }
+    _environmentAreaPointBefore = _copyDocument(_document);
+    _environmentAreaPointChanged = false;
+    return true;
+  }
+
+  void moveSelectedLiquidDepthHandleDuringGesture(
+    int handleIndex,
+    WorldPoint point,
+  ) {
+    final liquid = selectedLiquidVolume;
+    if (_environmentAreaPointBefore == null ||
+        liquid == null ||
+        !liquid.hasDepthRamp ||
+        !_document.contains(point.x, point.y)) {
+      return;
+    }
+    final index = _document.liquidVolumes.indexOf(liquid);
+    _document.liquidVolumes[index] = liquid.copyWith(
+      depthRampStart: handleIndex == 0 ? point : liquid.depthRampStart,
+      depthRampEnd: handleIndex == 1 ? point : liquid.depthRampEnd,
+    );
+    _environmentAreaPointChanged = true;
+    _markTerrainChanged();
+    notifyListeners();
+  }
+
+  void adjustSelectedElevationBlend(double delta) {
+    // Surface transitions are explicit connectors in schema v6. A visual edge
+    // blend must never silently create a traversable slope.
+  }
+
+  void moveSelectedTerrainRegionOrder(int delta) {
+    final region = selectedTerrainRegion;
+    if (region == null || delta == 0) return;
+    final current = _document.terrainRegions.indexOf(region);
+    final target = (current + delta).clamp(
+      0,
+      _document.terrainRegions.length - 1,
+    );
+    if (current == target) return;
+    final before = [for (final value in _document.terrainRegions) value.id];
+    _document.terrainRegions
+      ..removeAt(current)
+      ..insert(target, region);
+    _normalizeTerrainRegionOrder();
+    final after = [for (final value in _document.terrainRegions) value.id];
+    _pushCommand(_TerrainRegionOrderCommand(before: before, after: after));
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void _normalizeTerrainRegionOrder() {
+    for (var index = 0; index < _document.terrainRegions.length; index++) {
+      final region = _document.terrainRegions[index];
+      if (region.order != index) {
+        _document.terrainRegions[index] = region.copyWith(order: index);
+      }
+    }
+  }
+
+  void _replaceTerrainRegionWithHistory(
+    TerrainRegion before,
+    TerrainRegion after,
+  ) {
+    final index = _document.terrainRegions.indexOf(before);
+    if (index < 0 || before.toJson().toString() == after.toJson().toString()) {
+      return;
+    }
+    _document.terrainRegions[index] = after;
+    _pushCommand(
+      _TerrainRegionReplaceCommand(
+        before: _copyTerrainRegion(before),
+        after: _copyTerrainRegion(after),
+      ),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
   bool setDefaultGroundMaterial(EnvironmentMaterial material) {
-    if (_document.baseMaterialId == material.id) return false;
-    final before = _document.baseMaterialId;
-    _document.baseMaterialId = material.id;
-    _pushCommand(_BaseMaterialCommand(before: before, after: material.id));
+    final surface = activeSurface;
+    if (surface.materialId == material.id) return false;
+    final before = _copyDocument(_document);
+    surface.materialId = material.id;
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
     _markTerrainChanged();
     notifyListeners();
     _paletteNotifier.notifyListeners();
     return true;
+  }
+
+  void setSelectedSurfaceGeometryOnly(bool geometryOnly) {
+    final surface = selectedSurface;
+    if (surface == null || surface.id == environmentBaseSurfaceId) return;
+    final drawsBaseMaterial = !geometryOnly;
+    if (surface.drawsBaseMaterial == drawsBaseMaterial) return;
+    final before = _copyDocument(_document);
+    surface.drawsBaseMaterial = drawsBaseMaterial;
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void setActiveSurface(String surfaceId) {
+    if (_document.surfaceById(surfaceId) == null ||
+        _document.activeSurfaceId == surfaceId) {
+      return;
+    }
+    _document.activeSurfaceId = surfaceId;
+    if (_connectorTargetSurfaceId == surfaceId) {
+      _connectorTargetSurfaceId = null;
+    }
+    _connectorStart = null;
+    _selectedTerrainRegionId = null;
+    _selectedSurfaceId = null;
+    _selectedLiquidVolumeId = null;
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
+  }
+
+  void _placeConnectorPoint(WorldPoint point) {
+    final target = connectorTargetSurface;
+    if (target == null) return;
+    final start = _connectorStart;
+    if (start == null) {
+      _connectorStart = point;
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
+    final before = _copyDocument(_document);
+    _document.surfaceConnectors.add(
+      EnvironmentSurfaceConnector(
+        id: 'connector_${_objectIdNamespace}_${_nextTerrainRegionId++}',
+        fromSurfaceId: _document.activeSurfaceId,
+        toSurfaceId: target.id,
+        from: start,
+        to: point,
+        kind: _connectorKind,
+        width: _connectorWidth,
+        bidirectional: _connectorBidirectional,
+      ),
+    );
+    _connectorStart = null;
+    _pushCommand(
+      _ReplaceDocumentCommand(before: before, after: _copyDocument(_document)),
+    );
+    _markTerrainChanged();
+    notifyListeners();
+    _paletteNotifier.notifyListeners();
   }
 
   void rotateSelected() {
@@ -1141,12 +1938,93 @@ class EditorController extends ChangeNotifier {
     _geometryShapeIndex = 0;
   }
 
+  void setSelectedAnimalBehaviorProfile(String profileId) {
+    if (catalog.animalBehaviorProfileById(profileId) == null) return;
+    final animals = selectedObjects
+        .where(
+          (object) =>
+              catalog.objectById(object.assetId)?.animalAnimation != null,
+        )
+        .toList();
+    if (animals.isEmpty ||
+        animals.every((object) {
+          final animation = catalog
+              .objectById(object.assetId)!
+              .animalAnimation!;
+          return (object.behaviorProfileId ?? animation.behaviorProfileId) ==
+              profileId;
+        })) {
+      return;
+    }
+    _recordObjectMutation(animals.map((object) => object.id), () {
+      for (final animal in animals) {
+        final defaultId = catalog
+            .objectById(animal.assetId)!
+            .animalAnimation!
+            .behaviorProfileId;
+        animal.behaviorProfileId = profileId == defaultId ? null : profileId;
+      }
+    });
+  }
+
+  AnimalBehaviorProfile? animalBehaviorProfileFor(
+    PlacedEnvironmentObject object,
+  ) {
+    final animation = catalog.objectById(object.assetId)?.animalAnimation;
+    if (animation == null) return null;
+    return catalog.animalBehaviorProfileById(
+      object.behaviorProfileId ?? animation.behaviorProfileId,
+    );
+  }
+
   void adjustSelectedVerticalOffset(double delta) {
     final selected = selectedObjects;
     if (selected.isEmpty) return;
     _recordObjectMutation(selected.map((object) => object.id), () {
       for (final object in selected) {
         object.verticalOffset = (object.verticalOffset + delta).clamp(-10, 10);
+      }
+    });
+  }
+
+  void setSelectedSupportSurface(String surfaceId) {
+    if (_document.surfaceById(surfaceId) == null) return;
+    final selected = selectedObjects;
+    if (selected.isEmpty ||
+        selected.every((object) => object.supportSurfaceId == surfaceId)) {
+      return;
+    }
+    _recordObjectMutation(selected.map((object) => object.id), () {
+      for (final object in selected) {
+        object.supportSurfaceId = surfaceId;
+      }
+    });
+  }
+
+  void setSelectedCrossSurfaceOcclusion(bool enabled) {
+    final selected = selectedObjects;
+    if (selected.isEmpty ||
+        selected.every((object) => object.crossSurfaceOcclusion == enabled)) {
+      return;
+    }
+    _recordObjectMutation(selected.map((object) => object.id), () {
+      for (final object in selected) {
+        object.crossSurfaceOcclusion = enabled;
+        if (enabled && object.occlusionHeight <= 0) {
+          object.occlusionHeight = 4;
+        }
+      }
+    });
+  }
+
+  void adjustSelectedOcclusionHeight(double delta) {
+    final selected = selectedObjects;
+    if (selected.isEmpty) return;
+    _recordObjectMutation(selected.map((object) => object.id), () {
+      for (final object in selected) {
+        object.occlusionHeight = (object.occlusionHeight + delta)
+            .clamp(0, 32)
+            .toDouble();
       }
     });
   }
@@ -1162,8 +2040,75 @@ class EditorController extends ChangeNotifier {
     });
   }
 
+  void setSelectedLiquidInteraction(EnvironmentLiquidInteraction interaction) {
+    final selected = selectedObjects;
+    if (selected.isEmpty ||
+        selected.every((object) => object.liquidInteraction == interaction)) {
+      return;
+    }
+    _recordObjectMutation(selected.map((object) => object.id), () {
+      for (final object in selected) {
+        object.liquidInteraction = interaction;
+      }
+    });
+  }
+
+  void adjustSelectedLiquidDraft(double delta) {
+    final selected = selectedObjects;
+    if (selected.isEmpty) return;
+    _recordObjectMutation(selected.map((object) => object.id), () {
+      for (final object in selected) {
+        object.liquidDraft = (object.liquidDraft + delta)
+            .clamp(0, 4)
+            .toDouble();
+      }
+    });
+  }
+
   void deleteSelected() {
     final terrainRegion = selectedTerrainRegion;
+    final surface = selectedSurface;
+    final liquid = selectedLiquidVolume;
+    if (_selectedObjectIds.isEmpty && (surface != null || liquid != null)) {
+      final before = _copyDocument(_document);
+      if (liquid != null) {
+        _document.liquidVolumes.remove(liquid);
+        _selectedLiquidVolumeId = null;
+      } else if (surface != null && surface.id != environmentBaseSurfaceId) {
+        if (_document.objects.any(
+              (object) => object.supportSurfaceId == surface.id,
+            ) ||
+            _document.liquidVolumes.any(
+              (candidate) => candidate.bedSurfaceId == surface.id,
+            ) ||
+            _document.surfaceConnectors.any(
+              (connector) =>
+                  connector.fromSurfaceId == surface.id ||
+                  connector.toSurfaceId == surface.id,
+            )) {
+          return;
+        }
+        _document.terrainRegions.removeWhere(
+          (region) => region.surfaceId == surface.id,
+        );
+        _document.terrainStrokes.removeWhere(
+          (stroke) => stroke.surfaceId == surface.id,
+        );
+        _document.surfaces.remove(surface);
+        _document.activeSurfaceId = environmentBaseSurfaceId;
+        _selectedSurfaceId = null;
+      }
+      _pushCommand(
+        _ReplaceDocumentCommand(
+          before: before,
+          after: _copyDocument(_document),
+        ),
+      );
+      _markTerrainChanged();
+      notifyListeners();
+      _paletteNotifier.notifyListeners();
+      return;
+    }
     if (_selectedObjectIds.isEmpty && terrainRegion != null) {
       final index = _document.terrainRegions.indexOf(terrainRegion);
       _document.terrainRegions.removeAt(index);
@@ -1338,10 +2283,11 @@ class EditorController extends ChangeNotifier {
     final command = _undo.removeLast();
     command.undo(this);
     _redo.add(command);
-    _markSceneChanged(objectIds: command.affectedObjectIds);
     if (command.affectsTerrain) {
       _markTerrainChanged();
       _paletteNotifier.notifyListeners();
+    } else {
+      _markSceneChanged(objectIds: command.affectedObjectIds);
     }
     _normalizeSelection();
     notifyListeners();
@@ -1352,10 +2298,11 @@ class EditorController extends ChangeNotifier {
     final command = _redo.removeLast();
     command.redo(this);
     _undo.add(command);
-    _markSceneChanged(objectIds: command.affectedObjectIds);
     if (command.affectsTerrain) {
       _markTerrainChanged();
       _paletteNotifier.notifyListeners();
+    } else {
+      _markSceneChanged(objectIds: command.affectedObjectIds);
     }
     _normalizeSelection();
     notifyListeners();
@@ -1371,7 +2318,8 @@ class EditorController extends ChangeNotifier {
     _selectedObjectIds.clear();
     _primarySelectedObjectId = null;
     _selectedTerrainRegionId = null;
-    _markSceneChanged();
+    _selectedSurfaceId = null;
+    _selectedLiquidVolumeId = null;
     _markTerrainChanged();
     notifyListeners();
   }
@@ -1384,6 +2332,9 @@ class EditorController extends ChangeNotifier {
   }
 
   void _paint(WorldPoint point) {
+    // Liquids are persistent polygon volumes. Painting water as unrelated
+    // decals would reintroduce the old ambiguous height model.
+    if (selectedMaterialIsWater) return;
     var stroke = _activeStroke;
     if (stroke == null) {
       stroke = TerrainStroke(
@@ -1395,6 +2346,7 @@ class EditorController extends ChangeNotifier {
         scatter: _brushScatter,
         sizeJitter: 0.18,
         opacityJitter: 0.16,
+        surfaceId: _document.activeSurfaceId,
         points: [],
       );
       _document.terrainStrokes.add(stroke);
@@ -1414,6 +2366,7 @@ class EditorController extends ChangeNotifier {
   void _markTerrainChanged([TerrainStroke? stroke]) {
     _terrainRevision++;
     _lastTerrainChangedStroke = stroke;
+    _markSceneChanged();
   }
 
   int _nextTerrainStrokeSeed() {
@@ -1433,6 +2386,7 @@ class EditorController extends ChangeNotifier {
       y: point.y,
       editorLayerId: _document.activeLayerId,
       direction: _placementDirection,
+      supportSurfaceId: _document.activeSurfaceId,
     );
     _gestureObjectIds.add(object.id);
     _gestureObjectBefore[object.id] = const _ObjectRecord.absent();
@@ -1829,6 +2783,19 @@ class EditorController extends ChangeNotifier {
           (region) => region.id == _selectedTerrainRegionId,
         )) {
       _selectedTerrainRegionId = null;
+    }
+    if (_selectedSurfaceId != null &&
+        _document.surfaceById(_selectedSurfaceId!) == null) {
+      _selectedSurfaceId = null;
+    }
+    if (_selectedLiquidVolumeId != null &&
+        !_document.liquidVolumes.any(
+          (liquid) => liquid.id == _selectedLiquidVolumeId,
+        )) {
+      _selectedLiquidVolumeId = null;
+    }
+    if (_document.surfaceById(_document.activeSurfaceId) == null) {
+      _document.activeSurfaceId = environmentBaseSurfaceId;
     }
   }
 
@@ -2272,6 +3239,37 @@ class _TerrainRegionDeleteCommand extends _EditorCommand {
   }
 }
 
+class _TerrainRegionOrderCommand extends _EditorCommand {
+  const _TerrainRegionOrderCommand({required this.before, required this.after});
+
+  final List<String> before;
+  final List<String> after;
+
+  @override
+  bool get affectsTerrain => true;
+
+  @override
+  Set<String> get affectedObjectIds => const {};
+
+  @override
+  void undo(EditorController controller) => _apply(controller, before);
+
+  @override
+  void redo(EditorController controller) => _apply(controller, after);
+
+  void _apply(EditorController controller, List<String> ids) {
+    final byId = {
+      for (final region in controller._document.terrainRegions)
+        region.id: region,
+    };
+    controller._document.terrainRegions
+      ..clear()
+      ..addAll(ids.map((id) => byId.remove(id)).whereType<TerrainRegion>())
+      ..addAll(byId.values);
+    controller._normalizeTerrainRegionOrder();
+  }
+}
+
 class _TerrainRegionReplaceCommand extends _EditorCommand {
   const _TerrainRegionReplaceCommand({
     required this.before,
@@ -2300,29 +3298,6 @@ class _TerrainRegionReplaceCommand extends _EditorCommand {
     if (index >= 0) {
       controller._document.terrainRegions[index] = _copyTerrainRegion(region);
     }
-  }
-}
-
-class _BaseMaterialCommand extends _EditorCommand {
-  const _BaseMaterialCommand({required this.before, required this.after});
-
-  final String before;
-  final String after;
-
-  @override
-  bool get affectsTerrain => true;
-
-  @override
-  Set<String> get affectedObjectIds => const {};
-
-  @override
-  void undo(EditorController controller) {
-    controller._document.baseMaterialId = before;
-  }
-
-  @override
-  void redo(EditorController controller) {
-    controller._document.baseMaterialId = after;
   }
 }
 
@@ -2414,6 +3389,38 @@ TerrainStroke _copyTerrainStroke(TerrainStroke stroke) =>
 
 TerrainRegion _copyTerrainRegion(TerrainRegion region) =>
     TerrainRegion.fromJson(region.toJson());
+
+(WorldPoint, WorldPoint) _defaultLiquidDepthRamp(List<WorldPoint> points) {
+  if (points.length < 2) {
+    return const (WorldPoint(0, 0), WorldPoint(1, 0));
+  }
+  var start = points.first;
+  var end = points[1];
+  var maximumDistanceSquared = -1.0;
+  for (var first = 0; first < points.length - 1; first++) {
+    for (var second = first + 1; second < points.length; second++) {
+      final dx = points[second].x - points[first].x;
+      final dy = points[second].y - points[first].y;
+      final distanceSquared = dx * dx + dy * dy;
+      if (distanceSquared > maximumDistanceSquared) {
+        maximumDistanceSquared = distanceSquared;
+        start = points[first];
+        end = points[second];
+      }
+    }
+  }
+  const inset = 0.1;
+  return (
+    WorldPoint(
+      start.x + (end.x - start.x) * inset,
+      start.y + (end.y - start.y) * inset,
+    ),
+    WorldPoint(
+      start.x + (end.x - start.x) * (1 - inset),
+      start.y + (end.y - start.y) * (1 - inset),
+    ),
+  );
+}
 
 bool _pointInPolygon(WorldPoint point, List<WorldPoint> polygon) {
   if (polygon.length < 3) return false;

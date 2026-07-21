@@ -1,13 +1,1031 @@
 {
-  "baseMaterialId": "ow3.ground.meadow",
+  "schemaVersion": 4,
+  "worldId": "environment_starter",
   "coordinate": {
     "x": 7,
     "y": 2
   },
-  "objects": [],
-  "overlapObjectIds": [],
-  "schemaVersion": 1,
   "size": 32.0,
+  "baseMaterialId": "ow3.ground.meadow",
+  "surfaces": [
+    {
+      "id": "surface_hkkwpdeoym_0_1",
+      "name": "Surface 1",
+      "materialId": "ow3.ground.earth",
+      "kind": "platform",
+      "height": {
+        "kind": "flat",
+        "elevation": 0.0
+      },
+      "walkable": true,
+      "drawsBaseMaterial": false,
+      "order": 1,
+      "points": [
+        {
+          "x": -3.7358551025390625,
+          "y": 11.4034423828125
+        },
+        {
+          "x": -3.807342529296875,
+          "y": 5.8109283447265625
+        },
+        {
+          "x": 18.37286376953125,
+          "y": 5.9614105224609375
+        },
+        {
+          "x": 18.343582153320312,
+          "y": 11.357040405273438
+        },
+        {
+          "x": -2.4191131591796875,
+          "y": 11.324745178222656
+        }
+      ]
+    }
+  ],
+  "liquidVolumes": [
+    {
+      "id": "liquid_hkktxfdald_0_2",
+      "name": "Liquid 1",
+      "bedSurfaceId": "surface_ground",
+      "materialId": "nf.water.001",
+      "surfaceElevation": 0.0,
+      "depth": 2.0500000000000007,
+      "depthRamp": {
+        "endDepth": 0.3075000000000001,
+        "start": {
+          "x": 16.614089965820312,
+          "y": 3.5172653198242188
+        },
+        "end": {
+          "x": -3.6558380126953125,
+          "y": 3.5655517578125
+        }
+      },
+      "edgeBlend": 3.0,
+      "opacity": 0.95,
+      "textureScale": 0.5,
+      "order": 0,
+      "points": [
+        {
+          "x": -12.81024169921875,
+          "y": -63.9767603892833
+        },
+        {
+          "x": -6.1046600341796875,
+          "y": -47.73391532897949
+        },
+        {
+          "x": -2.248626708984375,
+          "y": -28.326522827148438
+        },
+        {
+          "x": -1.6812896728515625,
+          "y": -10.562747955322266
+        },
+        {
+          "x": -3.055023193359375,
+          "y": 11.271614074707031
+        },
+        {
+          "x": -1.4062042236328125,
+          "y": 30.244094848632812
+        },
+        {
+          "x": -3.1552734375,
+          "y": 51.06627655029297
+        },
+        {
+          "x": -1.8262786865234375,
+          "y": 79.83328247070312
+        },
+        {
+          "x": -3.0190582275390625,
+          "y": 95.70797729492188
+        },
+        {
+          "x": 1.6558074951171875,
+          "y": 116.03634643554688
+        },
+        {
+          "x": 3.72601318359375,
+          "y": 134.8344268798828
+        },
+        {
+          "x": 3.320037841796875,
+          "y": 153.71054077148438
+        },
+        {
+          "x": 1.50396728515625,
+          "y": 177.1307373046875
+        },
+        {
+          "x": 6.72161865234375,
+          "y": 191.99476623535156
+        },
+        {
+          "x": 31.997268676757812,
+          "y": 191.97036743164062
+        },
+        {
+          "x": 31.990585327148438,
+          "y": -63.92713230103254
+        },
+        {
+          "x": -12.814193725585938,
+          "y": -63.99262379389256
+        }
+      ]
+    }
+  ],
+  "surfaceConnectors": [],
+  "terrainRegions": [],
   "terrainStrokes": [],
-  "worldId": "environment_starter"
+  "objects": [
+    {
+      "id": "object_hkkwpdeoym_0_22",
+      "assetId": "ow3.grass.005",
+      "localPosition": {
+        "x": 1.0854034423828125,
+        "y": 20.983322143554688
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 224.5854034423828,
+          "y": 84.48332214355469
+        },
+        "max": {
+          "x": 225.5854034423828,
+          "y": 85.48332214355469
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_33",
+      "assetId": "nf.smallBoat.001",
+      "localPosition": {
+        "x": 1.175506591796875,
+        "y": 6.269111633300781
+      },
+      "verticalOffset": 0.0,
+      "direction": "northEast",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 224.67550659179688,
+          "y": 69.76911163330078
+        },
+        "max": {
+          "x": 225.67550659179688,
+          "y": 70.76911163330078
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_21",
+      "assetId": "nf.platform.001",
+      "localPosition": {
+        "x": 7.1238861083984375,
+        "y": 13.619224548339844
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 221.39520263671875,
+          "y": 70.88050079345703
+        },
+        "max": {
+          "x": 232.36563110351562,
+          "y": 76.4984359741211
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_27",
+      "assetId": "nf.longBoat.006",
+      "localPosition": {
+        "x": 19.106597900390625,
+        "y": 7.879558563232422
+      },
+      "verticalOffset": 0.0,
+      "direction": "southWest",
+      "liquidInteraction": "float",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 232.68841909620244,
+          "y": 67.34590124341923
+        },
+        "max": {
+          "x": 245.7520182206921,
+          "y": 69.67148996141475
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_28",
+      "assetId": "nf.platform.001",
+      "localPosition": {
+        "x": 17.650527954101562,
+        "y": 13.018234252929688
+      },
+      "verticalOffset": 0.0,
+      "direction": "east",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 231.92184448242188,
+          "y": 70.27951049804688
+        },
+        "max": {
+          "x": 242.89227294921875,
+          "y": 75.89744567871094
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_29",
+      "assetId": "nf.longBoat.006",
+      "localPosition": {
+        "x": 19.141433715820312,
+        "y": 16.238147735595703
+      },
+      "verticalOffset": 0.0,
+      "direction": "southWest",
+      "liquidInteraction": "float",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "occlusionHeight": 4.0,
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 232.72325491163213,
+          "y": 75.70449041578252
+        },
+        "max": {
+          "x": 245.78685403612178,
+          "y": 78.03007913377803
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_32",
+      "assetId": "nf.longBoat.007",
+      "localPosition": {
+        "x": 14.901214599609375,
+        "y": 20.835296630859375
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "liquidInteraction": "float",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "occlusionHeight": 4.0,
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 238.40121459960938,
+          "y": 84.33529663085938
+        },
+        "max": {
+          "x": 239.40121459960938,
+          "y": 85.33529663085938
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_39",
+      "assetId": "nf.catapultStone.001",
+      "localPosition": {
+        "x": 2.680511474609375,
+        "y": 18.017906188964844
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 226.18051147460938,
+          "y": 81.51790618896484
+        },
+        "max": {
+          "x": 227.18051147460938,
+          "y": 82.51790618896484
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_40",
+      "assetId": "nf.catapultStone.001",
+      "localPosition": {
+        "x": 0.520904541015625,
+        "y": 18.1773681640625
+      },
+      "verticalOffset": 0.0,
+      "direction": "southWest",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 224.02090454101562,
+          "y": 81.6773681640625
+        },
+        "max": {
+          "x": 225.02090454101562,
+          "y": 82.6773681640625
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_41",
+      "assetId": "nf.catapultStone.001",
+      "localPosition": {
+        "x": 0.25140380859375,
+        "y": 0.31223297119140625
+      },
+      "verticalOffset": 0.0,
+      "direction": "southWest",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 223.75140380859375,
+          "y": 63.812232971191406
+        },
+        "max": {
+          "x": 224.75140380859375,
+          "y": 64.8122329711914
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_42",
+      "assetId": "nf.catapultStone.001",
+      "localPosition": {
+        "x": 4.3644256591796875,
+        "y": 3.4357070922851562
+      },
+      "verticalOffset": 0.0,
+      "direction": "west",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 227.8644256591797,
+          "y": 66.93570709228516
+        },
+        "max": {
+          "x": 228.8644256591797,
+          "y": 67.93570709228516
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_47",
+      "assetId": "nf.snowRock.001",
+      "localPosition": {
+        "x": 3.051849365234375,
+        "y": 14.997352600097656
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 226.55184936523438,
+          "y": 78.49735260009766
+        },
+        "max": {
+          "x": 227.55184936523438,
+          "y": 79.49735260009766
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_49",
+      "assetId": "nf.snowGrass.005",
+      "localPosition": {
+        "x": 2.1388397216796875,
+        "y": 14.729766845703125
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 225.6388397216797,
+          "y": 78.22976684570312
+        },
+        "max": {
+          "x": 226.6388397216797,
+          "y": 79.22976684570312
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_50",
+      "assetId": "nf.snowGrass.005",
+      "localPosition": {
+        "x": 5.228790283203125,
+        "y": 18.881317138671875
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 228.72879028320312,
+          "y": 82.38131713867188
+        },
+        "max": {
+          "x": 229.72879028320312,
+          "y": 83.38131713867188
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_52",
+      "assetId": "nf.snowGrass.003",
+      "localPosition": {
+        "x": 1.23626708984375,
+        "y": 17.408294677734375
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 224.73626708984375,
+          "y": 80.90829467773438
+        },
+        "max": {
+          "x": 225.73626708984375,
+          "y": 81.90829467773438
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_55",
+      "assetId": "nf.longBoat.006",
+      "localPosition": {
+        "x": 6.274749755859375,
+        "y": 20.217811584472656
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "liquidInteraction": "float",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 229.77474975585938,
+          "y": 83.71781158447266
+        },
+        "max": {
+          "x": 230.77474975585938,
+          "y": 84.71781158447266
+        }
+      }
+    },
+    {
+      "id": "object_hkkuk3v41z_0_56",
+      "assetId": "nf.smallBoat.001",
+      "localPosition": {
+        "x": 4.8040008544921875,
+        "y": 6.5885772705078125
+      },
+      "verticalOffset": 0.0,
+      "direction": "northEast",
+      "supportSurfaceId": "surface_ground",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 228.3040008544922,
+          "y": 70.08857727050781
+        },
+        "max": {
+          "x": 229.3040008544922,
+          "y": 71.08857727050781
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_0",
+      "assetId": "nf.barrel.001",
+      "localPosition": {
+        "x": 17.076446533203125,
+        "y": 7.149681091308594
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 240.5115966796875,
+          "y": 70.65005493164062
+        },
+        "max": {
+          "x": 241.14987182617188,
+          "y": 71.27388000488281
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_2",
+      "assetId": "nf.barrel.005",
+      "localPosition": {
+        "x": 13.420974731445312,
+        "y": 10.473403930664062
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 236.9209747314453,
+          "y": 73.97340393066406
+        },
+        "max": {
+          "x": 237.9209747314453,
+          "y": 74.97340393066406
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_3",
+      "assetId": "nf.barrel.006",
+      "localPosition": {
+        "x": 17.481735229492188,
+        "y": 6.766975402832031
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 240.9817352294922,
+          "y": 70.26697540283203
+        },
+        "max": {
+          "x": 241.9817352294922,
+          "y": 71.26697540283203
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_4",
+      "assetId": "nf.cropBag.001",
+      "localPosition": {
+        "x": 17.824356079101562,
+        "y": 10.912979125976562
+      },
+      "verticalOffset": 0.0,
+      "direction": "west",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 241.32435607910156,
+          "y": 74.41297912597656
+        },
+        "max": {
+          "x": 242.32435607910156,
+          "y": 75.41297912597656
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_5",
+      "assetId": "nf.fishRack.001",
+      "localPosition": {
+        "x": 7.8931884765625,
+        "y": 7.044578552246094
+      },
+      "verticalOffset": 0.0,
+      "direction": "northWest",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 231.3931884765625,
+          "y": 70.5445785522461
+        },
+        "max": {
+          "x": 232.3931884765625,
+          "y": 71.5445785522461
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_7",
+      "assetId": "nf.snowGrass.002",
+      "localPosition": {
+        "x": 10.104339599609375,
+        "y": 7.088653564453125
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 233.60433959960938,
+          "y": 70.58865356445312
+        },
+        "max": {
+          "x": 234.60433959960938,
+          "y": 71.58865356445312
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_10",
+      "assetId": "nf.grass.001",
+      "localPosition": {
+        "x": 5.8678436279296875,
+        "y": 11.316497802734375
+      },
+      "verticalOffset": 0.0,
+      "direction": "northWest",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 229.3678436279297,
+          "y": 74.81649780273438
+        },
+        "max": {
+          "x": 230.3678436279297,
+          "y": 75.81649780273438
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_15",
+      "assetId": "ow3.grass.007",
+      "localPosition": {
+        "x": 0.5137939453125,
+        "y": 1.1004638671875
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 224.0137939453125,
+          "y": 64.6004638671875
+        },
+        "max": {
+          "x": 225.0137939453125,
+          "y": 65.6004638671875
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_17",
+      "assetId": "ow3.grass.005",
+      "localPosition": {
+        "x": 0.119110107421875,
+        "y": 0.9198074340820312
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 223.61911010742188,
+          "y": 64.41980743408203
+        },
+        "max": {
+          "x": 224.61911010742188,
+          "y": 65.41980743408203
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_18",
+      "assetId": "ow3.grass.005",
+      "localPosition": {
+        "x": 3.38165283203125,
+        "y": 3.8316726684570312
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 226.88165283203125,
+          "y": 67.33167266845703
+        },
+        "max": {
+          "x": 227.88165283203125,
+          "y": 68.33167266845703
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_19",
+      "assetId": "ow3.grass.005",
+      "localPosition": {
+        "x": 2.1516876220703125,
+        "y": 3.6736831665039062
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 225.6516876220703,
+          "y": 67.1736831665039
+        },
+        "max": {
+          "x": 226.6516876220703,
+          "y": 68.1736831665039
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_20",
+      "assetId": "ow3.grass.005",
+      "localPosition": {
+        "x": 2.503387451171875,
+        "y": 21.312362670898438
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 226.00338745117188,
+          "y": 84.81236267089844
+        },
+        "max": {
+          "x": 227.00338745117188,
+          "y": 85.81236267089844
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_23",
+      "assetId": "ow3.chestStatic.179",
+      "localPosition": {
+        "x": 14.621078491210938,
+        "y": 6.7291412353515625
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 238.12107849121094,
+          "y": 70.22914123535156
+        },
+        "max": {
+          "x": 239.12107849121094,
+          "y": 71.22914123535156
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_24",
+      "assetId": "ow3.chestStatic.175",
+      "localPosition": {
+        "x": 15.793533325195312,
+        "y": 6.80340576171875
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 239.2935333251953,
+          "y": 70.30340576171875
+        },
+        "max": {
+          "x": 240.2935333251953,
+          "y": 71.30340576171875
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_25",
+      "assetId": "ow3.chickenCrate.001",
+      "localPosition": {
+        "x": 15.244155883789062,
+        "y": 7.399040222167969
+      },
+      "verticalOffset": 0.0,
+      "direction": "west",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 238.74415588378906,
+          "y": 70.89904022216797
+        },
+        "max": {
+          "x": 239.74415588378906,
+          "y": 71.89904022216797
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_27",
+      "assetId": "ow3.coalBag.001",
+      "localPosition": {
+        "x": 17.147903442382812,
+        "y": 10.619529724121094
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 240.6479034423828,
+          "y": 74.1195297241211
+        },
+        "max": {
+          "x": 241.6479034423828,
+          "y": 75.1195297241211
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_28",
+      "assetId": "ow3.crate.004",
+      "localPosition": {
+        "x": 17.641937255859375,
+        "y": 7.180366516113281
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 241.14193725585938,
+          "y": 70.68036651611328
+        },
+        "max": {
+          "x": 242.14193725585938,
+          "y": 71.68036651611328
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_29",
+      "assetId": "ow3.crate.003",
+      "localPosition": {
+        "x": 17.803497314453125,
+        "y": 7.9604034423828125
+      },
+      "verticalOffset": 0.0,
+      "direction": "north",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 241.30349731445312,
+          "y": 71.46040344238281
+        },
+        "max": {
+          "x": 242.30349731445312,
+          "y": 72.46040344238281
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_30",
+      "assetId": "ow3.crate.005",
+      "localPosition": {
+        "x": 16.444747924804688,
+        "y": 6.46478271484375
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 239.9447479248047,
+          "y": 69.96478271484375
+        },
+        "max": {
+          "x": 240.9447479248047,
+          "y": 70.96478271484375
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_31",
+      "assetId": "ow3.crate.014",
+      "localPosition": {
+        "x": 13.369247436523438,
+        "y": 6.457550048828125
+      },
+      "verticalOffset": 0.0,
+      "direction": "south",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 236.86924743652344,
+          "y": 69.95755004882812
+        },
+        "max": {
+          "x": 237.86924743652344,
+          "y": 70.95755004882812
+        }
+      }
+    },
+    {
+      "id": "object_hkkwpdeoym_0_32",
+      "assetId": "ow3.crate.013",
+      "localPosition": {
+        "x": 13.677001953125,
+        "y": 6.9395904541015625
+      },
+      "verticalOffset": 0.0,
+      "direction": "north",
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "editorLayerId": "layer_world",
+      "bounds": {
+        "min": {
+          "x": 237.177001953125,
+          "y": 70.43959045410156
+        },
+        "max": {
+          "x": 238.177001953125,
+          "y": 71.43959045410156
+        }
+      }
+    }
+  ],
+  "overlapObjectIds": [
+    "object_hkkuk3v41z_0_21",
+    "object_hkkuk3v41z_0_27",
+    "object_hkkuk3v41z_0_28",
+    "object_hkkuk3v41z_0_29",
+    "object_hkkuk3v41z_0_32",
+    "object_hkkuk3v41z_0_33",
+    "object_hkkuk3v41z_0_37",
+    "object_hkkuk3v41z_0_39",
+    "object_hkkuk3v41z_0_40",
+    "object_hkkuk3v41z_0_41",
+    "object_hkkuk3v41z_0_42",
+    "object_hkkuk3v41z_0_47",
+    "object_hkkuk3v41z_0_49",
+    "object_hkkuk3v41z_0_50",
+    "object_hkkuk3v41z_0_52",
+    "object_hkkuk3v41z_0_55",
+    "object_hkkuk3v41z_0_56",
+    "object_hkkwpdeoym_0_0",
+    "object_hkkwpdeoym_0_10",
+    "object_hkkwpdeoym_0_15",
+    "object_hkkwpdeoym_0_17",
+    "object_hkkwpdeoym_0_18",
+    "object_hkkwpdeoym_0_19",
+    "object_hkkwpdeoym_0_2",
+    "object_hkkwpdeoym_0_20",
+    "object_hkkwpdeoym_0_21",
+    "object_hkkwpdeoym_0_22",
+    "object_hkkwpdeoym_0_23",
+    "object_hkkwpdeoym_0_24",
+    "object_hkkwpdeoym_0_25",
+    "object_hkkwpdeoym_0_27",
+    "object_hkkwpdeoym_0_28",
+    "object_hkkwpdeoym_0_29",
+    "object_hkkwpdeoym_0_3",
+    "object_hkkwpdeoym_0_30",
+    "object_hkkwpdeoym_0_31",
+    "object_hkkwpdeoym_0_32",
+    "object_hkkwpdeoym_0_4",
+    "object_hkkwpdeoym_0_5",
+    "object_hkkwpdeoym_0_7"
+  ]
 }

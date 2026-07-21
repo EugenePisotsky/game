@@ -220,6 +220,8 @@ class _EditorScreenState extends State<EditorScreen> {
   bool _marqueeSelecting = false;
   bool _movingSelection = false;
   EnvironmentGeometryHandle? _movingGeometryHandle;
+  int? _movingTerrainPoint;
+  int? _movingLiquidDepthHandle;
   Offset? _gestureScreenStart;
   WorldPoint? _lastGestureWorld;
   Duration? _lastPanEventTime;
@@ -358,9 +360,20 @@ class _EditorScreenState extends State<EditorScreen> {
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.escape) {
-      controller.hasPathDraft
-          ? controller.cancelPathDraft()
-          : controller.clearSelection();
+      if (controller.hasSurfacePolygonDraft) {
+        controller.cancelSurfacePolygon();
+      } else if (controller.connectorStart != null) {
+        controller.cancelConnectorDraft();
+      } else if (controller.hasPathDraft) {
+        controller.cancelPathDraft();
+      } else {
+        controller.clearSelection();
+      }
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.enter &&
+        controller.mode == EnvironmentEditorMode.surfacePolygon) {
+      controller.finishSurfacePolygon();
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.f1) {
@@ -444,6 +457,31 @@ class _EditorScreenState extends State<EditorScreen> {
         _gestureScreenStart = event.localPosition;
         _lastGestureWorld = _worldAt(event.localPosition);
         controller.beginGesture();
+        if (controller.mode == EnvironmentEditorMode.editGround) {
+          final liquidDepthHandle = game.hitTestSelectedLiquidDepthHandle(
+            Vector2(event.localPosition.dx, event.localPosition.dy),
+          );
+          if (liquidDepthHandle != null &&
+              controller.beginSelectedLiquidDepthHandleGesture(
+                liquidDepthHandle,
+              )) {
+            _movingLiquidDepthHandle = liquidDepthHandle;
+            _movingTerrainPoint = null;
+            _movingSelection = false;
+            _marqueeSelecting = false;
+            return;
+          }
+          final pointIndex = game.hitTestSelectedTerrainPoint(
+            Vector2(event.localPosition.dx, event.localPosition.dy),
+          );
+          if (pointIndex != null &&
+              controller.beginSelectedTerrainPointGesture(pointIndex)) {
+            _movingTerrainPoint = pointIndex;
+            _movingSelection = false;
+            _marqueeSelecting = false;
+            return;
+          }
+        }
         if (controller.mode == EnvironmentEditorMode.collision) {
           final handle = game.hitTestSelectedGeometryHandle(
             Vector2(event.localPosition.dx, event.localPosition.dy),
@@ -501,12 +539,25 @@ class _EditorScreenState extends State<EditorScreen> {
         }
         final point = _worldAt(event.localPosition);
         if (point == null) return;
+        final liquidDepthHandle = _movingLiquidDepthHandle;
+        if (liquidDepthHandle != null) {
+          controller.moveSelectedLiquidDepthHandleDuringGesture(
+            liquidDepthHandle,
+            point,
+          );
+          return;
+        }
         final geometryHandle = _movingGeometryHandle;
         if (geometryHandle != null) {
           controller.moveSelectedGeometryHandleDuringGesture(
             geometryHandle,
             point,
           );
+          return;
+        }
+        final terrainPoint = _movingTerrainPoint;
+        if (terrainPoint != null) {
+          controller.moveSelectedTerrainPointDuringGesture(terrainPoint, point);
           return;
         }
         if (controller.isObjectSelectionMode && _movingSelection) {
@@ -680,6 +731,8 @@ class _EditorScreenState extends State<EditorScreen> {
     _marqueeSelecting = false;
     _movingSelection = false;
     _movingGeometryHandle = null;
+    _movingTerrainPoint = null;
+    _movingLiquidDepthHandle = null;
     _gestureScreenStart = null;
     _lastGestureWorld = null;
     game.setSelectionMarquee(null);
@@ -1254,206 +1307,504 @@ class _PaletteState extends State<_Palette> {
                   children: [
                     Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                          child: Column(
-                            children: [
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: 4,
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                              child: Column(
                                 children: [
-                                  ChoiceChip(
-                                    label: const Text('Brush'),
-                                    selected:
-                                        controller.mode ==
-                                        EnvironmentEditorMode.paint,
-                                    onSelected: (_) => controller.selectMode(
-                                      EnvironmentEditorMode.paint,
-                                    ),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      ChoiceChip(
+                                        label: const Text('Brush'),
+                                        selected:
+                                            controller.mode ==
+                                            EnvironmentEditorMode.paint,
+                                        onSelected: (_) =>
+                                            controller.selectMode(
+                                              EnvironmentEditorMode.paint,
+                                            ),
+                                      ),
+                                      ChoiceChip(
+                                        label: const Text('Fill area'),
+                                        selected:
+                                            controller.mode ==
+                                            EnvironmentEditorMode.fillGround,
+                                        onSelected: (_) =>
+                                            controller.selectMode(
+                                              EnvironmentEditorMode.fillGround,
+                                            ),
+                                      ),
+                                      ChoiceChip(
+                                        label: const Text('Surface'),
+                                        selected:
+                                            controller.mode ==
+                                            EnvironmentEditorMode
+                                                .surfacePolygon,
+                                        onSelected: (_) =>
+                                            controller.selectMode(
+                                              EnvironmentEditorMode
+                                                  .surfacePolygon,
+                                            ),
+                                      ),
+                                      ChoiceChip(
+                                        label: const Text('Reset'),
+                                        selected:
+                                            controller.mode ==
+                                            EnvironmentEditorMode.resetGround,
+                                        onSelected: (_) =>
+                                            controller.selectMode(
+                                              EnvironmentEditorMode.resetGround,
+                                            ),
+                                      ),
+                                      ChoiceChip(
+                                        label: const Text('Clear'),
+                                        selected:
+                                            controller.mode ==
+                                            EnvironmentEditorMode
+                                                .clearGroundFill,
+                                        onSelected: (_) =>
+                                            controller.selectMode(
+                                              EnvironmentEditorMode
+                                                  .clearGroundFill,
+                                            ),
+                                      ),
+                                      ChoiceChip(
+                                        label: const Text('Edit fill'),
+                                        selected:
+                                            controller.mode ==
+                                            EnvironmentEditorMode.editGround,
+                                        onSelected: (_) =>
+                                            controller.selectMode(
+                                              EnvironmentEditorMode.editGround,
+                                            ),
+                                      ),
+                                      ChoiceChip(
+                                        label: const Text('Link'),
+                                        selected:
+                                            controller.mode ==
+                                            EnvironmentEditorMode.connector,
+                                        onSelected: (_) =>
+                                            controller.selectMode(
+                                              EnvironmentEditorMode.connector,
+                                            ),
+                                      ),
+                                    ],
                                   ),
-                                  ChoiceChip(
-                                    label: const Text('Fill area'),
-                                    selected:
-                                        controller.mode ==
-                                        EnvironmentEditorMode.fillGround,
-                                    onSelected: (_) => controller.selectMode(
-                                      EnvironmentEditorMode.fillGround,
+                                  if (controller.mode ==
+                                      EnvironmentEditorMode.paint) ...[
+                                    _BrushSlider(
+                                      label:
+                                          'Size ${controller.brushRadius.toStringAsFixed(1)}',
+                                      value: controller.brushRadius,
+                                      min: 0.5,
+                                      max: 5,
+                                      divisions: 18,
+                                      onChanged: controller.setBrushRadius,
                                     ),
-                                  ),
-                                  ChoiceChip(
-                                    label: const Text('Reset paint'),
-                                    selected:
-                                        controller.mode ==
-                                        EnvironmentEditorMode.resetGround,
-                                    onSelected: (_) => controller.selectMode(
-                                      EnvironmentEditorMode.resetGround,
+                                    _BrushSlider(
+                                      label:
+                                          'Flow ${(controller.brushFlow * 100).round()}%',
+                                      value: controller.brushFlow,
+                                      min: 0.05,
+                                      max: 0.6,
+                                      divisions: 22,
+                                      onChanged: controller.setBrushFlow,
                                     ),
-                                  ),
-                                  ChoiceChip(
-                                    label: const Text('Clear fill'),
-                                    selected:
-                                        controller.mode ==
-                                        EnvironmentEditorMode.clearGroundFill,
-                                    onSelected: (_) => controller.selectMode(
-                                      EnvironmentEditorMode.clearGroundFill,
+                                    _BrushSlider(
+                                      label:
+                                          'Scatter ${(controller.brushScatter * 100).round()}%',
+                                      value: controller.brushScatter,
+                                      min: 0,
+                                      max: 0.65,
+                                      divisions: 13,
+                                      onChanged: controller.setBrushScatter,
                                     ),
-                                  ),
-                                  ChoiceChip(
-                                    label: const Text('Edit fill'),
-                                    selected:
-                                        controller.mode ==
-                                        EnvironmentEditorMode.editGround,
-                                    onSelected: (_) => controller.selectMode(
-                                      EnvironmentEditorMode.editGround,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (controller.mode ==
-                                  EnvironmentEditorMode.paint) ...[
-                                _BrushSlider(
-                                  label:
-                                      'Size ${controller.brushRadius.toStringAsFixed(1)}',
-                                  value: controller.brushRadius,
-                                  min: 0.5,
-                                  max: 5,
-                                  divisions: 18,
-                                  onChanged: controller.setBrushRadius,
-                                ),
-                                _BrushSlider(
-                                  label:
-                                      'Flow ${(controller.brushFlow * 100).round()}%',
-                                  value: controller.brushFlow,
-                                  min: 0.05,
-                                  max: 0.6,
-                                  divisions: 22,
-                                  onChanged: controller.setBrushFlow,
-                                ),
-                                _BrushSlider(
-                                  label:
-                                      'Scatter ${(controller.brushScatter * 100).round()}%',
-                                  value: controller.brushScatter,
-                                  min: 0,
-                                  max: 0.65,
-                                  divisions: 13,
-                                  onChanged: controller.setBrushScatter,
-                                ),
-                              ],
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      'Default: ${controller.catalog.materialById(controller.document.baseMaterialId)?.name ?? controller.document.baseMaterialId}',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                  ],
+                                  if (controller.mode ==
+                                      EnvironmentEditorMode.surfacePolygon) ...[
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Click polygon corners, then press Enter or Finish. Escape cancels.',
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodySmall,
                                     ),
-                                  ),
-                                  TextButton(
-                                    onPressed:
-                                        controller.document.baseMaterialId ==
-                                            controller.selectedMaterialId
-                                        ? null
-                                        : () {
-                                            final material = controller.catalog
-                                                .materialById(
-                                                  controller.selectedMaterialId,
-                                                );
-                                            if (material != null) {
-                                              controller
-                                                  .setDefaultGroundMaterial(
-                                                    material,
-                                                  );
-                                            }
-                                          },
-                                    child: const Text('Use selected'),
-                                  ),
-                                ],
-                              ),
-                              if (controller.mode ==
-                                      EnvironmentEditorMode.fillGround ||
-                                  controller.mode ==
-                                      EnvironmentEditorMode.editGround ||
-                                  controller.selectedTerrainRegion != null)
-                                Builder(
-                                  builder: (context) {
-                                    final region =
-                                        controller.selectedTerrainRegion;
-                                    final material = controller.catalog
-                                        .materialById(
-                                          region != null &&
-                                                  !region.resetsToDefault
-                                              ? region.materialId
-                                              : controller.selectedMaterialId,
-                                        );
-                                    if (material == null) {
-                                      return const SizedBox.shrink();
-                                    }
-                                    final scale =
-                                        controller.activeFillTextureScale;
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        Text(
-                                          'Material repeat ${material.effectiveRepeatWorldWidth.toStringAsFixed(1)} × ${material.effectiveRepeatWorldHeight.toStringAsFixed(1)} world units',
+                                        TextButton(
+                                          onPressed:
+                                              controller.hasSurfacePolygonDraft
+                                              ? controller.cancelSurfacePolygon
+                                              : null,
+                                          child: const Text('Cancel'),
+                                        ),
+                                        FilledButton(
+                                          onPressed:
+                                              controller
+                                                      .surfacePolygonDraft
+                                                      .length >=
+                                                  3
+                                              ? controller.finishSurfacePolygon
+                                              : null,
+                                          child: Text(
+                                            'Finish (${controller.surfacePolygonDraft.length})',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                  if (controller.mode ==
+                                      EnvironmentEditorMode.connector) ...[
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      controller.connectorStart == null
+                                          ? 'Click the landing on the active surface, then click the landing on the destination surface.'
+                                          : 'First landing recorded. Click the destination landing or cancel.',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    DropdownButtonFormField<String>(
+                                      initialValue:
+                                          controller.connectorTargetSurface?.id,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Destination surface',
+                                        isDense: true,
+                                      ),
+                                      items: [
+                                        for (final surface
+                                            in controller.document.surfaces)
+                                          if (surface.id !=
+                                              controller
+                                                  .document
+                                                  .activeSurfaceId)
+                                            DropdownMenuItem(
+                                              value: surface.id,
+                                              child: Text(surface.name),
+                                            ),
+                                      ],
+                                      onChanged: (id) {
+                                        if (id != null) {
+                                          controller.setConnectorTargetSurface(
+                                            id,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                    const SizedBox(height: 6),
+                                    DropdownButtonFormField<
+                                      EnvironmentSurfaceConnectorKind
+                                    >(
+                                      initialValue: controller.connectorKind,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Traversal',
+                                        isDense: true,
+                                      ),
+                                      items: [
+                                        for (final kind
+                                            in EnvironmentSurfaceConnectorKind
+                                                .values)
+                                          DropdownMenuItem(
+                                            value: kind,
+                                            child: Text(kind.name),
+                                          ),
+                                      ],
+                                      onChanged: (kind) {
+                                        if (kind != null) {
+                                          controller.setConnectorKind(kind);
+                                        }
+                                      },
+                                    ),
+                                    _BrushSlider(
+                                      label:
+                                          'Landing width ${controller.connectorWidth.toStringAsFixed(2)}',
+                                      value: controller.connectorWidth,
+                                      min: 0.25,
+                                      max: 4,
+                                      divisions: 15,
+                                      onChanged: controller.setConnectorWidth,
+                                    ),
+                                    SwitchListTile.adaptive(
+                                      dense: true,
+                                      contentPadding: EdgeInsets.zero,
+                                      title: const Text('Bidirectional'),
+                                      value: controller.connectorBidirectional,
+                                      onChanged:
+                                          controller.setConnectorBidirectional,
+                                    ),
+                                    if (controller.connectorStart != null)
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: TextButton(
+                                          onPressed:
+                                              controller.cancelConnectorDraft,
+                                          child: const Text(
+                                            'Cancel first landing',
+                                          ),
+                                        ),
+                                      ),
+                                    if (controller
+                                        .document
+                                        .surfaceConnectors
+                                        .isNotEmpty)
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              '${controller.document.surfaceConnectors.length} authored ${controller.document.surfaceConnectors.length == 1 ? 'connector' : 'connectors'}',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall,
+                                            ),
+                                          ),
+                                          PopupMenuButton<String>(
+                                            tooltip: 'Delete a connector',
+                                            icon: const Icon(
+                                              Icons.link_off,
+                                              size: 18,
+                                            ),
+                                            onSelected: controller
+                                                .deleteSurfaceConnector,
+                                            itemBuilder: (context) => [
+                                              for (final connector
+                                                  in controller
+                                                      .document
+                                                      .surfaceConnectors
+                                                      .reversed)
+                                                PopupMenuItem(
+                                                  value: connector.id,
+                                                  child: Text(
+                                                    '${connector.kind.name}: ${controller.document.surfaceById(connector.fromSurfaceId)?.name ?? connector.fromSurfaceId} → ${controller.document.surfaceById(connector.toSurfaceId)?.name ?? connector.toSurfaceId}',
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                  ],
+                                  const SizedBox(height: 4),
+                                  DropdownButtonFormField<String>(
+                                    initialValue:
+                                        controller.document.activeSurfaceId,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Target surface',
+                                      isDense: true,
+                                    ),
+                                    items: [
+                                      for (final surface
+                                          in controller.document.surfaces)
+                                        DropdownMenuItem(
+                                          value: surface.id,
+                                          child: Text(
+                                            '${surface.name} · z ${surface.height.elevation.toStringAsFixed(2)}',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                    ],
+                                    onChanged: (id) {
+                                      if (id != null) {
+                                        controller.setActiveSurface(id);
+                                      }
+                                    },
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'Default: ${controller.catalog.materialById(controller.activeSurface.materialId)?.name ?? controller.activeSurface.materialId}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall,
                                         ),
-                                        if (region?.resetsToDefault ?? false)
-                                          Text(
-                                            'This clear-fill region reveals the default ground and has no texture size.',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
-                                          )
-                                        else ...[
-                                          _BrushSlider(
-                                            label: region == null
-                                                ? 'New size ${(scale * 100).round()}%'
-                                                : 'Fill size ${(scale * 100).round()}%',
-                                            value: scale,
-                                            min: 0.25,
-                                            max: 4,
-                                            divisions: 15,
-                                            onChangeStart: (_) => controller
-                                                .beginTerrainTextureScaleEdit(),
-                                            onChanged: controller
-                                                .setActiveFillTextureScale,
-                                            onChangeEnd: (_) => controller
-                                                .endTerrainTextureScaleEdit(),
-                                          ),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  region == null
-                                                      ? 'Used by the next fill. Smaller values create finer detail.'
-                                                      : 'Editing ${material.name}. Changes preview live.',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodySmall,
-                                                ),
+                                      ),
+                                      TextButton(
+                                        onPressed:
+                                            controller
+                                                    .activeSurface
+                                                    .materialId ==
+                                                controller.selectedMaterialId
+                                            ? null
+                                            : () {
+                                                final material = controller
+                                                    .catalog
+                                                    .materialById(
+                                                      controller
+                                                          .selectedMaterialId,
+                                                    );
+                                                if (material != null) {
+                                                  controller
+                                                      .setDefaultGroundMaterial(
+                                                        material,
+                                                      );
+                                                }
+                                              },
+                                        child: const Text('Use selected'),
+                                      ),
+                                    ],
+                                  ),
+                                  if (controller.mode ==
+                                          EnvironmentEditorMode.fillGround ||
+                                      controller.mode ==
+                                          EnvironmentEditorMode
+                                              .surfacePolygon ||
+                                      controller.mode ==
+                                          EnvironmentEditorMode.editGround ||
+                                      controller.hasSelectedEnvironmentArea)
+                                    Builder(
+                                      builder: (context) {
+                                        final region =
+                                            controller.selectedTerrainRegion;
+                                        final liquid =
+                                            controller.selectedLiquidVolume;
+                                        final material = controller.catalog
+                                            .materialById(
+                                              liquid?.materialId ??
+                                                  (region != null &&
+                                                          !region
+                                                              .resetsToDefault
+                                                      ? region.materialId
+                                                      : controller
+                                                            .selectedMaterialId),
+                                            );
+                                        if (material == null) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        final scale =
+                                            controller.activeFillTextureScale;
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Text(
+                                              'Material repeat ${material.effectiveRepeatWorldWidth.toStringAsFixed(1)} × ${material.effectiveRepeatWorldHeight.toStringAsFixed(1)} world units',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall,
+                                            ),
+                                            if (region?.resetsToDefault ??
+                                                false)
+                                              Text(
+                                                'This clear-fill region reveals the default ground and has no texture size.',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall,
+                                              )
+                                            else ...[
+                                              _BrushSlider(
+                                                label:
+                                                    region == null &&
+                                                        liquid == null
+                                                    ? 'New size ${(scale * 100).round()}%'
+                                                    : 'Fill size ${(scale * 100).round()}%',
+                                                value: scale,
+                                                min: 0.25,
+                                                max: 4,
+                                                divisions: 15,
+                                                onChangeStart: (_) => controller
+                                                    .beginTerrainTextureScaleEdit(),
+                                                onChanged: controller
+                                                    .setActiveFillTextureScale,
+                                                onChangeEnd: (_) => controller
+                                                    .endTerrainTextureScaleEdit(),
                                               ),
-                                              TextButton(
-                                                onPressed: scale == 1
-                                                    ? null
-                                                    : controller
-                                                          .resetActiveFillTextureScale,
-                                                child: const Text('Reset'),
+                                              _BrushSlider(
+                                                label:
+                                                    'Opacity ${(controller.activeFillOpacity * 100).round()}%',
+                                                value: controller
+                                                    .activeFillOpacity,
+                                                min: 0.05,
+                                                max: 1,
+                                                divisions: 19,
+                                                onChangeStart: (_) => controller
+                                                    .beginTerrainTextureScaleEdit(),
+                                                onChanged: controller
+                                                    .setActiveFillOpacity,
+                                                onChangeEnd: (_) => controller
+                                                    .endTerrainTextureScaleEdit(),
+                                              ),
+                                              _BrushSlider(
+                                                label:
+                                                    'Edge ${controller.activeFillEdgeBlend.toStringAsFixed(2)}',
+                                                value: controller
+                                                    .activeFillEdgeBlend,
+                                                min: 0,
+                                                max: 3,
+                                                divisions: 30,
+                                                onChangeStart: (_) => controller
+                                                    .beginTerrainTextureScaleEdit(),
+                                                onChanged: controller
+                                                    .setActiveFillEdgeBlend,
+                                                onChangeEnd: (_) => controller
+                                                    .endTerrainTextureScaleEdit(),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      region == null &&
+                                                              liquid == null
+                                                          ? 'Used by the next fill. Smaller values create finer detail.'
+                                                          : 'Editing ${material.name}. Changes preview live.',
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodySmall,
+                                                    ),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: scale == 1
+                                                        ? null
+                                                        : controller
+                                                              .resetActiveFillTextureScale,
+                                                    child: const Text('Reset'),
+                                                  ),
+                                                ],
                                               ),
                                             ],
-                                          ),
-                                        ],
-                                      ],
-                                    );
-                                  },
-                                ),
-                            ],
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  if (!controller.hasSelectedEnvironmentArea &&
+                                      (controller.mode ==
+                                              EnvironmentEditorMode
+                                                  .surfacePolygon ||
+                                          controller
+                                              .selectedMaterialIsWater)) ...[
+                                    _BrushSlider(
+                                      label:
+                                          'Surface elevation ${controller.newSurfaceElevation.toStringAsFixed(2)}',
+                                      value: controller.newSurfaceElevation,
+                                      min: -4,
+                                      max: 4,
+                                      divisions: 32,
+                                      onChanged:
+                                          controller.setNewSurfaceElevation,
+                                    ),
+                                    if (controller.selectedMaterialIsWater)
+                                      _BrushSlider(
+                                        label:
+                                            'Water depth ${controller.newWaterDepth.toStringAsFixed(2)}',
+                                        value: controller.newWaterDepth,
+                                        min: 0.05,
+                                        max: 3,
+                                        divisions: 59,
+                                        onChanged: controller.setNewWaterDepth,
+                                      ),
+                                  ],
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                         Expanded(
@@ -1472,7 +1823,10 @@ class _PaletteState extends State<_Palette> {
                                     (controller.mode ==
                                             EnvironmentEditorMode.paint ||
                                         controller.mode ==
-                                            EnvironmentEditorMode.fillGround) &&
+                                            EnvironmentEditorMode.fillGround ||
+                                        controller.mode ==
+                                            EnvironmentEditorMode
+                                                .surfacePolygon) &&
                                     controller.selectedMaterialId ==
                                         material.id,
                                 onTap: () =>
@@ -1627,6 +1981,7 @@ class _PaletteState extends State<_Palette> {
                                   'Buildings' => Icons.cottage_outlined,
                                   'Furniture' => Icons.chair_outlined,
                                   'Small Items' => Icons.inventory_2_outlined,
+                                  'Animals' => Icons.pets_outlined,
                                   _ => Icons.nature_outlined,
                                 },
                                 selected:
@@ -1811,6 +2166,7 @@ class _AssetPaletteIndex {
     'ow3' => 'CORE 3',
     'nf' => 'NORTHFOLK',
     'owdt' => 'DARK TOWN',
+    'animals' => 'ANIMALS',
     _ => id.toUpperCase(),
   };
 
@@ -2189,6 +2545,8 @@ class _InspectorState extends State<_Inspector> {
         final object = controller.selectedObject;
         final selectedObjects = controller.selectedObjects;
         final terrainRegion = controller.selectedTerrainRegion;
+        final surface = controller.selectedSurface;
+        final liquid = controller.selectedLiquidVolume;
         final terrainMaterial = terrainRegion == null
             ? null
             : controller.catalog.materialById(terrainRegion.materialId);
@@ -2220,6 +2578,11 @@ class _InspectorState extends State<_Inspector> {
             Text(
               '${controller.document.terrainRegions.length} ground fills · '
               '${controller.document.terrainStrokes.length} paint strokes',
+            ),
+            Text(
+              '${controller.document.surfaces.length} surfaces · '
+              '${controller.document.liquidVolumes.length} liquid volumes · '
+              '${controller.document.surfaceConnectors.length} connectors',
             ),
             Text('${controller.document.objects.length} placed objects'),
             const Divider(height: 32),
@@ -2257,11 +2620,145 @@ class _InspectorState extends State<_Inspector> {
                 }),
               ),
             const Divider(height: 32),
-            if (object == null && terrainRegion == null) ...[
+            if (object == null && !controller.hasSelectedEnvironmentArea) ...[
               const Text('No object selected'),
               const SizedBox(height: 8),
               const Text(
                 'Choose Select for objects or Edit fill for ground regions.',
+              ),
+            ] else if (object == null && surface != null) ...[
+              Text(
+                surface.name,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text('${surface.points.length} polygon points'),
+              Text('kind ${surface.kind.name}'),
+              Text('support id ${surface.id}'),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Geometry only'),
+                subtitle: Text(
+                  surface.id == environmentBaseSurfaceId
+                      ? 'The base world surface must draw its material.'
+                      : 'Keep elevation, navigation, and object support without drawing the default material.',
+                ),
+                value: !surface.drawsBaseMaterial,
+                onChanged: surface.id == environmentBaseSurfaceId
+                    ? null
+                    : controller.setSelectedSurfaceGeometryOnly,
+              ),
+              const SizedBox(height: 8),
+              _NumberStepper(
+                label: 'Surface elevation',
+                value: surface.height.elevation,
+                step: 0.25,
+                onDecrease: () =>
+                    controller.adjustSelectedTerrainElevation(-0.25),
+                onIncrease: () =>
+                    controller.adjustSelectedTerrainElevation(0.25),
+              ),
+              const SizedBox(height: 8),
+              FilledButton.tonalIcon(
+                onPressed: controller.document.activeSurfaceId == surface.id
+                    ? null
+                    : () => controller.setActiveSurface(surface.id),
+                icon: const Icon(Icons.layers_outlined),
+                label: const Text('Use as target surface'),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Objects and paint placed while this surface is active are bound to it. Other floors at the same x/y remain independent.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: controller.deleteSelected,
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Delete surface'),
+              ),
+            ] else if (object == null && liquid != null) ...[
+              Text(liquid.name, style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Text('${liquid.points.length} polygon points'),
+              Text('bed surface ${liquid.bedSurfaceId}'),
+              const SizedBox(height: 8),
+              _NumberStepper(
+                label: 'Liquid surface elevation',
+                value: liquid.surfaceElevation,
+                step: 0.25,
+                onDecrease: () =>
+                    controller.adjustSelectedTerrainElevation(-0.25),
+                onIncrease: () =>
+                    controller.adjustSelectedTerrainElevation(0.25),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Variable depth'),
+                subtitle: const Text(
+                  'Interpolate from one authored depth endpoint to another',
+                ),
+                value: liquid.hasDepthRamp,
+                onChanged: controller.setSelectedVariableWaterDepth,
+              ),
+              if (liquid.hasDepthRamp) ...[
+                _NumberStepper(
+                  label: 'Start depth',
+                  value: liquid.depth,
+                  step: 0.1,
+                  onDecrease: () => controller.adjustSelectedWaterDepth(-0.1),
+                  onIncrease: () => controller.adjustSelectedWaterDepth(0.1),
+                ),
+                const SizedBox(height: 8),
+                _NumberStepper(
+                  label: 'End depth',
+                  value: liquid.endDepth!,
+                  step: 0.1,
+                  onDecrease: () =>
+                      controller.adjustSelectedWaterEndDepth(-0.1),
+                  onIncrease: () => controller.adjustSelectedWaterEndDepth(0.1),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: controller.swapSelectedWaterDepthRamp,
+                  icon: const Icon(Icons.swap_horiz),
+                  label: const Text('Swap depth ends'),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'In Edit fill mode, drag cyan (start) and purple (end) to aim the depth ramp.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ] else
+                _NumberStepper(
+                  label: 'Depth',
+                  value: liquid.depth,
+                  step: 0.1,
+                  onDecrease: () => controller.adjustSelectedWaterDepth(-0.1),
+                  onIncrease: () => controller.adjustSelectedWaterDepth(0.1),
+                ),
+              const SizedBox(height: 8),
+              _NumberStepper(
+                label: 'Opacity',
+                value: liquid.opacity,
+                step: 0.05,
+                onDecrease: () => controller.adjustSelectedFillOpacity(-0.05),
+                onIncrease: () => controller.adjustSelectedFillOpacity(0.05),
+              ),
+              const SizedBox(height: 8),
+              _NumberStepper(
+                label: 'Edge softness',
+                value: liquid.edgeBlend,
+                step: 0.1,
+                onDecrease: () => controller.adjustSelectedFillEdgeBlend(-0.1),
+                onIncrease: () => controller.adjustSelectedFillEdgeBlend(0.1),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: controller.deleteSelected,
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Delete liquid'),
               ),
             ] else if (object == null) ...[
               Text(
@@ -2272,12 +2769,58 @@ class _InspectorState extends State<_Inspector> {
               ),
               const SizedBox(height: 8),
               Text('${terrainRegion.points.length} polygon points'),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          controller.moveSelectedTerrainRegionOrder(-1),
+                      icon: const Icon(Icons.arrow_downward, size: 18),
+                      label: const Text('Behind'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          controller.moveSelectedTerrainRegionOrder(1),
+                      icon: const Icon(Icons.arrow_upward, size: 18),
+                      label: const Text('In front'),
+                    ),
+                  ),
+                ],
+              ),
               if (!terrainRegion.resetsToDefault) ...[
                 Text(
                   'texture size ${(terrainRegion.textureScale * 100).round()}%',
                 ),
                 Text(
                   'repeat ${(terrainMaterial!.effectiveRepeatWorldWidth * terrainRegion.textureScale).toStringAsFixed(1)} × ${(terrainMaterial.effectiveRepeatWorldHeight * terrainRegion.textureScale).toStringAsFixed(1)} world units',
+                ),
+                const SizedBox(height: 8),
+                _NumberStepper(
+                  label: 'Opacity',
+                  value: terrainRegion.opacity,
+                  step: 0.05,
+                  onDecrease: () => controller.adjustSelectedFillOpacity(-0.05),
+                  onIncrease: () => controller.adjustSelectedFillOpacity(0.05),
+                ),
+                const SizedBox(height: 8),
+                _NumberStepper(
+                  label: 'Edge softness',
+                  value: terrainRegion.edgeBlend,
+                  step: 0.1,
+                  onDecrease: () =>
+                      controller.adjustSelectedFillEdgeBlend(-0.1),
+                  onIncrease: () => controller.adjustSelectedFillEdgeBlend(0.1),
+                ),
+                Text(
+                  'Opacity and edge softness are visual; the polygon remains the exact gameplay boundary.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                Text(
+                  'Paint on ${controller.document.surfaceById(terrainRegion.surfaceId)?.name ?? terrainRegion.surfaceId}. Height belongs to that surface, not this paint.',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
               const SizedBox(height: 8),
@@ -2302,9 +2845,102 @@ class _InspectorState extends State<_Inspector> {
               Text('y ${object.y.toStringAsFixed(2)}'),
               Text('view ${object.direction.name}'),
               Text('render band ${asset?.renderBand.name ?? 'unknown'}'),
+              if (asset?.animalAnimation case final animation?) ...[
+                const SizedBox(height: 8),
+                Text('ANIMAL', style: Theme.of(context).textTheme.labelMedium),
+                if (controller.animalBehaviorProfileFor(object)
+                    case final profile?) ...[
+                  DropdownButtonFormField<String>(
+                    initialValue: profile.id,
+                    decoration: const InputDecoration(
+                      labelText: 'Behavior profile',
+                      isDense: true,
+                      border: OutlineInputBorder(),
+                    ),
+                    items: [
+                      for (final candidate
+                          in controller.catalog.animalBehaviorProfiles)
+                        DropdownMenuItem(
+                          value: candidate.id,
+                          child: Text(candidate.name),
+                        ),
+                    ],
+                    onChanged: (id) {
+                      if (id != null) {
+                        controller.setSelectedAnimalBehaviorProfile(id);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    profile.roamingRadius <= 0
+                        ? 'stays at its home point'
+                        : 'home radius ${profile.roamingRadius.toStringAsFixed(1)} world units',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  if (object.behaviorProfileId == null)
+                    Text(
+                      'Using ${animation.behaviorProfileId} default',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                ],
+              ],
               if (controller.mode == EnvironmentEditorMode.collision) ...[
                 const SizedBox(height: 10),
                 _GeometryEditor(controller: controller),
+              ],
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                initialValue:
+                    selectedObjects.every(
+                      (selected) =>
+                          selected.supportSurfaceId == object.supportSurfaceId,
+                    )
+                    ? object.supportSurfaceId
+                    : null,
+                decoration: const InputDecoration(
+                  labelText: 'Support surface',
+                  helperText: 'The floor this selection stands on',
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                ),
+                items: [
+                  for (final candidate in controller.document.surfaces)
+                    DropdownMenuItem(
+                      value: candidate.id,
+                      child: Text(candidate.name),
+                    ),
+                ],
+                onChanged: (surfaceId) {
+                  if (surfaceId != null) {
+                    controller.setSelectedSupportSurface(surfaceId);
+                  }
+                },
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Occlude upper surfaces'),
+                subtitle: const Text(
+                  'Depth-sort this object with overlapping surfaces above its support floor',
+                ),
+                value: object.crossSurfaceOcclusion,
+                onChanged: controller.setSelectedCrossSurfaceOcclusion,
+              ),
+              if (object.crossSurfaceOcclusion) ...[
+                _NumberStepper(
+                  label: 'Occlusion height',
+                  value: object.occlusionHeight,
+                  step: 0.5,
+                  onDecrease: () =>
+                      controller.adjustSelectedOcclusionHeight(-0.5),
+                  onIncrease: () =>
+                      controller.adjustSelectedOcclusionHeight(0.5),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Maximum vertical distance to an overlapping surface',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ],
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
@@ -2352,6 +2988,35 @@ class _InspectorState extends State<_Inspector> {
                 ],
               ],
               const SizedBox(height: 12),
+              DropdownButtonFormField<EnvironmentLiquidInteraction>(
+                initialValue: object.liquidInteraction,
+                decoration: const InputDecoration(
+                  labelText: 'Liquid interaction',
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                ),
+                items: [
+                  for (final interaction in EnvironmentLiquidInteraction.values)
+                    DropdownMenuItem(
+                      value: interaction,
+                      child: Text(interaction.name),
+                    ),
+                ],
+                onChanged: (interaction) {
+                  if (interaction != null) {
+                    controller.setSelectedLiquidInteraction(interaction);
+                  }
+                },
+              ),
+              const SizedBox(height: 8),
+              _NumberStepper(
+                label: 'Liquid draft',
+                value: object.liquidDraft,
+                step: 0.05,
+                onDecrease: () => controller.adjustSelectedLiquidDraft(-0.05),
+                onIncrease: () => controller.adjustSelectedLiquidDraft(0.05),
+              ),
+              const SizedBox(height: 8),
               _NumberStepper(
                 label: 'Vertical offset',
                 value: object.verticalOffset,

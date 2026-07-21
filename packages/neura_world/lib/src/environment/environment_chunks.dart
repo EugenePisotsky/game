@@ -122,6 +122,12 @@ class ChunkPlacedEnvironmentObject {
     this.verticalOffset = 0,
     this.sortBias = 0,
     this.direction = EnvironmentDirection.south,
+    this.behaviorProfileId,
+    this.liquidInteraction = EnvironmentLiquidInteraction.automatic,
+    this.liquidDraft = 0.12,
+    this.supportSurfaceId = environmentBaseSurfaceId,
+    this.crossSurfaceOcclusion = false,
+    this.occlusionHeight = 0,
   });
 
   final String id;
@@ -132,6 +138,12 @@ class ChunkPlacedEnvironmentObject {
   final double sortBias;
   final String editorLayerId;
   final EnvironmentDirection direction;
+  final String? behaviorProfileId;
+  final EnvironmentLiquidInteraction liquidInteraction;
+  final double liquidDraft;
+  final String supportSurfaceId;
+  final bool crossSurfaceOcclusion;
+  final double occlusionHeight;
   final EnvironmentObjectBounds bounds;
 
   PlacedEnvironmentObject toWorldObject(
@@ -146,6 +158,12 @@ class ChunkPlacedEnvironmentObject {
     sortBias: sortBias,
     editorLayerId: editorLayerId,
     direction: direction,
+    behaviorProfileId: behaviorProfileId,
+    liquidInteraction: liquidInteraction,
+    liquidDraft: liquidDraft,
+    supportSurfaceId: supportSurfaceId,
+    crossSurfaceOcclusion: crossSurfaceOcclusion,
+    occlusionHeight: occlusionHeight,
   );
 
   Map<String, Object> toJson() => {
@@ -155,6 +173,13 @@ class ChunkPlacedEnvironmentObject {
     'verticalOffset': verticalOffset,
     if (sortBias != 0) 'sortBias': sortBias,
     'direction': direction.name,
+    'behaviorProfileId': ?behaviorProfileId,
+    if (liquidInteraction != EnvironmentLiquidInteraction.automatic)
+      'liquidInteraction': liquidInteraction.name,
+    if (liquidDraft != 0.12) 'liquidDraft': liquidDraft,
+    'supportSurfaceId': supportSurfaceId,
+    if (crossSurfaceOcclusion) 'crossSurfaceOcclusion': true,
+    if (occlusionHeight != 0) 'occlusionHeight': occlusionHeight,
     'editorLayerId': editorLayerId,
     'bounds': bounds.toJson(),
   };
@@ -171,6 +196,15 @@ class ChunkPlacedEnvironmentObject {
       direction: EnvironmentDirection.values.byName(
         json['direction'] as String? ?? EnvironmentDirection.south.name,
       ),
+      behaviorProfileId: json['behaviorProfileId'] as String?,
+      liquidInteraction: EnvironmentLiquidInteraction.values.byName(
+        json['liquidInteraction'] as String? ??
+            EnvironmentLiquidInteraction.automatic.name,
+      ),
+      liquidDraft: (json['liquidDraft'] as num? ?? 0.12).toDouble(),
+      supportSurfaceId: json['supportSurfaceId'] as String,
+      crossSurfaceOcclusion: json['crossSurfaceOcclusion'] as bool? ?? false,
+      occlusionHeight: (json['occlusionHeight'] as num? ?? 0).toDouble(),
       editorLayerId:
           json['editorLayerId'] as String? ?? EnvironmentDocument.rootLayerId,
       bounds: EnvironmentObjectBounds.fromJson(
@@ -186,23 +220,32 @@ class EnvironmentChunkDocument {
     required this.coordinate,
     required this.size,
     required this.baseMaterialId,
+    List<EnvironmentSurface>? surfaces,
+    List<EnvironmentLiquidVolume>? liquidVolumes,
+    List<EnvironmentSurfaceConnector>? surfaceConnectors,
     List<TerrainRegion>? terrainRegions,
     List<TerrainStroke>? terrainStrokes,
     List<ChunkPlacedEnvironmentObject>? objects,
     Set<String>? overlapObjectIds,
     this.schemaVersion = currentSchemaVersion,
-  }) : terrainRegions = List.of(terrainRegions ?? const []),
+  }) : surfaces = List.of(surfaces ?? const []),
+       liquidVolumes = List.of(liquidVolumes ?? const []),
+       surfaceConnectors = List.of(surfaceConnectors ?? const []),
+       terrainRegions = List.of(terrainRegions ?? const []),
        terrainStrokes = List.of(terrainStrokes ?? const []),
        objects = List.of(objects ?? const []),
        overlapObjectIds = Set.of(overlapObjectIds ?? const {});
 
-  static const currentSchemaVersion = 2;
+  static const currentSchemaVersion = 4;
 
   final int schemaVersion;
   final String worldId;
   final EnvironmentChunkCoordinate coordinate;
   final double size;
   final String baseMaterialId;
+  final List<EnvironmentSurface> surfaces;
+  final List<EnvironmentLiquidVolume> liquidVolumes;
+  final List<EnvironmentSurfaceConnector> surfaceConnectors;
   final List<TerrainRegion> terrainRegions;
   final List<TerrainStroke> terrainStrokes;
   final List<ChunkPlacedEnvironmentObject> objects;
@@ -215,6 +258,8 @@ class EnvironmentChunkDocument {
     for (final region in terrainRegions)
       if (!region.resetsToDefault) region.materialId,
     for (final stroke in terrainStrokes) stroke.materialId,
+    for (final surface in surfaces) surface.materialId,
+    for (final liquid in liquidVolumes) liquid.materialId,
     for (final object in objects) object.assetId,
   };
 
@@ -224,6 +269,11 @@ class EnvironmentChunkDocument {
     'coordinate': coordinate.toJson(),
     'size': size,
     'baseMaterialId': baseMaterialId,
+    'surfaces': [for (final surface in surfaces) surface.toJson()],
+    'liquidVolumes': [for (final liquid in liquidVolumes) liquid.toJson()],
+    'surfaceConnectors': [
+      for (final connector in surfaceConnectors) connector.toJson(),
+    ],
     'terrainRegions': [for (final region in terrainRegions) region.toJson()],
     'terrainStrokes': [for (final stroke in terrainStrokes) stroke.toJson()],
     'objects': [for (final object in objects) object.toJson()],
@@ -236,7 +286,7 @@ class EnvironmentChunkDocument {
 
   factory EnvironmentChunkDocument.fromJson(Map<String, Object?> json) {
     final version = (json['schemaVersion'] as num?)?.toInt() ?? 1;
-    if (version < 1 || version > currentSchemaVersion) {
+    if (version != currentSchemaVersion) {
       throw FormatException('Unsupported environment chunk schema $version.');
     }
     return EnvironmentChunkDocument(
@@ -247,6 +297,19 @@ class EnvironmentChunkDocument {
       ),
       size: (json['size'] as num).toDouble(),
       baseMaterialId: json['baseMaterialId'] as String,
+      surfaces: [
+        for (final value in json['surfaces'] as List<Object?>? ?? const [])
+          EnvironmentSurface.fromJson(value as Map<String, Object?>),
+      ],
+      liquidVolumes: [
+        for (final value in json['liquidVolumes'] as List<Object?>? ?? const [])
+          EnvironmentLiquidVolume.fromJson(value as Map<String, Object?>),
+      ],
+      surfaceConnectors: [
+        for (final value
+            in json['surfaceConnectors'] as List<Object?>? ?? const [])
+          EnvironmentSurfaceConnector.fromJson(value as Map<String, Object?>),
+      ],
       terrainRegions: [
         for (final value
             in json['terrainRegions'] as List<Object?>? ?? const [])
@@ -297,6 +360,8 @@ class EnvironmentWorldManifest {
     List<EnvironmentTravelPoint>? travelPoints,
     List<EditorLayer>? editorLayers,
     String? activeLayerId,
+    this.playerSpawnSurfaceId = environmentBaseSurfaceId,
+    this.activeSurfaceId = environmentBaseSurfaceId,
     this.schemaVersion = currentSchemaVersion,
   }) : travelPoints = List.of(travelPoints ?? const []),
        editorLayers = List.of(
@@ -304,7 +369,7 @@ class EnvironmentWorldManifest {
        ),
        activeLayerId = activeLayerId ?? EnvironmentDocument.rootLayerId;
 
-  static const currentSchemaVersion = 1;
+  static const currentSchemaVersion = 2;
 
   final int schemaVersion;
   final String id;
@@ -318,6 +383,8 @@ class EnvironmentWorldManifest {
   final List<EnvironmentTravelPoint> travelPoints;
   final List<EditorLayer> editorLayers;
   final String activeLayerId;
+  final String playerSpawnSurfaceId;
+  final String activeSurfaceId;
 
   bool containsChunk(EnvironmentChunkCoordinate coordinate) =>
       chunks.contains(coordinate);
@@ -341,6 +408,8 @@ class EnvironmentWorldManifest {
     'travelPoints': [for (final point in travelPoints) point.toJson()],
     'editorLayers': [for (final layer in editorLayers) layer.toJson()],
     'activeLayerId': activeLayerId,
+    'playerSpawnSurfaceId': playerSpawnSurfaceId,
+    'activeSurfaceId': activeSurfaceId,
   };
 
   String toJsonString({bool pretty = true}) => pretty
@@ -392,6 +461,8 @@ class EnvironmentWorldManifest {
           EditorLayer.fromJson(value as Map<String, Object?>),
       ],
       activeLayerId: json['activeLayerId'] as String?,
+      playerSpawnSurfaceId: json['playerSpawnSurfaceId'] as String,
+      activeSurfaceId: json['activeSurfaceId'] as String,
     );
   }
 
@@ -427,6 +498,16 @@ class EnvironmentChunkedWorld {
       for (var y = 0; y < rows; y++)
         for (var x = 0; x < columns; x++) EnvironmentChunkCoordinate(x, y),
     ];
+    final surfaces = <EnvironmentChunkCoordinate, List<EnvironmentSurface>>{
+      for (final coordinate in coordinates) coordinate: [],
+    };
+    final liquids = <EnvironmentChunkCoordinate, List<EnvironmentLiquidVolume>>{
+      for (final coordinate in coordinates) coordinate: [],
+    };
+    final connectors =
+        <EnvironmentChunkCoordinate, List<EnvironmentSurfaceConnector>>{
+          for (final coordinate in coordinates) coordinate: [],
+        };
     final regions = <EnvironmentChunkCoordinate, List<TerrainRegion>>{
       for (final coordinate in coordinates) coordinate: [],
     };
@@ -437,6 +518,122 @@ class EnvironmentChunkedWorld {
         <EnvironmentChunkCoordinate, List<ChunkPlacedEnvironmentObject>>{
           for (final coordinate in coordinates) coordinate: [],
         };
+
+    EnvironmentObjectBounds polygonBounds(
+      List<WorldPoint> points, {
+      double padding = 0,
+    }) => EnvironmentObjectBounds(
+      minX: points.map((point) => point.x).reduce(math.min) - padding,
+      minY: points.map((point) => point.y).reduce(math.min) - padding,
+      maxX: points.map((point) => point.x).reduce(math.max) + padding,
+      maxY: points.map((point) => point.y).reduce(math.max) + padding,
+    );
+
+    WorldPoint localPoint(
+      WorldPoint point,
+      EnvironmentChunkCoordinate coordinate,
+    ) => WorldPoint(
+      point.x - coordinate.x * chunkSize,
+      point.y - coordinate.y * chunkSize,
+    );
+
+    EnvironmentSurfaceHeight localHeight(
+      EnvironmentSurfaceHeight height,
+      EnvironmentChunkCoordinate coordinate,
+    ) => switch (height.kind) {
+      EnvironmentSurfaceHeightKind.flat => EnvironmentSurfaceHeight.flat(
+        height.elevation,
+      ),
+      EnvironmentSurfaceHeightKind.linearRamp =>
+        EnvironmentSurfaceHeight.linearRamp(
+          elevation: height.elevation,
+          endElevation: height.endElevation,
+          rampStart: localPoint(height.rampStart!, coordinate),
+          rampEnd: localPoint(height.rampEnd!, coordinate),
+        ),
+    };
+
+    for (final surface in document.surfaces) {
+      // The rectangular base surface is derived from the manifest dimensions.
+      if (surface.id == environmentBaseSurfaceId || surface.points.length < 3) {
+        continue;
+      }
+      final bounds = polygonBounds(surface.points);
+      for (final coordinate in coordinates) {
+        if (!bounds.overlapsChunk(coordinate, chunkSize)) continue;
+        surfaces[coordinate]!.add(
+          EnvironmentSurface(
+            id: surface.id,
+            name: surface.name,
+            materialId: surface.materialId,
+            points: [
+              for (final point in surface.points) localPoint(point, coordinate),
+            ],
+            kind: surface.kind,
+            height: localHeight(surface.height, coordinate),
+            walkable: surface.walkable,
+            drawsBaseMaterial: surface.drawsBaseMaterial,
+            order: surface.order,
+            visibilityGroupId: surface.visibilityGroupId,
+          ),
+        );
+      }
+    }
+
+    for (final liquid in document.liquidVolumes) {
+      if (liquid.points.length < 3) continue;
+      final bounds = polygonBounds(liquid.points, padding: liquid.edgeBlend);
+      for (final coordinate in coordinates) {
+        if (!bounds.overlapsChunk(coordinate, chunkSize)) continue;
+        liquids[coordinate]!.add(
+          EnvironmentLiquidVolume(
+            id: liquid.id,
+            name: liquid.name,
+            bedSurfaceId: liquid.bedSurfaceId,
+            materialId: liquid.materialId,
+            points: [
+              for (final point in liquid.points) localPoint(point, coordinate),
+            ],
+            surfaceElevation: liquid.surfaceElevation,
+            depth: liquid.depth,
+            endDepth: liquid.endDepth,
+            depthRampStart: liquid.depthRampStart == null
+                ? null
+                : localPoint(liquid.depthRampStart!, coordinate),
+            depthRampEnd: liquid.depthRampEnd == null
+                ? null
+                : localPoint(liquid.depthRampEnd!, coordinate),
+            edgeBlend: liquid.edgeBlend,
+            opacity: liquid.opacity,
+            textureScale: liquid.textureScale,
+            order: liquid.order,
+          ),
+        );
+      }
+    }
+
+    for (final connector in document.surfaceConnectors) {
+      final bounds = polygonBounds([
+        connector.from,
+        connector.to,
+      ], padding: connector.width);
+      for (final coordinate in coordinates) {
+        if (!bounds.overlapsChunk(coordinate, chunkSize)) continue;
+        connectors[coordinate]!.add(
+          EnvironmentSurfaceConnector(
+            id: connector.id,
+            fromSurfaceId: connector.fromSurfaceId,
+            toSurfaceId: connector.toSurfaceId,
+            from: localPoint(connector.from, coordinate),
+            to: localPoint(connector.to, coordinate),
+            kind: connector.kind,
+            width: connector.width,
+            bidirectional: connector.bidirectional,
+            cost: connector.cost,
+          ),
+        );
+      }
+    }
 
     for (final region in document.terrainRegions) {
       if (region.points.length < 3) continue;
@@ -466,9 +663,11 @@ class EnvironmentChunkedWorld {
             materialId: region.materialId,
             resetsToDefault: region.resetsToDefault,
             edgeBlend: region.edgeBlend,
+            opacity: region.opacity,
             textureScale: region.textureScale,
             seed: region.seed,
             order: region.order,
+            surfaceId: region.surfaceId,
             points: [
               for (final point in region.points)
                 WorldPoint(
@@ -523,6 +722,7 @@ class EnvironmentChunkedWorld {
             scatter: stroke.scatter,
             sizeJitter: stroke.sizeJitter,
             opacityJitter: stroke.opacityJitter,
+            surfaceId: stroke.surfaceId,
             points: [
               for (final point in stroke.points)
                 WorldPoint(
@@ -558,6 +758,12 @@ class EnvironmentChunkedWorld {
           verticalOffset: object.verticalOffset,
           sortBias: object.sortBias,
           direction: object.direction,
+          behaviorProfileId: object.behaviorProfileId,
+          liquidInteraction: object.liquidInteraction,
+          liquidDraft: object.liquidDraft,
+          supportSurfaceId: object.supportSurfaceId,
+          crossSurfaceOcclusion: object.crossSurfaceOcclusion,
+          occlusionHeight: object.occlusionHeight,
           editorLayerId: object.editorLayerId,
           bounds: bounds,
         ),
@@ -571,6 +777,9 @@ class EnvironmentChunkedWorld {
           coordinate: coordinate,
           size: chunkSize,
           baseMaterialId: document.baseMaterialId,
+          surfaces: surfaces[coordinate],
+          liquidVolumes: liquids[coordinate],
+          surfaceConnectors: connectors[coordinate],
           terrainRegions: regions[coordinate],
           terrainStrokes: strokes[coordinate],
           objects: objects[coordinate],
@@ -597,6 +806,8 @@ class EnvironmentChunkedWorld {
         ),
         editorLayers: document.editorLayers,
         activeLayerId: document.activeLayerId,
+        playerSpawnSurfaceId: document.activeSurfaceId,
+        activeSurfaceId: document.activeSurfaceId,
       ),
       chunks: chunks,
     );
@@ -654,6 +865,9 @@ EnvironmentChunkedWorld extendEnvironmentChunkedWorld(
       coordinate: coordinate,
       size: source.size,
       baseMaterialId: source.baseMaterialId,
+      surfaces: source.surfaces,
+      liquidVolumes: source.liquidVolumes,
+      surfaceConnectors: source.surfaceConnectors,
       terrainRegions: source.terrainRegions,
       terrainStrokes: source.terrainStrokes,
       objects: [
@@ -667,6 +881,12 @@ EnvironmentChunkedWorld extendEnvironmentChunkedWorld(
             sortBias: object.sortBias,
             editorLayerId: object.editorLayerId,
             direction: object.direction,
+            behaviorProfileId: object.behaviorProfileId,
+            liquidInteraction: object.liquidInteraction,
+            liquidDraft: object.liquidDraft,
+            supportSurfaceId: object.supportSurfaceId,
+            crossSurfaceOcclusion: object.crossSurfaceOcclusion,
+            occlusionHeight: object.occlusionHeight,
             bounds: EnvironmentObjectBounds(
               minX: object.bounds.minX + worldShiftX,
               minY: object.bounds.minY + worldShiftY,
@@ -702,6 +922,9 @@ EnvironmentChunkedWorld extendEnvironmentChunkedWorld(
       coordinate: chunk.coordinate,
       size: chunk.size,
       baseMaterialId: chunk.baseMaterialId,
+      surfaces: chunk.surfaces,
+      liquidVolumes: chunk.liquidVolumes,
+      surfaceConnectors: chunk.surfaceConnectors,
       terrainRegions: chunk.terrainRegions,
       terrainStrokes: chunk.terrainStrokes,
       objects: chunk.objects,
@@ -742,6 +965,8 @@ EnvironmentChunkedWorld extendEnvironmentChunkedWorld(
       ],
       editorLayers: manifest.editorLayers,
       activeLayerId: manifest.activeLayerId,
+      playerSpawnSurfaceId: manifest.playerSpawnSurfaceId,
+      activeSurfaceId: manifest.activeSurfaceId,
     ),
     chunks: chunks,
   );

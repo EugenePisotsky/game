@@ -424,4 +424,64 @@ void main() {
     expect(geometry.toJson(), contains('footprints'));
     expect(geometry.toJson(), isNot(contains('footprint')));
   });
+
+  test(
+    'animal assets resolve shared behavior profiles and animation clips',
+    () {
+      final catalog = EnvironmentCatalog.fromJsonString('''
+      {
+        "materials": [],
+        "animalBehaviorProfiles": [
+          {
+            "id": "cat_household",
+            "name": "Household cat",
+            "roamingRadius": 5.0,
+            "walkSpeedPixelsPerSecond": 100.0,
+            "runSpeedPixelsPerSecond": 170.0,
+            "minimumPauseSeconds": 1.0,
+            "maximumPauseSeconds": 4.0,
+            "idleWeight": 0.2,
+            "walkWeight": 0.4,
+            "runWeight": 0.3,
+            "actionWeight": 0.1
+          }
+        ],
+        "objects": [
+          {
+            "id": "animals.cat_1",
+            "name": "Cat 1",
+            "category": "Cat",
+            "renderScale": 1.0,
+            "viewMode": "fixed",
+            "views": {"south": {"image": "cat_idle.png"}},
+            "animalAnimation": {
+              "behaviorProfileId": "cat_household",
+              "frameWidth": 80,
+              "frameHeight": 80,
+              "directionRows": [
+                "south", "west", "east", "north",
+                "southWest", "northWest", "southEast", "northEast"
+              ],
+              "idle": {"image": "cat_idle.png", "frames": 3, "framesPerSecond": 4.0},
+              "walk": {"image": "cat_walk.png", "frames": 8, "framesPerSecond": 9.0},
+              "run": {"image": "cat_run.png", "frames": 8, "framesPerSecond": 12.0},
+              "action": {"image": "cat_action.png", "frames": 3, "framesPerSecond": 5.0, "pingPong": true}
+            }
+          }
+        ]
+      }
+    ''');
+
+      final cat = catalog.objectById('animals.cat_1')!;
+      expect(cat.isAnimal, isTrue);
+      expect(cat.animalAnimation!.walk.frames, 8);
+      expect(cat.animalAnimation!.rowForDirection('northWest'), 5);
+      expect(
+        catalog
+            .animalBehaviorProfileById(cat.animalAnimation!.behaviorProfileId)!
+            .roamingRadius,
+        5,
+      );
+    },
+  );
 }

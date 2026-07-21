@@ -6,7 +6,6 @@ import 'package:flame_test/flame_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neura_assets/neura_assets.dart';
 import 'package:neura_game/neura_game.dart';
-import 'package:neura_rendering/neura_rendering.dart';
 import 'package:neura_world/neura_world.dart';
 
 void main() {
@@ -73,62 +72,6 @@ void main() {
   );
 
   testWithGame<NeuraGame>(
-    'building footprint orders the actor across its full ground contact',
-    () => NeuraGame(debugSceneName: 'tree_actor_depth'),
-    (game) async {
-      final objectId = game.debugScene!.relevantObjectIds.single;
-      final object = game.document.objects.firstWhere(
-        (candidate) => candidate.id == objectId,
-      );
-      final asset = game.environmentCatalog.objectById(object.assetId)!;
-      final footprint = game.environmentCatalog
-          .geometryForAsset(asset, direction: object.direction.name)
-          .footprints
-          .first;
-      final outline = environmentShapeOutline(footprint, object);
-      final inside = WorldPoint(
-        outline.map((point) => point.x).reduce((a, b) => a + b) /
-            outline.length,
-        outline.map((point) => point.y).reduce((a, b) => a + b) /
-            outline.length,
-      );
-
-      await game.teleportTo(inside);
-
-      expect(
-        game.debugRenderOrder.indexOf('player'),
-        lessThan(game.debugRenderOrder.indexOf(objectId)),
-        reason: 'an actor inside the footprint is occluded by the asset',
-      );
-
-      final horizontal = inside.x - inside.y;
-      final frontDepth =
-          outline
-              .map((point) => point.x + point.y)
-              .reduce((a, b) => math.max(a, b)) +
-          1;
-      await game.teleportTo(
-        WorldPoint(
-          (frontDepth + horizontal) / 2,
-          (frontDepth - horizontal) / 2,
-        ),
-      );
-      expect(
-        game.debugRenderOrder.indexOf(objectId),
-        lessThan(game.debugRenderOrder.indexOf('player')),
-        reason: 'an actor in front of the footprint draws above the asset',
-      );
-
-      await game.teleportTo(const WorldPoint(92, 88));
-      expect(
-        game.debugRenderOrder.indexOf('player'),
-        lessThan(game.debugRenderOrder.indexOf(objectId)),
-        reason: 'an actor behind the footprint draws below the asset',
-      );
-    },
-  );
-
-  testWithGame<NeuraGame>(
     'crosses repeated chunk seams without gaps, navigation loss, or cache growth',
     NeuraGame.new,
     (game) async {
@@ -163,7 +106,7 @@ void main() {
   );
 
   testWithGame<NeuraGame>(
-    'painted non-walkable water participates in navigation',
+    'explicit non-walkable liquid participates in navigation',
     NeuraGame.new,
     (game) async {
       await game.teleportTo(const WorldPoint(100, 100));
@@ -176,12 +119,20 @@ void main() {
           tags: ['water', 'non-walkable'],
         ),
       );
-      game.document.terrainStrokes.add(
-        TerrainStroke(
+      game.document.liquidVolumes.add(
+        EnvironmentLiquidVolume(
+          id: 'test_water',
+          name: 'Test water',
+          bedSurfaceId: environmentBaseSurfaceId,
           materialId: 'test.water',
-          radius: 2,
-          opacity: 1,
-          points: const [WorldPoint(102, 100)],
+          surfaceElevation: 0,
+          depth: 0.35,
+          points: const [
+            WorldPoint(100, 98),
+            WorldPoint(104, 98),
+            WorldPoint(104, 102),
+            WorldPoint(100, 102),
+          ],
         ),
       );
 
@@ -190,6 +141,50 @@ void main() {
         game.navigationGrid.isBlocked(const WorldPoint(106, 100)),
         isFalse,
       );
+    },
+  );
+
+  testWithGame<NeuraGame>(
+    'walking into an authored connector changes physical surfaces',
+    NeuraGame.new,
+    (game) async {
+      await game.teleportTo(const WorldPoint(100, 100));
+      game.document.surfaces.add(
+        EnvironmentSurface(
+          id: 'raised_test',
+          name: 'Raised test surface',
+          materialId: game.worldManifest.baseMaterialId,
+          points: const [
+            WorldPoint(99, 99),
+            WorldPoint(104, 99),
+            WorldPoint(104, 104),
+            WorldPoint(99, 104),
+          ],
+          kind: EnvironmentSurfaceKind.platform,
+          height: const EnvironmentSurfaceHeight.flat(1),
+          order: 1,
+        ),
+      );
+      game.document.surfaceConnectors.add(
+        const EnvironmentSurfaceConnector(
+          id: 'stairs_test',
+          fromSurfaceId: environmentBaseSurfaceId,
+          toSurfaceId: 'raised_test',
+          from: WorldPoint(101, 100),
+          to: WorldPoint(101, 100),
+          width: 1,
+        ),
+      );
+
+      expect(game.requestMovement(const WorldPoint(101, 100)), isTrue);
+      for (var index = 0; index < 30; index++) {
+        game.update(1 / 60);
+        if (game.playerSurfaceId == 'raised_test') break;
+      }
+
+      expect(game.playerSurfaceId, 'raised_test');
+      expect(game.playerPosition.x, 101);
+      expect(game.playerPosition.y, 100);
     },
   );
 

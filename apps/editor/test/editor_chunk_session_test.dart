@@ -118,6 +118,92 @@ void main() {
     },
   );
 
+  test(
+    'streaming preserves the live bathymetry ramp across chunk replicas',
+    () async {
+      const chunkSize = 32.0;
+      final coordinates = [
+        for (var x = 0; x < 5; x++) EnvironmentChunkCoordinate(x, 0),
+      ];
+      final manifest = EnvironmentWorldManifest(
+        id: 'world',
+        name: 'World',
+        chunkSize: chunkSize,
+        width: chunkSize * coordinates.length,
+        height: chunkSize,
+        baseMaterialId: 'ground',
+        chunks: coordinates,
+        playerSpawn: const ChunkLocalPosition(
+          chunk: EnvironmentChunkCoordinate(0, 0),
+          localX: 4,
+          localY: 4,
+        ),
+      );
+      final chunks = {
+        for (final coordinate in coordinates)
+          coordinate: EnvironmentChunkDocument(
+            worldId: manifest.id,
+            coordinate: coordinate,
+            size: chunkSize,
+            baseMaterialId: 'ground',
+            liquidVolumes: [
+              EnvironmentLiquidVolume(
+                id: 'harbor',
+                name: 'Harbor',
+                bedSurfaceId: environmentBaseSurfaceId,
+                materialId: 'water',
+                points: [
+                  WorldPoint(1 - coordinate.x * chunkSize, 1),
+                  WorldPoint(159 - coordinate.x * chunkSize, 1),
+                  WorldPoint(159 - coordinate.x * chunkSize, 31),
+                  WorldPoint(1 - coordinate.x * chunkSize, 31),
+                ],
+                surfaceElevation: 0,
+                depth: 0.25,
+                endDepth: 3,
+                depthRampStart: WorldPoint(8 - coordinate.x * chunkSize, 16),
+                depthRampEnd: WorldPoint(152 - coordinate.x * chunkSize, 16),
+              ),
+            ],
+          ),
+      };
+      final session = EditorChunkSession(
+        manifest: manifest,
+        catalog: EnvironmentCatalog(materials: const [], objects: const []),
+        bundle: _StringAssetBundle({
+          for (final entry in chunks.entries)
+            '$environmentWorldChunksAssetPrefix/${entry.key.key}.json': entry
+                .value
+                .toJsonString(),
+        }),
+      );
+      var document = await session.initialize();
+      final liquid = document.liquidVolumes.single;
+      liquid.depthRampStart = const WorldPoint(18, 12);
+      liquid.depthRampEnd = const WorldPoint(143, 23);
+
+      document =
+          await session.streamForBounds(
+            document,
+            minX: 140,
+            minY: 4,
+            maxX: 156,
+            maxY: 28,
+          ) ??
+          document;
+
+      final streamedLiquid = document.liquidVolumes.single;
+      expect(
+        (streamedLiquid.depthRampStart!.x, streamedLiquid.depthRampStart!.y),
+        (18, 12),
+      );
+      expect(
+        (streamedLiquid.depthRampEnd!.x, streamedLiquid.depthRampEnd!.y),
+        (143, 23),
+      );
+    },
+  );
+
   test('world extension and player spawn update the live manifest', () async {
     final manifest = EnvironmentWorldManifest(
       id: 'world',

@@ -5,10 +5,9 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flame/cache.dart';
-import 'package:flame/components.dart' show Anchor, FpsComponent;
+import 'package:flame/components.dart' show FpsComponent;
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flame/sprite.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show KeyEventResult;
 import 'package:neura_assets/neura_assets.dart';
@@ -35,10 +34,20 @@ class NeuraGame extends FlameGame
   final Map<String, ui.Paint> _repeatingPaints = {};
   final Map<String, ui.Paint> _decalPaints = {};
   final Map<String, _CharacterImages> _characterImages = {};
+  final Map<String, _ActiveAnimal> _animalStatesById = {};
+  final Map<String, NavigationGrid> _animalNavigationBySurface = {};
+  final Map<String, PlacedEnvironmentObject> _loadedAnimalHomesById = {};
+  final Map<String, EnvironmentSurfaceSample> _objectSurfacesById = {};
+  final Map<String, String> _objectDepthSurfaceIdsById = {};
+  final Map<String, ui.Path> _liquidOcclusionPathsById = {};
+  final Set<String> _objectsWithoutLiquidOcclusionPath = {};
+  final Set<String> _activeAnimalIds = {};
   final Map<EnvironmentChunkCoordinate, ui.Picture> _terrainPictures = {};
   final Map<EnvironmentRenderBand, List<PlacedEnvironmentObject>>
   _objectsByRenderBand = {};
   List<EnvironmentDepthEntity<_SceneEntry>> _staticDepthOrder = const [];
+  final Map<String, List<EnvironmentDepthEntity<_SceneEntry>>>
+  _staticDepthOrderBySurface = {};
   final FpsComponent _fpsComponent = FpsComponent(windowSize: 60);
 
   late EnvironmentDocument document;
@@ -51,6 +60,8 @@ class NeuraGame extends FlameGame
   RustNavigationWorld? _nativeNavigationWorld;
   EnvironmentDebugScene? debugScene;
   EnvironmentChunkCoordinate? _streamingCenter;
+  String _playerSurfaceId = environmentBaseSurfaceId;
+  String? _latchedConnectorId;
 
   final List<Vector2> _movementWaypoints = [];
   final Queue<EnvironmentDirection> _turnDirections = Queue();
@@ -74,6 +85,7 @@ class NeuraGame extends FlameGame
   int _pendingNavigationRequests = 0;
   int _lastNavigationMicros = 0;
   int _sceneDepthCacheBuildCount = 0;
+  double _animalActivationClock = 0;
   Future<void>? _navigationRefresh;
 
   static const double playerSpeedPixelsPerSecond = 210;
@@ -83,6 +95,57 @@ class NeuraGame extends FlameGame
   static const double _turnStepSeconds = 0.065;
   static const int _maxInactiveAssetEntries = 24;
   static const int _maxInactiveAssetBytes = 32 << 20;
+  static const double _animalActivationRadius = 36;
+  static const double _animalDeactivationRadius = 42;
+  static const double _maximumWalkableElevationSlope = 0.75;
+  static const double _liquidOpticalDepthScale = 1.25;
+
+  static double _liquidOpticalDepth(double depth) =>
+      1 - math.exp(-math.max(0, depth) / _liquidOpticalDepthScale);
+
+  EnvironmentSurfaceSample _surfaceAt(Vector2 point, {String? surfaceId}) =>
+      environmentSurfaceAtPoint(
+        document,
+        WorldPoint(point.x, point.y),
+        preferredSurfaceId: surfaceId,
+      );
+
+  double _groundElevationAt(Vector2 point, {String? surfaceId}) => _surfaceAt(
+    point,
+    surfaceId: surfaceId ?? _playerSurfaceId,
+  ).groundElevation;
+
+  double _visibleSurfaceElevationAt(Vector2 point) {
+    final surface = _surfaceAt(point, surfaceId: _playerSurfaceId);
+    return surface.liquidSurfaceElevation ?? surface.groundElevation;
+  }
+
+  Vector2 _projectAtElevation(Vector2 point, double elevation) =>
+      projection.worldToScreen(point)
+        ..y -= elevation * elevationPixelsPerWorldUnit;
+
+  double _surfaceElevationAt(String surfaceId, WorldPoint point) =>
+      document.surfaceById(surfaceId)?.elevationAt(point) ?? 0;
+
+  Vector2 _projectGround(Vector2 point, {String? surfaceId}) =>
+      _projectAtElevation(
+        point,
+        _groundElevationAt(point, surfaceId: surfaceId),
+      );
+
+  Vector2 _screenToVisibleSurface(Vector2 projected) {
+    var elevation = _visibleSurfaceElevationAt(playerPosition);
+    var world = projection.screenToWorld(
+      projected + Vector2(0, elevation * elevationPixelsPerWorldUnit),
+    );
+    for (var iteration = 0; iteration < 3; iteration++) {
+      elevation = _visibleSurfaceElevationAt(world);
+      world = projection.screenToWorld(
+        projected + Vector2(0, elevation * elevationPixelsPerWorldUnit),
+      );
+    }
+    return world;
+  }
 
   final ui.Paint _targetPaint = ui.Paint()
     ..color = const ui.Color(0xFFEACB73)
@@ -158,19 +221,32 @@ class NeuraGame extends FlameGame
   int get terrainPictureCount => _terrainPictures.length;
   int get sceneDepthCacheBuildCount => _sceneDepthCacheBuildCount;
   int get depthSortedObjectCount => _staticDepthOrder.length;
+  int get activeAnimalCount => _activeAnimalIds.length;
+  int get knownAnimalCount => _animalStatesById.length;
+  String get playerSurfaceId => _playerSurfaceId;
   int? get debugRandomSeed => debugScene?.randomSeed;
   double get diagnosticsFps => _fpsComponent.fps;
   double get diagnosticsFrameMilliseconds =>
       diagnosticsFps <= 0 ? 0 : 1000 / diagnosticsFps;
   List<String> get debugRenderOrder => [
-    for (final object in _objectsInBand(EnvironmentRenderBand.groundCover))
-      object.id,
-    for (final entry in _depthSortedSceneEntries())
-      entry.object?.id ?? 'player',
-    for (final object in _objectsInBand(EnvironmentRenderBand.overhead))
-      object.id,
-    for (final object in _objectsInBand(EnvironmentRenderBand.effects))
-      object.id,
+    for (final surface in _orderedSurfaces()) ...[
+      for (final object in _objectsInBand(
+        EnvironmentRenderBand.groundCover,
+        surfaceId: surface.id,
+      ))
+        object.id,
+      for (final entry in _depthSortedSceneEntries(surface.id)) entry.debugId,
+      for (final object in _objectsInBand(
+        EnvironmentRenderBand.overhead,
+        surfaceId: surface.id,
+      ))
+        object.id,
+      for (final object in _objectsInBand(
+        EnvironmentRenderBand.effects,
+        surfaceId: surface.id,
+      ))
+        object.id,
+    ],
   ];
 
   void toggleChunkDebug() => showChunkDebug = !showChunkDebug;
@@ -228,6 +304,7 @@ class NeuraGame extends FlameGame
     _turnDirections.clear();
     _turnStepRemaining = 0;
     _destination = null;
+    _latchedConnectorId = null;
     _streamingCenter = null;
     await _streamAroundPlayer();
   }
@@ -249,6 +326,7 @@ class NeuraGame extends FlameGame
     }
     _movementRandom = math.Random(debugScene?.randomSeed);
     worldManifest = await loadReleaseEnvironmentWorldManifest(rootBundle);
+    _playerSurfaceId = worldManifest.playerSpawnSurfaceId;
     final spawn =
         debugScene?.player ??
         worldManifest.playerSpawn.toWorld(worldManifest.chunkSize);
@@ -266,12 +344,15 @@ class NeuraGame extends FlameGame
     await chunkStreamer.updateAround(spawn);
     _streamingCenter = worldManifest.coordinateFor(spawn);
     document = _documentFromLoadedChunks();
+    _animalNavigationBySurface.clear();
     environmentCatalog = EnvironmentCatalog.fromJsonString(
       await rootBundle.loadString(environmentReleaseCatalogAsset),
     );
     environmentCatalog.applyGeometryOverridesFromJsonString(
       await rootBundle.loadString(environmentReleaseGeometryOverridesAsset),
     );
+    _synchronizeAnimalHomes();
+    _refreshAnimalActivation(force: true);
     _rebuildSceneDepthCache();
     characterCatalog = CharacterCatalog.fromJsonString(
       await rootBundle.loadString(
@@ -286,6 +367,10 @@ class NeuraGame extends FlameGame
           if (!region.resetsToDefault) region.materialId,
       for (final chunk in chunkStreamer.loadedChunks.values)
         for (final stroke in chunk.terrainStrokes) stroke.materialId,
+      for (final chunk in chunkStreamer.loadedChunks.values)
+        for (final surface in chunk.surfaces) surface.materialId,
+      for (final chunk in chunkStreamer.loadedChunks.values)
+        for (final liquid in chunk.liquidVolumes) liquid.materialId,
     };
     final usedMaterials = <EnvironmentMaterial>[];
     for (final id in usedMaterialIds) {
@@ -305,7 +390,18 @@ class NeuraGame extends FlameGame
     for (final object in document.objects) {
       final asset = environmentCatalog.objectById(object.assetId);
       if (asset != null) {
-        paths.add(asset.viewFor(object.direction.name).imagePath);
+        if (asset.animalAnimation case final animation?) {
+          if (_activeAnimalIds.contains(object.id)) {
+            paths.addAll(
+              _runtimeAnimalImagePaths(
+                animation,
+                _animalStatesById[object.id]?.profile,
+              ),
+            );
+          }
+        } else {
+          paths.add(asset.viewFor(object.direction.name).imagePath);
+        }
       }
     }
     await _ensureRuntimeImages(paths);
@@ -336,6 +432,7 @@ class NeuraGame extends FlameGame
       buildNativeNavigationWorldInput(
         document: document,
         catalog: environmentCatalog,
+        surfaceId: _playerSurfaceId,
       ),
     );
     _applyNavigationSnapshot(_nativeNavigationWorld!.snapshot);
@@ -347,11 +444,87 @@ class NeuraGame extends FlameGame
   }
 
   EnvironmentDocument _documentFromLoadedChunks() {
+    final surfaces = <EnvironmentSurface>[];
+    final surfaceIds = <String>{};
+    final liquids = <EnvironmentLiquidVolume>[];
+    final liquidIds = <String>{};
+    final connectors = <EnvironmentSurfaceConnector>[];
+    final connectorIds = <String>{};
     final regions = <TerrainRegion>[];
     final regionIds = <String>{};
     for (final chunk in chunkStreamer.loadedChunks.values) {
       final originX = chunk.coordinate.x * chunk.size;
       final originY = chunk.coordinate.y * chunk.size;
+      WorldPoint globalPoint(WorldPoint point) =>
+          WorldPoint(point.x + originX, point.y + originY);
+      for (final surface in chunk.surfaces) {
+        if (!surfaceIds.add(surface.id)) continue;
+        surfaces.add(
+          EnvironmentSurface(
+            id: surface.id,
+            name: surface.name,
+            materialId: surface.materialId,
+            points: [for (final point in surface.points) globalPoint(point)],
+            kind: surface.kind,
+            height: switch (surface.height.kind) {
+              EnvironmentSurfaceHeightKind.flat =>
+                EnvironmentSurfaceHeight.flat(surface.height.elevation),
+              EnvironmentSurfaceHeightKind.linearRamp =>
+                EnvironmentSurfaceHeight.linearRamp(
+                  elevation: surface.height.elevation,
+                  endElevation: surface.height.endElevation,
+                  rampStart: globalPoint(surface.height.rampStart!),
+                  rampEnd: globalPoint(surface.height.rampEnd!),
+                ),
+            },
+            walkable: surface.walkable,
+            drawsBaseMaterial: surface.drawsBaseMaterial,
+            order: surface.order,
+            visibilityGroupId: surface.visibilityGroupId,
+          ),
+        );
+      }
+      for (final liquid in chunk.liquidVolumes) {
+        if (!liquidIds.add(liquid.id)) continue;
+        liquids.add(
+          EnvironmentLiquidVolume(
+            id: liquid.id,
+            name: liquid.name,
+            bedSurfaceId: liquid.bedSurfaceId,
+            materialId: liquid.materialId,
+            points: [for (final point in liquid.points) globalPoint(point)],
+            surfaceElevation: liquid.surfaceElevation,
+            depth: liquid.depth,
+            endDepth: liquid.endDepth,
+            depthRampStart: liquid.depthRampStart == null
+                ? null
+                : globalPoint(liquid.depthRampStart!),
+            depthRampEnd: liquid.depthRampEnd == null
+                ? null
+                : globalPoint(liquid.depthRampEnd!),
+            edgeBlend: liquid.edgeBlend,
+            opacity: liquid.opacity,
+            textureScale: liquid.textureScale,
+            order: liquid.order,
+          ),
+        );
+      }
+      for (final connector in chunk.surfaceConnectors) {
+        if (!connectorIds.add(connector.id)) continue;
+        connectors.add(
+          EnvironmentSurfaceConnector(
+            id: connector.id,
+            fromSurfaceId: connector.fromSurfaceId,
+            toSurfaceId: connector.toSurfaceId,
+            from: globalPoint(connector.from),
+            to: globalPoint(connector.to),
+            kind: connector.kind,
+            width: connector.width,
+            bidirectional: connector.bidirectional,
+            cost: connector.cost,
+          ),
+        );
+      }
       for (final region in chunk.terrainRegions) {
         if (!regionIds.add(region.id)) continue;
         regions.add(
@@ -360,9 +533,11 @@ class NeuraGame extends FlameGame
             materialId: region.materialId,
             resetsToDefault: region.resetsToDefault,
             edgeBlend: region.edgeBlend,
+            opacity: region.opacity,
             textureScale: region.textureScale,
             seed: region.seed,
             order: region.order,
+            surfaceId: region.surfaceId,
             points: [
               for (final point in region.points)
                 WorldPoint(point.x + originX, point.y + originY),
@@ -396,6 +571,7 @@ class NeuraGame extends FlameGame
               scatter: stroke.scatter,
               sizeJitter: stroke.sizeJitter,
               opacityJitter: stroke.opacityJitter,
+              surfaceId: stroke.surfaceId,
               points: [
                 for (final point in stroke.points)
                   WorldPoint(
@@ -407,6 +583,27 @@ class NeuraGame extends FlameGame
       ],
       editorLayers: worldManifest.editorLayers,
       activeLayerId: worldManifest.activeLayerId,
+      surfaces: [
+        EnvironmentSurface(
+          id: environmentBaseSurfaceId,
+          name: 'Ground',
+          materialId: worldManifest.baseMaterialId,
+          points: [
+            const WorldPoint(0, 0),
+            WorldPoint(worldManifest.width, 0),
+            WorldPoint(worldManifest.width, worldManifest.height),
+            WorldPoint(0, worldManifest.height),
+          ],
+        ),
+        ...surfaces,
+      ],
+      liquidVolumes: liquids,
+      surfaceConnectors: connectors,
+      activeSurfaceId:
+          surfaceIds.contains(_playerSurfaceId) ||
+              _playerSurfaceId == environmentBaseSurfaceId
+          ? _playerSurfaceId
+          : environmentBaseSurfaceId,
     );
   }
 
@@ -419,6 +616,9 @@ class NeuraGame extends FlameGame
     if (!changed) return;
     _navigationRequestSerial++;
     document = _documentFromLoadedChunks();
+    _animalNavigationBySurface.clear();
+    _synchronizeAnimalHomes();
+    _refreshAnimalActivation(force: true);
     _rebuildSceneDepthCache();
     final refresh = _refreshNavigationAfterStreaming();
     _navigationRefresh = refresh;
@@ -439,9 +639,24 @@ class NeuraGame extends FlameGame
       buildNativeNavigationWorldInput(
         document: document,
         catalog: environmentCatalog,
+        surfaceId: _playerSurfaceId,
       ),
     );
     _applyNavigationSnapshot(snapshot);
+  }
+
+  void _scheduleNavigationRefresh() {
+    final refresh = _refreshNavigationAfterStreaming();
+    _navigationRefresh = refresh;
+    unawaited(() async {
+      try {
+        await refresh;
+      } finally {
+        if (identical(_navigationRefresh, refresh)) {
+          _navigationRefresh = null;
+        }
+      }
+    }());
   }
 
   void _applyNavigationSnapshot(NativeNavigationSnapshot snapshot) {
@@ -469,6 +684,10 @@ class NeuraGame extends FlameGame
           if (!region.resetsToDefault) region.materialId,
       for (final chunk in chunkStreamer.loadedChunks.values)
         for (final stroke in chunk.terrainStrokes) stroke.materialId,
+      for (final chunk in chunkStreamer.loadedChunks.values)
+        for (final surface in chunk.surfaces) surface.materialId,
+      for (final chunk in chunkStreamer.loadedChunks.values)
+        for (final liquid in chunk.liquidVolumes) liquid.materialId,
     };
     final neededPaths = <String>{
       for (final character in characterCatalog.characters) ...[
@@ -488,7 +707,18 @@ class NeuraGame extends FlameGame
       for (final object in chunk.objects) {
         final asset = environmentCatalog.objectById(object.assetId);
         if (asset != null) {
-          neededPaths.add(asset.viewFor(object.direction.name).imagePath);
+          if (asset.animalAnimation case final animation?) {
+            if (_activeAnimalIds.contains(object.id)) {
+              neededPaths.addAll(
+                _runtimeAnimalImagePaths(
+                  animation,
+                  _animalStatesById[object.id]?.profile,
+                ),
+              );
+            }
+          } else {
+            neededPaths.add(asset.viewFor(object.direction.name).imagePath);
+          }
         }
       }
     }
@@ -562,6 +792,22 @@ class NeuraGame extends FlameGame
     }
   }
 
+  Iterable<String> _runtimeAnimalImagePaths(
+    AnimalAnimationAsset animation,
+    AnimalBehaviorProfile? resolvedProfile,
+  ) sync* {
+    yield animation.idle.imagePath;
+    final profile =
+        resolvedProfile ??
+        environmentCatalog.animalBehaviorProfileById(
+          animation.behaviorProfileId,
+        );
+    if (profile == null) return;
+    if (profile.walkWeight > 0) yield animation.walk.imagePath;
+    if (profile.runWeight > 0) yield animation.run.imagePath;
+    if (profile.actionWeight > 0) yield animation.action.imagePath;
+  }
+
   void _trimInactiveAssetCache() {
     var bytes = _inactiveEnvironmentImages.values.fold(
       0,
@@ -581,6 +827,13 @@ class NeuraGame extends FlameGame
       image.width * image.height * 4;
 
   void _synchronizeTerrainPictures() {
+    if (document.surfaces.length > 1) {
+      for (final picture in _terrainPictures.values) {
+        picture.dispose();
+      }
+      _terrainPictures.clear();
+      return;
+    }
     for (final chunk in chunkStreamer.loadedChunks.values) {
       _terrainPictures.putIfAbsent(
         chunk.coordinate,
@@ -623,9 +876,11 @@ class NeuraGame extends FlameGame
             materialId: region.materialId,
             resetsToDefault: region.resetsToDefault,
             edgeBlend: region.edgeBlend,
+            opacity: region.opacity,
             textureScale: region.textureScale,
             seed: region.seed,
             order: region.order,
+            surfaceId: region.surfaceId,
             points: [
               for (final point in region.points)
                 WorldPoint(point.x + originX, point.y + originY),
@@ -651,6 +906,7 @@ class NeuraGame extends FlameGame
           scatter: stroke.scatter,
           sizeJitter: stroke.sizeJitter,
           opacityJitter: stroke.opacityJitter,
+          surfaceId: stroke.surfaceId,
           points: [
             for (final point in stroke.points)
               WorldPoint(point.x + originX, point.y + originY),
@@ -667,7 +923,7 @@ class NeuraGame extends FlameGame
     if (!isLoaded) return;
     final projected =
         (event.canvasPosition - size / 2) / zoom + _cameraProjectedPosition;
-    final world = projection.screenToWorld(projected);
+    final world = _screenToVisibleSurface(projected);
     unawaited(
       requestMovementAsync(
         WorldPoint(
@@ -791,12 +1047,28 @@ class NeuraGame extends FlameGame
     return remaining;
   }
 
-  bool _isPlayerBlocked(WorldPoint point) {
+  bool _isBlockedOnSurface(WorldPoint point, String surfaceId) {
+    final support = document.surfaceById(surfaceId);
+    if (support == null || !support.walkable || !support.contains(point)) {
+      return true;
+    }
     final material = environmentCatalog.materialById(
-      environmentMaterialAtPoint(document, point),
+      environmentMaterialAtPoint(document, point, surfaceId: surfaceId),
     );
     if (material?.blocksMovement ?? false) return true;
+    final sample = environmentSurfaceAtPoint(
+      document,
+      point,
+      preferredSurfaceId: surfaceId,
+    );
+    final liquidMaterialId = sample.liquidMaterialId;
+    if (liquidMaterialId != null &&
+        (environmentCatalog.materialById(liquidMaterialId)?.blocksMovement ??
+            false)) {
+      return true;
+    }
     for (final object in document.objects) {
+      if (object.supportSurfaceId != surfaceId) continue;
       final asset = environmentCatalog.objectById(object.assetId);
       if (asset != null &&
           environmentObjectBlocksPoint(
@@ -815,33 +1087,299 @@ class NeuraGame extends FlameGame
     return false;
   }
 
-  bool _isPlayerSegmentWalkable(Vector2 start, Vector2 end) {
+  bool _isPlayerBlocked(WorldPoint point) =>
+      _isBlockedOnSurface(point, _playerSurfaceId);
+
+  bool _isSegmentWalkableOnSurface(
+    Vector2 start,
+    Vector2 end,
+    String surfaceId,
+  ) {
     final delta = end - start;
     final steps = math.max(1, (delta.length / (navigationCellSize / 3)).ceil());
+    var previousPoint = start;
+    var previousElevation = _groundElevationAt(start, surfaceId: surfaceId);
     for (var step = 0; step <= steps; step++) {
       final t = step / steps;
-      if (_isPlayerBlocked(
-        WorldPoint(start.x + delta.x * t, start.y + delta.y * t),
-      )) {
+      final point = Vector2(start.x + delta.x * t, start.y + delta.y * t);
+      if (_isBlockedOnSurface(WorldPoint(point.x, point.y), surfaceId)) {
         return false;
+      }
+      if (step > 0) {
+        final elevation = _groundElevationAt(point, surfaceId: surfaceId);
+        final horizontalDistance = point.distanceTo(previousPoint);
+        final maximumElevationChange =
+            horizontalDistance * _maximumWalkableElevationSlope + 0.01;
+        if ((elevation - previousElevation).abs() > maximumElevationChange) {
+          return false;
+        }
+        previousElevation = elevation;
+        previousPoint = point;
       }
     }
     return true;
   }
 
+  bool _isPlayerSegmentWalkable(Vector2 start, Vector2 end) =>
+      _isSegmentWalkableOnSurface(start, end, _playerSurfaceId);
+
+  void _synchronizeAnimalHomes() {
+    _loadedAnimalHomesById.clear();
+    for (final object in document.objects) {
+      final asset = environmentCatalog.objectById(object.assetId);
+      final animation = asset?.animalAnimation;
+      if (asset == null || animation == null) continue;
+      final profile =
+          environmentCatalog.animalBehaviorProfileById(
+            object.behaviorProfileId ?? animation.behaviorProfileId,
+          ) ??
+          environmentCatalog.animalBehaviorProfileById(
+            animation.behaviorProfileId,
+          );
+      if (profile == null) continue;
+      _loadedAnimalHomesById[object.id] = object;
+      _animalStatesById.putIfAbsent(object.id, () {
+        return _ActiveAnimal(
+          id: object.id,
+          asset: asset,
+          profile: profile,
+          home: Vector2(object.x, object.y),
+          facing: object.direction,
+          randomSeed: _stableAnimalSeed(object.id),
+          surfaceId: object.supportSurfaceId,
+        );
+      });
+      _animalStatesById[object.id]!.surfaceId = object.supportSurfaceId;
+    }
+    _activeAnimalIds.removeWhere(
+      (id) => !_loadedAnimalHomesById.containsKey(id),
+    );
+  }
+
+  bool _refreshAnimalActivation({bool force = false}) {
+    var changed = false;
+    for (final entry in _loadedAnimalHomesById.entries) {
+      final animal = _animalStatesById[entry.key]!;
+      final limit = _activeAnimalIds.contains(entry.key)
+          ? _animalDeactivationRadius
+          : _animalActivationRadius;
+      final shouldBeActive =
+          animal.position.distanceTo(playerPosition) <= limit;
+      if (shouldBeActive) {
+        changed = _activeAnimalIds.add(entry.key) || changed;
+      } else {
+        changed = _activeAnimalIds.remove(entry.key) || changed;
+      }
+    }
+    if (changed && !force) unawaited(_synchronizeChunkAssets());
+    return changed;
+  }
+
+  void _updateAnimals(double dt) {
+    _animalActivationClock += dt;
+    if (_animalActivationClock >= 0.5) {
+      _animalActivationClock = 0;
+      _refreshAnimalActivation();
+    }
+    for (final id in _activeAnimalIds.toList(growable: false)) {
+      final animal = _animalStatesById[id];
+      if (animal == null) continue;
+      animal.animationTime += dt;
+      if (animal.isMoving) {
+        _updateMovingAnimal(animal, dt);
+        continue;
+      }
+      if (animal.pathPending) continue;
+      animal.remainingActivitySeconds -= dt;
+      if (animal.remainingActivitySeconds <= 0) {
+        _chooseNextAnimalActivity(animal);
+      }
+    }
+  }
+
+  void _updateMovingAnimal(_ActiveAnimal animal, double dt) {
+    var remainingSeconds = dt;
+    while (animal.waypoints.isNotEmpty && remainingSeconds > 0) {
+      final waypoint = animal.waypoints.first;
+      final delta = waypoint - animal.position;
+      final projectedDistance =
+          (_projectGround(waypoint, surfaceId: animal.surfaceId) -
+                  _projectGround(animal.position, surfaceId: animal.surfaceId))
+              .length;
+      if (projectedDistance <= 0.01) {
+        animal.position.setFrom(waypoint);
+        animal.waypoints.removeAt(0);
+        continue;
+      }
+      animal.facing = directionForWorldDelta(delta);
+      final speed = animal.activity == _AnimalActivity.run
+          ? animal.profile.runSpeedPixelsPerSecond
+          : animal.profile.walkSpeedPixelsPerSecond;
+      final remainingPixels = speed * remainingSeconds;
+      if (remainingPixels >= projectedDistance) {
+        animal.position.setFrom(waypoint);
+        animal.waypoints.removeAt(0);
+        remainingSeconds -= projectedDistance / speed;
+      } else {
+        animal.position.add(delta * (remainingPixels / projectedDistance));
+        remainingSeconds = 0;
+      }
+    }
+    if (animal.waypoints.isEmpty) {
+      animal.setActivity(_AnimalActivity.idle, duration: 0.35);
+    }
+  }
+
+  void _chooseNextAnimalActivity(_ActiveAnimal animal) {
+    final profile = animal.profile;
+    var idleWeight = profile.idleWeight;
+    var actionWeight = profile.actionWeight;
+    var walkWeight = profile.roamingRadius > 0 ? profile.walkWeight : 0.0;
+    var runWeight = profile.roamingRadius > 0 ? profile.runWeight : 0.0;
+    final total = idleWeight + actionWeight + walkWeight + runWeight;
+    if (total <= 0) {
+      animal.setActivity(_AnimalActivity.idle, duration: 2);
+      return;
+    }
+    var choice = animal.random.nextDouble() * total;
+    if ((choice -= idleWeight) < 0) {
+      animal.setActivity(
+        _AnimalActivity.idle,
+        duration: animal.randomDuration(),
+      );
+      return;
+    }
+    if ((choice -= actionWeight) < 0) {
+      animal.setActivity(
+        _AnimalActivity.action,
+        duration: animal.randomDuration() * 0.65,
+      );
+      return;
+    }
+    final activity = (choice -= walkWeight) < 0
+        ? _AnimalActivity.walk
+        : _AnimalActivity.run;
+    unawaited(_requestAnimalPath(animal, activity));
+  }
+
+  Future<void> _requestAnimalPath(
+    _ActiveAnimal animal,
+    _AnimalActivity activity,
+  ) async {
+    if (animal.pathPending || animal.profile.roamingRadius <= 0) return;
+    animal.pathPending = true;
+    final serial = ++animal.pathSerial;
+    final angle = animal.random.nextDouble() * math.pi * 2;
+    final distance =
+        animal.profile.roamingRadius *
+        (0.25 + math.sqrt(animal.random.nextDouble()) * 0.7);
+    final target = Vector2(
+      (animal.home.x + math.cos(angle) * distance).clamp(
+        0.0,
+        worldManifest.width,
+      ),
+      (animal.home.y + math.sin(angle) * distance).clamp(
+        0.0,
+        worldManifest.height,
+      ),
+    );
+    try {
+      final refresh = _navigationRefresh;
+      if (refresh != null) await refresh;
+      if (serial != animal.pathSerial ||
+          !_activeAnimalIds.contains(animal.id)) {
+        return;
+      }
+      final nativeWorld = animal.surfaceId == _playerSurfaceId
+          ? _nativeNavigationWorld
+          : null;
+      final fallbackGrid = animal.surfaceId == _playerSurfaceId
+          ? navigationGrid
+          : _animalNavigationBySurface.putIfAbsent(
+              animal.surfaceId,
+              () => NavigationGrid(
+                width: worldManifest.width,
+                height: worldManifest.height,
+                cellSize: navigationCellSize,
+                isBlocked: (point) =>
+                    _isBlockedOnSurface(point, animal.surfaceId),
+              ),
+            );
+      final route = nativeWorld == null
+          ? fallbackGrid.findPath(
+              WorldPoint(animal.position.x, animal.position.y),
+              WorldPoint(target.x, target.y),
+            )
+          : [
+              for (final point in (await nativeWorld.findPath(
+                start: NativeNavigationPoint(
+                  x: animal.position.x,
+                  y: animal.position.y,
+                ),
+                destination: NativeNavigationPoint(x: target.x, y: target.y),
+              )).points)
+                WorldPoint(point.x, point.y),
+            ];
+      if (serial != animal.pathSerial ||
+          !_activeAnimalIds.contains(animal.id)) {
+        return;
+      }
+      final aligned = directionAlignedWaypoints(
+        animal.position,
+        [for (final point in route) Vector2(point.x, point.y)],
+        initialFacing: animal.facing,
+        turnRandom: animal.random,
+        isWalkable: (start, end) =>
+            _isSegmentWalkableOnSurface(start, end, animal.surfaceId),
+      );
+      final radius = animal.profile.roamingRadius + navigationCellSize;
+      if (aligned.isEmpty ||
+          aligned.any((point) => point.distanceTo(animal.home) > radius)) {
+        animal.setActivity(_AnimalActivity.idle, duration: 0.8);
+        return;
+      }
+      animal.waypoints
+        ..clear()
+        ..addAll(aligned);
+      animal.setActivity(activity);
+      animal.facing = directionForWorldDelta(
+        animal.waypoints.first - animal.position,
+      );
+    } catch (_) {
+      if (serial == animal.pathSerial) {
+        animal.waypoints.clear();
+        animal.setActivity(_AnimalActivity.idle, duration: 1.0);
+      }
+    } finally {
+      if (serial == animal.pathSerial) animal.pathPending = false;
+    }
+  }
+
+  static int _stableAnimalSeed(String id) {
+    var hash = 0x811C9DC5;
+    for (final codeUnit in id.codeUnits) {
+      hash = ((hash ^ codeUnit) * 0x01000193) & 0x7FFFFFFF;
+    }
+    return hash;
+  }
+
   @override
   void update(double dt) {
     super.update(dt);
+    _updateAnimals(dt);
     if (_movementWaypoints.isEmpty) {
+      _updateConnectorLatch();
       _animationTime += dt;
       return;
     }
+    final hadMovement = _movementWaypoints.isNotEmpty;
 
     var remainingSeconds = dt;
     while (_movementWaypoints.isNotEmpty && remainingSeconds > 0) {
       final waypoint = _movementWaypoints.first;
       final delta = waypoint - playerPosition;
-      final projectedDistance = projection.worldToScreen(delta).length;
+      final projectedDistance =
+          (_projectGround(waypoint) - _projectGround(playerPosition)).length;
       if (projectedDistance <= 0.01) {
         playerPosition.setFrom(waypoint);
         _movementWaypoints.removeAt(0);
@@ -869,6 +1407,7 @@ class NeuraGame extends FlameGame
     }
 
     unawaited(_streamAroundPlayer());
+    if (hadMovement) _trySurfaceConnectorTransition();
 
     if (_movementWaypoints.isEmpty) {
       _destination = null;
@@ -878,6 +1417,77 @@ class NeuraGame extends FlameGame
     } else {
       _animationTime += dt;
     }
+  }
+
+  void _updateConnectorLatch() {
+    final id = _latchedConnectorId;
+    if (id == null) return;
+    EnvironmentSurfaceConnector? connector;
+    for (final candidate in document.surfaceConnectors) {
+      if (candidate.id == id) {
+        connector = candidate;
+        break;
+      }
+    }
+    if (connector == null) {
+      _latchedConnectorId = null;
+      return;
+    }
+    final endpoint = connector.fromSurfaceId == _playerSurfaceId
+        ? connector.from
+        : connector.toSurfaceId == _playerSurfaceId
+        ? connector.to
+        : null;
+    if (endpoint == null) {
+      _latchedConnectorId = null;
+      return;
+    }
+    final distance = playerPosition.distanceTo(Vector2(endpoint.x, endpoint.y));
+    if (distance > connector.width + playerNavigationRadius) {
+      _latchedConnectorId = null;
+    }
+  }
+
+  bool _trySurfaceConnectorTransition() {
+    _updateConnectorLatch();
+    if (_latchedConnectorId != null) return false;
+    for (final connector in document.surfaceConnectors) {
+      WorldPoint? entry;
+      WorldPoint? exit;
+      String? destinationSurfaceId;
+      if (connector.fromSurfaceId == _playerSurfaceId) {
+        entry = connector.from;
+        exit = connector.to;
+        destinationSurfaceId = connector.toSurfaceId;
+      } else if (connector.bidirectional &&
+          connector.toSurfaceId == _playerSurfaceId) {
+        entry = connector.to;
+        exit = connector.from;
+        destinationSurfaceId = connector.fromSurfaceId;
+      }
+      if (entry == null || exit == null || destinationSurfaceId == null) {
+        continue;
+      }
+      final entryDistance = playerPosition.distanceTo(
+        Vector2(entry.x, entry.y),
+      );
+      if (entryDistance > connector.width / 2 + playerNavigationRadius) {
+        continue;
+      }
+      _playerSurfaceId = destinationSurfaceId;
+      playerPosition.setValues(exit.x, exit.y);
+      _latchedConnectorId = connector.id;
+      _navigationRequestSerial++;
+      _movementWaypoints.clear();
+      _turnDirections.clear();
+      _turnStepRemaining = 0;
+      _destination = null;
+      _animalNavigationBySurface.clear();
+      _scheduleNavigationRefresh();
+      unawaited(_streamAroundPlayer());
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -891,9 +1501,25 @@ class NeuraGame extends FlameGame
       ..scale(zoom)
       ..translate(-_cameraProjectedPosition.x, -_cameraProjectedPosition.y);
 
-    _renderBaseGround(canvas);
-    _renderChunkTerrain(canvas);
-    _renderScene(canvas);
+    if (document.surfaces.length > 1) {
+      _renderLayeredEnvironment(canvas);
+    } else {
+      _renderBaseGround(canvas);
+      _renderChunkTerrain(canvas);
+      if (document.liquidVolumes.isNotEmpty) {
+        _renderScene(
+          canvas,
+          environmentBaseSurfaceId,
+          liquidPass: _LiquidSpritePass.submerged,
+        );
+      }
+      _renderLiquidVolumes(canvas);
+      _renderScene(
+        canvas,
+        environmentBaseSurfaceId,
+        liquidPass: _LiquidSpritePass.exposed,
+      );
+    }
     _renderMapOutline(canvas);
     if (showRenderDebug) _renderDepthDebug(canvas);
     if (showGeometryDebug) _renderGeometryDebug(canvas);
@@ -934,12 +1560,209 @@ class NeuraGame extends FlameGame
     }
   }
 
+  List<EnvironmentSurface> _orderedSurfaces() =>
+      [...document.surfaces]..sort((a, b) {
+        final order = a.order.compareTo(b.order);
+        if (order != 0) return order;
+        return a.height.elevation.compareTo(b.height.elevation);
+      });
+
+  void _renderLayeredEnvironment(ui.Canvas canvas) {
+    for (final surface in _orderedSurfaces()) {
+      final surfacePath = _surfaceProjectedPath(surface);
+      final layerBounds = surfacePath.getBounds().inflate(
+        projection.tileWidth * 3,
+      );
+      canvas.save();
+      canvas.clipPath(surfacePath);
+      if (surface.id == environmentBaseSurfaceId) {
+        _renderBaseGround(canvas);
+      } else if (surface.drawsBaseMaterial) {
+        _renderPhysicalSurface(canvas, surface);
+      }
+      final regions = document.terrainRegions.where(
+        (region) => region.surfaceId == surface.id,
+      );
+      if (regions.isNotEmpty) {
+        canvas.saveLayer(layerBounds, ui.Paint());
+        for (final region in regions) {
+          _renderTerrainRegion(canvas, region);
+        }
+        canvas.restore();
+      }
+      final strokes = document.terrainStrokes.where(
+        (stroke) => stroke.surfaceId == surface.id,
+      );
+      if (strokes.isNotEmpty) {
+        canvas.saveLayer(layerBounds, ui.Paint());
+        for (final stroke in strokes) {
+          _renderStroke(canvas, stroke);
+        }
+        canvas.restore();
+      }
+      final liquids =
+          document.liquidVolumes
+              .where((liquid) => liquid.bedSurfaceId == surface.id)
+              .toList()
+            ..sort((a, b) => a.order.compareTo(b.order));
+      if (liquids.isNotEmpty) {
+        _renderScene(
+          canvas,
+          surface.id,
+          liquidPass: _LiquidSpritePass.submerged,
+        );
+      }
+      for (final liquid in liquids) {
+        _renderLiquidVolume(canvas, liquid);
+      }
+      canvas.restore();
+      _renderScene(canvas, surface.id, liquidPass: _LiquidSpritePass.exposed);
+    }
+  }
+
+  ui.Path _surfaceProjectedPath(EnvironmentSurface surface) {
+    final path = ui.Path();
+    for (var index = 0; index < surface.points.length; index++) {
+      final point = surface.points[index];
+      final projected = _projectAtElevation(
+        Vector2(point.x, point.y),
+        surface.elevationAt(point),
+      );
+      index == 0
+          ? path.moveTo(projected.x, projected.y)
+          : path.lineTo(projected.x, projected.y);
+    }
+    return path..close();
+  }
+
+  void _renderPhysicalSurface(ui.Canvas canvas, EnvironmentSurface surface) {
+    _renderTerrainRegion(
+      canvas,
+      TerrainRegion(
+        id: 'surface-fill:${surface.id}',
+        materialId: surface.materialId,
+        points: surface.points,
+        surfaceId: surface.id,
+      ),
+    );
+  }
+
+  void _renderLiquidVolumes(ui.Canvas canvas) {
+    final liquids = [...document.liquidVolumes]
+      ..sort((a, b) => a.order.compareTo(b.order));
+    for (final liquid in liquids) {
+      _renderLiquidVolume(canvas, liquid);
+    }
+  }
+
+  void _renderLiquidVolume(
+    ui.Canvas canvas,
+    EnvironmentLiquidVolume liquid, {
+    ui.BlendMode? blendMode,
+  }) {
+    if (liquid.points.length < 3) return;
+    final material = environmentCatalog.materialById(liquid.materialId);
+    final basePaint = _repeatingPaints[liquid.materialId];
+    final image = material == null ? null : _loadedImages[material.texturePath];
+    if (material == null || basePaint?.shader == null || image == null) return;
+    final path = ui.Path();
+    for (var index = 0; index < liquid.points.length; index++) {
+      final point = liquid.points[index];
+      final projected = _projectAtElevation(
+        Vector2(point.x, point.y),
+        liquid.surfaceElevation,
+      );
+      index == 0
+          ? path.moveTo(projected.x, projected.y)
+          : path.lineTo(projected.x, projected.y);
+    }
+    path.close();
+    final minX = liquid.points.map((point) => point.x).reduce(math.min);
+    final minY = liquid.points.map((point) => point.y).reduce(math.min);
+    final maxX = liquid.points.map((point) => point.x).reduce(math.max);
+    final maxY = liquid.points.map((point) => point.y).reduce(math.max);
+    final texelsPerWorldUnitX =
+        image.width /
+        (material.effectiveRepeatWorldWidth * liquid.textureScale);
+    final texelsPerWorldUnitY =
+        image.height /
+        (material.effectiveRepeatWorldHeight * liquid.textureScale);
+    final softness = liquid.edgeBlend.clamp(0, 3).toDouble();
+    final sigma = softness * projection.halfHeight;
+    final bounds = path.getBounds().inflate(math.max(1, sigma * 3));
+    canvas.saveLayer(
+      bounds,
+      ui.Paint()..blendMode = blendMode ?? ui.BlendMode.srcOver,
+    );
+    final paint = ui.Paint()
+      ..shader = basePaint!.shader
+      ..blendMode = ui.BlendMode.srcOver;
+    final expandedMin = WorldPoint(minX - softness, minY - softness);
+    final expandedMax = WorldPoint(maxX + softness, maxY + softness);
+    ui.Color liquidVertexColor(WorldPoint point) {
+      final opticalDepth = _liquidOpticalDepth(liquid.depthAt(point));
+      final depthOpacity = 0.15 + 0.85 * opticalDepth;
+      final tintStrength = 0.8 * opticalDepth;
+      int tintChannel(int deepWater) =>
+          (255 + (deepWater - 255) * tintStrength).round();
+      return ui.Color.fromRGBO(
+        tintChannel(88),
+        tintChannel(126),
+        tintChannel(150),
+        liquid.opacity * depthOpacity,
+      );
+    }
+
+    _drawTexturedWorldQuad(
+      canvas,
+      expandedMin,
+      expandedMax,
+      paint,
+      ui.Rect.fromLTRB(
+        (minX - softness) * texelsPerWorldUnitX,
+        (minY - softness) * texelsPerWorldUnitY,
+        (maxX + softness) * texelsPerWorldUnitX,
+        (maxY + softness) * texelsPerWorldUnitY,
+      ),
+      elevation: liquid.surfaceElevation,
+      vertexColors: [
+        liquidVertexColor(expandedMin),
+        liquidVertexColor(WorldPoint(expandedMax.x, expandedMin.y)),
+        liquidVertexColor(expandedMax),
+        liquidVertexColor(WorldPoint(expandedMin.x, expandedMax.y)),
+      ],
+    );
+    final maskPaint = ui.Paint()
+      ..color = const ui.Color(0xFFFFFFFF)
+      ..maskFilter = softness == 0
+          ? null
+          : ui.MaskFilter.blur(ui.BlurStyle.normal, sigma);
+    canvas.saveLayer(bounds, ui.Paint()..blendMode = ui.BlendMode.dstIn);
+    canvas.drawPath(path, maskPaint);
+    canvas.restore();
+    canvas.restore();
+  }
+
   void _renderChunkTerrain(ui.Canvas canvas) {
+    if (_hasElevatedTerrain) {
+      for (final region in document.terrainRegions) {
+        _renderTerrainRegion(canvas, region);
+      }
+      for (final stroke in document.terrainStrokes) {
+        _renderStroke(canvas, stroke);
+      }
+      return;
+    }
     for (final coordinate in chunkStreamer.loadedChunks.keys) {
       final picture = _terrainPictures[coordinate];
       if (picture != null) canvas.drawPicture(picture);
     }
   }
+
+  bool get _hasElevatedTerrain => document.surfaces.any(
+    (surface) =>
+        surface.height.elevation != 0 || surface.height.endElevation != 0,
+  );
 
   void _renderStroke(ui.Canvas canvas, TerrainStroke stroke) {
     if (stroke.points.isEmpty) return;
@@ -947,7 +1770,10 @@ class NeuraGame extends FlameGame
       final path = ui.Path();
       for (var index = 0; index < stroke.points.length; index++) {
         final point = stroke.points[index];
-        final projected = projection.worldToScreen(Vector2(point.x, point.y));
+        final projected = _projectAtElevation(
+          Vector2(point.x, point.y),
+          _surfaceElevationAt(stroke.surfaceId, point),
+        );
         index == 0
             ? path.moveTo(projected.x, projected.y)
             : path.lineTo(projected.x, projected.y);
@@ -961,7 +1787,14 @@ class NeuraGame extends FlameGame
     final image = _loadedImages[material.decalPath]!;
     for (final stamp in terrainStrokeStamps(stroke)) {
       paint.color = ui.Color.fromRGBO(255, 255, 255, stamp.opacity);
-      _drawStamp(canvas, stamp.center, stamp.radius, paint, image);
+      _drawStamp(
+        canvas,
+        stamp.center,
+        stamp.radius,
+        paint,
+        image,
+        elevation: _surfaceElevationAt(stroke.surfaceId, stamp.center),
+      );
     }
   }
 
@@ -970,7 +1803,10 @@ class NeuraGame extends FlameGame
     final path = ui.Path();
     for (var index = 0; index < region.points.length; index++) {
       final point = region.points[index];
-      final projected = projection.worldToScreen(Vector2(point.x, point.y));
+      final projected = _projectAtElevation(
+        Vector2(point.x, point.y),
+        _surfaceElevationAt(region.surfaceId, point),
+      );
       index == 0
           ? path.moveTo(projected.x, projected.y)
           : path.lineTo(projected.x, projected.y);
@@ -995,20 +1831,48 @@ class NeuraGame extends FlameGame
     final texelsPerWorldUnitY =
         image.height /
         (material.effectiveRepeatWorldHeight * region.textureScale);
-    canvas.save();
-    canvas.clipPath(path);
+    final softness = region.edgeBlend.clamp(0, 3).toDouble();
+    final needsMask = softness > 0 || region.opacity < 0.999;
+    final sigma = softness * projection.halfHeight;
+    final expandedMin = WorldPoint(minX - softness, minY - softness);
+    final expandedMax = WorldPoint(maxX + softness, maxY + softness);
+    final layerBounds = path.getBounds().inflate(math.max(1, sigma * 3));
+    if (needsMask) {
+      canvas.saveLayer(layerBounds, ui.Paint());
+    } else {
+      canvas.save();
+      canvas.clipPath(path);
+    }
     _drawTexturedWorldQuad(
       canvas,
-      WorldPoint(minX, minY),
-      WorldPoint(maxX, maxY),
+      expandedMin,
+      expandedMax,
       paint,
       ui.Rect.fromLTRB(
-        minX * texelsPerWorldUnitX,
-        minY * texelsPerWorldUnitY,
-        maxX * texelsPerWorldUnitX,
-        maxY * texelsPerWorldUnitY,
+        expandedMin.x * texelsPerWorldUnitX,
+        expandedMin.y * texelsPerWorldUnitY,
+        expandedMax.x * texelsPerWorldUnitX,
+        expandedMax.y * texelsPerWorldUnitY,
       ),
+      elevation: _surfaceElevationAt(region.surfaceId, region.points.first),
     );
+    if (needsMask) {
+      canvas.saveLayer(layerBounds, ui.Paint()..blendMode = ui.BlendMode.dstIn);
+      canvas.drawPath(
+        path,
+        ui.Paint()
+          ..color = ui.Color.fromRGBO(
+            255,
+            255,
+            255,
+            region.opacity.clamp(0.05, 1),
+          )
+          ..maskFilter = softness == 0
+              ? null
+              : ui.MaskFilter.blur(ui.BlurStyle.normal, sigma),
+      );
+      canvas.restore();
+    }
     canvas.restore();
   }
 
@@ -1017,14 +1881,18 @@ class NeuraGame extends FlameGame
     WorldPoint center,
     double radius,
     ui.Paint paint,
-    ui.Image image,
-  ) {
+    ui.Image image, {
+    double elevation = 0,
+    ui.BlendMode blendMode = ui.BlendMode.srcOver,
+  }) {
     _drawTexturedWorldQuad(
       canvas,
       WorldPoint(center.x - radius, center.y - radius),
       WorldPoint(center.x + radius, center.y + radius),
       paint,
       ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      elevation: elevation,
+      blendMode: blendMode,
     );
   }
 
@@ -1033,14 +1901,22 @@ class NeuraGame extends FlameGame
     WorldPoint min,
     WorldPoint max,
     ui.Paint paint,
-    ui.Rect textureRect,
-  ) {
+    ui.Rect textureRect, {
+    double elevation = 0,
+    ui.BlendMode blendMode = ui.BlendMode.srcOver,
+    List<ui.Color>? vertexColors,
+  }) {
     final corners = [
       projection.worldToScreen(Vector2(min.x, min.y)),
       projection.worldToScreen(Vector2(max.x, min.y)),
       projection.worldToScreen(Vector2(max.x, max.y)),
       projection.worldToScreen(Vector2(min.x, max.y)),
     ];
+    if (elevation != 0) {
+      for (final corner in corners) {
+        corner.y -= elevation * elevationPixelsPerWorldUnit;
+      }
+    }
     final vertices = ui.Vertices.raw(
       ui.VertexMode.triangleFan,
       Float32List.fromList([
@@ -1056,42 +1932,125 @@ class NeuraGame extends FlameGame
         textureRect.left,
         textureRect.bottom,
       ]),
+      colors: vertexColors == null
+          ? null
+          : Int32List.fromList([
+              for (final color in vertexColors) color.toARGB32(),
+            ]),
     );
-    canvas.drawVertices(vertices, ui.BlendMode.srcOver, paint);
+    canvas.drawVertices(
+      vertices,
+      vertexColors == null ? blendMode : ui.BlendMode.modulate,
+      paint,
+    );
   }
 
-  void _renderScene(ui.Canvas canvas) {
-    _renderObjectBand(canvas, EnvironmentRenderBand.groundCover);
+  void _renderScene(
+    ui.Canvas canvas,
+    String surfaceId, {
+    required _LiquidSpritePass liquidPass,
+  }) {
+    _renderObjectBand(
+      canvas,
+      EnvironmentRenderBand.groundCover,
+      surfaceId: surfaceId,
+      liquidPass: liquidPass,
+    );
 
-    final playerIndex = _playerDepthInsertionIndex();
-    for (var index = 0; index <= _staticDepthOrder.length; index++) {
-      if (index == playerIndex) _renderPlayer(canvas);
-      if (index < _staticDepthOrder.length) {
-        _renderObject(canvas, _staticDepthOrder[index].value.object!);
+    final staticOrder =
+        _staticDepthOrderBySurface[surfaceId] ??
+        const <EnvironmentDepthEntity<_SceneEntry>>[];
+    final dynamicEntries = _dynamicDepthEntries(surfaceId, staticOrder);
+    var dynamicIndex = 0;
+    for (var index = 0; index <= staticOrder.length; index++) {
+      while (dynamicIndex < dynamicEntries.length &&
+          dynamicEntries[dynamicIndex].insertionIndex == index) {
+        _renderDynamicSceneEntry(
+          canvas,
+          dynamicEntries[dynamicIndex].entity.value,
+          liquidPass: liquidPass,
+        );
+        dynamicIndex++;
+      }
+      if (index < staticOrder.length) {
+        _renderObject(
+          canvas,
+          staticOrder[index].value.object!,
+          liquidPass: liquidPass,
+        );
       }
     }
 
-    _renderObjectBand(canvas, EnvironmentRenderBand.overhead);
-    _renderObjectBand(canvas, EnvironmentRenderBand.effects);
+    _renderObjectBand(
+      canvas,
+      EnvironmentRenderBand.overhead,
+      surfaceId: surfaceId,
+      liquidPass: liquidPass,
+    );
+    _renderObjectBand(
+      canvas,
+      EnvironmentRenderBand.effects,
+      surfaceId: surfaceId,
+      liquidPass: liquidPass,
+    );
   }
 
-  void _renderObjectBand(ui.Canvas canvas, EnvironmentRenderBand band) {
-    for (final object in _objectsInBand(band)) {
-      _renderObject(canvas, object);
+  void _renderObjectBand(
+    ui.Canvas canvas,
+    EnvironmentRenderBand band, {
+    required String surfaceId,
+    required _LiquidSpritePass liquidPass,
+  }) {
+    for (final object in _objectsInBand(band, surfaceId: surfaceId)) {
+      _renderObject(canvas, object, liquidPass: liquidPass);
     }
   }
 
-  List<PlacedEnvironmentObject> _objectsInBand(EnvironmentRenderBand band) =>
-      _objectsByRenderBand[band] ?? const [];
+  Iterable<PlacedEnvironmentObject> _objectsInBand(
+    EnvironmentRenderBand band, {
+    String? surfaceId,
+  }) {
+    final objects = _objectsByRenderBand[band] ?? const [];
+    return surfaceId == null
+        ? objects
+        : objects.where(
+            (object) =>
+                (_objectDepthSurfaceIdsById[object.id] ??
+                    object.supportSurfaceId) ==
+                surfaceId,
+          );
+  }
 
   void _rebuildSceneDepthCache() {
+    _objectSurfacesById.clear();
+    _objectDepthSurfaceIdsById.clear();
+    _liquidOcclusionPathsById.clear();
+    _objectsWithoutLiquidOcclusionPath.clear();
     final objectsByBand =
         <EnvironmentRenderBand, List<PlacedEnvironmentObject>>{
           for (final band in EnvironmentRenderBand.values) band: [],
         };
     for (final object in document.objects) {
       final asset = environmentCatalog.objectById(object.assetId);
-      if (asset != null) objectsByBand[asset.renderBand]!.add(object);
+      if (asset != null && !asset.isAnimal) {
+        final surface = _surfaceAt(
+          Vector2(object.x, object.y),
+          surfaceId: object.supportSurfaceId,
+        );
+        _objectSurfacesById[object.id] = surface;
+        final geometry = environmentCatalog.geometryForAsset(
+          asset,
+          direction: object.direction.name,
+        );
+        _objectDepthSurfaceIdsById[object.id] = environmentObjectDepthSurfaceId(
+          document: document,
+          asset: asset,
+          object: object,
+          objectElevation: _objectElevation(object, asset, surface: surface),
+          geometry: geometry,
+        );
+        objectsByBand[asset.renderBand]!.add(object);
+      }
     }
     for (final entry in objectsByBand.entries) {
       entry.value.sort((a, b) {
@@ -1140,9 +2099,21 @@ class NeuraGame extends FlameGame
         ),
       );
     }
-    _staticDepthOrder = List.unmodifiable(
-      sortEnvironmentDepthEntities(entities),
-    );
+    _staticDepthOrderBySurface.clear();
+    for (final surface in document.surfaces) {
+      final ordered = sortEnvironmentDepthEntities(
+        entities
+            .where(
+              (entity) => _objectDepthSurfaceIdsById[entity.id] == surface.id,
+            )
+            .toList(),
+      );
+      _staticDepthOrderBySurface[surface.id] = List.unmodifiable(ordered);
+    }
+    _staticDepthOrder = List.unmodifiable([
+      for (final surface in _orderedSurfaces())
+        ...?_staticDepthOrderBySurface[surface.id],
+    ]);
     _sceneDepthCacheBuildCount++;
   }
 
@@ -1157,37 +2128,284 @@ class NeuraGame extends FlameGame
     );
   }
 
-  int _playerDepthInsertionIndex() =>
-      environmentDepthInsertionIndex(_staticDepthOrder, _playerDepthEntity());
-
-  List<_SceneEntry> _depthSortedSceneEntries() {
-    final playerIndex = _playerDepthInsertionIndex();
-    return [
-      for (var index = 0; index <= _staticDepthOrder.length; index++) ...[
-        if (index == playerIndex) const _SceneEntry.player(),
-        if (index < _staticDepthOrder.length) _staticDepthOrder[index].value,
-      ],
-    ];
+  EnvironmentDepthEntity<_SceneEntry> _animalDepthEntity(_ActiveAnimal animal) {
+    final actor = WorldPoint(animal.position.x, animal.position.y);
+    return EnvironmentDepthEntity(
+      id: animal.id,
+      value: _SceneEntry.animal(animal.id),
+      contact: actor,
+      depth: actor.x + actor.y,
+      tieBreaker: actor.x,
+    );
   }
 
-  void _renderObject(ui.Canvas canvas, PlacedEnvironmentObject object) {
+  List<_DynamicDepthEntry> _dynamicDepthEntries(
+    String surfaceId,
+    List<EnvironmentDepthEntity<_SceneEntry>> staticOrder,
+  ) {
+    final entities = <EnvironmentDepthEntity<_SceneEntry>>[
+      if (_playerSurfaceId == surfaceId) _playerDepthEntity(),
+      for (final id in _activeAnimalIds)
+        if (_animalStatesById[id] case final animal?)
+          if (animal.surfaceId == surfaceId) _animalDepthEntity(animal),
+    ];
+    final entries = [
+      for (final entity in entities)
+        _DynamicDepthEntry(
+          insertionIndex: environmentDepthInsertionIndex(staticOrder, entity),
+          entity: entity,
+        ),
+    ];
+    entries.sort((left, right) {
+      final insertion = left.insertionIndex.compareTo(right.insertionIndex);
+      if (insertion != 0) return insertion;
+      final depth = left.entity.depth.compareTo(right.entity.depth);
+      if (depth != 0) return depth;
+      return left.entity.id.compareTo(right.entity.id);
+    });
+    return entries;
+  }
+
+  void _renderDynamicSceneEntry(
+    ui.Canvas canvas,
+    _SceneEntry entry, {
+    required _LiquidSpritePass liquidPass,
+  }) {
+    if (liquidPass == _LiquidSpritePass.submerged) return;
+    if (entry.isPlayer) {
+      _renderPlayer(canvas);
+      return;
+    }
+    final animalId = entry.animalId;
+    if (animalId != null) {
+      final animal = _animalStatesById[animalId];
+      if (animal != null) _renderAnimal(canvas, animal);
+    }
+  }
+
+  List<_SceneEntry> _depthSortedSceneEntries(String surfaceId) {
+    final staticOrder =
+        _staticDepthOrderBySurface[surfaceId] ??
+        const <EnvironmentDepthEntity<_SceneEntry>>[];
+    final dynamicEntries = _dynamicDepthEntries(surfaceId, staticOrder);
+    var dynamicIndex = 0;
+    final entries = <_SceneEntry>[];
+    for (var index = 0; index <= staticOrder.length; index++) {
+      while (dynamicIndex < dynamicEntries.length &&
+          dynamicEntries[dynamicIndex].insertionIndex == index) {
+        entries.add(dynamicEntries[dynamicIndex++].entity.value);
+      }
+      if (index < staticOrder.length) {
+        entries.add(staticOrder[index].value);
+      }
+    }
+    return entries;
+  }
+
+  void _renderObject(
+    ui.Canvas canvas,
+    PlacedEnvironmentObject object, {
+    required _LiquidSpritePass liquidPass,
+  }) {
     final asset = environmentCatalog.objectById(object.assetId);
     if (asset == null) return;
+    final surface =
+        _objectSurfacesById[object.id] ??
+        _surfaceAt(
+          Vector2(object.x, object.y),
+          surfaceId: object.supportSurfaceId,
+        );
+    if (liquidPass == _LiquidSpritePass.submerged &&
+        (!surface.hasLiquid ||
+            _liquidInteractionFor(object, asset) ==
+                EnvironmentLiquidInteraction.ignore)) {
+      return;
+    }
     final view = asset.viewFor(object.direction.name);
     final image = _loadedImages[view.imagePath];
     if (image == null) return;
-    Sprite(image).render(
-      canvas,
-      position: projection.worldToScreen(Vector2(object.x, object.y))
-        ..y -= object.verticalOffset * elevationPixelsPerWorldUnit,
-      size: Vector2(
+    final width =
         (view.logicalWidth > 0 ? view.logicalWidth : image.width) *
-            asset.renderScale,
+        asset.renderScale;
+    final height =
         (view.logicalHeight > 0 ? view.logicalHeight : image.height) *
-            asset.renderScale,
-      ),
-      anchor: Anchor(view.pivotX, view.pivotY),
+        asset.renderScale;
+    final anchor = _projectAtElevation(
+      Vector2(object.x, object.y),
+      _objectElevation(object, asset, surface: surface),
     );
+    final destination = ui.Rect.fromLTWH(
+      anchor.x - width * view.pivotX,
+      anchor.y - height * view.pivotY,
+      width,
+      height,
+    );
+    final liquidOcclusionPath = surface.hasLiquid
+        ? _cachedLiquidOcclusionPath(object, asset, surface, destination)
+        : null;
+    _drawObjectFrame(
+      canvas,
+      image,
+      ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      destination,
+      object,
+      asset,
+      surface: surface,
+      liquidOcclusionPath: liquidOcclusionPath,
+      liquidPass: liquidPass,
+    );
+  }
+
+  ui.Path? _cachedLiquidOcclusionPath(
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+    EnvironmentSurfaceSample surface,
+    ui.Rect destination,
+  ) {
+    final cached = _liquidOcclusionPathsById[object.id];
+    if (cached != null) return cached;
+    if (_objectsWithoutLiquidOcclusionPath.contains(object.id)) return null;
+    final geometry = environmentCatalog.geometryForAsset(
+      asset,
+      direction: object.direction.name,
+    );
+    final boundary = environmentFootprintFrontBoundary([
+      for (final footprint in geometry.footprints)
+        environmentShapeOutline(footprint, object),
+    ]);
+    if (boundary.length < 2) {
+      _objectsWithoutLiquidOcclusionPath.add(object.id);
+      return null;
+    }
+    final projected = [
+      for (final point in boundary)
+        _projectAtElevation(
+          Vector2(point.x, point.y),
+          surface.liquidSurfaceElevation!,
+        ),
+    ];
+    final path = ui.Path()
+      ..moveTo(destination.left, projected.first.y)
+      ..lineTo(projected.first.x, projected.first.y);
+    for (final point in projected.skip(1)) {
+      path.lineTo(point.x, point.y);
+    }
+    path
+      ..lineTo(destination.right, projected.last.y)
+      ..lineTo(destination.right, destination.bottom)
+      ..lineTo(destination.left, destination.bottom)
+      ..close();
+    _liquidOcclusionPathsById[object.id] = path;
+    return path;
+  }
+
+  EnvironmentLiquidInteraction _liquidInteractionFor(
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+  ) {
+    if (object.liquidInteraction != EnvironmentLiquidInteraction.automatic) {
+      return object.liquidInteraction;
+    }
+    final words = <String>{
+      asset.family.toLowerCase(),
+      asset.name.toLowerCase(),
+      for (final tag in asset.tags) tag.toLowerCase(),
+    }.join(' ');
+    return words.contains('boat') || words.contains('ship')
+        ? EnvironmentLiquidInteraction.float
+        : EnvironmentLiquidInteraction.submerge;
+  }
+
+  double _objectElevation(
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset, {
+    EnvironmentSurfaceSample? surface,
+  }) {
+    surface ??= _surfaceAt(
+      Vector2(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    );
+    final interaction = _liquidInteractionFor(object, asset);
+    if (surface.hasLiquid &&
+        interaction == EnvironmentLiquidInteraction.float) {
+      return surface.liquidSurfaceElevation! -
+          object.liquidDraft +
+          object.verticalOffset;
+    }
+    return surface.groundElevation + object.verticalOffset;
+  }
+
+  void _drawObjectFrame(
+    ui.Canvas canvas,
+    ui.Image image,
+    ui.Rect source,
+    ui.Rect destination,
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset, {
+    EnvironmentSurfaceSample? surface,
+    ui.Path? liquidOcclusionPath,
+    required _LiquidSpritePass liquidPass,
+  }) {
+    surface ??= _surfaceAt(
+      Vector2(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    );
+    final interaction = _liquidInteractionFor(object, asset);
+    if (!surface.hasLiquid ||
+        interaction == EnvironmentLiquidInteraction.ignore) {
+      if (liquidPass == _LiquidSpritePass.exposed) {
+        canvas.drawImageRect(image, source, destination, ui.Paint());
+      }
+      return;
+    }
+    final groundAnchor = projection.worldToScreen(Vector2(object.x, object.y));
+    final waterline =
+        groundAnchor.y -
+        surface.liquidSurfaceElevation! * elevationPixelsPerWorldUnit;
+    final overlayTop = math.max(destination.top, waterline);
+    if (liquidOcclusionPath == null && overlayTop >= destination.bottom) {
+      if (liquidPass == _LiquidSpritePass.exposed) {
+        canvas.drawImageRect(image, source, destination, ui.Paint());
+      }
+      return;
+    }
+
+    canvas.save();
+    if (liquidPass == _LiquidSpritePass.submerged) {
+      if (liquidOcclusionPath != null) {
+        canvas.clipPath(liquidOcclusionPath);
+      } else {
+        canvas.clipRect(
+          ui.Rect.fromLTRB(
+            destination.left,
+            overlayTop,
+            destination.right,
+            destination.bottom,
+          ),
+        );
+      }
+    } else if (liquidOcclusionPath != null) {
+      canvas.clipPath(
+        ui.Path.combine(
+          ui.PathOperation.difference,
+          ui.Path()..addRect(destination),
+          liquidOcclusionPath,
+        ),
+      );
+    } else if (overlayTop > destination.top) {
+      canvas.clipRect(
+        ui.Rect.fromLTRB(
+          destination.left,
+          destination.top,
+          destination.right,
+          overlayTop,
+        ),
+      );
+    } else {
+      canvas.clipRect(ui.Rect.zero);
+    }
+    canvas.drawImageRect(image, source, destination, ui.Paint());
+    canvas.restore();
   }
 
   void _renderPlayer(ui.Canvas canvas) {
@@ -1201,7 +2419,7 @@ class NeuraGame extends FlameGame
     final row = characterCatalog.rowForDirection(_facing.name);
     final frameWidth = characterCatalog.frameWidth.toDouble();
     final frameHeight = characterCatalog.frameHeight.toDouble();
-    final position = projection.worldToScreen(playerPosition);
+    final position = _projectGround(playerPosition);
     final destination = ui.Rect.fromLTWH(
       position.x - frameWidth * asset.renderScale * asset.pivotX,
       position.y - frameHeight * asset.renderScale * asset.pivotY,
@@ -1221,15 +2439,56 @@ class NeuraGame extends FlameGame
     );
   }
 
+  void _renderAnimal(ui.Canvas canvas, _ActiveAnimal animal) {
+    final animation = animal.asset.animalAnimation!;
+    final clip = animation.clipFor(animal.activity.name);
+    final image = _loadedImages[clip.imagePath];
+    if (image == null) return;
+    final rawFrame = (animal.animationTime * clip.framesPerSecond).floor();
+    final frame = clip.pingPong && clip.frames > 1
+        ? () {
+            final period = clip.frames * 2 - 2;
+            final phase = rawFrame % period;
+            return phase < clip.frames ? phase : period - phase;
+          }()
+        : rawFrame % clip.frames;
+    final row = animation.rowForDirection(animal.facing.name);
+    final sourceWidth = image.width / clip.frames;
+    final sourceHeight = image.height / animation.directionRows.length;
+    final view = animal.asset.views.values.first;
+    final position = _projectGround(
+      animal.position,
+      surfaceId: animal.surfaceId,
+    );
+    final width = animation.frameWidth * animal.asset.renderScale;
+    final height = animation.frameHeight * animal.asset.renderScale;
+    canvas.drawImageRect(
+      image,
+      ui.Rect.fromLTWH(
+        frame * sourceWidth,
+        row * sourceHeight,
+        sourceWidth,
+        sourceHeight,
+      ),
+      ui.Rect.fromLTWH(
+        position.x - width * view.pivotX,
+        position.y - height * view.pivotY,
+        width,
+        height,
+      ),
+      ui.Paint(),
+    );
+  }
+
   void _renderTarget(ui.Canvas canvas) {
     final target = _destination;
     if (target == null) return;
-    final center = projection.worldToScreen(target);
+    final center = _projectGround(target);
     final points = [
-      projection.worldToScreen(target + Vector2(-0.28, -0.28)),
-      projection.worldToScreen(target + Vector2(0.28, -0.28)),
-      projection.worldToScreen(target + Vector2(0.28, 0.28)),
-      projection.worldToScreen(target + Vector2(-0.28, 0.28)),
+      _projectGround(target + Vector2(-0.28, -0.28)),
+      _projectGround(target + Vector2(0.28, -0.28)),
+      _projectGround(target + Vector2(0.28, 0.28)),
+      _projectGround(target + Vector2(-0.28, 0.28)),
     ];
     final path = ui.Path()..moveTo(points.first.x, points.first.y);
     for (final point in points.skip(1)) {
@@ -1471,8 +2730,7 @@ class NeuraGame extends FlameGame
     super.onRemove();
   }
 
-  Vector2 get _cameraProjectedPosition =>
-      projection.worldToScreen(playerPosition);
+  Vector2 get _cameraProjectedPosition => _projectGround(playerPosition);
 }
 
 class _CharacterImages {
@@ -1482,13 +2740,77 @@ class _CharacterImages {
   final ui.Image walk;
 }
 
+enum _AnimalActivity { idle, walk, run, action }
+
+enum _LiquidSpritePass { submerged, exposed }
+
+class _ActiveAnimal {
+  _ActiveAnimal({
+    required this.id,
+    required this.asset,
+    required this.profile,
+    required Vector2 home,
+    required this.facing,
+    required int randomSeed,
+    required this.surfaceId,
+  }) : home = home.clone(),
+       position = home.clone(),
+       random = math.Random(randomSeed) {
+    remainingActivitySeconds = randomDuration();
+  }
+
+  final String id;
+  final EnvironmentObjectAsset asset;
+  final AnimalBehaviorProfile profile;
+  final Vector2 home;
+  final Vector2 position;
+  final math.Random random;
+  final List<Vector2> waypoints = [];
+  String surfaceId;
+  EnvironmentDirection facing;
+  _AnimalActivity activity = _AnimalActivity.idle;
+  double animationTime = 0;
+  double remainingActivitySeconds = 0;
+  bool pathPending = false;
+  int pathSerial = 0;
+
+  bool get isMoving => waypoints.isNotEmpty;
+
+  double randomDuration() =>
+      profile.minimumPauseSeconds +
+      random.nextDouble() *
+          (profile.maximumPauseSeconds - profile.minimumPauseSeconds);
+
+  void setActivity(_AnimalActivity value, {double duration = 0}) {
+    if (activity != value) animationTime = 0;
+    activity = value;
+    remainingActivitySeconds = duration;
+  }
+}
+
+class _DynamicDepthEntry {
+  const _DynamicDepthEntry({
+    required this.insertionIndex,
+    required this.entity,
+  });
+
+  final int insertionIndex;
+  final EnvironmentDepthEntity<_SceneEntry> entity;
+}
+
 class _SceneEntry {
-  const _SceneEntry._({this.object});
+  const _SceneEntry._({this.object, this.animalId, this.isPlayer = false});
 
   factory _SceneEntry.object(PlacedEnvironmentObject object) =>
       _SceneEntry._(object: object);
 
-  const factory _SceneEntry.player() = _SceneEntry._;
+  const _SceneEntry.player() : this._(isPlayer: true);
+
+  factory _SceneEntry.animal(String id) => _SceneEntry._(animalId: id);
 
   final PlacedEnvironmentObject? object;
+  final String? animalId;
+  final bool isPlayer;
+
+  String get debugId => object?.id ?? animalId ?? 'player';
 }

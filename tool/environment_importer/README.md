@@ -6,7 +6,9 @@ runtime-ready Neura assets. Its reviewed registry covers Core Tiles 1, 2, and
 vegetation, buildings, structures, vehicles, furniture, props, small items,
 and dungeon art. Opaque `WaterTile` sources receive deterministic
 soft-edged brush decals during `build`; their original images remain the
-repeating textures.
+repeating textures. The same build also validates `content/Animals` compact
+20 x 20 sheets and extracts idle, walk, run, and action atlases for dynamic
+animal actors.
 
 Run commands from the repository root:
 
@@ -25,7 +27,9 @@ cargo run --manifest-path tool/environment_importer/Cargo.toml -- check
   excluded, invalid, or unclassified.
 - `build` also copies runtime PNGs into pack-scoped paths, deletes stale cache
   files, generates 192 x 192 thumbnails, merges overrides and manual entries,
-  and writes `environment_catalog.json`.
+  writes `environment_catalog.json`, and generates compact animal animation
+  atlases. Animal behavior profiles are shared catalog data rather than being
+  duplicated for every visual variant.
 - `check-assets` verifies only source discovery, the generated visual catalog,
   copied images, and thumbnails. It never checks or writes authored worlds,
   chunks, or release exports.
@@ -34,8 +38,9 @@ cargo run --manifest-path tool/environment_importer/Cargo.toml -- check
   and chunks; do not run it after resizing or authoring the world in the
   editor.
 - `clear-world --yes` destructively resets every authored chunk to the base
-  material, clears objects, paint, overlaps, travel points, and custom layers,
-  and places the player at the center of chunk `0_0`. It preserves the current
+  material, clears custom surfaces, liquids, connectors, objects, paint,
+  overlaps, travel points, and custom layers, and places the player on the
+  base surface at the center of chunk `0_0`. It preserves the current
   dimensions and chunk grid.
 - `check-world` validates the editable manifest, complete rectangular chunk
   grid, player spawn, and chunk identities directly. The authored chunk files

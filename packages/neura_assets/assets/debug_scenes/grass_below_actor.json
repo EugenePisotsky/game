@@ -1,6 +1,6 @@
 {
   "id": "grass_below_actor",
-  "description": "Actor standing over low grass verifies the ground-cover render band.",
+  "description": "Blank-world deterministic actor fixture retained after the authored-world reset.",
   "camera": {"x": 92.05, "y": 83.85},
   "player": {"x": 92.05, "y": 83.85},
   "facing": "south",
@@ -8,7 +8,7 @@
   "viewportHeight": 600,
   "clockSeconds": 0.4,
   "randomSeed": 2101,
-  "relevantObjectIds": ["object_hke4fcwbdq_0_75"],
+  "relevantObjectIds": [],
   "expectedLoadedChunks": [
     {"x": 1, "y": 1}, {"x": 2, "y": 1}, {"x": 3, "y": 1},
     {"x": 1, "y": 2}, {"x": 2, "y": 2}, {"x": 3, "y": 2},

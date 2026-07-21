@@ -195,6 +195,8 @@ class _StreamingHudState extends State<_StreamingHud> {
           'terrain cache ${widget.game.terrainPictureCount}  '
           'depth static ${widget.game.depthSortedObjectCount}  '
           'rebuild ${widget.game.sceneDepthCacheBuildCount}\n'
+          'animals active ${widget.game.activeAnimalCount}  '
+          'known ${widget.game.knownAnimalCount}\n'
           '${widget.game.diagnosticsFps.toStringAsFixed(1)} fps  '
           '${widget.game.diagnosticsFrameMilliseconds.toStringAsFixed(1)} ms frame  '
           '${widget.game.updateTime} ms update  ${widget.game.renderTime} ms render',

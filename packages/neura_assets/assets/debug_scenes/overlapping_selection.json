@@ -1,6 +1,6 @@
 {
   "id": "overlapping_selection",
-  "description": "A dense barrel and crate cluster exercises topmost selection and overlap cycling.",
+  "description": "Blank-world deterministic overlap-camera fixture retained after reset.",
   "camera": {"x": 85.8, "y": 113.9},
   "player": {"x": 85.8, "y": 113.9},
   "facing": "southWest",
@@ -8,12 +8,7 @@
   "viewportHeight": 600,
   "clockSeconds": 0.0,
   "randomSeed": 2103,
-  "relevantObjectIds": [
-    "object_hke4fcwbdq_0_38",
-    "object_hke4fcwbdq_0_39",
-    "object_hke4fcwbdq_0_40",
-    "object_hke4fcwbdq_0_48"
-  ],
+  "relevantObjectIds": [],
   "expectedLoadedChunks": [
     {"x": 1, "y": 2}, {"x": 2, "y": 2}, {"x": 3, "y": 2},
     {"x": 1, "y": 3}, {"x": 2, "y": 3}, {"x": 3, "y": 3},

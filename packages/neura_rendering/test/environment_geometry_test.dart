@@ -149,6 +149,86 @@ void main() {
     );
   });
 
+  test('tall footprint can join an overlapping upper surface depth pass', () {
+    const asset = EnvironmentObjectAsset(
+      id: 'ship',
+      name: 'Ship',
+      category: 'Ships',
+      renderScale: 1,
+      views: {'south': EnvironmentObjectView(imagePath: 'ship.png')},
+      geometry: EnvironmentAssetGeometry(
+        footprints: [
+          EnvironmentRectangle(
+            center: EnvironmentGeometryPoint(0, 0),
+            size: EnvironmentGeometryPoint(4, 2),
+          ),
+        ],
+      ),
+    );
+    final document = EnvironmentDocument(
+      id: 'world',
+      name: 'World',
+      width: 20,
+      height: 20,
+      baseMaterialId: 'ground',
+    );
+    document.surfaces.add(
+      EnvironmentSurface(
+        id: 'platform',
+        name: 'Platform',
+        materialId: 'wood',
+        order: 1,
+        height: const EnvironmentSurfaceHeight.flat(2),
+        points: const [
+          WorldPoint(6, 4),
+          WorldPoint(9, 4),
+          WorldPoint(9, 7),
+          WorldPoint(6, 7),
+        ],
+      ),
+    );
+    final ship = PlacedEnvironmentObject(
+      id: 'ship',
+      assetId: asset.id,
+      x: 5,
+      y: 5,
+      crossSurfaceOcclusion: true,
+      occlusionHeight: 1,
+    );
+
+    expect(
+      environmentObjectDepthSurfaceId(
+        document: document,
+        asset: asset,
+        object: ship,
+        objectElevation: 0,
+      ),
+      environmentBaseSurfaceId,
+    );
+
+    ship.occlusionHeight = 2;
+    expect(
+      environmentObjectDepthSurfaceId(
+        document: document,
+        asset: asset,
+        object: ship,
+        objectElevation: 0,
+      ),
+      'platform',
+    );
+
+    ship.crossSurfaceOcclusion = false;
+    expect(
+      environmentObjectDepthSurfaceId(
+        document: document,
+        asset: asset,
+        object: ship,
+        objectElevation: 0,
+      ),
+      environmentBaseSurfaceId,
+    );
+  });
+
   test(
     'sloped footprint resolves the local front edge instead of global max',
     () {
@@ -289,5 +369,15 @@ void main() {
 
     expect(environmentDepthConstraint(behindLeftPillar, shelter), -1);
     expect(environmentDepthConstraint(insideOpening, shelter), isNull);
+  });
+
+  test('liquid occlusion follows the front isometric footprint silhouette', () {
+    final boundary = environmentFootprintFrontBoundary(const [
+      [WorldPoint(0, 0), WorldPoint(1, 0), WorldPoint(1, 1), WorldPoint(0, 1)],
+    ]);
+
+    expect(boundary, hasLength(3));
+    expect(boundary.map((point) => point.x - point.y), [-1, 0, 1]);
+    expect(boundary.map((point) => point.x + point.y), [1, 2, 1]);
   });
 }

@@ -83,6 +83,15 @@ struct Rules {
     world_width: f64,
     world_height: f64,
     player_spawn: RulePoint,
+    animals: Option<AnimalRule>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AnimalRule {
+    source_root: PathBuf,
+    pack_id: String,
+    display_name: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -207,6 +216,17 @@ struct DiscoveredObject {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+struct DiscoveredAnimal {
+    id: String,
+    name: String,
+    species: String,
+    behavior_profile_id: String,
+    frame_size: u32,
+    source: SourceImage,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 struct DiscoveredSourceStatus {
     source: String,
     status: String,
@@ -227,6 +247,8 @@ struct Manifest {
     packs: Vec<String>,
     materials: Vec<DiscoveredMaterial>,
     objects: Vec<DiscoveredObject>,
+    #[serde(default)]
+    animals: Vec<DiscoveredAnimal>,
     sources: Vec<DiscoveredSourceStatus>,
     warnings: Vec<String>,
 }
@@ -285,6 +307,24 @@ struct Catalog {
     source_packs: Vec<CatalogSourcePack>,
     materials: Vec<CatalogMaterial>,
     objects: Vec<CatalogObject>,
+    #[serde(default)]
+    animal_behavior_profiles: Vec<CatalogAnimalBehaviorProfile>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CatalogAnimalBehaviorProfile {
+    id: String,
+    name: String,
+    roaming_radius: f64,
+    walk_speed_pixels_per_second: f64,
+    run_speed_pixels_per_second: f64,
+    minimum_pause_seconds: f64,
+    maximum_pause_seconds: f64,
+    idle_weight: f64,
+    walk_weight: f64,
+    run_weight: f64,
+    action_weight: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -354,6 +394,31 @@ struct CatalogObject {
     #[serde(skip_serializing_if = "Option::is_none")]
     thumbnail: Option<String>,
     views: BTreeMap<String, CatalogView>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    animal_animation: Option<CatalogAnimalAnimation>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CatalogAnimalAnimation {
+    behavior_profile_id: String,
+    frame_width: u32,
+    frame_height: u32,
+    direction_rows: Vec<String>,
+    idle: CatalogAnimalAnimationClip,
+    walk: CatalogAnimalAnimationClip,
+    run: CatalogAnimalAnimationClip,
+    action: CatalogAnimalAnimationClip,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CatalogAnimalAnimationClip {
+    image: String,
+    frames: u32,
+    frames_per_second: f64,
+    #[serde(default, skip_serializing_if = "is_false")]
+    ping_pong: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -372,6 +437,10 @@ struct CatalogView {
 
 fn is_zero(value: &u32) -> bool {
     *value == 0
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 fn default_pivot_x() -> f64 {
@@ -500,6 +569,11 @@ fn validate_rules(rules: &Rules) -> Result<()> {
                 );
             }
         }
+    }
+    if let Some(animals) = &rules.animals
+        && !pack_ids.insert(animals.pack_id.as_str())
+    {
+        return Err(format!("duplicate source pack id {}", animals.pack_id).into());
     }
     Ok(())
 }
@@ -816,15 +890,90 @@ fn scan(root: &Path, rules: &Rules) -> Result<Manifest> {
             .then(left.source_variant.cmp(&right.source_variant))
     });
     sources.sort_by(|left, right| left.source.cmp(&right.source));
+    let animals = scan_animals(root, rules)?;
 
     Ok(Manifest {
         schema_version: 2,
         packs: rules.packs.iter().map(|pack| pack.id.clone()).collect(),
         materials,
         objects,
+        animals,
         sources,
         warnings,
     })
+}
+
+fn scan_animals(root: &Path, rules: &Rules) -> Result<Vec<DiscoveredAnimal>> {
+    let Some(rule) = &rules.animals else {
+        return Ok(Vec::new());
+    };
+    let source_root = root.join(&rule.source_root);
+    let mut directories = fs::read_dir(&source_root)?
+        .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+        .filter(|path| path.is_dir())
+        .collect::<Vec<_>>();
+    directories.sort();
+    let mut animals = Vec::new();
+    for directory in directories {
+        let path = directory.join("Sprite_1.png");
+        if !path.is_file() {
+            continue;
+        }
+        let folder = directory
+            .file_name()
+            .and_then(|name| name.to_str())
+            .ok_or("animal directory name is not UTF-8")?;
+        let source = inspect_image(root, &path)?;
+        if source.width != source.height || source.width % 20 != 0 {
+            return Err(format!(
+                "animal sheet {} must be a square 20 x 20 grid, got {} x {}",
+                source.source, source.width, source.height
+            )
+            .into());
+        }
+        let slug = folder.to_ascii_lowercase();
+        let species = animal_species(folder);
+        animals.push(DiscoveredAnimal {
+            id: format!("animals.{slug}"),
+            name: folder.replace('_', " "),
+            species: species.into(),
+            behavior_profile_id: animal_behavior_profile(species).into(),
+            frame_size: source.width / 20,
+            source,
+        });
+    }
+    Ok(animals)
+}
+
+fn animal_species(folder: &str) -> &str {
+    let lower = folder.to_ascii_lowercase();
+    if lower.starts_with("cat_") {
+        "cat"
+    } else if lower.starts_with("dog_") {
+        "dog"
+    } else if lower.starts_with("chicken") || lower.starts_with("turkey") {
+        "poultry"
+    } else if lower.starts_with("horse_") {
+        "horse"
+    } else if lower.starts_with("donkey_") {
+        "donkey"
+    } else if lower.starts_with("wolf_") {
+        "wolf"
+    } else {
+        "deer"
+    }
+}
+
+fn animal_behavior_profile(species: &str) -> &str {
+    match species {
+        "cat" => "cat_household",
+        "dog" => "dog_household",
+        "poultry" => "poultry_yard",
+        "horse" => "horse_stabled",
+        "donkey" => "donkey_paddock",
+        "wolf" => "wolf_wild",
+        _ => "deer_wild",
+    }
 }
 
 fn directional_pattern(rule: &ObjectRule) -> Result<String> {
@@ -939,6 +1088,9 @@ fn build(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
             false,
         )?;
     }
+    for animal in &manifest.animals {
+        build_animal_assets(root, &generated_root, animal)?;
+    }
 
     write_json(&root.join(&rules.manifest_path), manifest)?;
     write_json(&root.join(&rules.catalog_path), &catalog)?;
@@ -995,6 +1147,12 @@ fn check(root: &Path, rules: &Rules, manifest: &Manifest) -> Result<()> {
         }
         require_file(&generated_root.join(object_thumbnail_path(object)))?;
     }
+    for animal in &manifest.animals {
+        for clip in ["idle", "walk", "run", "action"] {
+            require_file(&generated_root.join(animal_animation_path(animal, clip)))?;
+        }
+        require_file(&generated_root.join(animal_thumbnail_path(animal)))?;
+    }
     Ok(())
 }
 
@@ -1010,6 +1168,12 @@ fn expected_generated_paths(manifest: &Manifest) -> BTreeSet<PathBuf> {
             paths.insert(object_image_path(object, *view));
         }
         paths.insert(object_thumbnail_path(object));
+    }
+    for animal in &manifest.animals {
+        for clip in ["idle", "walk", "run", "action"] {
+            paths.insert(animal_animation_path(animal, clip));
+        }
+        paths.insert(animal_thumbnail_path(animal));
     }
     paths
 }
@@ -1249,6 +1413,10 @@ fn segments_intersect(a: (f64, f64), b: (f64, f64), c: (f64, f64), d: (f64, f64)
 
 #[derive(Default)]
 struct GeneratedChunk {
+    surfaces: Vec<serde_json::Value>,
+    liquid_volumes: Vec<serde_json::Value>,
+    surface_connectors: Vec<serde_json::Value>,
+    terrain_regions: Vec<serde_json::Value>,
     terrain_strokes: Vec<serde_json::Value>,
     objects: Vec<serde_json::Value>,
     overlap_object_ids: BTreeSet<String>,
@@ -1323,6 +1491,9 @@ fn clear_world(root: &Path, rules: &Rules) -> Result<()> {
     manifest["travelPoints"] = json!([]);
     manifest["editorLayers"] = json!([root_layer.clone()]);
     manifest["activeLayerId"] = json!("layer_world");
+    manifest["schemaVersion"] = json!(2);
+    manifest["playerSpawnSurfaceId"] = json!("surface_ground");
+    manifest["activeSurfaceId"] = json!("surface_ground");
 
     let chunks_root = root.join(&rules.world_chunks_root);
     fs::create_dir_all(&chunks_root)?;
@@ -1343,11 +1514,15 @@ fn clear_world(root: &Path, rules: &Rules) -> Result<()> {
         write_json(
             &chunks_root.join(format!("{x}_{y}.json")),
             &json!({
-                "schemaVersion": 1,
+                "schemaVersion": 4,
                 "worldId": world_id.clone(),
                 "coordinate": {"x": x, "y": y},
                 "size": chunk_size,
                 "baseMaterialId": base_material.clone(),
+                "surfaces": [],
+                "liquidVolumes": [],
+                "surfaceConnectors": [],
+                "terrainRegions": [],
                 "terrainStrokes": [],
                 "objects": [],
                 "overlapObjectIds": []
@@ -1359,13 +1534,36 @@ fn clear_world(root: &Path, rules: &Rules) -> Result<()> {
     let source_path = root.join(&rules.source_world_path);
     if source_path.exists() {
         let mut source: Value = read_json(&source_path)?;
+        source["schemaVersion"] = json!(6);
         source["width"] = manifest["width"].clone();
         source["height"] = manifest["height"].clone();
-        source["baseMaterialId"] = json!(base_material);
+        source.as_object_mut().unwrap().remove("baseMaterialId");
+        source["surfaces"] = json!([{
+            "id": "surface_ground",
+            "name": "Ground",
+            "materialId": base_material,
+            "kind": "terrain",
+            "height": {"kind": "flat", "elevation": 0.0},
+            "walkable": true,
+            "order": 0,
+            "points": [
+                {"x": 0.0, "y": 0.0},
+                {"x": manifest["width"].as_f64().unwrap(), "y": 0.0},
+                {
+                    "x": manifest["width"].as_f64().unwrap(),
+                    "y": manifest["height"].as_f64().unwrap()
+                },
+                {"x": 0.0, "y": manifest["height"].as_f64().unwrap()}
+            ]
+        }]);
+        source["liquidVolumes"] = json!([]);
+        source["surfaceConnectors"] = json!([]);
+        source["terrainRegions"] = json!([]);
         source["terrainStrokes"] = json!([]);
         source["objects"] = json!([]);
         source["editorLayers"] = json!([root_layer]);
         source["activeLayerId"] = json!("layer_world");
+        source["activeSurfaceId"] = json!("surface_ground");
         write_json(&source_path, &source)?;
     }
     Ok(())
@@ -1373,6 +1571,14 @@ fn clear_world(root: &Path, rules: &Rules) -> Result<()> {
 
 fn check_world(root: &Path, rules: &Rules) -> Result<()> {
     let manifest: serde_json::Value = read_json(&root.join(&rules.world_manifest_path))?;
+    if manifest["schemaVersion"].as_u64() != Some(2) {
+        return Err("world manifest must use surface schema version 2".into());
+    }
+    if manifest["playerSpawnSurfaceId"].as_str().is_none()
+        || manifest["activeSurfaceId"].as_str().is_none()
+    {
+        return Err("world manifest has no spawn/active surface id".into());
+    }
     let world_id = manifest["id"].as_str().ok_or("world manifest has no id")?;
     let chunk_size = manifest["chunkSize"]
         .as_f64()
@@ -1435,6 +1641,11 @@ fn check_world(root: &Path, rules: &Rules) -> Result<()> {
     for &(x, y) in &coordinates {
         let name = format!("{x}_{y}.json");
         let chunk: serde_json::Value = read_json(&chunks_root.join(&name))?;
+        if chunk["schemaVersion"].as_u64() != Some(4) {
+            return Err(
+                format!("environment chunk {name} must use surface schema version 4").into(),
+            );
+        }
         if chunk["worldId"].as_str() != Some(world_id)
             || chunk["coordinate"]["x"].as_i64() != Some(x as i64)
             || chunk["coordinate"]["y"].as_i64() != Some(y as i64)
@@ -1447,6 +1658,18 @@ fn check_world(root: &Path, rules: &Rules) -> Result<()> {
             return Err(
                 format!("environment chunk {name} disagrees with its world manifest").into(),
             );
+        }
+        for field in [
+            "surfaces",
+            "liquidVolumes",
+            "surfaceConnectors",
+            "terrainRegions",
+            "terrainStrokes",
+            "objects",
+        ] {
+            if !chunk[field].is_array() {
+                return Err(format!("environment chunk {name} {field} must be an array").into());
+            }
         }
     }
     let actual_names = fs::read_dir(&chunks_root)?
@@ -1634,6 +1857,19 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
                     .to_owned(),
             );
         }
+        for field in ["terrainRegions", "surfaces", "liquidVolumes"] {
+            for entry in chunk[field].as_array().into_iter().flatten() {
+                if entry["resetsToDefault"].as_bool() == Some(true) {
+                    continue;
+                }
+                required_materials.insert(
+                    entry["materialId"]
+                        .as_str()
+                        .ok_or_else(|| format!("chunk {x}_{y} {field} entry has no materialId"))?
+                        .to_owned(),
+                );
+            }
+        }
         let objects = chunk["objects"]
             .as_array_mut()
             .ok_or_else(|| format!("chunk {x}_{y} objects must be an array"))?;
@@ -1814,6 +2050,31 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
         let max_dimension = object["sourcePack"]
             .as_str()
             .and_then(release_max_dimension_for);
+        if let Some(animation) = object
+            .get_mut("animalAnimation")
+            .and_then(Value::as_object_mut)
+        {
+            for clip_name in ["idle", "walk", "run", "action"] {
+                let clip = animation
+                    .get_mut(clip_name)
+                    .and_then(Value::as_object_mut)
+                    .ok_or_else(|| {
+                        format!("animal asset {id} is missing animation clip {clip_name}")
+                    })?;
+                let logical = clip["image"]
+                    .as_str()
+                    .ok_or_else(|| format!("animal asset {id} clip {clip_name} has no image"))?
+                    .to_owned();
+                let release_path = register_release_image(
+                    root,
+                    source_image_root,
+                    &logical,
+                    max_dimension,
+                    &mut images,
+                )?;
+                clip.insert("image".to_owned(), Value::String(release_path));
+            }
+        }
         let source_views = object["views"]
             .as_object()
             .ok_or_else(|| format!("asset {id} views must be an object"))?;
@@ -1849,6 +2110,7 @@ fn generate_release_package(root: &Path, rules: &Rules) -> Result<ReleasePackage
     let release_catalog = json!({
         "schemaVersion": catalog["schemaVersion"].clone(),
         "sourcePacks": catalog["sourcePacks"].clone(),
+        "animalBehaviorProfiles": catalog["animalBehaviorProfiles"].clone(),
         "materials": release_materials,
         "objects": release_objects
     });
@@ -2063,6 +2325,67 @@ fn remove_empty_directories(root: &Path) -> Result<()> {
     Ok(())
 }
 
+fn polygon_json_bounds(value: &serde_json::Value, padding: f64) -> Result<(f64, f64, f64, f64)> {
+    let points = value["points"]
+        .as_array()
+        .ok_or("surface points must be an array")?;
+    if points.len() < 3 {
+        return Err("surface polygon must have at least three points".into());
+    }
+    let mut min_x = f64::INFINITY;
+    let mut min_y = f64::INFINITY;
+    let mut max_x = f64::NEG_INFINITY;
+    let mut max_y = f64::NEG_INFINITY;
+    for point in points {
+        let x = point["x"]
+            .as_f64()
+            .ok_or("surface point x must be numeric")?;
+        let y = point["y"]
+            .as_f64()
+            .ok_or("surface point y must be numeric")?;
+        min_x = min_x.min(x);
+        min_y = min_y.min(y);
+        max_x = max_x.max(x);
+        max_y = max_y.max(y);
+    }
+    Ok((
+        min_x - padding,
+        min_y - padding,
+        max_x + padding,
+        max_y + padding,
+    ))
+}
+
+fn localize_world_point(
+    point: &mut serde_json::Value,
+    coordinate: (i32, i32),
+    chunk_size: f64,
+) -> Result<()> {
+    point["x"] = serde_json::json!(
+        point["x"].as_f64().ok_or("world point x must be numeric")?
+            - coordinate.0 as f64 * chunk_size
+    );
+    point["y"] = serde_json::json!(
+        point["y"].as_f64().ok_or("world point y must be numeric")?
+            - coordinate.1 as f64 * chunk_size
+    );
+    Ok(())
+}
+
+fn localize_polygon(
+    value: &mut serde_json::Value,
+    coordinate: (i32, i32),
+    chunk_size: f64,
+) -> Result<()> {
+    for point in value["points"]
+        .as_array_mut()
+        .ok_or("surface points must be an array")?
+    {
+        localize_world_point(point, coordinate, chunk_size)?;
+    }
+    Ok(())
+}
+
 fn generate_world(
     root: &Path,
     rules: &Rules,
@@ -2074,9 +2397,19 @@ fn generate_world(
     let source: Value = read_json(&root.join(&rules.source_world_path))?;
     let world_id = source["id"].as_str().ok_or("source world has no id")?;
     let name = source["name"].as_str().ok_or("source world has no name")?;
-    let base_material = source["baseMaterialId"]
+    if source["schemaVersion"].as_u64() != Some(6) {
+        return Err("source world must use explicit surface schema version 6".into());
+    }
+    let source_surfaces = source["surfaces"]
+        .as_array()
+        .ok_or("source world surfaces must be an array")?;
+    let base_surface = source_surfaces
+        .iter()
+        .find(|surface| surface["id"].as_str() == Some("surface_ground"))
+        .ok_or("source world has no surface_ground")?;
+    let base_material = base_surface["materialId"]
         .as_str()
-        .ok_or("source world has no baseMaterialId")?;
+        .ok_or("base surface has no materialId")?;
     let columns = (rules.world_width / rules.world_chunk_size).ceil() as i32;
     let rows = (rules.world_height / rules.world_chunk_size).ceil() as i32;
     let coordinates = (0..rows)
@@ -2086,6 +2419,98 @@ fn generate_world(
         .iter()
         .map(|coordinate| (*coordinate, GeneratedChunk::default()))
         .collect::<BTreeMap<_, _>>();
+
+    for surface in source_surfaces {
+        if surface["id"].as_str() == Some("surface_ground") {
+            continue;
+        }
+        let bounds = polygon_json_bounds(surface, 0.0)?;
+        for &coordinate in &coordinates {
+            if !bounds_overlap_chunk(bounds, coordinate, rules.world_chunk_size) {
+                continue;
+            }
+            let mut local = surface.clone();
+            localize_polygon(&mut local, coordinate, rules.world_chunk_size)?;
+            if local["height"]["kind"].as_str() == Some("linearRamp") {
+                for field in ["rampStart", "rampEnd"] {
+                    localize_world_point(
+                        &mut local["height"][field],
+                        coordinate,
+                        rules.world_chunk_size,
+                    )?;
+                }
+            }
+            chunks.get_mut(&coordinate).unwrap().surfaces.push(local);
+        }
+    }
+
+    for liquid in source["liquidVolumes"].as_array().into_iter().flatten() {
+        let bounds = polygon_json_bounds(liquid, liquid["edgeBlend"].as_f64().unwrap_or(0.0))?;
+        for &coordinate in &coordinates {
+            if !bounds_overlap_chunk(bounds, coordinate, rules.world_chunk_size) {
+                continue;
+            }
+            let mut local = liquid.clone();
+            localize_polygon(&mut local, coordinate, rules.world_chunk_size)?;
+            chunks
+                .get_mut(&coordinate)
+                .unwrap()
+                .liquid_volumes
+                .push(local);
+        }
+    }
+
+    for region in source["terrainRegions"].as_array().into_iter().flatten() {
+        let bounds = polygon_json_bounds(region, region["edgeBlend"].as_f64().unwrap_or(0.0))?;
+        for &coordinate in &coordinates {
+            if !bounds_overlap_chunk(bounds, coordinate, rules.world_chunk_size) {
+                continue;
+            }
+            let mut local = region.clone();
+            localize_polygon(&mut local, coordinate, rules.world_chunk_size)?;
+            chunks
+                .get_mut(&coordinate)
+                .unwrap()
+                .terrain_regions
+                .push(local);
+        }
+    }
+
+    for connector in source["surfaceConnectors"].as_array().into_iter().flatten() {
+        let from_x = connector["from"]["x"]
+            .as_f64()
+            .ok_or("connector from.x must be numeric")?;
+        let from_y = connector["from"]["y"]
+            .as_f64()
+            .ok_or("connector from.y must be numeric")?;
+        let to_x = connector["to"]["x"]
+            .as_f64()
+            .ok_or("connector to.x must be numeric")?;
+        let to_y = connector["to"]["y"]
+            .as_f64()
+            .ok_or("connector to.y must be numeric")?;
+        let padding = connector["width"].as_f64().unwrap_or(1.0);
+        let bounds = (
+            from_x.min(to_x) - padding,
+            from_y.min(to_y) - padding,
+            from_x.max(to_x) + padding,
+            from_y.max(to_y) + padding,
+        );
+        for &coordinate in &coordinates {
+            if !bounds_overlap_chunk(bounds, coordinate, rules.world_chunk_size) {
+                continue;
+            }
+            let mut local = connector.clone();
+            for field in ["from", "to"] {
+                localize_world_point(&mut local[field], coordinate, rules.world_chunk_size)?;
+            }
+            chunks
+                .get_mut(&coordinate)
+                .unwrap()
+                .surface_connectors
+                .push(local);
+        }
+    }
 
     for stroke in source["terrainStrokes"].as_array().into_iter().flatten() {
         let radius = stroke["radius"]
@@ -2208,11 +2633,15 @@ fn generate_world(
         .into_iter()
         .map(|((x, y), chunk)| {
             let value = json!({
-                "schemaVersion": 1,
+                "schemaVersion": 4,
                 "worldId": world_id,
                 "coordinate": {"x": x, "y": y},
                 "size": rules.world_chunk_size,
                 "baseMaterialId": base_material,
+                "surfaces": chunk.surfaces,
+                "liquidVolumes": chunk.liquid_volumes,
+                "surfaceConnectors": chunk.surface_connectors,
+                "terrainRegions": chunk.terrain_regions,
                 "terrainStrokes": chunk.terrain_strokes,
                 "objects": chunk.objects,
                 "overlapObjectIds": chunk.overlap_object_ids
@@ -2225,7 +2654,7 @@ fn generate_world(
     let editor_layers = source["editorLayers"].clone();
     let active_layer_id = source["activeLayerId"].as_str().unwrap_or("layer_world");
     let manifest = json!({
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "id": world_id,
         "name": name,
         "chunkSize": rules.world_chunk_size,
@@ -2243,6 +2672,8 @@ fn generate_world(
         "travelPoints": [],
         "editorLayers": editor_layers,
         "activeLayerId": active_layer_id
+        ,"playerSpawnSurfaceId": "surface_ground"
+        ,"activeSurfaceId": source["activeSurfaceId"].as_str().unwrap_or("surface_ground")
     });
     Ok((manifest, chunk_values))
 }
@@ -2512,7 +2943,74 @@ fn create_catalog(
                 object_thumbnail_path(object).display()
             )),
             views,
+            animal_animation: None,
         });
+    }
+    if let Some(animal_rule) = &rules.animals {
+        for animal in &manifest.animals {
+            let idle_path = format!(
+                "environment_generated/{}",
+                animal_animation_path(animal, "idle").display()
+            );
+            let views = DIRECTIONS
+                .iter()
+                .map(|direction| {
+                    (
+                        (*direction).to_owned(),
+                        CatalogView {
+                            image: idle_path.clone(),
+                            logical_width: animal.frame_size,
+                            logical_height: animal.frame_size,
+                            pivot_x: 0.5,
+                            pivot_y: 0.75,
+                        },
+                    )
+                })
+                .collect();
+            let clip = |name: &str, frames: u32, frames_per_second: f64, ping_pong: bool| {
+                CatalogAnimalAnimationClip {
+                    image: format!(
+                        "environment_generated/{}",
+                        animal_animation_path(animal, name).display()
+                    ),
+                    frames,
+                    frames_per_second,
+                    ping_pong,
+                }
+            };
+            objects.push(CatalogObject {
+                id: animal.id.clone(),
+                name: animal.name.clone(),
+                category: title_case(&animal.species),
+                family: animal.species.clone(),
+                source_pack: animal_rule.pack_id.clone(),
+                category_path: vec!["Animals".into(), title_case(&animal.species)],
+                view_mode: "eightWay".into(),
+                render_scale: 1.0,
+                render_band: "depthSorted".into(),
+                sort_anchor_x: 0.0,
+                sort_anchor_y: 0.0,
+                default_sort_bias: 0.0,
+                geometry: animal_geometry(&animal.species),
+                collision_profile: None,
+                tags: vec!["animal".into(), animal.species.clone()],
+                thumbnail: Some(format!(
+                    "environment_generated/{}",
+                    animal_thumbnail_path(animal).display()
+                )),
+                views,
+                animal_animation: Some(CatalogAnimalAnimation {
+                    behavior_profile_id: animal.behavior_profile_id.clone(),
+                    frame_width: animal.frame_size,
+                    frame_height: animal.frame_size,
+                    direction_rows: DIRECTIONS.iter().map(|value| (*value).into()).collect(),
+                    idle: clip("idle", 3, 4.0, false),
+                    walk: clip("walk", 8, 9.0, false),
+                    run: clip("run", 8, 12.0, false),
+                    action: clip("action", 3, 5.0, true),
+                }),
+            });
+        }
     }
     objects.append(&mut manual.objects);
     for object in &mut objects {
@@ -2557,19 +3055,168 @@ fn create_catalog(
         }
     }
 
+    let mut source_packs = rules
+        .packs
+        .iter()
+        .map(|pack| CatalogSourcePack {
+            id: pack.id.clone(),
+            name: pack.display_name.clone(),
+        })
+        .collect::<Vec<_>>();
+    if let Some(animal_rule) = &rules.animals {
+        source_packs.push(CatalogSourcePack {
+            id: animal_rule.pack_id.clone(),
+            name: animal_rule.display_name.clone(),
+        });
+    }
     Ok(Catalog {
-        schema_version: 3,
-        source_packs: rules
-            .packs
-            .iter()
-            .map(|pack| CatalogSourcePack {
-                id: pack.id.clone(),
-                name: pack.display_name.clone(),
-            })
-            .collect(),
+        schema_version: 4,
+        source_packs,
         materials,
         objects,
+        animal_behavior_profiles: animal_behavior_profiles(),
     })
+}
+
+fn animal_geometry(species: &str) -> serde_json::Value {
+    let (radius_x, radius_y) = match species {
+        "horse" | "donkey" => (0.34, 0.22),
+        "deer" | "wolf" => (0.27, 0.18),
+        "dog" => (0.22, 0.15),
+        "cat" => (0.17, 0.12),
+        _ => (0.13, 0.09),
+    };
+    serde_json::json!({
+        "footprints": [ellipse(0.0, 0.0, radius_x, radius_y)],
+        "blocking": [],
+        "selection": [ellipse(0.0, 0.0, radius_x, radius_y)],
+        "reviewed": true
+    })
+}
+
+fn animal_behavior_profiles() -> Vec<CatalogAnimalBehaviorProfile> {
+    vec![
+        animal_profile(
+            "cat_household",
+            "Household cat",
+            5.0,
+            105.0,
+            175.0,
+            1.2,
+            4.5,
+            0.25,
+            0.35,
+            0.30,
+            0.10,
+        ),
+        animal_profile(
+            "dog_household",
+            "Household dog",
+            6.0,
+            115.0,
+            185.0,
+            1.4,
+            5.5,
+            0.30,
+            0.40,
+            0.22,
+            0.08,
+        ),
+        animal_profile(
+            "poultry_yard",
+            "Poultry yard",
+            3.5,
+            72.0,
+            115.0,
+            0.7,
+            2.5,
+            0.16,
+            0.60,
+            0.04,
+            0.20,
+        ),
+        animal_profile(
+            "horse_stabled",
+            "Stabled horse",
+            0.0,
+            100.0,
+            160.0,
+            3.5,
+            8.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+        ),
+        animal_profile(
+            "donkey_paddock",
+            "Paddock donkey",
+            2.5,
+            82.0,
+            125.0,
+            2.0,
+            6.0,
+            0.55,
+            0.30,
+            0.0,
+            0.15,
+        ),
+        animal_profile(
+            "deer_wild",
+            "Wild deer",
+            9.0,
+            125.0,
+            205.0,
+            1.2,
+            4.0,
+            0.18,
+            0.32,
+            0.42,
+            0.08,
+        ),
+        animal_profile(
+            "wolf_wild",
+            "Wild wolf",
+            10.0,
+            130.0,
+            215.0,
+            1.0,
+            3.5,
+            0.15,
+            0.32,
+            0.48,
+            0.05,
+        ),
+    ]
+}
+
+#[allow(clippy::too_many_arguments)]
+fn animal_profile(
+    id: &str,
+    name: &str,
+    roaming_radius: f64,
+    walk_speed_pixels_per_second: f64,
+    run_speed_pixels_per_second: f64,
+    minimum_pause_seconds: f64,
+    maximum_pause_seconds: f64,
+    idle_weight: f64,
+    walk_weight: f64,
+    run_weight: f64,
+    action_weight: f64,
+) -> CatalogAnimalBehaviorProfile {
+    CatalogAnimalBehaviorProfile {
+        id: id.into(),
+        name: name.into(),
+        roaming_radius,
+        walk_speed_pixels_per_second,
+        run_speed_pixels_per_second,
+        minimum_pause_seconds,
+        maximum_pause_seconds,
+        idle_weight,
+        walk_weight,
+        run_weight,
+        action_weight,
+    }
 }
 
 fn geometry_for_profile(profile: Option<&str>) -> serde_json::Value {
@@ -2757,6 +3404,83 @@ fn generated_object_id(object: &DiscoveredObject) -> String {
     }
 }
 
+fn animal_stem(animal: &DiscoveredAnimal) -> &str {
+    animal.id.strip_prefix("animals.").unwrap_or(&animal.id)
+}
+
+fn animal_animation_path(animal: &DiscoveredAnimal, clip: &str) -> PathBuf {
+    PathBuf::from("actors")
+        .join("animals")
+        .join(animal_stem(animal))
+        .join(format!("{clip}.png"))
+}
+
+fn animal_thumbnail_path(animal: &DiscoveredAnimal) -> PathBuf {
+    PathBuf::from("thumbnails")
+        .join("animals")
+        .join(format!("{}.png", animal_stem(animal)))
+}
+
+fn build_animal_assets(
+    root: &Path,
+    generated_root: &Path,
+    animal: &DiscoveredAnimal,
+) -> Result<()> {
+    let source = image::open(root.join(&animal.source.source))?;
+    for (clip, start, frames) in [
+        ("walk", 0_u32, 8_u32),
+        ("run", 64, 8),
+        ("idle", 128, 3),
+        ("action", 152, 3),
+    ] {
+        let atlas = extract_animal_animation(&source, animal.frame_size, start, frames)?;
+        let destination = generated_root.join(animal_animation_path(animal, clip));
+        if let Some(parent) = destination.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        DynamicImage::ImageRgba8(atlas).save_with_format(destination, ImageFormat::Png)?;
+    }
+
+    let frame = animal_frame(&source, animal.frame_size, 128)?.to_rgba8();
+    let destination = generated_root.join(animal_thumbnail_path(animal));
+    if let Some(parent) = destination.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let resized = DynamicImage::ImageRgba8(frame).thumbnail(184, 184);
+    let mut canvas = RgbaImage::new(192, 192);
+    let x = (192_u32.saturating_sub(resized.width())) / 2;
+    let y = (192_u32.saturating_sub(resized.height())) / 2;
+    canvas.copy_from(&resized.to_rgba8(), x, y)?;
+    DynamicImage::ImageRgba8(canvas).save_with_format(destination, ImageFormat::Png)?;
+    Ok(())
+}
+
+fn extract_animal_animation(
+    source: &DynamicImage,
+    frame_size: u32,
+    start: u32,
+    frames_per_direction: u32,
+) -> Result<RgbaImage> {
+    let mut atlas = RgbaImage::new(frames_per_direction * frame_size, 8 * frame_size);
+    for direction in 0..8_u32 {
+        for frame in 0..frames_per_direction {
+            let source_index = start + direction * frames_per_direction + frame;
+            let cell = animal_frame(source, frame_size, source_index)?.to_rgba8();
+            atlas.copy_from(&cell, frame * frame_size, direction * frame_size)?;
+        }
+    }
+    Ok(atlas)
+}
+
+fn animal_frame(source: &DynamicImage, frame_size: u32, index: u32) -> Result<DynamicImage> {
+    let x = (index % 20) * frame_size;
+    let y = (index / 20) * frame_size;
+    if x + frame_size > source.width() || y + frame_size > source.height() {
+        return Err(format!("animal frame {index} is outside the source sheet").into());
+    }
+    Ok(source.crop_imm(x, y, frame_size, frame_size))
+}
+
 fn copy_if_changed(root: &Path, source: &SourceImage, destination: &Path) -> Result<()> {
     if destination.is_file() && sha256_file(destination)? == source.sha256 {
         return Ok(());
@@ -2907,9 +3631,10 @@ fn print_summary(manifest: &Manifest, action: &str) {
         *counts.entry(&object.kind).or_default() += 1;
     }
     println!(
-        "{action} {} materials and {} object families",
+        "{action} {} materials, {} object families, and {} animals",
         manifest.materials.len(),
-        manifest.objects.len()
+        manifest.objects.len(),
+        manifest.animals.len()
     );
     for (kind, count) in counts {
         println!("  {kind}: {count}");
@@ -2936,6 +3661,24 @@ mod tests {
         assert_eq!(DIRECTIONS[0], "south");
         assert_eq!(DIRECTIONS[3], "north");
         assert_eq!(DIRECTIONS[7], "northEast");
+    }
+
+    #[test]
+    fn compact_animal_animation_is_repacked_by_direction() {
+        let mut source = RgbaImage::new(20, 20);
+        for index in 0..400_u32 {
+            source.put_pixel(
+                index % 20,
+                index / 20,
+                image::Rgba([(index & 0xFF) as u8, (index >> 8) as u8, 0, 255]),
+            );
+        }
+        let atlas = extract_animal_animation(&DynamicImage::ImageRgba8(source), 1, 128, 3).unwrap();
+        assert_eq!(atlas.dimensions(), (3, 8));
+        assert_eq!(atlas.get_pixel(0, 0).0[..2], [128, 0]);
+        assert_eq!(atlas.get_pixel(2, 0).0[..2], [130, 0]);
+        assert_eq!(atlas.get_pixel(0, 1).0[..2], [131, 0]);
+        assert_eq!(atlas.get_pixel(2, 7).0[..2], [151, 0]);
     }
 
     #[test]

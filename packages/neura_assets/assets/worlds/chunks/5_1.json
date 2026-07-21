@@ -1,13 +1,17 @@
 {
-  "baseMaterialId": "ow3.ground.meadow",
+  "schemaVersion": 4,
+  "worldId": "environment_starter",
   "coordinate": {
     "x": 5,
     "y": 1
   },
-  "objects": [],
-  "overlapObjectIds": [],
-  "schemaVersion": 1,
   "size": 32.0,
+  "baseMaterialId": "ow3.ground.meadow",
+  "surfaces": [],
+  "liquidVolumes": [],
+  "surfaceConnectors": [],
+  "terrainRegions": [],
   "terrainStrokes": [],
-  "worldId": "environment_starter"
+  "objects": [],
+  "overlapObjectIds": []
 }

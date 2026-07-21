@@ -575,6 +575,223 @@ List<WorldPoint> environmentShapeOutline(
   ];
 }
 
+/// Resolves the surface pass in which an object should be depth sorted.
+///
+/// The object's support surface still owns its elevation, collision, and
+/// liquid interaction. Tall objects may opt into a later overlapping surface
+/// pass so actors standing on that surface can sort in front of or behind the
+/// object using the normal footprint rules.
+String environmentObjectDepthSurfaceId({
+  required EnvironmentDocument document,
+  required EnvironmentObjectAsset asset,
+  required PlacedEnvironmentObject object,
+  required double objectElevation,
+  EnvironmentAssetGeometry? geometry,
+}) {
+  final support =
+      document.surfaceById(object.supportSurfaceId) ?? document.baseSurface;
+  if (!object.crossSurfaceOcclusion || object.occlusionHeight <= 0) {
+    return support.id;
+  }
+
+  final footprintOutlines = [
+    for (final footprint in (geometry ?? asset.geometry).footprints)
+      environmentShapeOutline(footprint, object),
+  ];
+  final anchor = WorldPoint(object.x, object.y);
+  var selected = support;
+  var selectedElevation = selected.elevationAt(anchor);
+  const epsilon = 1e-7;
+
+  for (final candidate in document.surfaces) {
+    if (candidate.id == support.id) continue;
+    final candidateElevation = candidate.elevationAt(anchor);
+    final height = candidateElevation - objectElevation;
+    if (height < -epsilon || height > object.occlusionHeight + epsilon) {
+      continue;
+    }
+    final overlaps = footprintOutlines.isEmpty
+        ? candidate.contains(anchor)
+        : footprintOutlines.any(
+            (outline) => _environmentPolygonsOverlap(outline, candidate.points),
+          );
+    if (!overlaps) continue;
+
+    final laterOrder = candidate.order.compareTo(selected.order);
+    if (laterOrder > 0 ||
+        (laterOrder == 0 && candidateElevation > selectedElevation)) {
+      selected = candidate;
+      selectedElevation = candidateElevation;
+    }
+  }
+  return selected.id;
+}
+
+bool _environmentPolygonsOverlap(
+  List<WorldPoint> first,
+  List<WorldPoint> second,
+) {
+  if (first.length < 3 || second.length < 3) return false;
+  if (first.any((point) => _pointInWorldPolygon(point, second)) ||
+      second.any((point) => _pointInWorldPolygon(point, first))) {
+    return true;
+  }
+  for (var a = 0; a < first.length; a++) {
+    final aStart = first[a];
+    final aEnd = first[(a + 1) % first.length];
+    for (var b = 0; b < second.length; b++) {
+      if (_worldSegmentsIntersect(
+        aStart,
+        aEnd,
+        second[b],
+        second[(b + 1) % second.length],
+      )) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool _pointInWorldPolygon(WorldPoint point, List<WorldPoint> polygon) {
+  var inside = false;
+  for (
+    var current = 0, previous = polygon.length - 1;
+    current < polygon.length;
+    previous = current++
+  ) {
+    final a = polygon[current];
+    final b = polygon[previous];
+    if (_worldPointOnSegment(point, a, b)) return true;
+    if ((a.y > point.y) != (b.y > point.y) &&
+        point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+bool _worldSegmentsIntersect(
+  WorldPoint a,
+  WorldPoint b,
+  WorldPoint c,
+  WorldPoint d,
+) {
+  final abC = _worldOrientation(a, b, c);
+  final abD = _worldOrientation(a, b, d);
+  final cdA = _worldOrientation(c, d, a);
+  final cdB = _worldOrientation(c, d, b);
+  if (((abC > 0 && abD < 0) || (abC < 0 && abD > 0)) &&
+      ((cdA > 0 && cdB < 0) || (cdA < 0 && cdB > 0))) {
+    return true;
+  }
+  return _worldPointOnSegment(c, a, b) ||
+      _worldPointOnSegment(d, a, b) ||
+      _worldPointOnSegment(a, c, d) ||
+      _worldPointOnSegment(b, c, d);
+}
+
+double _worldOrientation(WorldPoint a, WorldPoint b, WorldPoint c) =>
+    (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+
+bool _worldPointOnSegment(WorldPoint point, WorldPoint start, WorldPoint end) {
+  const epsilon = 1e-7;
+  if (_worldOrientation(start, end, point).abs() > epsilon) return false;
+  return point.x >= math.min(start.x, end.x) - epsilon &&
+      point.x <= math.max(start.x, end.x) + epsilon &&
+      point.y >= math.min(start.y, end.y) - epsilon &&
+      point.y <= math.max(start.y, end.y) + epsilon;
+}
+
+/// Returns the front-facing silhouette of one or more ground footprints.
+///
+/// In Neura's isometric projection, `x - y` is the horizontal screen axis and
+/// `x + y` increases toward the camera. The convex front chain therefore gives
+/// renderers a stable intersection line for a horizontal liquid surface.
+/// Multiple footprints are treated as one visual silhouette; transparent gaps
+/// in the sprite remain transparent when the resulting mask is composited.
+List<WorldPoint> environmentFootprintFrontBoundary(
+  Iterable<List<WorldPoint>> outlines,
+) {
+  final points = <_IsometricFootprintPoint>[
+    for (final outline in outlines)
+      for (final point in outline)
+        _IsometricFootprintPoint(
+          horizontal: point.x - point.y,
+          depth: point.x + point.y,
+        ),
+  ];
+  if (points.length < 2) return const [];
+  points.sort((a, b) {
+    final horizontal = a.horizontal.compareTo(b.horizontal);
+    return horizontal != 0 ? horizontal : a.depth.compareTo(b.depth);
+  });
+  final unique = <_IsometricFootprintPoint>[];
+  for (final point in points) {
+    if (unique.isEmpty ||
+        (point.horizontal - unique.last.horizontal).abs() > 1e-9 ||
+        (point.depth - unique.last.depth).abs() > 1e-9) {
+      unique.add(point);
+    }
+  }
+  if (unique.length < 2) return const [];
+
+  final lower = <_IsometricFootprintPoint>[];
+  for (final point in unique) {
+    while (lower.length >= 2 &&
+        _isometricCross(lower[lower.length - 2], lower.last, point) <= 0) {
+      lower.removeLast();
+    }
+    lower.add(point);
+  }
+  final upper = <_IsometricFootprintPoint>[];
+  for (final point in unique.reversed) {
+    while (upper.length >= 2 &&
+        _isometricCross(upper[upper.length - 2], upper.last, point) <= 0) {
+      upper.removeLast();
+    }
+    upper.add(point);
+  }
+
+  // [lower] and [upper] are named after the conventional Cartesian hull.
+  // Screen depth grows downward, so the chain with the larger mean depth is
+  // the visible/front liquid intersection.
+  final lowerForward = lower;
+  final upperForward = upper.reversed.toList(growable: false);
+  final front =
+      _meanIsometricDepth(lowerForward) >= _meanIsometricDepth(upperForward)
+      ? lowerForward
+      : upperForward;
+  return [
+    for (final point in front)
+      WorldPoint(
+        (point.depth + point.horizontal) / 2,
+        (point.depth - point.horizontal) / 2,
+      ),
+  ];
+}
+
+class _IsometricFootprintPoint {
+  const _IsometricFootprintPoint({
+    required this.horizontal,
+    required this.depth,
+  });
+
+  final double horizontal;
+  final double depth;
+}
+
+double _isometricCross(
+  _IsometricFootprintPoint origin,
+  _IsometricFootprintPoint a,
+  _IsometricFootprintPoint b,
+) =>
+    (a.horizontal - origin.horizontal) * (b.depth - origin.depth) -
+    (a.depth - origin.depth) * (b.horizontal - origin.horizontal);
+
+double _meanIsometricDepth(List<_IsometricFootprintPoint> points) =>
+    points.fold<double>(0, (sum, point) => sum + point.depth) / points.length;
+
 EnvironmentGeometryPoint _inversePoint(
   WorldPoint point,
   PlacedEnvironmentObject object,

@@ -4,10 +4,350 @@
     "x": 6,
     "y": 2
   },
-  "objects": [],
-  "overlapObjectIds": [],
-  "schemaVersion": 1,
+  "liquidVolumes": [
+    {
+      "bedSurfaceId": "surface_ground",
+      "depth": 2.0500000000000007,
+      "depthRamp": {
+        "end": {
+          "x": 28.344161987304688,
+          "y": 3.5655517578125
+        },
+        "endDepth": 0.3075000000000001,
+        "start": {
+          "x": 48.61408996582031,
+          "y": 3.5172653198242188
+        }
+      },
+      "edgeBlend": 3.0,
+      "id": "liquid_hkktxfdald_0_2",
+      "materialId": "nf.water.001",
+      "name": "Liquid 1",
+      "opacity": 0.95,
+      "order": 0,
+      "points": [
+        {
+          "x": 19.18975830078125,
+          "y": -63.9767603892833
+        },
+        {
+          "x": 25.895339965820312,
+          "y": -47.73391532897949
+        },
+        {
+          "x": 29.751373291015625,
+          "y": -28.32652282714844
+        },
+        {
+          "x": 30.31871032714844,
+          "y": -10.562747955322266
+        },
+        {
+          "x": 28.944976806640625,
+          "y": 11.271614074707031
+        },
+        {
+          "x": 30.593795776367188,
+          "y": 30.244094848632812
+        },
+        {
+          "x": 28.8447265625,
+          "y": 51.06627655029297
+        },
+        {
+          "x": 30.17372131347656,
+          "y": 79.83328247070312
+        },
+        {
+          "x": 28.980941772460938,
+          "y": 95.70797729492188
+        },
+        {
+          "x": 33.65580749511719,
+          "y": 116.03634643554688
+        },
+        {
+          "x": 35.72601318359375,
+          "y": 134.8344268798828
+        },
+        {
+          "x": 35.320037841796875,
+          "y": 153.71054077148438
+        },
+        {
+          "x": 33.50396728515625,
+          "y": 177.1307373046875
+        },
+        {
+          "x": 38.72161865234375,
+          "y": 191.99476623535156
+        },
+        {
+          "x": 63.99726867675781,
+          "y": 191.97036743164065
+        },
+        {
+          "x": 63.99058532714844,
+          "y": -63.92713230103254
+        },
+        {
+          "x": 19.185806274414062,
+          "y": -63.99262379389256
+        }
+      ],
+      "surfaceElevation": 0.0,
+      "textureScale": 0.5
+    }
+  ],
+  "objects": [
+    {
+      "assetId": "nf.catapultStone.001",
+      "bounds": {
+        "max": {
+          "x": 224.4924468994141,
+          "y": 79.28916931152344
+        },
+        "min": {
+          "x": 223.4924468994141,
+          "y": 78.28916931152344
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkkuk3v41z_0_37",
+      "localPosition": {
+        "x": 31.992446899414062,
+        "y": 14.789169311523438
+      },
+      "supportSurfaceId": "surface_ground",
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.007",
+      "bounds": {
+        "max": {
+          "x": 223.91734313964844,
+          "y": 67.59849548339844
+        },
+        "min": {
+          "x": 222.91734313964844,
+          "y": 66.59849548339844
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkkwpdeoym_0_14",
+      "localPosition": {
+        "x": 31.41734313964844,
+        "y": 3.0984954833984375
+      },
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.007",
+      "bounds": {
+        "max": {
+          "x": 223.8811187744141,
+          "y": 66.12530517578125
+        },
+        "min": {
+          "x": 222.8811187744141,
+          "y": 65.12530517578125
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkkwpdeoym_0_16",
+      "localPosition": {
+        "x": 31.381118774414062,
+        "y": 1.62530517578125
+      },
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "ow3.grass.005",
+      "bounds": {
+        "max": {
+          "x": 224.4759979248047,
+          "y": 82.4065933227539
+        },
+        "min": {
+          "x": 223.4759979248047,
+          "y": 81.4065933227539
+        }
+      },
+      "direction": "south",
+      "editorLayerId": "layer_world",
+      "id": "object_hkkwpdeoym_0_21",
+      "localPosition": {
+        "x": 31.975997924804688,
+        "y": 17.906593322753906
+      },
+      "supportSurfaceId": "surface_hkkwpdeoym_0_1",
+      "verticalOffset": 0.0
+    }
+  ],
+  "overlapObjectIds": [
+    "object_hkkuk3v41z_0_21",
+    "object_hkkuk3v41z_0_37",
+    "object_hkkuk3v41z_0_41",
+    "object_hkkwpdeoym_0_14",
+    "object_hkkwpdeoym_0_16",
+    "object_hkkwpdeoym_0_17",
+    "object_hkkwpdeoym_0_21"
+  ],
+  "schemaVersion": 4,
   "size": 32.0,
+  "surfaceConnectors": [],
+  "surfaces": [
+    {
+      "drawsBaseMaterial": false,
+      "height": {
+        "elevation": 0.0,
+        "kind": "flat"
+      },
+      "id": "surface_hkkwpdeoym_0_1",
+      "kind": "platform",
+      "materialId": "ow3.ground.earth",
+      "name": "Surface 1",
+      "order": 1,
+      "points": [
+        {
+          "x": 28.264144897460938,
+          "y": 11.4034423828125
+        },
+        {
+          "x": 28.192657470703125,
+          "y": 5.8109283447265625
+        },
+        {
+          "x": 50.37286376953125,
+          "y": 5.9614105224609375
+        },
+        {
+          "x": 50.34358215332031,
+          "y": 11.357040405273438
+        },
+        {
+          "x": 29.580886840820312,
+          "y": 11.324745178222656
+        }
+      ],
+      "walkable": true
+    }
+  ],
+  "terrainRegions": [
+    {
+      "edgeBlend": 0.0,
+      "id": "region_hkkuk3v41z_0_2",
+      "materialId": "nf.ground.010",
+      "order": 0,
+      "points": [
+        {
+          "x": 29.517181396484375,
+          "y": 17.03874969482422
+        },
+        {
+          "x": 29.517181396484375,
+          "y": 17.03874969482422
+        },
+        {
+          "x": 29.517181396484375,
+          "y": 17.03874969482422
+        },
+        {
+          "x": 29.517181396484375,
+          "y": 17.03874969482422
+        }
+      ],
+      "seed": 1103527590,
+      "surfaceId": "surface_ground",
+      "textureScale": 1.0
+    },
+    {
+      "edgeBlend": 0.0,
+      "id": "region_hkkuk3v41z_0_3",
+      "materialId": "nf.ground.010",
+      "order": 1,
+      "points": [
+        {
+          "x": 29.666427612304688,
+          "y": 7.962249755859375
+        },
+        {
+          "x": 29.666427612304688,
+          "y": 7.962249755859375
+        },
+        {
+          "x": 29.666427612304688,
+          "y": 7.962249755859375
+        },
+        {
+          "x": 29.666427612304688,
+          "y": 7.962249755859375
+        }
+      ],
+      "seed": 59559187,
+      "surfaceId": "surface_ground",
+      "textureScale": 1.0
+    },
+    {
+      "edgeBlend": 0.0,
+      "id": "region_hkkuk3v41z_0_7",
+      "materialId": "nf.ground.008",
+      "order": 2,
+      "points": [
+        {
+          "x": 27.596343994140625,
+          "y": 10.305702209472656
+        },
+        {
+          "x": 27.597244262695312,
+          "y": 10.304801940917969
+        },
+        {
+          "x": 27.597244262695312,
+          "y": 10.304801940917969
+        },
+        {
+          "x": 27.596343994140625,
+          "y": 10.305702209472656
+        }
+      ],
+      "seed": 1222621274,
+      "surfaceId": "surface_ground",
+      "textureScale": 0.25
+    },
+    {
+      "edgeBlend": 0.0,
+      "id": "region_hkkuk3v41z_0_8",
+      "materialId": "nf.ground.008",
+      "order": 3,
+      "points": [
+        {
+          "x": 28.31829833984375,
+          "y": 1.9114227294921875
+        },
+        {
+          "x": 28.31829833984375,
+          "y": 1.9114227294921875
+        },
+        {
+          "x": 28.319610595703125,
+          "y": 1.9127349853515625
+        },
+        {
+          "x": 28.319610595703125,
+          "y": 1.9127349853515625
+        }
+      ],
+      "seed": 178652871,
+      "surfaceId": "surface_ground",
+      "textureScale": 0.25
+    }
+  ],
   "terrainStrokes": [],
   "worldId": "environment_starter"
 }

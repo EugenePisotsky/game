@@ -45,6 +45,12 @@ void main() {
     expect(find.text('OBJECTS'), findsOneWidget);
     expect(find.text('Environment Study'), findsOneWidget);
     expect(find.text('Worn earth'), findsOneWidget);
+    await tester.tap(find.text('Link'));
+    await tester.pumpAndSettle();
+    expect(find.text('Destination surface'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Brush'));
+    await tester.pumpAndSettle();
     final search = find.byWidgetPredicate(
       (widget) =>
           widget is TextField && widget.decoration?.hintText == 'Search assets',

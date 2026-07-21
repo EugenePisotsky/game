@@ -317,10 +317,12 @@ class EnvironmentCatalog {
     required List<EnvironmentMaterial> materials,
     required List<EnvironmentObjectAsset> objects,
     List<EnvironmentSourcePack> sourcePacks = const [],
+    List<AnimalBehaviorProfile> animalBehaviorProfiles = const [],
     Map<String, EnvironmentAssetGeometry>? geometryOverrides,
   }) : _materials = List.of(materials),
        _objects = List.of(objects),
        sourcePacks = List.unmodifiable(sourcePacks),
+       animalBehaviorProfiles = List.unmodifiable(animalBehaviorProfiles),
        _geometryOverrides = Map.of(geometryOverrides ?? const {}) {
     this.materials = UnmodifiableListView(_materials);
     this.objects = UnmodifiableListView(_objects);
@@ -336,15 +338,38 @@ class EnvironmentCatalog {
       }
       _objectsById[object.id] = object;
     }
+    for (final profile in animalBehaviorProfiles) {
+      if (_animalBehaviorProfilesById.containsKey(profile.id)) {
+        throw ArgumentError.value(
+          profile.id,
+          'animalBehaviorProfiles',
+          'Duplicate ID',
+        );
+      }
+      _animalBehaviorProfilesById[profile.id] = profile;
+    }
+    for (final object in _objects) {
+      final profileId = object.animalAnimation?.behaviorProfileId;
+      if (profileId != null &&
+          !_animalBehaviorProfilesById.containsKey(profileId)) {
+        throw ArgumentError.value(
+          profileId,
+          'objects',
+          'Animal asset ${object.id} references an unknown behavior profile',
+        );
+      }
+    }
   }
 
   final List<EnvironmentMaterial> _materials;
   final List<EnvironmentObjectAsset> _objects;
   final List<EnvironmentSourcePack> sourcePacks;
+  final List<AnimalBehaviorProfile> animalBehaviorProfiles;
   late final UnmodifiableListView<EnvironmentMaterial> materials;
   late final UnmodifiableListView<EnvironmentObjectAsset> objects;
   final Map<String, EnvironmentMaterial> _materialsById = {};
   final Map<String, EnvironmentObjectAsset> _objectsById = {};
+  final Map<String, AnimalBehaviorProfile> _animalBehaviorProfilesById = {};
   final Map<String, EnvironmentAssetGeometry> _geometryOverrides;
 
   Map<String, EnvironmentAssetGeometry> get geometryOverrides =>
@@ -353,6 +378,9 @@ class EnvironmentCatalog {
   EnvironmentMaterial? materialById(String id) => _materialsById[id];
 
   EnvironmentObjectAsset? objectById(String id) => _objectsById[id];
+
+  AnimalBehaviorProfile? animalBehaviorProfileById(String id) =>
+      _animalBehaviorProfilesById[id];
 
   void registerMaterial(EnvironmentMaterial material) {
     if (_materialsById.containsKey(material.id)) {
@@ -466,6 +494,11 @@ class EnvironmentCatalog {
       sourcePacks: [
         for (final value in json['sourcePacks'] as List<Object?>? ?? const [])
           EnvironmentSourcePack.fromJson(value as Map<String, Object?>),
+      ],
+      animalBehaviorProfiles: [
+        for (final value
+            in json['animalBehaviorProfiles'] as List<Object?>? ?? const [])
+          AnimalBehaviorProfile.fromJson(value as Map<String, Object?>),
       ],
       materials: [
         for (final value in json['materials'] as List<Object?>)
@@ -582,6 +615,7 @@ class EnvironmentObjectAsset {
     this.tags = const [],
     this.thumbnailPath,
     this.collisionProfile,
+    this.animalAnimation,
   });
 
   final String id;
@@ -601,6 +635,9 @@ class EnvironmentObjectAsset {
   final List<String> tags;
   final String? thumbnailPath;
   final String? collisionProfile;
+  final AnimalAnimationAsset? animalAnimation;
+
+  bool get isAnimal => animalAnimation != null;
 
   String get categoryBreadcrumb =>
       (categoryPath.isEmpty ? [category] : categoryPath).join(' / ');
@@ -690,9 +727,142 @@ class EnvironmentObjectAsset {
       ],
       thumbnailPath: json['thumbnail'] as String?,
       collisionProfile: json['collisionProfile'] as String?,
+      animalAnimation: json['animalAnimation'] == null
+          ? null
+          : AnimalAnimationAsset.fromJson(
+              json['animalAnimation'] as Map<String, Object?>,
+            ),
       views: Map.unmodifiable(views),
     );
   }
+}
+
+class AnimalAnimationAsset {
+  const AnimalAnimationAsset({
+    required this.behaviorProfileId,
+    required this.frameWidth,
+    required this.frameHeight,
+    required this.directionRows,
+    required this.idle,
+    required this.walk,
+    required this.run,
+    required this.action,
+  });
+
+  final String behaviorProfileId;
+  final int frameWidth;
+  final int frameHeight;
+  final List<String> directionRows;
+  final AnimalAnimationClip idle;
+  final AnimalAnimationClip walk;
+  final AnimalAnimationClip run;
+  final AnimalAnimationClip action;
+
+  AnimalAnimationClip clipFor(String activity) => switch (activity) {
+    'walk' => walk,
+    'run' => run,
+    'action' => action,
+    _ => idle,
+  };
+
+  int rowForDirection(String direction) {
+    final row = directionRows.indexOf(direction);
+    return row < 0 ? 0 : row;
+  }
+
+  Iterable<String> get imagePaths => {
+    idle.imagePath,
+    walk.imagePath,
+    run.imagePath,
+    action.imagePath,
+  };
+
+  factory AnimalAnimationAsset.fromJson(
+    Map<String, Object?> json,
+  ) => AnimalAnimationAsset(
+    behaviorProfileId: json['behaviorProfileId'] as String,
+    frameWidth: (json['frameWidth'] as num).toInt(),
+    frameHeight: (json['frameHeight'] as num).toInt(),
+    directionRows: [
+      for (final value in json['directionRows'] as List<Object?>)
+        value as String,
+    ],
+    idle: AnimalAnimationClip.fromJson(json['idle'] as Map<String, Object?>),
+    walk: AnimalAnimationClip.fromJson(json['walk'] as Map<String, Object?>),
+    run: AnimalAnimationClip.fromJson(json['run'] as Map<String, Object?>),
+    action: AnimalAnimationClip.fromJson(
+      json['action'] as Map<String, Object?>,
+    ),
+  );
+}
+
+class AnimalAnimationClip {
+  const AnimalAnimationClip({
+    required this.imagePath,
+    required this.frames,
+    required this.framesPerSecond,
+    this.pingPong = false,
+  });
+
+  final String imagePath;
+  final int frames;
+  final double framesPerSecond;
+  final bool pingPong;
+
+  factory AnimalAnimationClip.fromJson(Map<String, Object?> json) =>
+      AnimalAnimationClip(
+        imagePath: json['image'] as String,
+        frames: (json['frames'] as num).toInt(),
+        framesPerSecond: (json['framesPerSecond'] as num).toDouble(),
+        pingPong: json['pingPong'] as bool? ?? false,
+      );
+}
+
+class AnimalBehaviorProfile {
+  const AnimalBehaviorProfile({
+    required this.id,
+    required this.name,
+    required this.roamingRadius,
+    required this.walkSpeedPixelsPerSecond,
+    required this.runSpeedPixelsPerSecond,
+    required this.minimumPauseSeconds,
+    required this.maximumPauseSeconds,
+    required this.idleWeight,
+    required this.walkWeight,
+    required this.runWeight,
+    required this.actionWeight,
+  });
+
+  final String id;
+  final String name;
+  final double roamingRadius;
+  final double walkSpeedPixelsPerSecond;
+  final double runSpeedPixelsPerSecond;
+  final double minimumPauseSeconds;
+  final double maximumPauseSeconds;
+  final double idleWeight;
+  final double walkWeight;
+  final double runWeight;
+  final double actionWeight;
+
+  double get totalWeight => idleWeight + walkWeight + runWeight + actionWeight;
+
+  factory AnimalBehaviorProfile.fromJson(Map<String, Object?> json) =>
+      AnimalBehaviorProfile(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        roamingRadius: (json['roamingRadius'] as num).toDouble(),
+        walkSpeedPixelsPerSecond: (json['walkSpeedPixelsPerSecond'] as num)
+            .toDouble(),
+        runSpeedPixelsPerSecond: (json['runSpeedPixelsPerSecond'] as num)
+            .toDouble(),
+        minimumPauseSeconds: (json['minimumPauseSeconds'] as num).toDouble(),
+        maximumPauseSeconds: (json['maximumPauseSeconds'] as num).toDouble(),
+        idleWeight: (json['idleWeight'] as num).toDouble(),
+        walkWeight: (json['walkWeight'] as num).toDouble(),
+        runWeight: (json['runWeight'] as num).toDouble(),
+        actionWeight: (json['actionWeight'] as num).toDouble(),
+      );
 }
 
 class EnvironmentObjectView {

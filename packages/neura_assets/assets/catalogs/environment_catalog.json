@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "sourcePacks": [
     {
       "id": "ow1",
@@ -20,6 +20,10 @@
     {
       "id": "owdt",
       "name": "Other Worlds Dark Town Tiles"
+    },
+    {
+      "id": "animals",
+      "name": "Other Worlds Animals"
     }
   ],
   "materials": [
@@ -142507,6 +142511,4240 @@
       }
     },
     {
+      "id": "animals.buck",
+      "name": "Buck",
+      "category": "Deer",
+      "family": "deer",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Deer"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "deer"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/buck.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "logicalWidth": 150,
+          "logicalHeight": 150,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "logicalWidth": 150,
+          "logicalHeight": 150,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "logicalWidth": 150,
+          "logicalHeight": 150,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "logicalWidth": 150,
+          "logicalHeight": 150,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "logicalWidth": 150,
+          "logicalHeight": 150,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "logicalWidth": 150,
+          "logicalHeight": 150,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "logicalWidth": 150,
+          "logicalHeight": 150,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "logicalWidth": 150,
+          "logicalHeight": 150,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "deer_wild",
+        "frameWidth": 150,
+        "frameHeight": 150,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/buck/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/buck/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/buck/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/buck/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.cat_1",
+      "name": "Cat 1",
+      "category": "Cat",
+      "family": "cat",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Cat"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "cat"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/cat_1.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "cat_household",
+        "frameWidth": 80,
+        "frameHeight": 80,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/cat_1/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/cat_1/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/cat_1/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/cat_1/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.cat_2",
+      "name": "Cat 2",
+      "category": "Cat",
+      "family": "cat",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Cat"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "cat"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/cat_2.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "cat_household",
+        "frameWidth": 80,
+        "frameHeight": 80,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/cat_2/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/cat_2/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/cat_2/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/cat_2/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.cat_3",
+      "name": "Cat 3",
+      "category": "Cat",
+      "family": "cat",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Cat"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "cat"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/cat_3.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "cat_household",
+        "frameWidth": 80,
+        "frameHeight": 80,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/cat_3/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/cat_3/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/cat_3/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/cat_3/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.cat_4",
+      "name": "Cat 4",
+      "category": "Cat",
+      "family": "cat",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Cat"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "cat"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/cat_4.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "cat_household",
+        "frameWidth": 80,
+        "frameHeight": 80,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/cat_4/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/cat_4/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/cat_4/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/cat_4/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.cat_5",
+      "name": "Cat 5",
+      "category": "Cat",
+      "family": "cat",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Cat"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "cat"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/cat_5.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "cat_household",
+        "frameWidth": 80,
+        "frameHeight": 80,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/cat_5/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/cat_5/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/cat_5/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/cat_5/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.cat_6",
+      "name": "Cat 6",
+      "category": "Cat",
+      "family": "cat",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Cat"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.17,
+              "y": 0.12
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "cat"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/cat_6.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "logicalWidth": 80,
+          "logicalHeight": 80,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "cat_household",
+        "frameWidth": 80,
+        "frameHeight": 80,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/cat_6/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/cat_6/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/cat_6/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/cat_6/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.chicken_1",
+      "name": "Chicken 1",
+      "category": "Poultry",
+      "family": "poultry",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Poultry"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.13,
+              "y": 0.09
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.13,
+              "y": 0.09
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "poultry"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/chicken_1.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "poultry_yard",
+        "frameWidth": 100,
+        "frameHeight": 100,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/chicken_1/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/chicken_1/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/chicken_1/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/chicken_1/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.doe",
+      "name": "Doe",
+      "category": "Deer",
+      "family": "deer",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Deer"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "deer"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/doe.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "deer_wild",
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/doe/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/doe/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/doe/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/doe/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.dog_1",
+      "name": "Dog 1",
+      "category": "Dog",
+      "family": "dog",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Dog"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "dog"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/dog_1.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "dog_household",
+        "frameWidth": 120,
+        "frameHeight": 120,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/dog_1/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/dog_1/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/dog_1/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/dog_1/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.dog_2",
+      "name": "Dog 2",
+      "category": "Dog",
+      "family": "dog",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Dog"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "dog"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/dog_2.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "dog_household",
+        "frameWidth": 120,
+        "frameHeight": 120,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/dog_2/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/dog_2/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/dog_2/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/dog_2/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.dog_3",
+      "name": "Dog 3",
+      "category": "Dog",
+      "family": "dog",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Dog"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "dog"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/dog_3.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "dog_household",
+        "frameWidth": 120,
+        "frameHeight": 120,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/dog_3/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/dog_3/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/dog_3/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/dog_3/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.dog_4",
+      "name": "Dog 4",
+      "category": "Dog",
+      "family": "dog",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Dog"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "dog"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/dog_4.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "dog_household",
+        "frameWidth": 120,
+        "frameHeight": 120,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/dog_4/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/dog_4/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/dog_4/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/dog_4/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.dog_5",
+      "name": "Dog 5",
+      "category": "Dog",
+      "family": "dog",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Dog"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "dog"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/dog_5.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "dog_household",
+        "frameWidth": 120,
+        "frameHeight": 120,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/dog_5/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/dog_5/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/dog_5/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/dog_5/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.dog_6",
+      "name": "Dog 6",
+      "category": "Dog",
+      "family": "dog",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Dog"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.22,
+              "y": 0.15
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "dog"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/dog_6.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "logicalWidth": 120,
+          "logicalHeight": 120,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "dog_household",
+        "frameWidth": 120,
+        "frameHeight": 120,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/dog_6/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/dog_6/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/dog_6/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/dog_6/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.donkey_1",
+      "name": "Donkey 1",
+      "category": "Donkey",
+      "family": "donkey",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Donkey"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "donkey"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/donkey_1.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "donkey_paddock",
+        "frameWidth": 160,
+        "frameHeight": 160,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/donkey_1/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/donkey_1/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/donkey_1/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/donkey_1/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.donkey_2",
+      "name": "Donkey 2",
+      "category": "Donkey",
+      "family": "donkey",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Donkey"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "donkey"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/donkey_2.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "donkey_paddock",
+        "frameWidth": 160,
+        "frameHeight": 160,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/donkey_2/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/donkey_2/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/donkey_2/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/donkey_2/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.donkey_3",
+      "name": "Donkey 3",
+      "category": "Donkey",
+      "family": "donkey",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Donkey"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "donkey"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/donkey_3.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "donkey_paddock",
+        "frameWidth": 160,
+        "frameHeight": 160,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/donkey_3/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/donkey_3/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/donkey_3/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/donkey_3/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.donkey_4",
+      "name": "Donkey 4",
+      "category": "Donkey",
+      "family": "donkey",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Donkey"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "donkey"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/donkey_4.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "logicalWidth": 160,
+          "logicalHeight": 160,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "donkey_paddock",
+        "frameWidth": 160,
+        "frameHeight": 160,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/donkey_4/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/donkey_4/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/donkey_4/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/donkey_4/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.horse_1",
+      "name": "Horse 1",
+      "category": "Horse",
+      "family": "horse",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Horse"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "horse"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/horse_1.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "horse_stabled",
+        "frameWidth": 240,
+        "frameHeight": 240,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/horse_1/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/horse_1/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/horse_1/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/horse_1/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.horse_2",
+      "name": "Horse 2",
+      "category": "Horse",
+      "family": "horse",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Horse"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "horse"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/horse_2.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "horse_stabled",
+        "frameWidth": 240,
+        "frameHeight": 240,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/horse_2/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/horse_2/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/horse_2/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/horse_2/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.horse_3",
+      "name": "Horse 3",
+      "category": "Horse",
+      "family": "horse",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Horse"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "horse"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/horse_3.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "horse_stabled",
+        "frameWidth": 240,
+        "frameHeight": 240,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/horse_3/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/horse_3/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/horse_3/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/horse_3/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.horse_4",
+      "name": "Horse 4",
+      "category": "Horse",
+      "family": "horse",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Horse"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "horse"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/horse_4.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "horse_stabled",
+        "frameWidth": 240,
+        "frameHeight": 240,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/horse_4/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/horse_4/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/horse_4/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/horse_4/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.horse_5",
+      "name": "Horse 5",
+      "category": "Horse",
+      "family": "horse",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Horse"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "horse"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/horse_5.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "horse_stabled",
+        "frameWidth": 240,
+        "frameHeight": 240,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/horse_5/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/horse_5/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/horse_5/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/horse_5/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.horse_6",
+      "name": "Horse 6",
+      "category": "Horse",
+      "family": "horse",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Horse"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.34,
+              "y": 0.22
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "horse"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/horse_6.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "logicalWidth": 240,
+          "logicalHeight": 240,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "horse_stabled",
+        "frameWidth": 240,
+        "frameHeight": 240,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/horse_6/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/horse_6/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/horse_6/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/horse_6/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.turkey_1",
+      "name": "Turkey 1",
+      "category": "Poultry",
+      "family": "poultry",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Poultry"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.13,
+              "y": 0.09
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.13,
+              "y": 0.09
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "poultry"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/turkey_1.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "logicalWidth": 100,
+          "logicalHeight": 100,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "poultry_yard",
+        "frameWidth": 100,
+        "frameHeight": 100,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/turkey_1/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/turkey_1/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/turkey_1/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/turkey_1/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.wolf_arctic",
+      "name": "Wolf Arctic",
+      "category": "Wolf",
+      "family": "wolf",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Wolf"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "wolf"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/wolf_arctic.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "wolf_wild",
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/wolf_arctic/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/wolf_arctic/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/wolf_arctic/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/wolf_arctic/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.wolf_black",
+      "name": "Wolf Black",
+      "category": "Wolf",
+      "family": "wolf",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Wolf"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "wolf"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/wolf_black.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "wolf_wild",
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/wolf_black/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/wolf_black/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/wolf_black/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/wolf_black/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
+      "id": "animals.wolf_timber",
+      "name": "Wolf Timber",
+      "category": "Wolf",
+      "family": "wolf",
+      "sourcePack": "animals",
+      "categoryPath": [
+        "Animals",
+        "Wolf"
+      ],
+      "viewMode": "eightWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "footprints": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ],
+        "reviewed": true,
+        "selection": [
+          {
+            "center": {
+              "x": 0.0,
+              "y": 0.0
+            },
+            "radius": {
+              "x": 0.27,
+              "y": 0.18
+            },
+            "type": "ellipse"
+          }
+        ]
+      },
+      "tags": [
+        "animal",
+        "wolf"
+      ],
+      "thumbnail": "environment_generated/thumbnails/animals/wolf_timber.png",
+      "views": {
+        "east": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "north": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northEast": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "northWest": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "south": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southEast": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "southWest": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        },
+        "west": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "logicalWidth": 128,
+          "logicalHeight": 128,
+          "pivotX": 0.5,
+          "pivotY": 0.75
+        }
+      },
+      "animalAnimation": {
+        "behaviorProfileId": "wolf_wild",
+        "frameWidth": 128,
+        "frameHeight": 128,
+        "directionRows": [
+          "south",
+          "west",
+          "east",
+          "north",
+          "southWest",
+          "northWest",
+          "southEast",
+          "northEast"
+        ],
+        "idle": {
+          "image": "environment_generated/actors/animals/wolf_timber/idle.png",
+          "frames": 3,
+          "framesPerSecond": 4.0
+        },
+        "walk": {
+          "image": "environment_generated/actors/animals/wolf_timber/walk.png",
+          "frames": 8,
+          "framesPerSecond": 9.0
+        },
+        "run": {
+          "image": "environment_generated/actors/animals/wolf_timber/run.png",
+          "frames": 8,
+          "framesPerSecond": 12.0
+        },
+        "action": {
+          "image": "environment_generated/actors/animals/wolf_timber/action.png",
+          "frames": 3,
+          "framesPerSecond": 5.0,
+          "pingPong": true
+        }
+      }
+    },
+    {
       "id": "ow3.fence.wood",
       "name": "Wooden fence",
       "category": "Structures",
@@ -142864,6 +147102,153 @@
           "pivotY": 0.97
         }
       }
+    },
+    {
+      "id": "custom.asset",
+      "name": "Custom Asset",
+      "category": "Custom",
+      "sourcePack": "custom",
+      "categoryPath": [
+        "Props",
+        "Custom"
+      ],
+      "viewMode": "fourWay",
+      "renderScale": 1.0,
+      "renderBand": "depthSorted",
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "reviewed": false
+      },
+      "tags": [
+        "custom",
+        "blender"
+      ],
+      "views": {
+        "east": {
+          "image": "environment_v2/custom/custom.asset/east.png",
+          "logicalWidth": 945,
+          "logicalHeight": 953,
+          "pivotX": 0.54179894,
+          "pivotY": 0.51206716
+        },
+        "north": {
+          "image": "environment_v2/custom/custom.asset/north.png",
+          "logicalWidth": 946,
+          "logicalHeight": 927,
+          "pivotX": 0.50634249,
+          "pivotY": 0.55231931
+        },
+        "south": {
+          "image": "environment_v2/custom/custom.asset/south.png",
+          "logicalWidth": 947,
+          "logicalHeight": 962,
+          "pivotX": 0.49419219,
+          "pivotY": 0.49480249
+        },
+        "west": {
+          "image": "environment_v2/custom/custom.asset/west.png",
+          "logicalWidth": 945,
+          "logicalHeight": 949,
+          "pivotX": 0.45820106,
+          "pivotY": 0.53951528
+        }
+      }
+    }
+  ],
+  "animalBehaviorProfiles": [
+    {
+      "id": "cat_household",
+      "name": "Household cat",
+      "roamingRadius": 5.0,
+      "walkSpeedPixelsPerSecond": 105.0,
+      "runSpeedPixelsPerSecond": 175.0,
+      "minimumPauseSeconds": 1.2,
+      "maximumPauseSeconds": 4.5,
+      "idleWeight": 0.25,
+      "walkWeight": 0.35,
+      "runWeight": 0.3,
+      "actionWeight": 0.1
+    },
+    {
+      "id": "dog_household",
+      "name": "Household dog",
+      "roamingRadius": 6.0,
+      "walkSpeedPixelsPerSecond": 115.0,
+      "runSpeedPixelsPerSecond": 185.0,
+      "minimumPauseSeconds": 1.4,
+      "maximumPauseSeconds": 5.5,
+      "idleWeight": 0.3,
+      "walkWeight": 0.4,
+      "runWeight": 0.22,
+      "actionWeight": 0.08
+    },
+    {
+      "id": "poultry_yard",
+      "name": "Poultry yard",
+      "roamingRadius": 3.5,
+      "walkSpeedPixelsPerSecond": 72.0,
+      "runSpeedPixelsPerSecond": 115.0,
+      "minimumPauseSeconds": 0.7,
+      "maximumPauseSeconds": 2.5,
+      "idleWeight": 0.16,
+      "walkWeight": 0.6,
+      "runWeight": 0.04,
+      "actionWeight": 0.2
+    },
+    {
+      "id": "horse_stabled",
+      "name": "Stabled horse",
+      "roamingRadius": 0.0,
+      "walkSpeedPixelsPerSecond": 100.0,
+      "runSpeedPixelsPerSecond": 160.0,
+      "minimumPauseSeconds": 3.5,
+      "maximumPauseSeconds": 8.0,
+      "idleWeight": 1.0,
+      "walkWeight": 0.0,
+      "runWeight": 0.0,
+      "actionWeight": 0.0
+    },
+    {
+      "id": "donkey_paddock",
+      "name": "Paddock donkey",
+      "roamingRadius": 2.5,
+      "walkSpeedPixelsPerSecond": 82.0,
+      "runSpeedPixelsPerSecond": 125.0,
+      "minimumPauseSeconds": 2.0,
+      "maximumPauseSeconds": 6.0,
+      "idleWeight": 0.55,
+      "walkWeight": 0.3,
+      "runWeight": 0.0,
+      "actionWeight": 0.15
+    },
+    {
+      "id": "deer_wild",
+      "name": "Wild deer",
+      "roamingRadius": 9.0,
+      "walkSpeedPixelsPerSecond": 125.0,
+      "runSpeedPixelsPerSecond": 205.0,
+      "minimumPauseSeconds": 1.2,
+      "maximumPauseSeconds": 4.0,
+      "idleWeight": 0.18,
+      "walkWeight": 0.32,
+      "runWeight": 0.42,
+      "actionWeight": 0.08
+    },
+    {
+      "id": "wolf_wild",
+      "name": "Wild wolf",
+      "roamingRadius": 10.0,
+      "walkSpeedPixelsPerSecond": 130.0,
+      "runSpeedPixelsPerSecond": 215.0,
+      "minimumPauseSeconds": 1.0,
+      "maximumPauseSeconds": 3.5,
+      "idleWeight": 0.15,
+      "walkWeight": 0.32,
+      "runWeight": 0.48,
+      "actionWeight": 0.05
     }
   ]
 }

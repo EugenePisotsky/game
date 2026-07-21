@@ -462,6 +462,34 @@ void main() {
     expect(controller.selectedObject?.verticalOffset, 0);
   });
 
+  test('cross-surface occlusion scope is authored and undoable', () {
+    final controller = EditorController(
+      EnvironmentDocument(
+        id: 'test',
+        name: 'Test',
+        width: 20,
+        height: 20,
+        baseMaterialId: earth.id,
+        objects: [
+          PlacedEnvironmentObject(id: 'ship_1', assetId: tree.id, x: 2, y: 2),
+        ],
+      ),
+      catalog: catalog,
+    )..selectObjectIds(['ship_1']);
+
+    controller.setSelectedCrossSurfaceOcclusion(true);
+    expect(controller.selectedObject?.crossSurfaceOcclusion, isTrue);
+    expect(controller.selectedObject?.occlusionHeight, 4);
+
+    controller.adjustSelectedOcclusionHeight(0.5);
+    expect(controller.selectedObject?.occlusionHeight, 4.5);
+    controller.undo();
+    expect(controller.selectedObject?.occlusionHeight, 4);
+    controller.undo();
+    expect(controller.selectedObject?.crossSurfaceOcclusion, isFalse);
+    expect(controller.selectedObject?.occlusionHeight, 0);
+  });
+
   test(
     'layers organize placement and hidden or locked content is not selectable',
     () {
@@ -727,6 +755,218 @@ void main() {
     expect(controller.document.terrainRegions, isEmpty);
     controller.undo();
     expect(controller.document.terrainRegions, hasLength(1));
+  });
+
+  test('ground fills are visual paint bound to the active surface', () {
+    const polygon = [
+      WorldPoint(4, 4),
+      WorldPoint(12, 4),
+      WorldPoint(12, 12),
+      WorldPoint(4, 12),
+    ];
+    final controller = EditorController(world(), catalog: catalog)
+      ..selectMode(EnvironmentEditorMode.fillGround)
+      ..selectPaintMaterial(grass);
+
+    expect(controller.fillGroundInArea(polygon), isTrue);
+    expect(
+      controller.selectedTerrainRegion?.surfaceId,
+      environmentBaseSurfaceId,
+    );
+    expect(controller.document.surfaces, hasLength(1));
+  });
+
+  test('surface polygons create editable physical planes', () {
+    final controller = EditorController(world(), catalog: catalog)
+      ..selectMode(EnvironmentEditorMode.surfacePolygon)
+      ..selectPaintMaterial(grass)
+      ..setNewSurfaceElevation(1.5);
+
+    for (final point in const [
+      WorldPoint(3, 3),
+      WorldPoint(10, 3),
+      WorldPoint(12, 8),
+      WorldPoint(7, 12),
+      WorldPoint(3, 8),
+    ]) {
+      controller
+        ..beginGesture()
+        ..applyAt(point)
+        ..endGesture();
+    }
+    expect(controller.finishSurfacePolygon(), isTrue);
+    expect(controller.selectedSurface?.points, hasLength(5));
+    expect(controller.selectedSurface?.height.elevation, 1.5);
+    expect(controller.document.activeSurfaceId, controller.selectedSurface?.id);
+
+    controller.setSelectedSurfaceGeometryOnly(true);
+    expect(controller.selectedSurface?.drawsBaseMaterial, isFalse);
+    controller.undo();
+    expect(controller.selectedSurface?.drawsBaseMaterial, isTrue);
+    controller.redo();
+    expect(controller.selectedSurface?.drawsBaseMaterial, isFalse);
+
+    controller.selectMode(EnvironmentEditorMode.editGround);
+    expect(controller.beginSelectedTerrainPointGesture(2), isTrue);
+    controller
+      ..moveSelectedTerrainPointDuringGesture(2, const WorldPoint(13, 9))
+      ..endGesture();
+    expect(controller.selectedSurface?.points[2].x, 13);
+    expect(controller.selectedSurface?.points[2].y, 9);
+    controller.undo();
+    expect(controller.selectedSurface?.points[2].x, 12);
+    expect(controller.selectedSurface?.points[2].y, 8);
+  });
+
+  test('liquid bathymetry ramp controls and handles are undoable', () {
+    final document = world()
+      ..liquidVolumes.add(
+        EnvironmentLiquidVolume(
+          id: 'pond',
+          name: 'Pond',
+          bedSurfaceId: environmentBaseSurfaceId,
+          materialId: grass.id,
+          surfaceElevation: 0,
+          depth: 2,
+          points: const [
+            WorldPoint(2, 2),
+            WorldPoint(12, 2),
+            WorldPoint(12, 12),
+            WorldPoint(2, 12),
+          ],
+        ),
+      );
+    final controller = EditorController(document, catalog: catalog)
+      ..selectMode(EnvironmentEditorMode.editGround)
+      ..beginGesture()
+      ..applyAt(const WorldPoint(5, 5))
+      ..endGesture();
+
+    expect(controller.selectedLiquidVolume?.id, 'pond');
+    controller.setSelectedVariableWaterDepth(true);
+    expect(controller.selectedLiquidVolume?.hasDepthRamp, isTrue);
+    expect(controller.selectedLiquidVolume?.endDepth, closeTo(0.3, 1e-9));
+
+    controller.adjustSelectedWaterEndDepth(-0.1);
+    expect(controller.selectedLiquidVolume?.endDepth, closeTo(0.2, 1e-9));
+    final startBefore = controller.selectedLiquidVolume!.depthRampStart!;
+    controller
+      ..beginGesture()
+      ..beginSelectedLiquidDepthHandleGesture(0)
+      ..moveSelectedLiquidDepthHandleDuringGesture(0, const WorldPoint(3, 6))
+      ..endGesture();
+    expect(controller.selectedLiquidVolume?.depthRampStart?.x, 3);
+    expect(controller.selectedLiquidVolume?.depthRampStart?.y, 6);
+    controller.undo();
+    expect(controller.selectedLiquidVolume?.depthRampStart?.x, startBefore.x);
+    expect(controller.selectedLiquidVolume?.depthRampStart?.y, startBefore.y);
+  });
+
+  test('objects and connectors are explicitly bound to physical surfaces', () {
+    final raised = EnvironmentSurface(
+      id: 'raised',
+      name: 'Raised deck',
+      materialId: grass.id,
+      points: const [
+        WorldPoint(4, 4),
+        WorldPoint(12, 4),
+        WorldPoint(12, 12),
+        WorldPoint(4, 12),
+      ],
+      height: const EnvironmentSurfaceHeight.flat(1.5),
+      kind: EnvironmentSurfaceKind.platform,
+      order: 1,
+    );
+    final document = world()
+      ..surfaces.add(raised)
+      ..activeSurfaceId = raised.id;
+    final controller = EditorController(document, catalog: catalog)
+      ..selectObjectAsset(tree)
+      ..beginGesture()
+      ..applyAt(const WorldPoint(8, 8))
+      ..endGesture();
+
+    expect(controller.selectedObject?.supportSurfaceId, raised.id);
+    controller.setSelectedSupportSurface(environmentBaseSurfaceId);
+    expect(
+      controller.selectedObject?.supportSurfaceId,
+      environmentBaseSurfaceId,
+    );
+    controller.undo();
+    expect(controller.selectedObject?.supportSurfaceId, raised.id);
+
+    controller
+      ..selectMode(EnvironmentEditorMode.connector)
+      ..setConnectorTargetSurface(environmentBaseSurfaceId)
+      ..beginGesture()
+      ..applyAt(const WorldPoint(5, 5))
+      ..endGesture()
+      ..beginGesture()
+      ..applyAt(const WorldPoint(3, 3))
+      ..endGesture();
+
+    final connector = controller.document.surfaceConnectors.single;
+    expect(connector.fromSurfaceId, raised.id);
+    expect(connector.toSurfaceId, environmentBaseSurfaceId);
+    expect(connector.from, const WorldPoint(5, 5));
+    expect(connector.to, const WorldPoint(3, 3));
+    controller.undo();
+    expect(controller.document.surfaceConnectors, isEmpty);
+    controller.redo();
+    expect(controller.document.surfaceConnectors, hasLength(1));
+  });
+
+  test('overlapping surface depth can be reordered and undone', () {
+    const first = [
+      WorldPoint(2, 2),
+      WorldPoint(8, 2),
+      WorldPoint(8, 8),
+      WorldPoint(2, 8),
+    ];
+    const second = [
+      WorldPoint(5, 5),
+      WorldPoint(11, 5),
+      WorldPoint(11, 11),
+      WorldPoint(5, 11),
+    ];
+    final controller = EditorController(world(), catalog: catalog)
+      ..selectMode(EnvironmentEditorMode.fillGround)
+      ..selectPaintMaterial(grass)
+      ..fillGroundInArea(first)
+      ..fillGroundInArea(second);
+
+    final selectedId = controller.selectedTerrainRegionId;
+    controller.moveSelectedTerrainRegionOrder(-1);
+    expect(controller.document.terrainRegions.first.id, selectedId);
+    controller.undo();
+    expect(controller.document.terrainRegions.last.id, selectedId);
+  });
+
+  test('selected objects retain authored liquid interaction and draft', () {
+    final controller = EditorController(
+      EnvironmentDocument(
+        id: 'test',
+        name: 'Test',
+        width: 20,
+        height: 20,
+        baseMaterialId: earth.id,
+        objects: [
+          PlacedEnvironmentObject(id: 'tree_1', assetId: tree.id, x: 2, y: 2),
+        ],
+      ),
+      catalog: catalog,
+    )..selectObjectIds(['tree_1']);
+
+    controller
+      ..setSelectedLiquidInteraction(EnvironmentLiquidInteraction.float)
+      ..adjustSelectedLiquidDraft(0.18);
+    expect(
+      controller.selectedObject?.liquidInteraction,
+      EnvironmentLiquidInteraction.float,
+    );
+    expect(controller.selectedObject?.liquidDraft, closeTo(0.3, 1e-9));
+    controller.undo();
+    expect(controller.selectedObject?.liquidDraft, 0.12);
   });
 
   test(

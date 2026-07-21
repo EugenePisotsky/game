@@ -85,6 +85,10 @@ class EditorGame extends FlameGame {
   static const double _terrainHighResolutionMargin = 512;
   static const double _terrainDirectRenderZoom = 0.7;
   static const double _spatialCellSize = 256;
+  static const double _liquidOpticalDepthScale = 1.25;
+
+  static double _liquidOpticalDepth(double depth) =>
+      1 - math.exp(-math.max(0, depth) / _liquidOpticalDepthScale);
   static const int _editorObjectBaseDimension = 512;
   static const int _editorObjectMaximumDimension = 4096;
   static const int _imageCacheBudgetBytes = 160 << 20;
@@ -106,7 +110,13 @@ class EditorGame extends FlameGame {
       .where((raster) => raster.resolution == _terrainRasterHighResolution)
       .length;
   bool get usesDirectTerrainRendering =>
-      loadedChunks != null && zoom >= _terrainDirectRenderZoom;
+      loadedChunks != null &&
+      (zoom >= _terrainDirectRenderZoom || _hasElevatedTerrain);
+
+  bool get _hasElevatedTerrain => controller.document.surfaces.any(
+    (surface) =>
+        surface.height.elevation != 0 || surface.height.endElevation != 0,
+  );
   int get pendingTerrainBakeCount =>
       _dirtyTerrainChunks.length + (_terrainBakeInFlight == null ? 0 : 1);
   int get updateTime => _updateMicroseconds ~/ 1000;
@@ -167,6 +177,10 @@ class EditorGame extends FlameGame {
     ..color = const ui.Color(0xFFE9C46A)
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 3;
+  final ui.Paint _animalHomePaint = ui.Paint()
+    ..color = const ui.Color(0x8878C6A3)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 1.5;
   final ui.Paint _hoverPaint = ui.Paint()
     ..color = const ui.Color(0xFF78C6A3)
     ..style = ui.PaintingStyle.stroke
@@ -181,6 +195,10 @@ class EditorGame extends FlameGame {
     ..color = const ui.Color(0xDD4EA8DE)
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 2;
+  final ui.Paint _liquidOcclusionGeometryPaint = ui.Paint()
+    ..color = const ui.Color(0xFF4DE3FF)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 3;
   final ui.Paint _blockingPaint = ui.Paint()
     ..color = const ui.Color(0xDDE76F51)
     ..style = ui.PaintingStyle.stroke
@@ -222,6 +240,14 @@ class EditorGame extends FlameGame {
     ..color = const ui.Color(0xFF64D8FF)
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 2.5;
+  final ui.Paint _connectorPaint = ui.Paint()
+    ..color = const ui.Color(0xFFB987FF)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 3;
+  final ui.Paint _connectorPreviewPaint = ui.Paint()
+    ..color = const ui.Color(0xAAB987FF)
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 2;
 
   static final Float64List _identityMatrix = Float64List.fromList([
     1,
@@ -256,6 +282,8 @@ class EditorGame extends FlameGame {
         if (!region.resetsToDefault) region.materialId,
       for (final stroke in controller.document.terrainStrokes)
         stroke.materialId,
+      for (final surface in controller.document.surfaces) surface.materialId,
+      for (final liquid in controller.document.liquidVolumes) liquid.materialId,
     };
     final materialPaths = <String>{};
     for (final id in materialIds) {
@@ -434,22 +462,40 @@ class EditorGame extends FlameGame {
     EnvironmentObjectView view,
   ) {
     final knownSourceSize = _sourceImageSizes[view.imagePath];
-    final sourceWidth = view.logicalWidth > 0
-        ? view.logicalWidth
-        : knownSourceSize?.$1 ?? 0;
-    final sourceHeight = view.logicalHeight > 0
-        ? view.logicalHeight
-        : knownSourceSize?.$2 ?? 0;
+    final animation = asset.animalAnimation;
+    final sourceWidth =
+        knownSourceSize?.$1 ??
+        (animation == null
+            ? view.logicalWidth
+            : animation.frameWidth * animation.idle.frames);
+    final sourceHeight =
+        knownSourceSize?.$2 ??
+        (animation == null
+            ? view.logicalHeight
+            : animation.frameHeight * animation.directionRows.length);
     if (sourceWidth <= 0 || sourceHeight <= 0) {
       return _editorObjectBaseDimension;
     }
     final views = ui.PlatformDispatcher.instance.views;
     final devicePixelRatio = views.isEmpty ? 1.0 : views.first.devicePixelRatio;
     final requiredDimension =
-        math.max(sourceWidth, sourceHeight) *
+        math.max(
+          view.logicalWidth > 0 ? view.logicalWidth : sourceWidth,
+          view.logicalHeight > 0 ? view.logicalHeight : sourceHeight,
+        ) *
         asset.renderScale *
         zoom *
         devicePixelRatio;
+    if (animation != null) {
+      final frameMaximum = math.max(
+        animation.frameWidth,
+        animation.frameHeight,
+      );
+      final atlasMaximum = math.max(sourceWidth, sourceHeight);
+      final requiredAtlasDimension =
+          requiredDimension * atlasMaximum / frameMaximum;
+      return requiredAtlasDimension.ceil().clamp(1, atlasMaximum);
+    }
     for (final tier in const [512, 1024, 2048, 3072, 4096]) {
       if (requiredDimension <= tier) {
         return math.min(tier, math.max(sourceWidth, sourceHeight));
@@ -464,7 +510,7 @@ class EditorGame extends FlameGame {
   WorldPoint? worldAtScreen(Vector2 screen) {
     if (!isLoaded) return null;
     final projected = _projectedAtScreen(screen);
-    final world = projection.screenToWorld(projected);
+    final world = _projectedToVisibleSurface(projected);
     final point = WorldPoint(world.x, world.y);
     return controller.document.contains(point.x, point.y) ? point : null;
   }
@@ -477,7 +523,7 @@ class EditorGame extends FlameGame {
       Vector2(screenRect.right, screenRect.bottom),
       Vector2(screenRect.left, screenRect.bottom),
     ]) {
-      final world = projection.screenToWorld(_projectedAtScreen(screen));
+      final world = _projectedToVisibleSurface(_projectedAtScreen(screen));
       result.add(
         WorldPoint(
           world.x.clamp(0, controller.document.width).toDouble(),
@@ -516,11 +562,15 @@ class EditorGame extends FlameGame {
     final object = controller.selectedObject;
     final shape = controller.selectedGeometryShape;
     if (object == null || shape == null) return null;
+    final elevation = _surfaceAt(
+      WorldPoint(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    ).groundElevation;
     EnvironmentGeometryHandle? nearest;
     var nearestDistanceSquared = radius * radius;
     for (final candidate in _geometryHandlePoints(shape)) {
       final world = transformEnvironmentGeometryPoint(candidate.local, object);
-      final vertexScreen = _screenForWorldPoint(world);
+      final vertexScreen = _screenForWorldPoint(world, elevation: elevation);
       final distanceSquared = vertexScreen.distanceToSquared(screen);
       if (distanceSquared <= nearestDistanceSquared) {
         nearest = candidate.handle;
@@ -535,6 +585,47 @@ class EditorGame extends FlameGame {
     return handle?.type == EnvironmentGeometryHandleType.polygonVertex
         ? handle!.index
         : null;
+  }
+
+  int? hitTestSelectedTerrainPoint(Vector2 screen, {double radius = 12}) {
+    if (!isLoaded) return null;
+    final points = controller.selectedEnvironmentAreaPoints;
+    if (points == null) return null;
+    int? nearest;
+    var nearestDistanceSquared = radius * radius;
+    for (var index = 0; index < points.length; index++) {
+      final vertexScreen = _screenForWorldPoint(
+        points[index],
+        elevation: controller.selectedEnvironmentAreaElevationAt(points[index]),
+      );
+      final distanceSquared = vertexScreen.distanceToSquared(screen);
+      if (distanceSquared <= nearestDistanceSquared) {
+        nearest = index;
+        nearestDistanceSquared = distanceSquared;
+      }
+    }
+    return nearest;
+  }
+
+  int? hitTestSelectedLiquidDepthHandle(Vector2 screen, {double radius = 12}) {
+    if (!isLoaded) return null;
+    final liquid = controller.selectedLiquidVolume;
+    if (liquid == null || !liquid.hasDepthRamp) return null;
+    final handles = [liquid.depthRampStart!, liquid.depthRampEnd!];
+    int? nearest;
+    var nearestDistanceSquared = radius * radius;
+    for (var index = 0; index < handles.length; index++) {
+      final handleScreen = _screenForWorldPoint(
+        handles[index],
+        elevation: liquid.surfaceElevation,
+      );
+      final distanceSquared = handleScreen.distanceToSquared(screen);
+      if (distanceSquared <= nearestDistanceSquared) {
+        nearest = index;
+        nearestDistanceSquared = distanceSquared;
+      }
+    }
+    return nearest;
   }
 
   List<String> objectIdsInMarquee(
@@ -673,34 +764,55 @@ class EditorGame extends FlameGame {
         ..scale(zoom)
         ..translate(-_mapCenterScreen.x, -_mapCenterScreen.y);
 
-      _renderBaseGround(canvas);
-      if (loadedChunks == null) {
-        canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
-        for (final region in controller.document.terrainRegions) {
-          _renderTerrainRegion(canvas, region);
-        }
-        canvas.restore();
-        canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
-        for (final stroke in controller.document.terrainStrokes) {
-          _renderStroke(canvas, stroke);
-        }
-        canvas.restore();
+      if (controller.document.surfaces.length > 1) {
+        _renderLayeredEnvironment(canvas);
       } else {
-        if (zoom >= _terrainDirectRenderZoom) {
-          _evictStaleTerrainRasters();
-          _renderDirectChunkTerrain(canvas);
+        _renderBaseGround(canvas);
+        if (loadedChunks == null) {
+          canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
+          for (final region in controller.document.terrainRegions) {
+            _renderTerrainRegion(canvas, region);
+          }
+          canvas.restore();
+          canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
+          for (final stroke in controller.document.terrainStrokes) {
+            _renderStroke(canvas, stroke);
+          }
+          canvas.restore();
         } else {
-          _synchronizeTerrainRasters();
-          _renderRasterChunkTerrain(canvas);
+          if (_hasElevatedTerrain) {
+            canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
+            for (final region in controller.document.terrainRegions) {
+              _renderTerrainRegion(canvas, region);
+            }
+            canvas.restore();
+            canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
+            for (final stroke in controller.document.terrainStrokes) {
+              _renderStroke(canvas, stroke);
+            }
+            canvas.restore();
+          } else if (zoom >= _terrainDirectRenderZoom) {
+            _evictStaleTerrainRasters();
+            _renderDirectChunkTerrain(canvas);
+          } else {
+            _synchronizeTerrainRasters();
+            _renderRasterChunkTerrain(canvas);
+          }
+          final activeStroke = controller.activeTerrainStroke;
+          if (activeStroke != null) _renderStroke(canvas, activeStroke);
         }
-        final activeStroke = controller.activeTerrainStroke;
-        if (activeStroke != null) _renderStroke(canvas, activeStroke);
+        if (controller.document.liquidVolumes.isNotEmpty) {
+          _renderAllObjectBands(
+            canvas,
+            liquidPass: _LiquidSpritePass.submerged,
+          );
+        }
+        _renderLiquidVolumes(canvas);
+        _renderAllObjectBands(canvas, liquidPass: _LiquidSpritePass.exposed);
       }
-      _renderObjectBand(canvas, EnvironmentRenderBand.groundCover);
-      _renderObjectBand(canvas, EnvironmentRenderBand.depthSorted);
-      _renderObjectBand(canvas, EnvironmentRenderBand.overhead);
-      _renderObjectBand(canvas, EnvironmentRenderBand.effects);
+      _renderSurfaceConnectors(canvas);
       _renderPathPreview(canvas);
+      _renderSurfacePolygonPreview(canvas);
       _renderMapOutline(canvas);
       _renderPlayerSpawn(canvas);
       if (showRenderDebug) _renderDepthDebug(canvas);
@@ -773,10 +885,186 @@ class EditorGame extends FlameGame {
     }
   }
 
+  void _renderLayeredEnvironment(ui.Canvas canvas) {
+    final surfaces = [...controller.document.surfaces]
+      ..sort((a, b) {
+        final order = a.order.compareTo(b.order);
+        if (order != 0) return order;
+        return a.height.elevation.compareTo(b.height.elevation);
+      });
+    for (final surface in surfaces) {
+      if (surface.id == environmentBaseSurfaceId) {
+        _renderBaseGround(canvas);
+      } else if (surface.drawsBaseMaterial) {
+        _renderPhysicalSurface(canvas, surface);
+      }
+      canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
+      for (final region in controller.document.terrainRegions) {
+        if (region.surfaceId == surface.id) {
+          _renderTerrainRegion(canvas, region);
+        }
+      }
+      canvas.restore();
+      canvas.saveLayer(_visibleProjectedBounds, ui.Paint());
+      for (final stroke in controller.document.terrainStrokes) {
+        if (stroke.surfaceId == surface.id) _renderStroke(canvas, stroke);
+      }
+      final activeStroke = controller.activeTerrainStroke;
+      if (activeStroke != null && activeStroke.surfaceId == surface.id) {
+        _renderStroke(canvas, activeStroke);
+      }
+      canvas.restore();
+      final liquids =
+          controller.document.liquidVolumes
+              .where((liquid) => liquid.bedSurfaceId == surface.id)
+              .toList()
+            ..sort((a, b) => a.order.compareTo(b.order));
+      if (liquids.isNotEmpty) {
+        _renderAllObjectBands(
+          canvas,
+          surfaceId: surface.id,
+          liquidPass: _LiquidSpritePass.submerged,
+        );
+      }
+      for (final liquid in liquids) {
+        _renderLiquidVolume(canvas, liquid);
+      }
+      _renderAllObjectBands(
+        canvas,
+        surfaceId: surface.id,
+        liquidPass: _LiquidSpritePass.exposed,
+      );
+    }
+  }
+
+  void _renderAllObjectBands(
+    ui.Canvas canvas, {
+    String? surfaceId,
+    required _LiquidSpritePass liquidPass,
+  }) {
+    for (final band in EnvironmentRenderBand.values) {
+      _renderObjectBand(
+        canvas,
+        band,
+        surfaceId: surfaceId,
+        liquidPass: liquidPass,
+      );
+    }
+  }
+
+  void _renderPhysicalSurface(ui.Canvas canvas, EnvironmentSurface surface) {
+    _renderTerrainRegion(
+      canvas,
+      TerrainRegion(
+        id: 'surface-fill:${surface.id}',
+        materialId: surface.materialId,
+        points: surface.points,
+        surfaceId: surface.id,
+      ),
+    );
+  }
+
+  void _renderLiquidVolumes(ui.Canvas canvas) {
+    final liquids = [...controller.document.liquidVolumes]
+      ..sort((a, b) => a.order.compareTo(b.order));
+    for (final liquid in liquids) {
+      _renderLiquidVolume(canvas, liquid);
+    }
+  }
+
+  void _renderLiquidVolume(
+    ui.Canvas canvas,
+    EnvironmentLiquidVolume liquid, {
+    ui.BlendMode? blendMode,
+  }) {
+    if (liquid.points.length < 3) return;
+    final material = controller.catalog.materialById(liquid.materialId);
+    final basePaint = _repeatingPaints[liquid.materialId];
+    if (material == null) return;
+    if (basePaint?.shader == null ||
+        !_loadedImages.containsKey(material.texturePath)) {
+      _loadMaterial(liquid.materialId);
+      return;
+    }
+    final image = _loadedImages[material.texturePath]!;
+    final path = _worldPolygonPath(
+      liquid.points,
+      elevation: liquid.surfaceElevation,
+    );
+    final minX = liquid.points.map((point) => point.x).reduce(math.min);
+    final minY = liquid.points.map((point) => point.y).reduce(math.min);
+    final maxX = liquid.points.map((point) => point.x).reduce(math.max);
+    final maxY = liquid.points.map((point) => point.y).reduce(math.max);
+    final texelsPerWorldUnitX =
+        image.width /
+        (material.effectiveRepeatWorldWidth * liquid.textureScale);
+    final texelsPerWorldUnitY =
+        image.height /
+        (material.effectiveRepeatWorldHeight * liquid.textureScale);
+    final softness = liquid.edgeBlend.clamp(0, 3).toDouble();
+    final sigma = softness * projection.halfHeight;
+    final bounds = path.getBounds().inflate(math.max(1, sigma * 3));
+    canvas.saveLayer(
+      bounds,
+      ui.Paint()..blendMode = blendMode ?? ui.BlendMode.srcOver,
+    );
+    final paint = ui.Paint()
+      ..shader = basePaint!.shader
+      ..blendMode = ui.BlendMode.srcOver;
+    final expandedMin = WorldPoint(minX - softness, minY - softness);
+    final expandedMax = WorldPoint(maxX + softness, maxY + softness);
+    ui.Color liquidVertexColor(WorldPoint point) {
+      final opticalDepth = _liquidOpticalDepth(liquid.depthAt(point));
+      final depthOpacity = 0.15 + 0.85 * opticalDepth;
+      final tintStrength = 0.8 * opticalDepth;
+      int tintChannel(int deepWater) =>
+          (255 + (deepWater - 255) * tintStrength).round();
+      return ui.Color.fromRGBO(
+        tintChannel(88),
+        tintChannel(126),
+        tintChannel(150),
+        liquid.opacity * depthOpacity,
+      );
+    }
+
+    _drawTexturedWorldQuad(
+      canvas,
+      expandedMin,
+      expandedMax,
+      paint,
+      ui.Rect.fromLTRB(
+        (minX - softness) * texelsPerWorldUnitX,
+        (minY - softness) * texelsPerWorldUnitY,
+        (maxX + softness) * texelsPerWorldUnitX,
+        (maxY + softness) * texelsPerWorldUnitY,
+      ),
+      image,
+      elevation: liquid.surfaceElevation,
+      vertexColors: [
+        liquidVertexColor(expandedMin),
+        liquidVertexColor(WorldPoint(expandedMax.x, expandedMin.y)),
+        liquidVertexColor(expandedMax),
+        liquidVertexColor(WorldPoint(expandedMin.x, expandedMax.y)),
+      ],
+    );
+    final maskPaint = ui.Paint()
+      ..color = const ui.Color(0xFFFFFFFF)
+      ..maskFilter = softness == 0
+          ? null
+          : ui.MaskFilter.blur(ui.BlurStyle.normal, sigma);
+    canvas.saveLayer(bounds, ui.Paint()..blendMode = ui.BlendMode.dstIn);
+    canvas.drawPath(path, maskPaint);
+    canvas.restore();
+    canvas.restore();
+  }
+
   void _renderStroke(ui.Canvas canvas, TerrainStroke stroke) {
     if (stroke.points.isEmpty) return;
     if (stroke.resetsToBase) {
-      canvas.drawPath(_worldPolygonPath(stroke.points), _terrainResetPaint);
+      canvas.drawPath(
+        _worldSurfacePolygonPath(stroke.points, stroke.surfaceId),
+        _terrainResetPaint,
+      );
       return;
     }
     final material = controller.catalog.materialById(stroke.materialId);
@@ -789,13 +1077,20 @@ class EditorGame extends FlameGame {
     final image = _loadedImages[material.decalPath]!;
     for (final stamp in terrainStrokeStamps(stroke)) {
       paint.color = ui.Color.fromRGBO(255, 255, 255, stamp.opacity);
-      _drawStamp(canvas, stamp.center, stamp.radius, paint, image);
+      _drawStamp(
+        canvas,
+        stamp.center,
+        stamp.radius,
+        paint,
+        image,
+        elevation: _surfaceElevationAt(stroke.surfaceId, stamp.center),
+      );
     }
   }
 
   void _renderTerrainRegion(ui.Canvas canvas, TerrainRegion region) {
     if (region.points.length < 3) return;
-    final path = _worldPolygonPath(region.points);
+    final path = _worldSurfacePolygonPath(region.points, region.surfaceId);
     if (region.resetsToDefault) {
       canvas.drawPath(path, _terrainResetPaint);
       return;
@@ -818,21 +1113,49 @@ class EditorGame extends FlameGame {
     final texelsPerWorldUnitY =
         image.height /
         (material.effectiveRepeatWorldHeight * region.textureScale);
-    canvas.save();
-    canvas.clipPath(path);
+    final softness = region.edgeBlend.clamp(0, 3).toDouble();
+    final needsMask = softness > 0 || region.opacity < 0.999;
+    final sigma = softness * projection.halfHeight;
+    final expandedMin = WorldPoint(minX - softness, minY - softness);
+    final expandedMax = WorldPoint(maxX + softness, maxY + softness);
+    final layerBounds = path.getBounds().inflate(math.max(1, sigma * 3));
+    if (needsMask) {
+      canvas.saveLayer(layerBounds, ui.Paint());
+    } else {
+      canvas.save();
+      canvas.clipPath(path);
+    }
     _drawTexturedWorldQuad(
       canvas,
-      WorldPoint(minX, minY),
-      WorldPoint(maxX, maxY),
+      expandedMin,
+      expandedMax,
       paint,
       ui.Rect.fromLTRB(
-        minX * texelsPerWorldUnitX,
-        minY * texelsPerWorldUnitY,
-        maxX * texelsPerWorldUnitX,
-        maxY * texelsPerWorldUnitY,
+        expandedMin.x * texelsPerWorldUnitX,
+        expandedMin.y * texelsPerWorldUnitY,
+        expandedMax.x * texelsPerWorldUnitX,
+        expandedMax.y * texelsPerWorldUnitY,
       ),
       image,
+      elevation: _surfaceElevationAt(region.surfaceId, region.points.first),
     );
+    if (needsMask) {
+      canvas.saveLayer(layerBounds, ui.Paint()..blendMode = ui.BlendMode.dstIn);
+      canvas.drawPath(
+        path,
+        ui.Paint()
+          ..color = ui.Color.fromRGBO(
+            255,
+            255,
+            255,
+            region.opacity.clamp(0.05, 1),
+          )
+          ..maskFilter = softness == 0
+              ? null
+              : ui.MaskFilter.blur(ui.BlurStyle.normal, sigma),
+      );
+      canvas.restore();
+    }
     canvas.restore();
   }
 
@@ -1206,21 +1529,22 @@ class EditorGame extends FlameGame {
     final tileWorldHeight =
         material.effectiveRepeatWorldHeight * region.textureScale;
     if (tileWorldWidth <= 0 || tileWorldHeight <= 0) return;
+    final softness = region.edgeBlend.clamp(0, 3).toDouble();
     final minX = math.max(
       originX,
-      region.points.map((point) => point.x).reduce(math.min),
+      region.points.map((point) => point.x).reduce(math.min) - softness,
     );
     final minY = math.max(
       originY,
-      region.points.map((point) => point.y).reduce(math.min),
+      region.points.map((point) => point.y).reduce(math.min) - softness,
     );
     final maxX = math.min(
       originX + chunkSize,
-      region.points.map((point) => point.x).reduce(math.max),
+      region.points.map((point) => point.x).reduce(math.max) + softness,
     );
     final maxY = math.min(
       originY + chunkSize,
-      region.points.map((point) => point.y).reduce(math.max),
+      region.points.map((point) => point.y).reduce(math.max) + softness,
     );
     final firstTileX = (minX / tileWorldWidth).floor();
     final firstTileY = (minY / tileWorldHeight).floor();
@@ -1233,8 +1557,19 @@ class EditorGame extends FlameGame {
       image.height.toDouble(),
     );
     final paint = ui.Paint()..filterQuality = ui.FilterQuality.low;
-    canvas.save();
-    canvas.clipPath(path);
+    final needsMask = softness > 0 || region.opacity < 0.999;
+    final layerBounds = ui.Rect.fromLTWH(
+      0,
+      0,
+      chunkSize * pixelsPerWorldUnit,
+      chunkSize * pixelsPerWorldUnit,
+    );
+    if (needsMask) {
+      canvas.saveLayer(layerBounds, ui.Paint());
+    } else {
+      canvas.save();
+      canvas.clipPath(path);
+    }
     for (var tileY = firstTileY; tileY < lastTileY; tileY++) {
       for (var tileX = firstTileX; tileX < lastTileX; tileX++) {
         canvas.drawImageRect(
@@ -1250,15 +1585,53 @@ class EditorGame extends FlameGame {
         );
       }
     }
+    if (needsMask) {
+      canvas.saveLayer(layerBounds, ui.Paint()..blendMode = ui.BlendMode.dstIn);
+      canvas.drawPath(
+        path,
+        ui.Paint()
+          ..color = ui.Color.fromRGBO(
+            255,
+            255,
+            255,
+            region.opacity.clamp(0.05, 1),
+          )
+          ..maskFilter = softness == 0
+              ? null
+              : ui.MaskFilter.blur(
+                  ui.BlurStyle.normal,
+                  softness * pixelsPerWorldUnit,
+                ),
+      );
+      canvas.restore();
+    }
     canvas.restore();
   }
 
-  ui.Path _worldPolygonPath(List<WorldPoint> points) {
+  ui.Path _worldPolygonPath(List<WorldPoint> points, {double elevation = 0}) {
     final path = ui.Path();
     for (var index = 0; index < points.length; index++) {
       final projected = projection.worldToScreen(
         Vector2(points[index].x, points[index].y),
       );
+      projected.y -= elevation * elevationPixelsPerWorldUnit;
+      index == 0
+          ? path.moveTo(projected.x, projected.y)
+          : path.lineTo(projected.x, projected.y);
+    }
+    return path..close();
+  }
+
+  double _surfaceElevationAt(String surfaceId, WorldPoint point) =>
+      controller.document.surfaceById(surfaceId)?.elevationAt(point) ?? 0;
+
+  ui.Path _worldSurfacePolygonPath(List<WorldPoint> points, String surfaceId) {
+    final path = ui.Path();
+    for (var index = 0; index < points.length; index++) {
+      final point = points[index];
+      final projected = projection.worldToScreen(Vector2(point.x, point.y));
+      projected.y -=
+          _surfaceElevationAt(surfaceId, point) * elevationPixelsPerWorldUnit;
       index == 0
           ? path.moveTo(projected.x, projected.y)
           : path.lineTo(projected.x, projected.y);
@@ -1271,8 +1644,10 @@ class EditorGame extends FlameGame {
     WorldPoint center,
     double radius,
     ui.Paint paint,
-    ui.Image image,
-  ) {
+    ui.Image image, {
+    double elevation = 0,
+    ui.BlendMode blendMode = ui.BlendMode.srcOver,
+  }) {
     _drawTexturedWorldQuad(
       canvas,
       WorldPoint(center.x - radius, center.y - radius),
@@ -1280,6 +1655,8 @@ class EditorGame extends FlameGame {
       paint,
       ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
       image,
+      elevation: elevation,
+      blendMode: blendMode,
     );
   }
 
@@ -1289,14 +1666,22 @@ class EditorGame extends FlameGame {
     WorldPoint max,
     ui.Paint paint,
     ui.Rect textureRect,
-    ui.Image image,
-  ) {
+    ui.Image image, {
+    double elevation = 0,
+    ui.BlendMode blendMode = ui.BlendMode.srcOver,
+    List<ui.Color>? vertexColors,
+  }) {
     final corners = [
       projection.worldToScreen(Vector2(min.x, min.y)),
       projection.worldToScreen(Vector2(max.x, min.y)),
       projection.worldToScreen(Vector2(max.x, max.y)),
       projection.worldToScreen(Vector2(min.x, max.y)),
     ];
+    if (elevation != 0) {
+      for (final corner in corners) {
+        corner.y -= elevation * elevationPixelsPerWorldUnit;
+      }
+    }
     final positions = Float32List.fromList([
       for (final corner in corners) ...[corner.x, corner.y],
     ]);
@@ -1314,17 +1699,175 @@ class EditorGame extends FlameGame {
       ui.VertexMode.triangleFan,
       positions,
       textureCoordinates: textureCoordinates,
+      colors: vertexColors == null
+          ? null
+          : Int32List.fromList([
+              for (final color in vertexColors) color.toARGB32(),
+            ]),
     );
-    canvas.drawVertices(vertices, ui.BlendMode.srcOver, paint);
+    canvas.drawVertices(
+      vertices,
+      vertexColors == null ? blendMode : ui.BlendMode.modulate,
+      paint,
+    );
   }
 
-  void _renderObjectBand(ui.Canvas canvas, EnvironmentRenderBand band) {
+  EnvironmentSurfaceSample _surfaceAt(WorldPoint point, {String? surfaceId}) =>
+      environmentSurfaceAtPoint(
+        controller.document,
+        point,
+        preferredSurfaceId: surfaceId,
+      );
+
+  Vector2 _projectedToVisibleSurface(Vector2 projected) {
+    var world = projection.screenToWorld(projected);
+    for (var iteration = 0; iteration < 4; iteration++) {
+      final surface = _surfaceAt(WorldPoint(world.x, world.y));
+      final elevation =
+          surface.liquidSurfaceElevation ?? surface.groundElevation;
+      world = projection.screenToWorld(
+        projected + Vector2(0, elevation * elevationPixelsPerWorldUnit),
+      );
+    }
+    return world;
+  }
+
+  EnvironmentLiquidInteraction _liquidInteractionFor(
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+  ) {
+    if (object.liquidInteraction != EnvironmentLiquidInteraction.automatic) {
+      return object.liquidInteraction;
+    }
+    final words = <String>{
+      asset.family.toLowerCase(),
+      asset.name.toLowerCase(),
+      for (final tag in asset.tags) tag.toLowerCase(),
+    }.join(' ');
+    return words.contains('boat') || words.contains('ship')
+        ? EnvironmentLiquidInteraction.float
+        : EnvironmentLiquidInteraction.submerge;
+  }
+
+  double _objectElevation(
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset, {
+    EnvironmentSurfaceSample? surface,
+  }) {
+    surface ??= _surfaceAt(
+      WorldPoint(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    );
+    final interaction = _liquidInteractionFor(object, asset);
+    if (surface.hasLiquid &&
+        interaction == EnvironmentLiquidInteraction.float) {
+      return surface.liquidSurfaceElevation! -
+          object.liquidDraft +
+          object.verticalOffset;
+    }
+    return surface.groundElevation + object.verticalOffset;
+  }
+
+  void _drawObjectFrame(
+    ui.Canvas canvas,
+    ui.Image image,
+    ui.Rect source,
+    ui.Rect destination,
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset, {
+    EnvironmentSurfaceSample? surface,
+    ui.Path? liquidOcclusionPath,
+    required _LiquidSpritePass liquidPass,
+  }) {
+    surface ??= _surfaceAt(
+      WorldPoint(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    );
+    final interaction = _liquidInteractionFor(object, asset);
+    final submerges =
+        surface.hasLiquid && interaction != EnvironmentLiquidInteraction.ignore;
+    if (!submerges) {
+      if (liquidPass == _LiquidSpritePass.exposed) {
+        canvas.drawImageRect(image, source, destination, ui.Paint());
+      }
+      return;
+    }
+
+    final anchor = projection.worldToScreen(Vector2(object.x, object.y));
+    final waterline =
+        anchor.y -
+        surface.liquidSurfaceElevation! * elevationPixelsPerWorldUnit;
+    final overlayTop = math.max(destination.top, waterline);
+    if (liquidOcclusionPath == null && overlayTop >= destination.bottom) {
+      if (liquidPass == _LiquidSpritePass.exposed) {
+        canvas.drawImageRect(image, source, destination, ui.Paint());
+      }
+      return;
+    }
+
+    canvas.save();
+    if (liquidPass == _LiquidSpritePass.submerged) {
+      if (liquidOcclusionPath != null) {
+        canvas.clipPath(liquidOcclusionPath);
+      } else {
+        canvas.clipRect(
+          ui.Rect.fromLTRB(
+            destination.left,
+            overlayTop,
+            destination.right,
+            destination.bottom,
+          ),
+        );
+      }
+    } else if (liquidOcclusionPath != null) {
+      canvas.clipPath(
+        ui.Path.combine(
+          ui.PathOperation.difference,
+          ui.Path()..addRect(destination),
+          liquidOcclusionPath,
+        ),
+      );
+    } else if (overlayTop > destination.top) {
+      canvas.clipRect(
+        ui.Rect.fromLTRB(
+          destination.left,
+          destination.top,
+          destination.right,
+          overlayTop,
+        ),
+      );
+    } else {
+      canvas.clipRect(ui.Rect.zero);
+    }
+    canvas.drawImageRect(image, source, destination, ui.Paint());
+    canvas.restore();
+  }
+
+  void _renderObjectBand(
+    ui.Canvas canvas,
+    EnvironmentRenderBand band, {
+    String? surfaceId,
+    required _LiquidSpritePass liquidPass,
+  }) {
     final entries = _renderEntriesByBand[band]!;
     final visible = _visibleProjectedBounds;
-    _renderCandidateCount += entries.length;
+    if (liquidPass == _LiquidSpritePass.exposed) {
+      _renderCandidateCount += surfaceId == null
+          ? entries.length
+          : entries.where((entry) => entry.depthSurfaceId == surfaceId).length;
+    }
     for (final entry in entries) {
+      if (surfaceId != null && entry.depthSurfaceId != surfaceId) {
+        continue;
+      }
       if (!entry.projectedBounds.overlaps(visible)) continue;
-      _visibleSpriteCount++;
+      if (liquidPass == _LiquidSpritePass.submerged &&
+          (!entry.surface.hasLiquid ||
+              _liquidInteractionFor(entry.object, entry.asset) ==
+                  EnvironmentLiquidInteraction.ignore)) {
+        continue;
+      }
+      if (liquidPass == _LiquidSpritePass.exposed) _visibleSpriteCount++;
       final object = entry.object;
       final view = entry.view;
       final sprite = _sprites[view.imagePath];
@@ -1346,15 +1889,41 @@ class EditorGame extends FlameGame {
         continue;
       }
       _touchImage(view.imagePath);
-      sprite.render(
+      final animation = entry.asset.animalAnimation;
+      if (animation != null) {
+        final image = sprite.image;
+        final clip = animation.idle;
+        final cellWidth = image.width / clip.frames;
+        final cellHeight = image.height / animation.directionRows.length;
+        final row = animation.rowForDirection(object.direction.name);
+        _drawObjectFrame(
+          canvas,
+          image,
+          ui.Rect.fromLTWH(0, row * cellHeight, cellWidth, cellHeight),
+          entry.projectedBounds,
+          object,
+          entry.asset,
+          surface: entry.surface,
+          liquidOcclusionPath: entry.liquidOcclusionPath,
+          liquidPass: liquidPass,
+        );
+        continue;
+      }
+      _drawObjectFrame(
         canvas,
-        position: projection.worldToScreen(Vector2(object.x, object.y))
-          ..y -= object.verticalOffset * elevationPixelsPerWorldUnit,
-        size: Vector2(
-          entry.projectedBounds.width,
-          entry.projectedBounds.height,
+        sprite.image,
+        ui.Rect.fromLTWH(
+          0,
+          0,
+          sprite.image.width.toDouble(),
+          sprite.image.height.toDouble(),
         ),
-        anchor: Anchor(view.pivotX, view.pivotY),
+        entry.projectedBounds,
+        object,
+        entry.asset,
+        surface: entry.surface,
+        liquidOcclusionPath: entry.liquidOcclusionPath,
+        liquidPass: liquidPass,
       );
     }
   }
@@ -1364,13 +1933,22 @@ class EditorGame extends FlameGame {
     final start = controller.pathStart;
     final end = controller.pathEnd;
     if (start != null && end != null) {
-      final startScreen = projection
-          .worldToScreen(Vector2(start.x, start.y))
-          .toOffset();
-      final endScreen = projection
-          .worldToScreen(Vector2(end.x, end.y))
-          .toOffset();
-      canvas.drawLine(startScreen, endScreen, _pathPreviewLinePaint);
+      final startSurface = _surfaceAt(start);
+      final endSurface = _surfaceAt(end);
+      final startScreen = projection.worldToScreen(Vector2(start.x, start.y))
+        ..y -=
+            (startSurface.liquidSurfaceElevation ??
+                startSurface.groundElevation) *
+            elevationPixelsPerWorldUnit;
+      final endScreen = projection.worldToScreen(Vector2(end.x, end.y))
+        ..y -=
+            (endSurface.liquidSurfaceElevation ?? endSurface.groundElevation) *
+            elevationPixelsPerWorldUnit;
+      canvas.drawLine(
+        startScreen.toOffset(),
+        endScreen.toOffset(),
+        _pathPreviewLinePaint,
+      );
     }
     final asset = controller.catalog.objectById(
       controller.selectedObjectAssetId,
@@ -1400,11 +1978,18 @@ class EditorGame extends FlameGame {
         );
       }
       _touchImage(view.imagePath);
+      final position = projection.worldToScreen(
+        Vector2(placement.point.x, placement.point.y),
+      );
+      position.y -=
+          _surfaceAt(
+            placement.point,
+            surfaceId: controller.document.activeSurfaceId,
+          ).groundElevation *
+          elevationPixelsPerWorldUnit;
       sprite.render(
         canvas,
-        position: projection.worldToScreen(
-          Vector2(placement.point.x, placement.point.y),
-        ),
+        position: position,
         size: Vector2(
           sourceSize.$1 * asset.renderScale,
           sourceSize.$2 * asset.renderScale,
@@ -1415,9 +2000,15 @@ class EditorGame extends FlameGame {
     }
     if (start != null && end != null) {
       for (final point in [start, end]) {
-        final handle = projection
-            .worldToScreen(Vector2(point.x, point.y))
-            .toOffset();
+        final surface = _surfaceAt(
+          point,
+          surfaceId: controller.document.activeSurfaceId,
+        );
+        final elevation =
+            surface.liquidSurfaceElevation ?? surface.groundElevation;
+        final projected = projection.worldToScreen(Vector2(point.x, point.y))
+          ..y -= elevation * elevationPixelsPerWorldUnit;
+        final handle = projected.toOffset();
         canvas
           ..drawCircle(handle, 6, _pathHandleFillPaint)
           ..drawCircle(handle, 6, _pathHandleStrokePaint);
@@ -1425,10 +2016,92 @@ class EditorGame extends FlameGame {
     }
   }
 
+  Vector2 _projectConnectorPoint(WorldPoint point, String surfaceId) {
+    final elevation =
+        controller.document.surfaceById(surfaceId)?.elevationAt(point) ?? 0;
+    return projection.worldToScreen(Vector2(point.x, point.y))
+      ..y -= elevation * elevationPixelsPerWorldUnit;
+  }
+
+  void _renderSurfaceConnectors(ui.Canvas canvas) {
+    if (controller.mode != EnvironmentEditorMode.connector &&
+        !showGeometryDebug) {
+      return;
+    }
+    for (final connector in controller.document.surfaceConnectors) {
+      final from = _projectConnectorPoint(
+        connector.from,
+        connector.fromSurfaceId,
+      );
+      final to = _projectConnectorPoint(connector.to, connector.toSurfaceId);
+      canvas
+        ..drawLine(from.toOffset(), to.toOffset(), _connectorPaint)
+        ..drawCircle(from.toOffset(), 6, _pathHandleFillPaint)
+        ..drawCircle(from.toOffset(), 6, _connectorPaint)
+        ..drawCircle(to.toOffset(), 6, _pathHandleFillPaint)
+        ..drawCircle(to.toOffset(), 6, _connectorPaint);
+    }
+    if (controller.mode != EnvironmentEditorMode.connector) return;
+    final start = controller.connectorStart;
+    final target = controller.connectorTargetSurface;
+    final hover = controller.hoveredPoint;
+    if (start == null || target == null) return;
+    final from = _projectConnectorPoint(
+      start,
+      controller.document.activeSurfaceId,
+    );
+    final to = hover == null ? from : _projectConnectorPoint(hover, target.id);
+    canvas
+      ..drawLine(from.toOffset(), to.toOffset(), _connectorPreviewPaint)
+      ..drawCircle(from.toOffset(), 6, _pathHandleFillPaint)
+      ..drawCircle(from.toOffset(), 6, _connectorPaint);
+  }
+
   void _renderSelection(ui.Canvas canvas) {
-    final terrainRegion = controller.selectedTerrainRegion;
-    if (terrainRegion != null) {
-      canvas.drawPath(_worldPolygonPath(terrainRegion.points), _selectionPaint);
+    final areaPoints = controller.selectedEnvironmentAreaPoints;
+    if (areaPoints != null) {
+      final path = ui.Path();
+      for (var index = 0; index < areaPoints.length; index++) {
+        final point = areaPoints[index];
+        final projected = projection.worldToScreen(Vector2(point.x, point.y))
+          ..y -=
+              controller.selectedEnvironmentAreaElevationAt(point) *
+              elevationPixelsPerWorldUnit;
+        index == 0
+            ? path.moveTo(projected.x, projected.y)
+            : path.lineTo(projected.x, projected.y);
+      }
+      canvas.drawPath(path..close(), _selectionPaint);
+      if (controller.mode == EnvironmentEditorMode.editGround) {
+        for (final point in areaPoints) {
+          final projected = projection.worldToScreen(Vector2(point.x, point.y))
+            ..y -=
+                controller.selectedEnvironmentAreaElevationAt(point) *
+                elevationPixelsPerWorldUnit;
+          canvas
+            ..drawCircle(projected.toOffset(), 6, _pathHandleFillPaint)
+            ..drawCircle(projected.toOffset(), 6, _pathHandleStrokePaint);
+        }
+        final liquid = controller.selectedLiquidVolume;
+        if (liquid != null && liquid.hasDepthRamp) {
+          final start = projection.worldToScreen(
+            Vector2(liquid.depthRampStart!.x, liquid.depthRampStart!.y),
+          )..y -= liquid.surfaceElevation * elevationPixelsPerWorldUnit;
+          final end = projection.worldToScreen(
+            Vector2(liquid.depthRampEnd!.x, liquid.depthRampEnd!.y),
+          )..y -= liquid.surfaceElevation * elevationPixelsPerWorldUnit;
+          canvas
+            ..drawLine(
+              start.toOffset(),
+              end.toOffset(),
+              _liquidOcclusionGeometryPaint,
+            )
+            ..drawCircle(start.toOffset(), 8, _pathHandleFillPaint)
+            ..drawCircle(start.toOffset(), 8, _liquidOcclusionGeometryPaint)
+            ..drawCircle(end.toOffset(), 8, _pathHandleFillPaint)
+            ..drawCircle(end.toOffset(), 8, _selectionGeometryPaint);
+        }
+      }
     }
     final hoveredId = controller.hoveredObjectId;
     if (hoveredId != null &&
@@ -1440,6 +2113,48 @@ class EditorGame extends FlameGame {
     for (final selected in controller.selectedObjects) {
       final bounds = _objectProjectedBounds(selected);
       if (bounds != null) canvas.drawRect(bounds, _selectionPaint);
+      final asset = controller.catalog.objectById(selected.assetId);
+      final animation = asset?.animalAnimation;
+      final profile = animation == null
+          ? null
+          : controller.animalBehaviorProfileFor(selected);
+      if (profile != null && profile.roamingRadius > 0) {
+        final points = [
+          for (var index = 0; index < 48; index++)
+            WorldPoint(
+              selected.x +
+                  math.cos(index * math.pi / 24) * profile.roamingRadius,
+              selected.y +
+                  math.sin(index * math.pi / 24) * profile.roamingRadius,
+            ),
+        ];
+        canvas.drawPath(_worldPolygonPath(points), _animalHomePaint);
+      }
+    }
+  }
+
+  void _renderSurfacePolygonPreview(ui.Canvas canvas) {
+    if (controller.mode != EnvironmentEditorMode.surfacePolygon) return;
+    final points = controller.surfacePolygonDraft;
+    if (points.isEmpty) return;
+    final preview = [
+      ...points,
+      ...[controller.hoveredPoint].whereType<WorldPoint>(),
+    ];
+    final first = projection.worldToScreen(
+      Vector2(preview.first.x, preview.first.y),
+    );
+    final path = ui.Path()..moveTo(first.x, first.y);
+    for (final point in preview.skip(1)) {
+      final projected = projection.worldToScreen(Vector2(point.x, point.y));
+      path.lineTo(projected.x, projected.y);
+    }
+    canvas.drawPath(path, _pathPreviewLinePaint);
+    for (final point in points) {
+      final projected = projection.worldToScreen(Vector2(point.x, point.y));
+      canvas
+        ..drawCircle(projected.toOffset(), 6, _pathHandleFillPaint)
+        ..drawCircle(projected.toOffset(), 6, _pathHandleStrokePaint);
     }
   }
 
@@ -1457,6 +2172,7 @@ class EditorGame extends FlameGame {
       for (final footprint in geometry.footprints) {
         _drawGeometryShape(canvas, footprint, object, _footprintPaint);
       }
+      _drawLiquidOcclusionBoundary(canvas, object, asset, geometry);
       for (final shape in geometry.blocking) {
         _drawGeometryShape(canvas, shape, object, _blockingPaint);
       }
@@ -1475,6 +2191,9 @@ class EditorGame extends FlameGame {
     if (cursor != null) {
       const actorRadius = 0.18;
       final blocked = _isNavigationBlocked(cursor, actorRadius: actorRadius);
+      final surface = _surfaceAt(cursor);
+      final elevation =
+          surface.liquidSurfaceElevation ?? surface.groundElevation;
       final points = [
         for (var index = 0; index < 24; index++)
           WorldPoint(
@@ -1484,10 +2203,11 @@ class EditorGame extends FlameGame {
       ];
       final first = projection.worldToScreen(
         Vector2(points.first.x, points.first.y),
-      );
+      )..y -= elevation * elevationPixelsPerWorldUnit;
       final path = ui.Path()..moveTo(first.x, first.y);
       for (final point in points.skip(1)) {
         final projected = projection.worldToScreen(Vector2(point.x, point.y));
+        projected.y -= elevation * elevationPixelsPerWorldUnit;
         path.lineTo(projected.x, projected.y);
       }
       canvas.drawPath(
@@ -1503,18 +2223,24 @@ class EditorGame extends FlameGame {
   ) {
     const radius = 3.0;
     const spacing = 0.5;
+    final elevation = _surfaceAt(
+      WorldPoint(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    ).groundElevation;
     for (var offset = -radius; offset <= radius; offset += spacing) {
       _drawWorldLine(
         canvas,
         WorldPoint(object.x - radius, object.y + offset),
         WorldPoint(object.x + radius, object.y + offset),
         _geometryGridPaint,
+        elevation: elevation,
       );
       _drawWorldLine(
         canvas,
         WorldPoint(object.x + offset, object.y - radius),
         WorldPoint(object.x + offset, object.y + radius),
         _geometryGridPaint,
+        elevation: elevation,
       );
     }
   }
@@ -1525,7 +2251,7 @@ class EditorGame extends FlameGame {
     EnvironmentObjectAsset asset,
   ) {
     final pivot = projection.worldToScreen(Vector2(object.x, object.y))
-      ..y -= object.verticalOffset * elevationPixelsPerWorldUnit;
+      ..y -= _objectElevation(object, asset) * elevationPixelsPerWorldUnit;
     final pivotPaint = ui.Paint()
       ..color = const ui.Color(0xDDB987FF)
       ..style = ui.PaintingStyle.stroke
@@ -1544,7 +2270,7 @@ class EditorGame extends FlameGame {
       );
     final sort = projection.worldToScreen(
       Vector2(object.x + asset.sortAnchorX, object.y + asset.sortAnchorY),
-    );
+    )..y -= _objectElevation(object, asset) * elevationPixelsPerWorldUnit;
     canvas.drawCircle(
       sort.toOffset(),
       5 / zoom,
@@ -1561,6 +2287,10 @@ class EditorGame extends FlameGame {
   ) {
     final shape = controller.selectedGeometryShape;
     if (shape == null) return;
+    final elevation = _surfaceAt(
+      WorldPoint(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    ).groundElevation;
     final fill = ui.Paint()
       ..color = const ui.Color(0xFFF7D774)
       ..style = ui.PaintingStyle.fill;
@@ -1570,7 +2300,8 @@ class EditorGame extends FlameGame {
       ..strokeWidth = 2 / zoom;
     for (final candidate in _geometryHandlePoints(shape)) {
       final world = transformEnvironmentGeometryPoint(candidate.local, object);
-      final projected = projection.worldToScreen(Vector2(world.x, world.y));
+      final projected = projection.worldToScreen(Vector2(world.x, world.y))
+        ..y -= elevation * elevationPixelsPerWorldUnit;
       final center = projected.toOffset();
       if (candidate.handle.type == EnvironmentGeometryHandleType.center) {
         final extent = 5 / zoom;
@@ -1603,10 +2334,15 @@ class EditorGame extends FlameGame {
     ui.Canvas canvas,
     WorldPoint start,
     WorldPoint end,
-    ui.Paint paint,
-  ) {
+    ui.Paint paint, {
+    double elevation = 0,
+  }) {
     final a = projection.worldToScreen(Vector2(start.x, start.y));
     final b = projection.worldToScreen(Vector2(end.x, end.y));
+    if (elevation != 0) {
+      a.y -= elevation * elevationPixelsPerWorldUnit;
+      b.y -= elevation * elevationPixelsPerWorldUnit;
+    }
     canvas.drawLine(a.toOffset(), b.toOffset(), paint);
   }
 
@@ -1702,15 +2438,52 @@ class EditorGame extends FlameGame {
   ) {
     final points = environmentShapeOutline(shape, object);
     if (points.isEmpty) return;
+    final elevation = _surfaceAt(
+      WorldPoint(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    ).groundElevation;
     final first = projection.worldToScreen(
       Vector2(points.first.x, points.first.y),
-    );
+    )..y -= elevation * elevationPixelsPerWorldUnit;
     final path = ui.Path()..moveTo(first.x, first.y);
     for (final point in points.skip(1)) {
       final projected = projection.worldToScreen(Vector2(point.x, point.y));
+      projected.y -= elevation * elevationPixelsPerWorldUnit;
       path.lineTo(projected.x, projected.y);
     }
     canvas.drawPath(path..close(), paint);
+  }
+
+  void _drawLiquidOcclusionBoundary(
+    ui.Canvas canvas,
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+    EnvironmentAssetGeometry geometry,
+  ) {
+    final surface = _surfaceAt(
+      WorldPoint(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    );
+    if (!surface.hasLiquid ||
+        _liquidInteractionFor(object, asset) ==
+            EnvironmentLiquidInteraction.ignore) {
+      return;
+    }
+    final boundary = environmentFootprintFrontBoundary([
+      for (final footprint in geometry.footprints)
+        environmentShapeOutline(footprint, object),
+    ]);
+    if (boundary.length < 2) return;
+    final first = projection.worldToScreen(
+      Vector2(boundary.first.x, boundary.first.y),
+    )..y -= surface.liquidSurfaceElevation! * elevationPixelsPerWorldUnit;
+    final path = ui.Path()..moveTo(first.x, first.y);
+    for (final point in boundary.skip(1)) {
+      final projected = projection.worldToScreen(Vector2(point.x, point.y))
+        ..y -= surface.liquidSurfaceElevation! * elevationPixelsPerWorldUnit;
+      path.lineTo(projected.x, projected.y);
+    }
+    canvas.drawPath(path, _liquidOcclusionGeometryPaint);
   }
 
   ui.Rect? _objectProjectedBounds(PlacedEnvironmentObject object) {
@@ -1723,12 +2496,19 @@ class EditorGame extends FlameGame {
     EnvironmentObjectAsset asset,
     EnvironmentObjectView view,
     int sourceWidth,
-    int sourceHeight,
-  ) {
-    final width = sourceWidth * asset.renderScale;
-    final height = sourceHeight * asset.renderScale;
+    int sourceHeight, {
+    EnvironmentSurfaceSample? surface,
+  }) {
+    final width =
+        (view.logicalWidth > 0 ? view.logicalWidth : sourceWidth) *
+        asset.renderScale;
+    final height =
+        (view.logicalHeight > 0 ? view.logicalHeight : sourceHeight) *
+        asset.renderScale;
     final anchor = projection.worldToScreen(Vector2(object.x, object.y))
-      ..y -= object.verticalOffset * elevationPixelsPerWorldUnit;
+      ..y -=
+          _objectElevation(object, asset, surface: surface) *
+          elevationPixelsPerWorldUnit;
     return ui.Rect.fromLTWH(
       anchor.x - width * view.pivotX,
       anchor.y - height * view.pivotY,
@@ -1753,11 +2533,11 @@ class EditorGame extends FlameGame {
   Vector2 _projectedAtScreen(Vector2 screen) =>
       (screen - size / 2 - _panOffset) / zoom + _mapCenterScreen;
 
-  Vector2 _screenForWorldPoint(WorldPoint point) =>
-      (projection.worldToScreen(Vector2(point.x, point.y)) - _mapCenterScreen) *
-          zoom +
-      size / 2 +
-      _panOffset;
+  Vector2 _screenForWorldPoint(WorldPoint point, {double elevation = 0}) {
+    final projected = projection.worldToScreen(Vector2(point.x, point.y));
+    projected.y -= elevation * elevationPixelsPerWorldUnit;
+    return (projected - _mapCenterScreen) * zoom + size / 2 + _panOffset;
+  }
 
   ui.Rect get _visibleProjectedBounds =>
       _projectedBoundsForScreenRect(ui.Rect.fromLTWH(0, 0, size.x, size.y))
@@ -1873,18 +2653,40 @@ class EditorGame extends FlameGame {
     (int, int) sourceSize, {
     required bool keepBandSorted,
   }) {
+    final surface = _surfaceAt(
+      WorldPoint(object.x, object.y),
+      surfaceId: object.supportSurfaceId,
+    );
     final bounds = _objectProjectedBoundsFor(
       object,
       asset,
       view,
       sourceSize.$1,
       sourceSize.$2,
+      surface: surface,
+    );
+    final liquidOcclusionPath = surface.hasLiquid
+        ? _liquidOcclusionPath(object, asset, surface, bounds)
+        : null;
+    final geometry = controller.catalog.geometryForAsset(
+      asset,
+      direction: object.direction.name,
+    );
+    final depthSurfaceId = environmentObjectDepthSurfaceId(
+      document: controller.document,
+      asset: asset,
+      object: object,
+      objectElevation: _objectElevation(object, asset, surface: surface),
+      geometry: geometry,
     );
     final entry = _EditorRenderEntry(
       object: object,
       asset: asset,
       view: view,
       projectedBounds: bounds,
+      surface: surface,
+      liquidOcclusionPath: liquidOcclusionPath,
+      depthSurfaceId: depthSurfaceId,
       depth: asset.depthAt(
         object.x,
         object.y,
@@ -1915,6 +2717,39 @@ class EditorGame extends FlameGame {
         (_spatialRenderEntries[(x, y)] ??= []).add(entry);
       }
     }
+  }
+
+  ui.Path? _liquidOcclusionPath(
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+    EnvironmentSurfaceSample surface,
+    ui.Rect destination,
+  ) {
+    final geometry = controller.catalog.geometryForAsset(
+      asset,
+      direction: object.direction.name,
+    );
+    final boundary = environmentFootprintFrontBoundary([
+      for (final footprint in geometry.footprints)
+        environmentShapeOutline(footprint, object),
+    ]);
+    if (boundary.length < 2) return null;
+    final projected = [
+      for (final point in boundary)
+        projection.worldToScreen(Vector2(point.x, point.y))
+          ..y -= surface.liquidSurfaceElevation! * elevationPixelsPerWorldUnit,
+    ];
+    final path = ui.Path()
+      ..moveTo(destination.left, projected.first.y)
+      ..lineTo(projected.first.x, projected.first.y);
+    for (final point in projected.skip(1)) {
+      path.lineTo(point.x, point.y);
+    }
+    return path
+      ..lineTo(destination.right, projected.last.y)
+      ..lineTo(destination.right, destination.bottom)
+      ..lineTo(destination.left, destination.bottom)
+      ..close();
   }
 
   void _removeRenderEntry(String objectId) {
@@ -1991,6 +2826,7 @@ class EditorGame extends FlameGame {
     final spawn = playerSpawn?.call();
     if (spawn == null) return;
     final center = projection.worldToScreen(Vector2(spawn.x, spawn.y));
+    center.y -= _surfaceAt(spawn).groundElevation * elevationPixelsPerWorldUnit;
     final radius = 12 / zoom;
     canvas
       ..drawCircle(center.toOffset(), radius, _spawnPaint)
@@ -2238,12 +3074,17 @@ class _TerrainRaster {
   void dispose() => image.dispose();
 }
 
+enum _LiquidSpritePass { submerged, exposed }
+
 class _EditorRenderEntry {
   const _EditorRenderEntry({
     required this.object,
     required this.asset,
     required this.view,
     required this.projectedBounds,
+    required this.surface,
+    required this.liquidOcclusionPath,
+    required this.depthSurfaceId,
     required this.depth,
   });
 
@@ -2251,5 +3092,8 @@ class _EditorRenderEntry {
   final EnvironmentObjectAsset asset;
   final EnvironmentObjectView view;
   final ui.Rect projectedBounds;
+  final EnvironmentSurfaceSample surface;
+  final ui.Path? liquidOcclusionPath;
+  final String depthSurfaceId;
   final double depth;
 }

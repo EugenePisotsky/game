@@ -27,6 +27,11 @@ void main() {
             assetId: 'tree_asset',
             x: 33.5,
             y: 7,
+            behaviorProfileId: 'cat_household',
+            liquidInteraction: EnvironmentLiquidInteraction.submerge,
+            liquidDraft: 0.3,
+            crossSurfaceOcclusion: true,
+            occlusionHeight: 6,
           ),
         ],
       );
@@ -69,6 +74,20 @@ void main() {
       expect(restoredManifest.chunkSize, 32);
       expect(restoredManifest.activeLayerId, EnvironmentDocument.rootLayerId);
       expect(restoredChunk.objects.single.id, 'tree');
+      expect(restoredChunk.objects.single.behaviorProfileId, 'cat_household');
+      expect(
+        restoredChunk.objects.single.liquidInteraction,
+        EnvironmentLiquidInteraction.submerge,
+      );
+      expect(restoredChunk.objects.single.liquidDraft, 0.3);
+      expect(restoredChunk.objects.single.crossSurfaceOcclusion, isTrue);
+      expect(restoredChunk.objects.single.occlusionHeight, 6);
+      expect(
+        restoredChunk.objects.single
+            .toWorldObject(restoredChunk.coordinate, 32)
+            .behaviorProfileId,
+        'cat_household',
+      );
     },
   );
 
@@ -113,11 +132,62 @@ void main() {
         width: 64,
         height: 32,
         baseMaterialId: 'ground',
+        surfaces: [
+          EnvironmentSurface(
+            id: environmentBaseSurfaceId,
+            name: 'Ground',
+            materialId: 'ground',
+            points: const [
+              WorldPoint(0, 0),
+              WorldPoint(64, 0),
+              WorldPoint(64, 32),
+              WorldPoint(0, 32),
+            ],
+          ),
+          EnvironmentSurface(
+            id: 'surface_river_bed',
+            name: 'River bed',
+            materialId: 'sand',
+            drawsBaseMaterial: false,
+            height: const EnvironmentSurfaceHeight.flat(-0.6),
+            points: const [
+              WorldPoint(30, 8),
+              WorldPoint(34, 8),
+              WorldPoint(34, 12),
+              WorldPoint(30, 12),
+            ],
+          ),
+        ],
+        liquidVolumes: [
+          EnvironmentLiquidVolume(
+            id: 'river',
+            name: 'River',
+            bedSurfaceId: 'surface_river_bed',
+            materialId: 'water',
+            surfaceElevation: 1,
+            depth: 0.6,
+            endDepth: 1.6,
+            depthRampStart: const WorldPoint(30, 10),
+            depthRampEnd: const WorldPoint(34, 10),
+            opacity: 0.8,
+            edgeBlend: 0.5,
+            order: 4,
+            points: const [
+              WorldPoint(30, 8),
+              WorldPoint(34, 8),
+              WorldPoint(34, 12),
+              WorldPoint(30, 12),
+            ],
+          ),
+        ],
         terrainRegions: [
           TerrainRegion(
-            id: 'river',
-            materialId: 'water',
+            id: 'river_detail',
+            materialId: 'sand',
             order: 4,
+            opacity: 0.8,
+            edgeBlend: 0.5,
+            surfaceId: 'surface_river_bed',
             points: const [
               WorldPoint(30, 8),
               WorldPoint(34, 8),
@@ -132,10 +202,20 @@ void main() {
 
     final left = world.chunks[const EnvironmentChunkCoordinate(0, 0)]!;
     final right = world.chunks[const EnvironmentChunkCoordinate(1, 0)]!;
-    expect(left.terrainRegions.single.id, 'river');
-    expect(right.terrainRegions.single.id, 'river');
+    expect(left.terrainRegions.single.id, 'river_detail');
+    expect(right.terrainRegions.single.id, 'river_detail');
     expect(right.terrainRegions.single.points.first.x, -2);
+    expect(left.terrainRegions.single.opacity, 0.8);
+    expect(right.terrainRegions.single.edgeBlend, 0.5);
     expect(right.terrainRegions.single.order, 4);
+    expect(right.terrainRegions.single.surfaceId, 'surface_river_bed');
+    expect(right.surfaces.single.height.elevation, -0.6);
+    expect(right.surfaces.single.drawsBaseMaterial, isFalse);
+    expect(right.liquidVolumes.single.surfaceElevation, 1);
+    expect(right.liquidVolumes.single.depth, 0.6);
+    expect(right.liquidVolumes.single.endDepth, 1.6);
+    expect(right.liquidVolumes.single.depthRampStart?.x, -2);
+    expect(right.liquidVolumes.single.depthRampEnd?.x, 2);
     expect(right.referencedAssetIds, contains('water'));
 
     final restored = EnvironmentChunkDocument.fromJsonString(
@@ -145,7 +225,11 @@ void main() {
       restored.schemaVersion,
       EnvironmentChunkDocument.currentSchemaVersion,
     );
-    expect(restored.terrainRegions.single.materialId, 'water');
+    expect(restored.terrainRegions.single.materialId, 'sand');
+    expect(restored.liquidVolumes.single.materialId, 'water');
+    expect(restored.liquidVolumes.single.endDepth, 1.6);
+    expect(restored.liquidVolumes.single.depthRampStart?.x, -2);
+    expect(restored.surfaces.single.drawsBaseMaterial, isFalse);
   });
 
   test(
