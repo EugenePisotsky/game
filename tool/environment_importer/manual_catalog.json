@@ -84,6 +84,13 @@
       "renderScale": 1.0,
       "renderBand": "depthSorted",
       "tags": ["custom", "blender"],
+      "surfaceMap": {
+        "encoding": "octahedralWorldNormalRGHeightB",
+        "normalSpace": "world",
+        "heightSpace": "assetRootZ",
+        "heightMin": 0.0,
+        "heightMax": 7.38342
+      },
       "geometry": {
         "blocking": [],
         "reviewed": false
@@ -91,31 +98,35 @@
       "views": {
         "south": {
           "image": "environment_v2/custom/custom.asset/south.png",
+          "surfaceImage": "environment_v2/custom/custom.asset/south.surface.png",
           "logicalWidth": 947,
           "logicalHeight": 962,
           "pivotX": 0.49419219,
-          "pivotY": 0.49480249
+          "pivotY": 0.64345114
         },
         "west": {
           "image": "environment_v2/custom/custom.asset/west.png",
-          "logicalWidth": 945,
-          "logicalHeight": 949,
-          "pivotX": 0.45820106,
-          "pivotY": 0.53951528
+          "surfaceImage": "environment_v2/custom/custom.asset/west.surface.png",
+          "logicalWidth": 956,
+          "logicalHeight": 953,
+          "pivotX": 0.45188285,
+          "pivotY": 0.69150052
         },
         "east": {
           "image": "environment_v2/custom/custom.asset/east.png",
-          "logicalWidth": 945,
+          "surfaceImage": "environment_v2/custom/custom.asset/east.surface.png",
+          "logicalWidth": 956,
           "logicalHeight": 953,
-          "pivotX": 0.54179894,
-          "pivotY": 0.51206716
+          "pivotX": 0.54707113,
+          "pivotY": 0.66211962
         },
         "north": {
           "image": "environment_v2/custom/custom.asset/north.png",
+          "surfaceImage": "environment_v2/custom/custom.asset/north.surface.png",
           "logicalWidth": 946,
-          "logicalHeight": 927,
+          "logicalHeight": 943,
           "pivotX": 0.50634249,
-          "pivotY": 0.55231931
+          "pivotY": 0.71155885
         }
       }
     }

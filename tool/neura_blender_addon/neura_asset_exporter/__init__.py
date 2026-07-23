@@ -9,6 +9,7 @@ from pathlib import Path
 
 import bpy
 from bpy.props import (
+    BoolProperty,
     EnumProperty,
     FloatProperty,
     IntProperty,
@@ -23,6 +24,7 @@ from .core import (
     PIXELS_PER_CAMERA_UNIT,
     alpha_bounds,
     build_manifest,
+    build_surface_map_metadata,
     direction_angle_radians,
     directions_for_mode,
     expand_bounds_to_point,
@@ -30,6 +32,7 @@ from .core import (
     split_category_path,
     split_list,
     validate_asset_id,
+    write_data_rgba_png,
     write_manifest,
 )
 
@@ -37,7 +40,7 @@ from .core import (
 bl_info = {
     "name": "Neura Asset Exporter",
     "author": "Neura",
-    "version": (0, 1, 3),
+    "version": (0, 3, 0),
     "blender": (4, 2, 0),
     "location": "3D View > Sidebar > Neura",
     "description": "Render and export isometric sprite assets for Neura",
@@ -48,6 +51,8 @@ bl_info = {
 CAMERA_NAME = "NEURA_CAMERA"
 ROOT_NAME = "NEURA_ASSET_ROOT"
 HELPER_COLLECTION_NAME = "NEURA_EXPORT_HELPERS"
+SHADOW_COLLECTION_NAME = "NEURA_SHADOW"
+MAX_SHADOW_PROXY_TRIANGLES = 32
 GEOMETRY_COLLECTION_NAMES = {
     "footprints": "NEURA_FOOTPRINT",
     "blocking": "NEURA_BLOCKING",
@@ -99,6 +104,13 @@ class NeuraExportSettings(PropertyGroup):
     alpha_threshold: FloatProperty(
         name="Alpha threshold", default=0.001, min=0.0, max=1.0, precision=4
     )
+    export_surface_maps: BoolProperty(
+        name="Export lighting surface maps",
+        description=(
+            "Export aligned world-normal and root-height data for dynamic lighting"
+        ),
+        default=True,
+    )
 
 
 def _link_object_to_collection(obj: Object, collection: Collection) -> None:
@@ -146,7 +158,7 @@ def _configure_camera(scene: bpy.types.Scene, target: Vector) -> Object:
 
 
 def _ensure_geometry_collections(scene: bpy.types.Scene) -> None:
-    for name in GEOMETRY_COLLECTION_NAMES.values():
+    for name in (*GEOMETRY_COLLECTION_NAMES.values(), SHADOW_COLLECTION_NAME):
         collection = _ensure_child_collection(scene, name)
         collection.hide_render = True
 
@@ -275,6 +287,238 @@ def _export_geometry(root: Object) -> dict[str, object] | None:
     return geometry
 
 
+def _export_shadow_proxy(
+    context: bpy.types.Context,
+    root: Object,
+) -> dict[str, object] | None:
+    """Export one deliberately small mesh used only for cast shadows."""
+
+    collection = bpy.data.collections.get(SHADOW_COLLECTION_NAME)
+    if collection is None:
+        return None
+    meshes = [obj for obj in collection.all_objects if obj.type == "MESH"]
+    if not meshes:
+        return None
+    if len(meshes) != 1:
+        raise ValueError(
+            f"{SHADOW_COLLECTION_NAME} must contain exactly one mesh; "
+            f"found {len(meshes)}"
+        )
+
+    obj = meshes[0]
+    dependency_graph = context.evaluated_depsgraph_get()
+    evaluated = obj.evaluated_get(dependency_graph)
+    mesh = evaluated.to_mesh()
+    try:
+        mesh.calc_loop_triangles()
+        triangles = [list(value.vertices) for value in mesh.loop_triangles]
+        if not triangles:
+            raise ValueError(f"{obj.name}: shadow proxy mesh has no faces")
+        if len(triangles) > MAX_SHADOW_PROXY_TRIANGLES:
+            raise ValueError(
+                f"{obj.name}: shadow proxy has {len(triangles)} triangles; "
+                f"the limit is {MAX_SHADOW_PROXY_TRIANGLES}"
+            )
+        local_matrix = root.matrix_world.inverted_safe() @ evaluated.matrix_world
+        vertices = []
+        for vertex in mesh.vertices:
+            point = local_matrix @ vertex.co
+            vertices.append(
+                {
+                    "x": round(point.x, 6),
+                    "y": round(point.y, 6),
+                    "z": round(point.z, 6),
+                }
+            )
+        return {
+            "type": "triangleMesh",
+            "vertices": vertices,
+            "triangles": triangles,
+            "reviewed": False,
+        }
+    finally:
+        evaluated.to_mesh_clear()
+
+
+def _root_hierarchy(root: Object) -> list[Object]:
+    result: list[Object] = []
+    pending = [root]
+    while pending:
+        obj = pending.pop()
+        result.append(obj)
+        pending.extend(obj.children)
+    return result
+
+
+def _is_non_rendering_helper(obj: Object) -> bool:
+    helper_names = {
+        *GEOMETRY_COLLECTION_NAMES.values(),
+        SHADOW_COLLECTION_NAME,
+        HELPER_COLLECTION_NAME,
+    }
+    return any(collection.name in helper_names for collection in obj.users_collection)
+
+
+def _asset_height_range(
+    context: bpy.types.Context,
+    root: Object,
+) -> tuple[float, float]:
+    """Return visible geometry bounds in asset-root-local Z units."""
+
+    geometry_types = {"MESH", "CURVE", "SURFACE", "META", "FONT"}
+    root_inverse = root.matrix_world.inverted_safe()
+    dependency_graph = context.evaluated_depsgraph_get()
+    heights: list[float] = [0.0]
+    for obj in _root_hierarchy(root):
+        if (
+            obj.type not in geometry_types
+            or obj.hide_render
+            or _is_non_rendering_helper(obj)
+        ):
+            continue
+        evaluated = obj.evaluated_get(dependency_graph)
+        for corner in evaluated.bound_box:
+            point = root_inverse @ evaluated.matrix_world @ Vector(corner)
+            heights.append(point.z)
+    if len(heights) == 1:
+        raise ValueError(
+            "Asset root has no renderable geometry children for a surface map"
+        )
+
+    height_min = min(heights)
+    height_max = max(heights)
+    if height_max - height_min < 1e-6:
+        height_max = height_min + 1.0
+    return height_min, height_max
+
+
+def _math_node(nodes, operation: str, first=None, second=None):
+    node = nodes.new("ShaderNodeMath")
+    node.operation = operation
+    if first is not None:
+        node.inputs[0].default_value = first
+    if second is not None:
+        node.inputs[1].default_value = second
+    return node
+
+
+def _create_surface_material(
+    root: Object,
+    height_min: float,
+    height_max: float,
+) -> bpy.types.Material:
+    """Create a temporary emission material packing normal RG and height B."""
+
+    z_axis = root.matrix_world.to_3x3() @ Vector((0.0, 0.0, 1.0))
+    if abs(z_axis.x) > 1e-5 or abs(z_axis.y) > 1e-5 or z_axis.z <= 0.0:
+        raise ValueError(
+            "NEURA_ASSET_ROOT may rotate around Z, but its local Z axis must "
+            "remain upright for height-map export"
+        )
+    world_height_min = root.matrix_world.translation.z + height_min * z_axis.z
+    world_height_range = (height_max - height_min) * z_axis.z
+
+    material = bpy.data.materials.new("NEURA_SURFACE_EXPORT")
+    material.use_nodes = True
+    nodes = material.node_tree.nodes
+    links = material.node_tree.links
+    nodes.clear()
+
+    geometry = nodes.new("ShaderNodeNewGeometry")
+    normal = nodes.new("ShaderNodeVectorMath")
+    normal.operation = "NORMALIZE"
+    links.new(geometry.outputs["Normal"], normal.inputs[0])
+
+    absolute = nodes.new("ShaderNodeVectorMath")
+    absolute.operation = "ABSOLUTE"
+    links.new(normal.outputs["Vector"], absolute.inputs[0])
+    normal_sum = nodes.new("ShaderNodeVectorMath")
+    normal_sum.operation = "DOT_PRODUCT"
+    normal_sum.inputs[1].default_value = (1.0, 1.0, 1.0)
+    links.new(absolute.outputs["Vector"], normal_sum.inputs[0])
+    denominator = nodes.new("ShaderNodeCombineXYZ")
+    for value_input in denominator.inputs:
+        links.new(normal_sum.outputs["Value"], value_input)
+    projected = nodes.new("ShaderNodeVectorMath")
+    projected.operation = "DIVIDE"
+    links.new(normal.outputs["Vector"], projected.inputs[0])
+    links.new(denominator.outputs["Vector"], projected.inputs[1])
+    components = nodes.new("ShaderNodeSeparateXYZ")
+    links.new(projected.outputs["Vector"], components.inputs[0])
+
+    abs_x = _math_node(nodes, "ABSOLUTE")
+    abs_y = _math_node(nodes, "ABSOLUTE")
+    sign_x = _math_node(nodes, "SIGN")
+    sign_y = _math_node(nodes, "SIGN")
+    links.new(components.outputs["X"], abs_x.inputs[0])
+    links.new(components.outputs["Y"], abs_y.inputs[0])
+    links.new(components.outputs["X"], sign_x.inputs[0])
+    links.new(components.outputs["Y"], sign_y.inputs[0])
+    one_minus_abs_y = _math_node(nodes, "SUBTRACT", 1.0)
+    one_minus_abs_x = _math_node(nodes, "SUBTRACT", 1.0)
+    links.new(abs_y.outputs[0], one_minus_abs_y.inputs[1])
+    links.new(abs_x.outputs[0], one_minus_abs_x.inputs[1])
+    folded_x = _math_node(nodes, "MULTIPLY")
+    folded_y = _math_node(nodes, "MULTIPLY")
+    links.new(one_minus_abs_y.outputs[0], folded_x.inputs[0])
+    links.new(sign_x.outputs[0], folded_x.inputs[1])
+    links.new(one_minus_abs_x.outputs[0], folded_y.inputs[0])
+    links.new(sign_y.outputs[0], folded_y.inputs[1])
+
+    lower_hemisphere = _math_node(nodes, "LESS_THAN", second=0.0)
+    links.new(components.outputs["Z"], lower_hemisphere.inputs[0])
+    upper_hemisphere = _math_node(nodes, "SUBTRACT", 1.0)
+    links.new(lower_hemisphere.outputs[0], upper_hemisphere.inputs[1])
+
+    encoded_components = []
+    for original, folded in (
+        (components.outputs["X"], folded_x.outputs[0]),
+        (components.outputs["Y"], folded_y.outputs[0]),
+    ):
+        original_weighted = _math_node(nodes, "MULTIPLY")
+        folded_weighted = _math_node(nodes, "MULTIPLY")
+        combined = _math_node(nodes, "ADD")
+        scaled = _math_node(nodes, "MULTIPLY", second=0.5)
+        encoded = _math_node(nodes, "ADD", second=0.5)
+        links.new(original, original_weighted.inputs[0])
+        links.new(upper_hemisphere.outputs[0], original_weighted.inputs[1])
+        links.new(folded, folded_weighted.inputs[0])
+        links.new(lower_hemisphere.outputs[0], folded_weighted.inputs[1])
+        links.new(original_weighted.outputs[0], combined.inputs[0])
+        links.new(folded_weighted.outputs[0], combined.inputs[1])
+        links.new(combined.outputs[0], scaled.inputs[0])
+        links.new(scaled.outputs[0], encoded.inputs[0])
+        encoded_components.append(encoded.outputs[0])
+
+    position = nodes.new("ShaderNodeSeparateXYZ")
+    links.new(geometry.outputs["Position"], position.inputs[0])
+    height_offset = _math_node(nodes, "SUBTRACT", second=world_height_min)
+    links.new(position.outputs["Z"], height_offset.inputs[0])
+    height = _math_node(nodes, "DIVIDE", second=world_height_range)
+    height.use_clamp = True
+    links.new(height_offset.outputs[0], height.inputs[0])
+
+    packed = nodes.new("ShaderNodeCombineColor")
+    packed.mode = "RGB"
+    links.new(encoded_components[0], packed.inputs[0])
+    links.new(encoded_components[1], packed.inputs[1])
+    links.new(height.outputs[0], packed.inputs[2])
+    emission = nodes.new("ShaderNodeEmission")
+    links.new(packed.outputs[0], emission.inputs[0])
+    output = nodes.new("ShaderNodeOutputMaterial")
+    links.new(emission.outputs[0], output.inputs["Surface"])
+    return material
+
+
+def _use_eevee(render: bpy.types.RenderSettings) -> None:
+    """Select Eevee across Blender 4.x and 5.x engine identifier changes."""
+
+    try:
+        render.engine = "BLENDER_EEVEE_NEXT"
+    except TypeError:
+        render.engine = "BLENDER_EEVEE"
+
+
 def _save_cropped_render(
     scene: bpy.types.Scene,
     camera: Object,
@@ -282,7 +526,10 @@ def _save_cropped_render(
     output_path: Path,
     threshold: float,
     margin: int,
-) -> dict[str, object]:
+    bounds: tuple[int, int, int, int] | None = None,
+    alpha_source: array | None = None,
+    data_map: bool = False,
+) -> tuple[dict[str, object], tuple[int, int, int, int], array]:
     render_result = bpy.data.images.get("Render Result")
     source_image = render_result
     remove_source_image = False
@@ -304,20 +551,21 @@ def _save_cropped_render(
         )
     pixels = array("f", [0.0]) * (width * height * 4)
     source_image.pixels.foreach_get(pixels)
-    bounds = alpha_bounds(pixels, width, height, threshold, margin)
-    if bounds is None:
-        raise RuntimeError("The render is fully transparent")
     projected = world_to_camera_view(scene, camera, ground_origin)
     origin_x = projected.x * width
     origin_y = projected.y * height
-    bounds = expand_bounds_to_point(
-        bounds,
-        width,
-        height,
-        origin_x,
-        origin_y,
-        margin,
-    )
+    if bounds is None:
+        bounds = alpha_bounds(pixels, width, height, threshold, margin)
+        if bounds is None:
+            raise RuntimeError("The render is fully transparent")
+        bounds = expand_bounds_to_point(
+            bounds,
+            width,
+            height,
+            origin_x,
+            origin_y,
+            margin,
+        )
     left, bottom, right, top = bounds
     cropped_width = right - left
     cropped_height = top - bottom
@@ -325,6 +573,11 @@ def _save_cropped_render(
     for y in range(bottom, top):
         start = (y * width + left) * 4
         cropped.extend(pixels[start : start + cropped_width * 4])
+    if alpha_source is not None:
+        if len(alpha_source) != len(cropped):
+            raise ValueError("Surface map and albedo crop dimensions do not match")
+        for offset in range(3, len(cropped), 4):
+            cropped[offset] = alpha_source[offset]
     pivot_x, pivot_y = normalized_pivot(
         origin_x,
         origin_y,
@@ -332,39 +585,53 @@ def _save_cropped_render(
     )
 
     try:
-        image = bpy.data.images.new(
-            f"NEURA_EXPORT_{output_path.stem}",
-            width=cropped_width,
-            height=cropped_height,
-            alpha=True,
-            float_buffer=True,
-        )
-        try:
-            image.pixels.foreach_set(cropped)
-            image.alpha_mode = "PREMUL"
-            image.filepath_raw = str(output_path)
-            image.file_format = "PNG"
-            image.save_render(str(output_path), scene=scene)
-        finally:
-            bpy.data.images.remove(image)
+        if data_map:
+            write_data_rgba_png(
+                output_path,
+                cropped,
+                cropped_width,
+                cropped_height,
+            )
+        else:
+            image = bpy.data.images.new(
+                f"NEURA_EXPORT_{output_path.stem}",
+                width=cropped_width,
+                height=cropped_height,
+                alpha=True,
+                float_buffer=True,
+            )
+            try:
+                image.pixels.foreach_set(cropped)
+                image.alpha_mode = "PREMUL"
+                image.filepath_raw = str(output_path)
+                image.file_format = "PNG"
+                image.save_render(str(output_path), scene=scene)
+            finally:
+                bpy.data.images.remove(image)
     finally:
         if remove_source_image:
             bpy.data.images.remove(source_image)
 
-    return {
-        "image": output_path.name,
-        "logicalWidth": cropped_width,
-        "logicalHeight": cropped_height,
-        "pivotX": round(pivot_x, 8),
-        "pivotY": round(pivot_y, 8),
-    }
+    return (
+        {
+            "image": output_path.name,
+            "logicalWidth": cropped_width,
+            "logicalHeight": cropped_height,
+            "pivotX": round(pivot_x, 8),
+            "pivotY": round(pivot_y, 8),
+        },
+        bounds,
+        cropped,
+    )
 
 
 class _RenderState:
-    def __init__(self, scene: bpy.types.Scene):
+    def __init__(self, scene: bpy.types.Scene, view_layer: bpy.types.ViewLayer):
         render = scene.render
         self.scene = scene
+        self.view_layer = view_layer
         self.camera = scene.camera
+        self.engine = render.engine
         self.resolution_x = render.resolution_x
         self.resolution_y = render.resolution_y
         self.resolution_percentage = render.resolution_percentage
@@ -375,6 +642,20 @@ class _RenderState:
         self.file_format = render.image_settings.file_format
         self.color_mode = render.image_settings.color_mode
         self.color_depth = render.image_settings.color_depth
+        self.material_override = view_layer.material_override
+        self.view_transform = scene.view_settings.view_transform
+        self.look = scene.view_settings.look
+        self.exposure = scene.view_settings.exposure
+        self.gamma = scene.view_settings.gamma
+
+    def restore_color_and_engine(self) -> None:
+        render = self.scene.render
+        render.engine = self.engine
+        self.view_layer.material_override = self.material_override
+        self.scene.view_settings.view_transform = self.view_transform
+        self.scene.view_settings.look = self.look
+        self.scene.view_settings.exposure = self.exposure
+        self.scene.view_settings.gamma = self.gamma
 
     def restore(self) -> None:
         render = self.scene.render
@@ -389,12 +670,15 @@ class _RenderState:
         render.image_settings.file_format = self.file_format
         render.image_settings.color_mode = self.color_mode
         render.image_settings.color_depth = self.color_depth
+        self.restore_color_and_engine()
 
 
 class NEURA_OT_export_asset(Operator):
     bl_idname = "neura.export_asset"
     bl_label = "Export Neura Asset"
-    bl_description = "Render directional PNGs and write asset.json"
+    bl_description = (
+        "Render directional albedo and lighting-data PNGs and write asset.json"
+    )
 
     def execute(self, context):
         scene = context.scene
@@ -415,7 +699,7 @@ class NEURA_OT_export_asset(Operator):
         output_root = Path(bpy.path.abspath(settings.output_directory))
         asset_directory = output_root / settings.asset_id
         asset_directory.mkdir(parents=True, exist_ok=True)
-        render_state = _RenderState(scene)
+        render_state = _RenderState(scene, context.view_layer)
         original_root_matrix = root.matrix_world.copy()
         original_root_rotation_mode = root.rotation_mode
         root.rotation_mode = "XYZ"
@@ -425,6 +709,9 @@ class NEURA_OT_export_asset(Operator):
         original_camera_ortho_scale = camera.data.ortho_scale
         ground_origin = original_root_matrix.translation.copy()
         views: dict[str, dict[str, object]] = {}
+        surface_material = None
+        surface_map = None
+        shadow_proxy = None
 
         try:
             scene.camera = camera
@@ -442,6 +729,14 @@ class NEURA_OT_export_asset(Operator):
             camera.rotation_euler = (ground_origin - camera.location).to_track_quat(
                 "-Z", "Y"
             ).to_euler()
+            if settings.export_surface_maps:
+                height_min, height_max = _asset_height_range(context, root)
+                surface_material = _create_surface_material(
+                    root,
+                    height_min,
+                    height_max,
+                )
+                surface_map = build_surface_map_metadata(height_min, height_max)
 
             for direction in directions_for_mode(settings.view_mode):
                 root.rotation_euler = original_root_rotation
@@ -456,7 +751,7 @@ class NEURA_OT_export_asset(Operator):
                 )
                 scene.render.filepath = str(asset_directory / f"{direction}.png")
                 bpy.ops.render.render(write_still=True)
-                views[direction] = _save_cropped_render(
+                view, crop_bounds, albedo_pixels = _save_cropped_render(
                     scene,
                     camera,
                     ground_origin,
@@ -464,11 +759,37 @@ class NEURA_OT_export_asset(Operator):
                     settings.alpha_threshold,
                     settings.trim_margin,
                 )
+                views[direction] = view
+
+                if surface_material is not None:
+                    surface_path = asset_directory / f"{direction}.surface.png"
+                    context.view_layer.material_override = surface_material
+                    _use_eevee(scene.render)
+                    scene.view_settings.view_transform = "Raw"
+                    scene.view_settings.look = "None"
+                    scene.view_settings.exposure = 0.0
+                    scene.view_settings.gamma = 1.0
+                    scene.render.filepath = str(surface_path)
+                    bpy.ops.render.render(write_still=True)
+                    _save_cropped_render(
+                        scene,
+                        camera,
+                        ground_origin,
+                        surface_path,
+                        settings.alpha_threshold,
+                        settings.trim_margin,
+                        bounds=crop_bounds,
+                        alpha_source=albedo_pixels,
+                        data_map=True,
+                    )
+                    view["surfaceImage"] = surface_path.name
+                    render_state.restore_color_and_engine()
 
             root.matrix_world = original_root_matrix
             root.rotation_mode = original_root_rotation_mode
             context.view_layer.update()
             geometry = _export_geometry(root)
+            shadow_proxy = _export_shadow_proxy(context, root)
             manifest = build_manifest(
                 asset_id=settings.asset_id,
                 name=settings.display_name,
@@ -480,6 +801,8 @@ class NEURA_OT_export_asset(Operator):
                 render_band=settings.render_band,
                 views=views,
                 geometry=geometry,
+                surface_map=surface_map,
+                shadow_proxy=shadow_proxy,
             )
             write_manifest(asset_directory / "asset.json", manifest)
         except Exception as error:
@@ -492,6 +815,8 @@ class NEURA_OT_export_asset(Operator):
             camera.data.type = original_camera_type
             camera.data.ortho_scale = original_camera_ortho_scale
             render_state.restore()
+            if surface_material is not None:
+                bpy.data.materials.remove(surface_material)
             context.view_layer.update()
 
         self.report({"INFO"}, f"Exported {settings.asset_id} to {asset_directory}")
@@ -508,7 +833,7 @@ class NEURA_PT_export_panel(Panel):
     def draw(self, context):
         layout = self.layout
         settings = context.scene.neura_export
-        layout.label(text="Version 0.1.2")
+        layout.label(text="Version 0.3.0")
         layout.operator(NEURA_OT_setup_scene.bl_idname, icon="SCENE_DATA")
 
         metadata = layout.box()
@@ -531,6 +856,7 @@ class NEURA_PT_export_panel(Panel):
         row.prop(settings, "resolution_y")
         rendering.prop(settings, "alpha_threshold")
         rendering.prop(settings, "trim_margin")
+        rendering.prop(settings, "export_surface_maps")
 
         geometry = layout.box()
         geometry.label(text="Selected Geometry")

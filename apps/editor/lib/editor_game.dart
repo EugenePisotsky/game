@@ -77,6 +77,15 @@ class EditorGame extends FlameGame {
   bool showChunkDebug = false;
   bool showNavigationDebug = false;
   bool diagnosticsPaused = false;
+  bool experimentalLightingEnabled = true;
+  int experimentalLightingVisualization = 0;
+  double experimentalLightAzimuthDegrees = 315;
+  double experimentalLightIntensity = 4;
+  double experimentalShadowStrength = 0.75;
+  double experimentalCastShadowStrength = 0.65;
+  ui.FragmentProgram? _experimentalLightingProgram;
+  ui.FragmentProgram? _experimentalGroundShadowProgram;
+  Object? _experimentalLightingError;
 
   static const double elevationPixelsPerWorldUnit = 64;
   static const int _terrainRasterLowResolution = 1024;
@@ -86,6 +95,23 @@ class EditorGame extends FlameGame {
   static const double _terrainDirectRenderZoom = 0.7;
   static const double _spatialCellSize = 256;
   static const double _liquidOpticalDepthScale = 1.25;
+  static const String _experimentalLightingAssetId = 'custom.asset';
+  static const double _experimentalHeightMin = 0;
+  static const double _experimentalHeightMax = 7.38342;
+  static const double _experimentalLightOrbitRadius = 5.5;
+  static const double _experimentalLightHeight = 10.5;
+  static const double _experimentalLightRadius = 15;
+  static const double _experimentalShadowWorldExtent = 15;
+  static const double _experimentalProxyHalfWidth = 3.7;
+  static const double _experimentalProxyHalfDepth = 4.2;
+  static const double _experimentalProxyEaveHeight = 4.3;
+  static const double _experimentalProxyRidgeHeight = 7.15;
+  static const Map<String, String> _experimentalSurfacePaths = {
+    'south': 'environment_v2/custom/custom.asset/south.surface.png',
+    'west': 'environment_v2/custom/custom.asset/west.surface.png',
+    'east': 'environment_v2/custom/custom.asset/east.surface.png',
+    'north': 'environment_v2/custom/custom.asset/north.surface.png',
+  };
 
   static double _liquidOpticalDepth(double depth) =>
       1 - math.exp(-math.max(0, depth) / _liquidOpticalDepthScale);
@@ -135,6 +161,72 @@ class EditorGame extends FlameGame {
   double get diagnosticsFrameMilliseconds =>
       diagnosticsFps <= 0 ? 0 : 1000 / diagnosticsFps;
   bool get isAutoIdle => _autoPaused;
+  bool get experimentalLightingReady =>
+      _experimentalLightingProgram != null &&
+      _experimentalGroundShadowProgram != null;
+  String? get experimentalLightingError =>
+      _experimentalLightingError?.toString();
+  String get experimentalLightingVisualizationName =>
+      switch (experimentalLightingVisualization) {
+        1 => 'normals',
+        2 => 'height',
+        _ => 'lit',
+      };
+
+  void toggleExperimentalLighting() {
+    experimentalLightingEnabled = !experimentalLightingEnabled;
+    requestFrame(frames: 3);
+  }
+
+  void cycleExperimentalLightingVisualization() {
+    experimentalLightingVisualization =
+        (experimentalLightingVisualization + 1) % 3;
+    requestFrame(frames: 3);
+  }
+
+  void rotateExperimentalLight(double degrees) {
+    experimentalLightAzimuthDegrees =
+        (experimentalLightAzimuthDegrees + degrees) % 360;
+    if (experimentalLightAzimuthDegrees < 0) {
+      experimentalLightAzimuthDegrees += 360;
+    }
+    requestFrame(frames: 3);
+  }
+
+  void adjustExperimentalLightIntensity(double delta) {
+    setExperimentalLightIntensity(experimentalLightIntensity + delta);
+  }
+
+  void setExperimentalLightAzimuth(double degrees) {
+    experimentalLightAzimuthDegrees = degrees.clamp(0, 360).toDouble();
+    requestFrame(frames: 3);
+  }
+
+  void setExperimentalLightIntensity(double intensity) {
+    experimentalLightIntensity = intensity.clamp(0, 8).toDouble();
+    requestFrame(frames: 3);
+  }
+
+  void setExperimentalShadowStrength(double strength) {
+    experimentalShadowStrength = strength.clamp(0, 1).toDouble();
+    requestFrame(frames: 3);
+  }
+
+  void setExperimentalCastShadowStrength(double strength) {
+    experimentalCastShadowStrength = strength.clamp(0, 1).toDouble();
+    requestFrame(frames: 3);
+  }
+
+  bool focusExperimentalLightingAsset() {
+    for (final object in controller.document.objects) {
+      if (object.assetId != _experimentalLightingAssetId) continue;
+      _viewCenterWorld = WorldPoint(object.x, object.y);
+      _panOffset.setZero();
+      requestFrame(frames: 3);
+      return true;
+    }
+    return false;
+  }
 
   /// Wakes the Flame loop long enough to paint a stable editor frame.
   ///
@@ -275,6 +367,16 @@ class EditorGame extends FlameGame {
   Future<void> onLoad() async {
     await super.onLoad();
     await add(_fpsComponent);
+    try {
+      final programs = await Future.wait([
+        ui.FragmentProgram.fromAsset('shaders/editor_surface_lighting.frag'),
+        ui.FragmentProgram.fromAsset('shaders/editor_ground_shadow.frag'),
+      ]);
+      _experimentalLightingProgram = programs[0];
+      _experimentalGroundShadowProgram = programs[1];
+    } catch (error) {
+      _experimentalLightingError = error;
+    }
     final materialIds = <String>{
       controller.document.baseMaterialId,
       controller.selectedMaterialId,
@@ -808,7 +910,7 @@ class EditorGame extends FlameGame {
           );
         }
         _renderLiquidVolumes(canvas);
-        _renderAllObjectBands(canvas, liquidPass: _LiquidSpritePass.exposed);
+        _renderExposedObjectBandsWithShadows(canvas);
       }
       _renderSurfaceConnectors(canvas);
       _renderPathPreview(canvas);
@@ -929,11 +1031,7 @@ class EditorGame extends FlameGame {
       for (final liquid in liquids) {
         _renderLiquidVolume(canvas, liquid);
       }
-      _renderAllObjectBands(
-        canvas,
-        surfaceId: surface.id,
-        liquidPass: _LiquidSpritePass.exposed,
-      );
+      _renderExposedObjectBandsWithShadows(canvas, surfaceId: surface.id);
     }
   }
 
@@ -948,6 +1046,23 @@ class EditorGame extends FlameGame {
         band,
         surfaceId: surfaceId,
         liquidPass: liquidPass,
+      );
+    }
+  }
+
+  void _renderExposedObjectBandsWithShadows(
+    ui.Canvas canvas, {
+    String? surfaceId,
+  }) {
+    for (final band in EnvironmentRenderBand.values) {
+      if (band == EnvironmentRenderBand.depthSorted) {
+        _renderExperimentalGroundShadows(canvas, surfaceId: surfaceId);
+      }
+      _renderObjectBand(
+        canvas,
+        band,
+        surfaceId: surfaceId,
+        liquidPass: _LiquidSpritePass.exposed,
       );
     }
   }
@@ -970,6 +1085,115 @@ class EditorGame extends FlameGame {
     for (final liquid in liquids) {
       _renderLiquidVolume(canvas, liquid);
     }
+  }
+
+  void _renderExperimentalGroundShadows(ui.Canvas canvas, {String? surfaceId}) {
+    final program = _experimentalGroundShadowProgram;
+    if (!experimentalLightingEnabled ||
+        experimentalCastShadowStrength <= 0 ||
+        program == null) {
+      return;
+    }
+
+    for (final entries in _renderEntriesByBand.values) {
+      for (final entry in entries) {
+        if (entry.asset.id != _experimentalLightingAssetId ||
+            (surfaceId != null && entry.depthSurfaceId != surfaceId)) {
+          continue;
+        }
+        final receiverElevation = entry.surface.groundElevation;
+        final objectElevation = _objectElevation(
+          entry.object,
+          entry.asset,
+          surface: entry.surface,
+        );
+        final objectScreen = projection.worldToScreen(
+          Vector2(entry.object.x, entry.object.y),
+        )..y -= receiverElevation * elevationPixelsPerWorldUnit;
+        final bounds = _experimentalShadowBounds(
+          entry.object,
+          receiverElevation,
+        );
+        if (!bounds.overlaps(_visibleProjectedBounds)) continue;
+
+        final azimuth = experimentalLightAzimuthDegrees * math.pi / 180;
+        final lightX =
+            entry.object.x + math.cos(azimuth) * _experimentalLightOrbitRadius;
+        final lightY =
+            entry.object.y + math.sin(azimuth) * _experimentalLightOrbitRadius;
+        final objectRotation = _experimentalDirectionAngle(
+          entry.object.direction,
+        );
+        final shader = program.fragmentShader()
+          ..setFloat(0, bounds.left)
+          ..setFloat(1, bounds.top)
+          ..setFloat(2, bounds.width)
+          ..setFloat(3, bounds.height)
+          ..setFloat(4, objectScreen.x)
+          ..setFloat(5, objectScreen.y)
+          ..setFloat(6, entry.object.x)
+          ..setFloat(7, entry.object.y)
+          ..setFloat(8, objectElevation)
+          ..setFloat(9, lightX)
+          ..setFloat(10, lightY)
+          ..setFloat(11, objectElevation + _experimentalLightHeight)
+          ..setFloat(12, receiverElevation)
+          ..setFloat(13, experimentalCastShadowStrength)
+          ..setFloat(14, _experimentalLightRadius)
+          ..setFloat(15, _experimentalShadowWorldExtent)
+          ..setFloat(16, objectRotation)
+          ..setFloat(17, _experimentalProxyHalfWidth)
+          ..setFloat(18, _experimentalProxyHalfDepth)
+          ..setFloat(19, _experimentalProxyEaveHeight)
+          ..setFloat(20, _experimentalProxyRidgeHeight);
+        canvas.drawRect(bounds, ui.Paint()..shader = shader);
+      }
+    }
+  }
+
+  double _experimentalDirectionAngle(EnvironmentDirection direction) =>
+      switch (direction) {
+        EnvironmentDirection.south => 0,
+        EnvironmentDirection.southWest => math.pi / 4,
+        EnvironmentDirection.west => math.pi / 2,
+        EnvironmentDirection.northWest => math.pi * 3 / 4,
+        EnvironmentDirection.north => math.pi,
+        EnvironmentDirection.northEast => -math.pi * 3 / 4,
+        EnvironmentDirection.east => -math.pi / 2,
+        EnvironmentDirection.southEast => -math.pi / 4,
+      };
+
+  ui.Rect _experimentalShadowBounds(
+    PlacedEnvironmentObject object,
+    double elevation,
+  ) {
+    final points = [
+      Vector2(
+        object.x - _experimentalShadowWorldExtent,
+        object.y - _experimentalShadowWorldExtent,
+      ),
+      Vector2(
+        object.x + _experimentalShadowWorldExtent,
+        object.y - _experimentalShadowWorldExtent,
+      ),
+      Vector2(
+        object.x + _experimentalShadowWorldExtent,
+        object.y + _experimentalShadowWorldExtent,
+      ),
+      Vector2(
+        object.x - _experimentalShadowWorldExtent,
+        object.y + _experimentalShadowWorldExtent,
+      ),
+    ].map(projection.worldToScreen).toList();
+    for (final point in points) {
+      point.y -= elevation * elevationPixelsPerWorldUnit;
+    }
+    return ui.Rect.fromLTRB(
+      points.map((point) => point.x).reduce(math.min),
+      points.map((point) => point.y).reduce(math.min),
+      points.map((point) => point.x).reduce(math.max),
+      points.map((point) => point.y).reduce(math.max),
+    );
   }
 
   void _renderLiquidVolume(
@@ -1788,7 +2012,15 @@ class EditorGame extends FlameGame {
         surface.hasLiquid && interaction != EnvironmentLiquidInteraction.ignore;
     if (!submerges) {
       if (liquidPass == _LiquidSpritePass.exposed) {
-        canvas.drawImageRect(image, source, destination, ui.Paint());
+        _drawObjectImage(
+          canvas,
+          image,
+          source,
+          destination,
+          object,
+          asset,
+          surface,
+        );
       }
       return;
     }
@@ -1800,7 +2032,15 @@ class EditorGame extends FlameGame {
     final overlayTop = math.max(destination.top, waterline);
     if (liquidOcclusionPath == null && overlayTop >= destination.bottom) {
       if (liquidPass == _LiquidSpritePass.exposed) {
-        canvas.drawImageRect(image, source, destination, ui.Paint());
+        _drawObjectImage(
+          canvas,
+          image,
+          source,
+          destination,
+          object,
+          asset,
+          surface,
+        );
       }
       return;
     }
@@ -1839,8 +2079,88 @@ class EditorGame extends FlameGame {
     } else {
       canvas.clipRect(ui.Rect.zero);
     }
-    canvas.drawImageRect(image, source, destination, ui.Paint());
+    _drawObjectImage(
+      canvas,
+      image,
+      source,
+      destination,
+      object,
+      asset,
+      surface,
+    );
     canvas.restore();
+  }
+
+  void _drawObjectImage(
+    ui.Canvas canvas,
+    ui.Image image,
+    ui.Rect source,
+    ui.Rect destination,
+    PlacedEnvironmentObject object,
+    EnvironmentObjectAsset asset,
+    EnvironmentSurfaceSample surface,
+  ) {
+    final program = _experimentalLightingProgram;
+    final surfacePath = _experimentalSurfacePaths[object.direction.name];
+    if (!experimentalLightingEnabled ||
+        program == null ||
+        asset.id != _experimentalLightingAssetId ||
+        surfacePath == null ||
+        source.left != 0 ||
+        source.top != 0 ||
+        source.width != image.width ||
+        source.height != image.height) {
+      canvas.drawImageRect(image, source, destination, ui.Paint());
+      return;
+    }
+
+    final requestedDimension = math.max(image.width, image.height);
+    final surfaceImage = _loadedImages[surfacePath];
+    if (surfaceImage == null ||
+        !_decodedImageMeetsRequest(
+          surfacePath,
+          surfaceImage,
+          requestedDimension,
+        )) {
+      unawaited(_loadImage(surfacePath, maximumDimension: requestedDimension));
+      canvas.drawImageRect(image, source, destination, ui.Paint());
+      return;
+    }
+    _touchImage(surfacePath);
+
+    final view = asset.viewFor(object.direction.name);
+    final objectElevation = _objectElevation(object, asset, surface: surface);
+    final azimuth = experimentalLightAzimuthDegrees * math.pi / 180;
+    final lightX = object.x + math.cos(azimuth) * _experimentalLightOrbitRadius;
+    final lightY = object.y + math.sin(azimuth) * _experimentalLightOrbitRadius;
+    final shader = program.fragmentShader()
+      ..setFloat(0, destination.left)
+      ..setFloat(1, destination.top)
+      ..setFloat(2, destination.width)
+      ..setFloat(3, destination.height)
+      ..setFloat(4, view.logicalWidth.toDouble())
+      ..setFloat(5, view.logicalHeight.toDouble())
+      ..setFloat(6, view.pivotX)
+      ..setFloat(7, view.pivotY)
+      ..setFloat(8, _experimentalHeightMin)
+      ..setFloat(9, _experimentalHeightMax)
+      ..setFloat(10, object.x)
+      ..setFloat(11, object.y)
+      ..setFloat(12, objectElevation)
+      ..setFloat(13, lightX)
+      ..setFloat(14, lightY)
+      ..setFloat(15, objectElevation + _experimentalLightHeight)
+      ..setFloat(16, 1)
+      ..setFloat(17, 0.72)
+      ..setFloat(18, 0.45)
+      ..setFloat(19, 0.3)
+      ..setFloat(20, experimentalLightIntensity)
+      ..setFloat(21, _experimentalLightRadius)
+      ..setFloat(22, experimentalLightingVisualization.toDouble())
+      ..setFloat(23, experimentalShadowStrength)
+      ..setImageSampler(0, image)
+      ..setImageSampler(1, surfaceImage);
+    canvas.drawRect(destination, ui.Paint()..shader = shader);
   }
 
   void _renderObjectBand(

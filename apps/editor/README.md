@@ -20,6 +20,27 @@ larger editor application; it does not change the game release package.
 The complete imported environment cache is workspace-only and is not bundled
 into this application. Catalog previews are read lazily from the repository.
 
+## Blender lighting experiment
+
+Run the editor centered on the manually integrated `custom.asset` house:
+
+```sh
+flutter run -d macos --dart-entrypoint-args=--debug-scene=lighting_experiment
+```
+
+The **Lighting experiment** panel changes the point-light angle and intensity,
+the height-map self-shadow and cast-shadow strengths, and switches between lit,
+decoded-normal, and height-map views. **Focus custom.asset** returns the camera
+to the test house. F6 toggles lighting, F7 cycles visualization modes, square
+brackets rotate the light, and minus/equal adjust intensity.
+
+This experiment lights only `custom.asset`. Self-shadowing uses 12 height-field
+samples inside its sprite. Cast shadows intersect a compact gabled 3D proxy for
+the test house and therefore reach terrain, liquids, and ground-aligned details
+without interpreting camera-visible surface pixels as a complete 3D volume. An
+arbitrary neighboring sprite needs its own surface map before it can receive a
+geometrically correct shadow across walls or roofs.
+
 ## Editing shortcuts
 
 - Command-click toggles objects in the current selection. Shift-click remains

@@ -1,9 +1,10 @@
 # Neura Asset Exporter for Blender
 
 This Blender add-on renders static 3D models into the directional RGBA sprites
-and metadata consumed by Neura. Version 0.1 supports fixed, four-way, and
-eight-way environment objects. Animated characters and terrain materials are
-outside this first version.
+and metadata consumed by Neura. Version 0.3 supports fixed, four-way, and
+eight-way environment objects plus aligned normal/height surface maps for the
+dynamic-lighting pipeline and low-poly 3D cast-shadow proxies. Animated
+characters and terrain materials are outside this version.
 
 ## Install
 
@@ -26,7 +27,7 @@ user add-ons directory and reload scripts after changes.
 1. Press **Set Up Neura Scene**. The add-on creates:
    - `NEURA_ASSET_ROOT`, the ground contact and rotation origin;
    - `NEURA_CAMERA`, calibrated to the engine projection;
-   - footprint, blocking, walkable, and selection collections.
+   - footprint, blocking, walkable, selection, and shadow-proxy collections.
    If an asset root is already selected in the panel, setup keeps it and aims
    the generated camera at its origin. Otherwise it creates
    `NEURA_ASSET_ROOT`. You never need to position or rotate the camera by hand;
@@ -37,9 +38,13 @@ user add-ons directory and reload scripts after changes.
 4. Use an orthographic-friendly material and lighting setup. Everything that
    is render-visible in the scene is included, so hide reference meshes and
    guides from rendering.
-5. Fill in the catalog metadata, choose a view count, and select an output
+5. Leave **Export lighting surface maps** enabled unless the asset deliberately
+   does not participate in dynamic lighting. The root may rotate around its Z
+   axis, but its local Z axis must remain upright. Apply tilted root transforms
+   before export.
+6. Fill in the catalog metadata, choose a view count, and select an output
    directory.
-6. Press **Export Neura Asset**.
+7. Press **Export Neura Asset**.
 
 The add-on rotates the asset root while keeping the camera and lighting fixed,
 renders every required direction, crops transparent pixels, calculates the
@@ -49,9 +54,13 @@ ground pivot after cropping, restores the scene, and writes:
 <output>/<asset-id>/
   asset.json
   south.png
+  south.surface.png
   west.png
+  west.surface.png
   east.png
+  east.surface.png
   north.png
+  north.surface.png
   ...
 ```
 
@@ -67,6 +76,72 @@ remains fixed at `90.5097` camera pixels per world unit. Increase both canvas
 dimensions for large buildings rather than changing camera scale. The add-on
 caps either dimension at 4096 pixels to keep Blender's render and crop buffers
 within a practical memory budget.
+
+## Lighting surface maps
+
+When **Export lighting surface maps** is enabled, every albedo view gets a
+matching `<direction>.surface.png`. The exporter renders this pass with an
+unlit temporary material; the scene's materials and render settings are
+restored afterward. A surface map always has exactly the same dimensions,
+crop, alpha silhouette, and pivot as its albedo view.
+
+The packed 8-bit RGBA contract is:
+
+| Channel | Data |
+| --- | --- |
+| R, G | Octahedrally encoded world-space surface normal |
+| B | Asset-root-local Z normalized between `heightMin` and `heightMax` |
+| A | Corresponding albedo alpha |
+
+`asset.json` records the surface filename in each view and describes the
+encoding once at asset level:
+
+```json
+{
+  "views": {
+    "south": {
+      "image": "south.png",
+      "surfaceImage": "south.surface.png"
+    }
+  },
+  "surfaceMap": {
+    "encoding": "octahedralWorldNormalRGHeightB",
+    "normalSpace": "world",
+    "heightSpace": "assetRootZ",
+    "heightMin": 0.0,
+    "heightMax": 2.4
+  }
+}
+```
+
+Runtime height decoding is
+`heightMin + blue * (heightMax - heightMin)`. Octahedral normal decoding must
+use the sampled red and green values as the encoded two-dimensional vector.
+The data PNG is written without a display color profile; load and sample it as
+non-color linear data, never as an sRGB texture.
+
+The pass adds one Eevee render per direction. It is intended as a source asset,
+so this increases export time but does not affect runtime performance. Original
+material alpha is copied from the albedo render, allowing cutout assets to keep
+their silhouette even though the temporary surface material is opaque.
+
+## Cast-shadow proxy
+
+A directional surface map contains only the surfaces visible to its render
+camera. It is suitable for lighting that sprite, but it cannot describe hidden
+walls and roof faces well enough to cast correct shadows for every light angle.
+
+For assets that cast substantial shadows, put one closed, low-poly mesh in
+`NEURA_SHADOW`. Shape it like the asset's solid mass, not like every decorative
+detail. A house proxy should normally contain its wall volume and pitched roof;
+a barrel can use a coarse 8-sided cylinder. Keep it in asset-root-local space.
+The collection never appears in the albedo or surface renders.
+
+Export writes the evaluated proxy as root-local vertices and triangles under
+`shadowProxy` in `asset.json`. The runtime limit is 32 triangles, and export
+fails with a clear error if the proxy exceeds it. Use modifiers only when their
+evaluated result remains within that budget. The proxy metadata is marked
+`reviewed: false` until it has been checked in the editor's lighting preview.
 
 ## Geometry
 
@@ -95,7 +170,7 @@ for rails where appropriate.
 ## Importer integration
 
 `asset.json` intentionally uses the same object fields as Neura's environment
-catalog. Version 0.1 produces a source package; it does not edit generated
+catalog. Version 0.3 produces a source package; it does not edit generated
 catalogs or the Rust importer's reviewed configuration.
 
 Until the importer has a custom-manifest scan command, copy the object entry
@@ -124,11 +199,11 @@ buffers, color management, and registration are Blender APIs.
 
 ### Image dimensions must be positive
 
-Version 0.1.3 disables Blender's saved render-region and crop-to-border state
+Version 0.3.0 disables Blender's saved render-region and crop-to-border state
 during export, then restores it afterward. Those settings can otherwise make
 Blender expose a zero-sized Render Result. It also writes a full PNG first and
 uses that file when Blender's in-memory Render Result remains empty. Rebuild
-and reinstall the zip, confirm that the Neura panel says **Version 0.1.3**, then
+and reinstall the zip, confirm that the Neura panel says **Version 0.3.0**, then
 run **Set Up Neura Scene** once before exporting.
 
 If Blender still reports an empty result, confirm that:

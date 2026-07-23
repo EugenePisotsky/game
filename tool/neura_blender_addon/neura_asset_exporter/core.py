@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import math
 import re
+import struct
+import zlib
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
@@ -45,6 +47,8 @@ ENGINE_VIEW_MODES = {
     "FOUR_WAY": "fourWay",
     "EIGHT_WAY": "eightWay",
 }
+
+SURFACE_MAP_ENCODING = "octahedralWorldNormalRGHeightB"
 
 _ASSET_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:[._-][a-z0-9]+)+$")
 
@@ -168,6 +172,54 @@ def crop_rgba(
     return result, cropped_width, cropped_height
 
 
+def write_data_rgba_png(
+    path: Path,
+    rgba: Sequence[float],
+    width: int,
+    height: int,
+) -> None:
+    """Write exact linear RGBA values as an untagged 8-bit data PNG.
+
+    Blender's image save path applies display color management on some
+    versions even for generated non-color images. Surface maps are data, not
+    display color, so encode them directly and reverse Blender's bottom-up
+    pixel rows into PNG's top-down scanline order.
+    """
+
+    if width <= 0 or height <= 0:
+        raise ValueError("Image dimensions must be positive.")
+    if len(rgba) != width * height * 4:
+        raise ValueError("RGBA buffer length does not match its dimensions.")
+
+    raw = bytearray()
+    row_values = width * 4
+    for y in range(height - 1, -1, -1):
+        raw.append(0)  # PNG filter: None
+        start = y * row_values
+        for value in rgba[start : start + row_values]:
+            raw.append(round(max(0.0, min(1.0, float(value))) * 255.0))
+
+    def chunk(kind: bytes, payload: bytes) -> bytes:
+        return (
+            struct.pack(">I", len(payload))
+            + kind
+            + payload
+            + struct.pack(">I", zlib.crc32(kind + payload) & 0xFFFFFFFF)
+        )
+
+    payload = bytearray(b"\x89PNG\r\n\x1a\n")
+    payload.extend(
+        chunk(
+            b"IHDR",
+            struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0),
+        )
+    )
+    payload.extend(chunk(b"IDAT", zlib.compress(bytes(raw), level=6)))
+    payload.extend(chunk(b"IEND", b""))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(payload)
+
+
 def expand_bounds_to_point(
     bounds: tuple[int, int, int, int],
     width: int,
@@ -222,6 +274,8 @@ def build_manifest(
     render_band: str,
     views: Mapping[str, Mapping[str, object]],
     geometry: Mapping[str, object] | None = None,
+    surface_map: Mapping[str, object] | None = None,
+    shadow_proxy: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     error = validate_asset_id(asset_id)
     if error:
@@ -231,6 +285,17 @@ def build_manifest(
         raise ValueError(
             f"{view_mode} requires views {list(directions)}, got {list(views)}."
         )
+    if surface_map:
+        missing_surface_views = [
+            direction
+            for direction in directions
+            if not views[direction].get("surfaceImage")
+        ]
+        if missing_surface_views:
+            raise ValueError(
+                "Surface-map metadata requires surfaceImage for views "
+                f"{missing_surface_views}."
+            )
 
     categories = [value for value in category_path if value]
     manifest: dict[str, object] = {
@@ -248,7 +313,37 @@ def build_manifest(
     }
     if geometry:
         manifest["geometry"] = dict(geometry)
+    if surface_map:
+        manifest["surfaceMap"] = dict(surface_map)
+    if shadow_proxy:
+        manifest["shadowProxy"] = dict(shadow_proxy)
     return manifest
+
+
+def build_surface_map_metadata(
+    height_min: float,
+    height_max: float,
+) -> dict[str, object]:
+    """Describe the packed per-view surface textures.
+
+    Red and green contain an octahedral world-space normal. Blue contains
+    asset-root-local Z normalized across the asset-wide height range. Alpha
+    mirrors the corresponding albedo image.
+    """
+
+    height_min = float(height_min)
+    height_max = float(height_max)
+    if not math.isfinite(height_min) or not math.isfinite(height_max):
+        raise ValueError("Surface-map height bounds must be finite.")
+    if height_max <= height_min:
+        raise ValueError("Surface-map height range must be positive.")
+    return {
+        "encoding": SURFACE_MAP_ENCODING,
+        "normalSpace": "world",
+        "heightSpace": "assetRootZ",
+        "heightMin": round(height_min, 6),
+        "heightMax": round(height_max, 6),
+    }
 
 
 def write_manifest(path: Path, manifest: Mapping[str, object]) -> None:

@@ -30,3 +30,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  shaders:
+    - shaders/editor_surface_lighting.frag
+    - shaders/editor_ground_shadow.frag

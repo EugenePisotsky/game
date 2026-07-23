@@ -213,22 +213,22 @@
       "id": "object_hkkuk3v41z_0_27",
       "assetId": "nf.longBoat.006",
       "localPosition": {
-        "x": 19.106597900390625,
-        "y": 7.879558563232422
+        "x": 19.745208740234375,
+        "y": 6.382595062255859
       },
       "verticalOffset": 0.0,
       "direction": "southWest",
-      "liquidInteraction": "float",
+      "liquidInteraction": "ignore",
       "supportSurfaceId": "surface_ground",
       "editorLayerId": "layer_world",
       "bounds": {
         "min": {
-          "x": 232.68841909620244,
-          "y": 67.34590124341923
+          "x": 232.69809291298205,
+          "y": 64.24771640236192
         },
         "max": {
-          "x": 245.7520182206921,
-          "y": 69.67148996141475
+          "x": 244.24774220054334,
+          "y": 67.17099497962818
         }
       }
     },
@@ -258,23 +258,23 @@
       "id": "object_hkkuk3v41z_0_29",
       "assetId": "nf.longBoat.006",
       "localPosition": {
-        "x": 19.141433715820312,
-        "y": 16.238147735595703
+        "x": 18.111480712890625,
+        "y": 15.137287139892578
       },
       "verticalOffset": 0.0,
       "direction": "southWest",
-      "liquidInteraction": "float",
+      "liquidInteraction": "ignore",
       "supportSurfaceId": "surface_hkkwpdeoym_0_1",
       "occlusionHeight": 4.0,
       "editorLayerId": "layer_world",
       "bounds": {
         "min": {
-          "x": 232.72325491163213,
-          "y": 75.70449041578252
+          "x": 231.0643648856383,
+          "y": 73.00240847999864
         },
         "max": {
-          "x": 245.78685403612178,
-          "y": 78.03007913377803
+          "x": 242.6140141731996,
+          "y": 75.9256870572649
         }
       }
     },

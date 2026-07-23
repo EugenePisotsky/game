@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "neura_asset_exporter"
-version = "0.1.3"
+version = "0.3.0"
 name = "Neura Asset Exporter"
 tagline = "Render isometric sprite assets and metadata for Neura"
 maintainer = "Neura"

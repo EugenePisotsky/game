@@ -386,6 +386,18 @@ class _EditorScreenState extends State<EditorScreen> {
       setState(() => game.showChunkDebug = !game.showChunkDebug);
     } else if (key == LogicalKeyboardKey.f5) {
       setState(() => game.showNavigationDebug = !game.showNavigationDebug);
+    } else if (key == LogicalKeyboardKey.f6) {
+      setState(game.toggleExperimentalLighting);
+    } else if (key == LogicalKeyboardKey.f7) {
+      setState(game.cycleExperimentalLightingVisualization);
+    } else if (key == LogicalKeyboardKey.bracketLeft) {
+      setState(() => game.rotateExperimentalLight(-15));
+    } else if (key == LogicalKeyboardKey.bracketRight) {
+      setState(() => game.rotateExperimentalLight(15));
+    } else if (key == LogicalKeyboardKey.minus) {
+      setState(() => game.adjustExperimentalLightIntensity(-0.25));
+    } else if (key == LogicalKeyboardKey.equal) {
+      setState(() => game.adjustExperimentalLightIntensity(0.25));
     } else if (key == LogicalKeyboardKey.keyP) {
       setState(game.togglePause);
     } else if (key == LogicalKeyboardKey.period) {
@@ -615,6 +627,18 @@ class _EditorScreenState extends State<EditorScreen> {
               controller: controller,
               session: widget.chunkSession,
               frameTimings: _frameTimings,
+            ),
+          ),
+          Positioned(
+            right: 14,
+            top: 14,
+            child: _LightingExperimentPanel(
+              game: game,
+              onFocusAsset: () {
+                if (game.focusExperimentalLightingAsset()) {
+                  _scheduleChunkStreaming();
+                }
+              },
             ),
           ),
           Positioned(
@@ -2350,6 +2374,192 @@ class _AssetThumbnail extends StatelessWidget {
   }
 }
 
+class _LightingExperimentPanel extends StatefulWidget {
+  const _LightingExperimentPanel({
+    required this.game,
+    required this.onFocusAsset,
+  });
+
+  final EditorGame game;
+  final VoidCallback onFocusAsset;
+
+  @override
+  State<_LightingExperimentPanel> createState() =>
+      _LightingExperimentPanelState();
+}
+
+class _LightingExperimentPanelState extends State<_LightingExperimentPanel> {
+  Timer? _timer;
+  EditorGame get game => widget.game;
+
+  void _change(VoidCallback action) => setState(action);
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: Container(
+      width: 300,
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xE617211C),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0x667BD6A0)),
+        boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 12)],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.lightbulb_outline, size: 18),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'LIGHTING EXPERIMENT',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+              Switch(
+                value: game.experimentalLightingEnabled,
+                onChanged: (_) => _change(game.toggleExperimentalLighting),
+              ),
+            ],
+          ),
+          Text(
+            game.experimentalLightingReady
+                ? 'custom.asset · surface lighting + 3D proxy shadow'
+                : 'Shader unavailable: ${game.experimentalLightingError ?? 'loading'}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          _ExperimentSlider(
+            label: 'Light angle',
+            valueLabel:
+                '${game.experimentalLightAzimuthDegrees.toStringAsFixed(0)}°',
+            value: game.experimentalLightAzimuthDegrees,
+            max: 360,
+            divisions: 72,
+            onChanged: (value) =>
+                _change(() => game.setExperimentalLightAzimuth(value)),
+          ),
+          _ExperimentSlider(
+            label: 'Light intensity',
+            valueLabel: game.experimentalLightIntensity.toStringAsFixed(2),
+            value: game.experimentalLightIntensity,
+            max: 8,
+            divisions: 64,
+            onChanged: (value) =>
+                _change(() => game.setExperimentalLightIntensity(value)),
+          ),
+          _ExperimentSlider(
+            label: 'Self-shadow',
+            valueLabel: '${(game.experimentalShadowStrength * 100).round()}%',
+            value: game.experimentalShadowStrength,
+            max: 1,
+            divisions: 20,
+            onChanged: (value) =>
+                _change(() => game.setExperimentalShadowStrength(value)),
+          ),
+          _ExperimentSlider(
+            label: 'Cast shadow',
+            valueLabel:
+                '${(game.experimentalCastShadowStrength * 100).round()}%',
+            value: game.experimentalCastShadowStrength,
+            max: 1,
+            divisions: 20,
+            onChanged: (value) =>
+                _change(() => game.setExperimentalCastShadowStrength(value)),
+          ),
+          const SizedBox(height: 4),
+          SegmentedButton<int>(
+            segments: const [
+              ButtonSegment(value: 0, label: Text('Lit')),
+              ButtonSegment(value: 1, label: Text('Normals')),
+              ButtonSegment(value: 2, label: Text('Height')),
+            ],
+            selected: {game.experimentalLightingVisualization},
+            onSelectionChanged: (selection) {
+              final desired = selection.first;
+              _change(() {
+                while (game.experimentalLightingVisualization != desired) {
+                  game.cycleExperimentalLightingVisualization();
+                }
+              });
+            },
+            showSelectedIcon: false,
+            style: const ButtonStyle(
+              visualDensity: VisualDensity.compact,
+              textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 11)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: widget.onFocusAsset,
+              icon: const Icon(Icons.center_focus_strong, size: 16),
+              label: const Text('Focus custom.asset'),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _ExperimentSlider extends StatelessWidget {
+  const _ExperimentSlider({
+    required this.label,
+    required this.valueLabel,
+    required this.value,
+    required this.max,
+    required this.divisions,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String valueLabel;
+  final double value;
+  final double max;
+  final int divisions;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      SizedBox(width: 86, child: Text(label)),
+      Expanded(
+        child: Slider(
+          value: value,
+          max: max,
+          divisions: divisions,
+          onChanged: onChanged,
+        ),
+      ),
+      SizedBox(width: 42, child: Text(valueLabel, textAlign: TextAlign.right)),
+    ],
+  );
+}
+
 class _EditorDiagnosticsHud extends StatefulWidget {
   const _EditorDiagnosticsHud({
     required this.game,
@@ -2410,6 +2620,12 @@ class _EditorDiagnosticsHudState extends State<_EditorDiagnosticsHud> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Text(
             'F1 HUD · F2 depth · F3 geometry · F4 chunks · F5 navigation · P pause\n'
+            'F6 lighting · F7 lit/normals/height · [ ] light angle · - = intensity\n'
+            'lighting ${widget.game.experimentalLightingEnabled ? 'on' : 'off'}  '
+            '${widget.game.experimentalLightingReady ? widget.game.experimentalLightingVisualizationName : 'shader unavailable'}  '
+            '${widget.game.experimentalLightAzimuthDegrees.toStringAsFixed(0)}°  '
+            'self ${(widget.game.experimentalShadowStrength * 100).round()}%  '
+            'cast ${(widget.game.experimentalCastShadowStrength * 100).round()}%\n'
             'hover ${hovered?.id ?? '-'}  selected ${widget.controller.selectedObjectIds.length}  '
             'layer ${layer?.name ?? '-'}\n'
             'band ${asset?.renderBand.name ?? '-'}  '

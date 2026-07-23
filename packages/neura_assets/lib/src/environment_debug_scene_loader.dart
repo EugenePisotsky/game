@@ -13,6 +13,7 @@ const environmentDebugSceneNames = <String>[
   'tree_trunk_collision',
   'chunk_boundary',
   'chunk_streaming_reversal',
+  'lighting_experiment',
 ];
 
 Future<EnvironmentDebugScene> loadEnvironmentDebugScene(

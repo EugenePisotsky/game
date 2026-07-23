@@ -1,7 +1,7 @@
 {
   "chunkCount": 64,
-  "imageBytes": 8332992,
-  "imageCount": 39,
+  "imageBytes": 9995011,
+  "imageCount": 41,
   "images": [
     {
       "bytes": 506155,
@@ -92,6 +92,16 @@
       "sourceHeight": 66,
       "sourceLogicalPath": "environment_generated/objects/nf/barrel/006_1.png",
       "sourceWidth": 52
+    },
+    {
+      "bytes": 545012,
+      "outputHeight": 679,
+      "outputWidth": 750,
+      "releasePath": "images/e636b3dccc30e2f43ba6.png",
+      "sha256": "c1ef68959bbbf0fb6bd77a54adc6e1a2747f021662262ba785f07d0e1241d784",
+      "sourceHeight": 679,
+      "sourceLogicalPath": "environment_generated/objects/nf/building/006_5.png",
+      "sourceWidth": 750
     },
     {
       "bytes": 15767,
@@ -354,6 +364,16 @@
       "sourceWidth": 74
     },
     {
+      "bytes": 1117007,
+      "outputHeight": 927,
+      "outputWidth": 946,
+      "releasePath": "images/5b67a07111f51e9f159a.png",
+      "sha256": "419a862155ff368910a09564622cd4a35fcc7bd6124fc6d524381b0d26c2e316",
+      "sourceHeight": 927,
+      "sourceLogicalPath": "environment_v2/custom/custom.asset/north.png",
+      "sourceWidth": 946
+    },
+    {
       "bytes": 521769,
       "outputHeight": 512,
       "outputWidth": 512,
@@ -395,9 +415,9 @@
     }
   ],
   "materialCount": 5,
-  "metadataBytes": 113873,
-  "objectAssetCount": 26,
-  "payloadBytes": 8446865,
+  "metadataBytes": 116529,
+  "objectAssetCount": 28,
+  "payloadBytes": 10111540,
   "schemaVersion": 1,
   "sizeLimitBytes": 67108864,
   "worldId": "environment_starter"

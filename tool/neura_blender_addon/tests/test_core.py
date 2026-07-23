@@ -3,6 +3,7 @@ import math
 import sys
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "neura_asset_exporter"))
@@ -11,6 +12,7 @@ from core import (  # noqa: E402
     PIXELS_PER_CAMERA_UNIT,
     alpha_bounds,
     build_manifest,
+    build_surface_map_metadata,
     crop_rgba,
     direction_angle_radians,
     directions_for_mode,
@@ -20,6 +22,7 @@ from core import (  # noqa: E402
     split_category_path,
     split_list,
     validate_asset_id,
+    write_data_rgba_png,
     write_manifest,
 )
 
@@ -69,6 +72,35 @@ class ImageTests(unittest.TestCase):
     def test_transparent_image_has_no_bounds(self):
         self.assertIsNone(alpha_bounds([0.0] * 16, 2, 2, 0.0, 0))
 
+    def test_data_png_preserves_bytes_and_flips_bottom_up_rows(self):
+        bottom_red_top_green = [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.5,
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "surface.png"
+            write_data_rgba_png(path, bottom_red_top_green, 1, 2)
+            png = path.read_bytes()
+
+        self.assertEqual(png[:8], b"\x89PNG\r\n\x1a\n")
+        offset = 8
+        compressed = bytearray()
+        while offset < len(png):
+            length = int.from_bytes(png[offset : offset + 4], "big")
+            kind = png[offset + 4 : offset + 8]
+            payload = png[offset + 8 : offset + 8 + length]
+            if kind == b"IDAT":
+                compressed.extend(payload)
+            offset += 12 + length
+        rows = zlib.decompress(compressed)
+        self.assertEqual(rows, bytes((0, 0, 255, 0, 128, 0, 255, 0, 0, 255)))
+
 
 class ManifestTests(unittest.TestCase):
     def test_asset_id_validation(self):
@@ -91,6 +123,7 @@ class ManifestTests(unittest.TestCase):
                 "logicalHeight": 256,
                 "pivotX": 0.5,
                 "pivotY": 0.9,
+                "surfaceImage": f"{direction}.surface.png",
             }
             for direction in directions_for_mode("FOUR_WAY")
         }
@@ -105,10 +138,28 @@ class ManifestTests(unittest.TestCase):
             render_band="depthSorted",
             views=views,
             geometry={"blocking": [], "reviewed": False},
+            surface_map=build_surface_map_metadata(0.0, 3.25),
+            shadow_proxy={
+                "type": "triangleMesh",
+                "vertices": [
+                    {"x": 0.0, "y": 0.0, "z": 0.0},
+                    {"x": 1.0, "y": 0.0, "z": 0.0},
+                    {"x": 0.0, "y": 1.0, "z": 1.0},
+                ],
+                "triangles": [[0, 1, 2]],
+                "reviewed": False,
+            },
         )
         self.assertEqual(manifest["viewMode"], "fourWay")
         self.assertEqual(manifest["category"], "Village")
         self.assertEqual(manifest["geometry"]["blocking"], [])
+        self.assertEqual(manifest["views"]["south"]["image"], "south.png")
+        self.assertEqual(
+            manifest["surfaceMap"]["encoding"],
+            "octahedralWorldNormalRGHeightB",
+        )
+        self.assertEqual(manifest["surfaceMap"]["heightMax"], 3.25)
+        self.assertEqual(manifest["shadowProxy"]["type"], "triangleMesh")
 
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "asset.json"
@@ -128,6 +179,34 @@ class ManifestTests(unittest.TestCase):
                 render_band="depthSorted",
                 views={"south": {"image": "south.png"}},
             )
+
+    def test_manifest_rejects_missing_surface_image(self):
+        views = {
+            "south": {
+                "image": "south.png",
+                "logicalWidth": 64,
+                "logicalHeight": 64,
+                "pivotX": 0.5,
+                "pivotY": 1.0,
+            }
+        }
+        with self.assertRaisesRegex(ValueError, "requires surfaceImage"):
+            build_manifest(
+                asset_id="custom.bad_surface",
+                name="Bad Surface",
+                source_pack="custom",
+                category_path=[],
+                tags=[],
+                view_mode="FIXED",
+                render_scale=1.0,
+                render_band="depthSorted",
+                views=views,
+                surface_map=build_surface_map_metadata(0.0, 1.0),
+            )
+
+    def test_surface_map_metadata_rejects_empty_height_range(self):
+        with self.assertRaisesRegex(ValueError, "range must be positive"):
+            build_surface_map_metadata(2.0, 2.0)
 
 
 if __name__ == "__main__":

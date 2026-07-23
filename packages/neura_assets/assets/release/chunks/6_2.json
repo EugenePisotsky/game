@@ -187,6 +187,50 @@
       },
       "supportSurfaceId": "surface_hkkwpdeoym_0_1",
       "verticalOffset": 0.0
+    },
+    {
+      "assetId": "custom.asset",
+      "bounds": {
+        "max": {
+          "x": 213.52297973632812,
+          "y": 70.38082885742188
+        },
+        "min": {
+          "x": 212.52297973632812,
+          "y": 69.38082885742188
+        }
+      },
+      "direction": "north",
+      "editorLayerId": "layer_world",
+      "id": "object_hkm0dw9yac_0_0",
+      "localPosition": {
+        "x": 21.022979736328125,
+        "y": 5.880828857421875
+      },
+      "supportSurfaceId": "surface_ground",
+      "verticalOffset": 0.0
+    },
+    {
+      "assetId": "nf.building.006",
+      "bounds": {
+        "max": {
+          "x": 216.8210601806641,
+          "y": 64.68764114379883
+        },
+        "min": {
+          "x": 215.8210601806641,
+          "y": 63.68764114379883
+        }
+      },
+      "direction": "southWest",
+      "editorLayerId": "layer_world",
+      "id": "object_hkm0dw9yac_0_2",
+      "localPosition": {
+        "x": 24.321060180664062,
+        "y": 0.18764114379882812
+      },
+      "supportSurfaceId": "surface_ground",
+      "verticalOffset": 0.0
     }
   ],
   "overlapObjectIds": [
@@ -196,7 +240,9 @@
     "object_hkkwpdeoym_0_14",
     "object_hkkwpdeoym_0_16",
     "object_hkkwpdeoym_0_17",
-    "object_hkkwpdeoym_0_21"
+    "object_hkkwpdeoym_0_21",
+    "object_hkm0dw9yac_0_0",
+    "object_hkm0dw9yac_0_2"
   ],
   "schemaVersion": 4,
   "size": 32.0,

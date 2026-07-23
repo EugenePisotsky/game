@@ -178,6 +178,40 @@
   ],
   "objects": [
     {
+      "category": "Custom",
+      "categoryPath": [
+        "Props",
+        "Custom"
+      ],
+      "defaultSortBias": 0.0,
+      "geometry": {
+        "blocking": [],
+        "reviewed": false
+      },
+      "id": "custom.asset",
+      "name": "Custom Asset",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "custom",
+      "tags": [
+        "custom",
+        "blender"
+      ],
+      "viewMode": "fourWay",
+      "views": {
+        "north": {
+          "image": "images/5b67a07111f51e9f159a.png",
+          "logicalHeight": 927,
+          "logicalWidth": 946,
+          "pivotX": 0.50634249,
+          "pivotY": 0.55231931
+        }
+      }
+    },
+    {
       "category": "Containers",
       "categoryPath": [
         "Props",
@@ -267,6 +301,37 @@
           "logicalWidth": 52,
           "pivotX": 0.5,
           "pivotY": 1.0
+        }
+      }
+    },
+    {
+      "category": "Houses",
+      "categoryPath": [
+        "Buildings",
+        "Houses"
+      ],
+      "defaultSortBias": 0.0,
+      "family": "building",
+      "id": "nf.building.006",
+      "name": "Building 006",
+      "partialViews": true,
+      "renderBand": "depthSorted",
+      "renderScale": 1.0,
+      "sortAnchorX": 0.0,
+      "sortAnchorY": 0.0,
+      "sourcePack": "nf",
+      "tags": [
+        "building",
+        "northfolk"
+      ],
+      "viewMode": "eightWay",
+      "views": {
+        "southWest": {
+          "image": "images/e636b3dccc30e2f43ba6.png",
+          "logicalHeight": 679,
+          "logicalWidth": 750,
+          "pivotX": 0.5,
+          "pivotY": 0.97
         }
       }
     },

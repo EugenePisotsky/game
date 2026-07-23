@@ -1,0 +1,23 @@
+{
+  "id": "lighting_experiment",
+  "description": "Centers the editor on the manually integrated Blender lighting test asset.",
+  "camera": {"x": 212.523, "y": 69.381},
+  "player": {"x": 212.523, "y": 69.381},
+  "facing": "north",
+  "viewportWidth": 1200,
+  "viewportHeight": 800,
+  "clockSeconds": 0.0,
+  "randomSeed": 2207,
+  "relevantObjectIds": ["object_hkm0dw9yac_0_0"],
+  "expectedLoadedChunks": [
+    {"x": 5, "y": 1},
+    {"x": 6, "y": 1},
+    {"x": 7, "y": 1},
+    {"x": 5, "y": 2},
+    {"x": 6, "y": 2},
+    {"x": 7, "y": 2},
+    {"x": 5, "y": 3},
+    {"x": 6, "y": 3},
+    {"x": 7, "y": 3}
+  ]
+}
